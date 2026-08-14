@@ -404,6 +404,7 @@ export async function checkStatusAndAnnouncements() {
     } else {
       annBanner.style.display = 'none';
     }
+  } catch (e) {}
 }
 
 window.setDisguisePreset = function(presetKey) {
