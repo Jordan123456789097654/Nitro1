@@ -972,7 +972,7 @@ const db = {
       }
 
       if (vipOnly === 'true') {
-        sql += ' AND is_vip = true';
+        // All games currently unlocked for everyone
       }
 
       if (sort === 'alpha') {
