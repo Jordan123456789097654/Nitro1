@@ -1,0 +1,40 @@
+{
+  "name": "nitro-games-hub",
+  "version": "1.1.0",
+  "description": "NITRO (BETA) Full-Stack Web Games Hub with Supabase, Admin Panel, PRO Tier, Unfiltered Proxy, JWT Tokens, Announcements, and about:blank Cloak.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "keywords": [
+    "games",
+    "unblocked",
+    "full-stack",
+    "express",
+    "supabase",
+    "postgres",
+    "socket.io",
+    "jwt",
+    "railway"
+  ],
+  "author": "NITRO Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "javascript-obfuscator": "^5.5.0",
+    "jsonwebtoken": "^9.0.3",
+    "node-fetch": "^2.7.0",
+    "pg": "^8.13.1",
+    "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

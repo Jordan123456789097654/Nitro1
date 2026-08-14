@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Construction</title>
+    <!-- Reference your main system styles sheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Main Viewport Workspace positioning to clear fixed header and sidebar panels */
+        .workspace-viewport {
+            position: absolute;
+            top: 80px;         /* Height of your fixed header element */
+            left: 220px;       /* Width of your fixed sidebar navigation layout */
+            width: calc(100% - 220px);
+            height: calc(100vh - 80px);
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        /* Under Construction Window Container Card Element matching your visual reference */
+        .construction-card {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            padding: 45px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        /* Title header element */
+        .construction-card h1 {
+            color: #000000;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 45px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        /* Description subtext paragraph element */
+        .construction-card p {
+            color: #000000;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.35;
+            margin: 0;
+            max-width: 500px;
+        }
+
+        /* Responsive Breakpoints matching your style sheet structure rules */
+        @media (max-width: 768px) {
+            .workspace-viewport {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: auto;
+                padding: 20px;
+                min-height: calc(100vh - 160px);
+            }
+            .construction-card {
+                padding: 30px 25px;
+            }
+            .construction-card h1 {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+            .construction-card p {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Structural Fixed Sidebar Navigation Component Layout Shell -->
+    <div id="sidebar-container">
+        <!-- Loads your isolated sidebar.html asset module cleanly -->
+        <object type="text/html" data="sidebar.html" style="width:100%; height:100%; border:none;"></object>
+    </div>
+
+    <!-- 2. Structural Fixed Header Upper Banner Layout Shell -->
+    <div id="header-container">
+        <!-- Loads your isolated header.html asset module cleanly -->
+        <object type="text/html" data="header.html" style="width:100%; height:100%; border:none;"></object>
+    </div>
+
+    <!-- 3. Dynamic Center App Display Panel Frame Workspace -->
+    <main class="workspace-viewport">
+        
+        <!-- Replicated Under Construction Notice Graphic Card -->
+        <div class="construction-card">
+            <h1>Under Construction 🚧</h1>
+            <p>Donate to speed up the development of this page</p>
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,195 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password_hash": "$2a$10$9BMj6rm3NePqwEZH4oPEXuzf/GF0qTVcZjxAXHuvt0iY5jcd1LQFe",
+      "role": "admin",
+      "is_banned": 0,
+      "created_at": "2026-08-09T17:59:40.794Z"
+    },
+    {
+      "id": 2,
+      "username": "vip_user",
+      "password_hash": "$2a$10$1kop2P68VqeFoVvnjwxkNuMuTYm1p6zAdT3Xzd8z8XnKoNlwW0SJW",
+      "role": "vip",
+      "is_banned": 0,
+      "created_at": "2026-08-09T17:59:40.859Z"
+    }
+  ],
+  "games": [
+    {
+      "id": 1,
+      "title": "Ragdoll Archers",
+      "slug": "ragdoll-archers",
+      "author": "Eric Gurt",
+      "thumbnail_url": "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "archers",
+      "is_vip": 0,
+      "category": "Action",
+      "clicks": 20
+    },
+    {
+      "id": 2,
+      "title": "Death Run 3D",
+      "slug": "death-run-3d",
+      "author": "FLAY",
+      "thumbnail_url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "deathrun",
+      "is_vip": 0,
+      "category": "Action",
+      "clicks": 19
+    },
+    {
+      "id": 3,
+      "title": "Slope Runner",
+      "slug": "slope",
+      "author": "Y8 Games",
+      "thumbnail_url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "slope",
+      "is_vip": 0,
+      "category": "Skill",
+      "clicks": 17
+    },
+    {
+      "id": 4,
+      "title": "Brotato Survival",
+      "slug": "brotato",
+      "author": "Blobfish",
+      "thumbnail_url": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "brotato",
+      "is_vip": 0,
+      "category": "Action",
+      "clicks": 10
+    },
+    {
+      "id": 5,
+      "title": "Geometry Dash Lite",
+      "slug": "geometry-dash-lite",
+      "author": "RobTop Games",
+      "thumbnail_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "geometry",
+      "is_vip": 0,
+      "category": "Rhythm",
+      "clicks": 9
+    },
+    {
+      "id": 6,
+      "title": "Deal or No Deal",
+      "slug": "deal-or-no-deal",
+      "author": "Endemol",
+      "thumbnail_url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "deal",
+      "is_vip": 0,
+      "category": "Puzzle",
+      "clicks": 8
+    },
+    {
+      "id": 7,
+      "title": "2048 Deluxe",
+      "slug": "2048",
+      "author": "Gabriele Cirulli",
+      "thumbnail_url": "https://images.unsplash.com/photo-1606167668584-78701c57f13d?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "2048",
+      "is_vip": 0,
+      "category": "Puzzle",
+      "clicks": 45
+    },
+    {
+      "id": 8,
+      "title": "8 Ball Classic Pool",
+      "slug": "8-ball-classic",
+      "author": "Famobi",
+      "thumbnail_url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "8ball",
+      "is_vip": 0,
+      "category": "Sports",
+      "clicks": 32
+    },
+    {
+      "id": 9,
+      "title": "1v1.LOL Arena (VIP)",
+      "slug": "1v1-lol",
+      "author": "JustPlay.LOL",
+      "thumbnail_url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "1v1",
+      "is_vip": 1,
+      "category": "Shooter",
+      "clicks": 64
+    },
+    {
+      "id": 10,
+      "title": "A Bite at Freddy's (VIP)",
+      "slug": "bite-at-freddys",
+      "author": "Garrett McKay",
+      "thumbnail_url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "freddys",
+      "is_vip": 1,
+      "category": "Horror",
+      "clicks": 53
+    },
+    {
+      "id": 11,
+      "title": "Retro 64-in-1 Arcade",
+      "slug": "retro-64-arcade",
+      "author": "NES Emulators",
+      "thumbnail_url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "retro",
+      "is_vip": 0,
+      "category": "Retro",
+      "clicks": 28
+    },
+    {
+      "id": 12,
+      "title": "A Small World Cup",
+      "slug": "small-world-cup",
+      "author": "Rujogames",
+      "thumbnail_url": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=500&auto=format&fit=crop&q=60",
+      "embed_type": "builtin",
+      "embed_content": "soccer",
+      "is_vip": 0,
+      "category": "Sports",
+      "clicks": 14
+    }
+  ],
+  "chat_messages": [],
+  "moderation_logs": [],
+  "filter_words": [
+    {
+      "id": 1,
+      "word": "slur1",
+      "filter_type": "both"
+    },
+    {
+      "id": 2,
+      "word": "slur2",
+      "filter_type": "both"
+    },
+    {
+      "id": 3,
+      "word": "hate",
+      "filter_type": "both"
+    },
+    {
+      "id": 4,
+      "word": "nazi",
+      "filter_type": "both"
+    },
+    {
+      "id": 5,
+      "word": "admin_impersonator",
+      "filter_type": "both"
+    }
+  ]
+}

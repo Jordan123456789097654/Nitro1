@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cherry">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Study Helper - Homework Suite & Workspace</title>
+  <link rel="icon" id="page-favicon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/games.css">
+  <link rel="stylesheet" href="/css/chat.css">
+  <link rel="stylesheet" href="/css/settings.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/browser.css">
+  <link rel="stylesheet" href="/css/upgrades.css">
+</head>
+<body>
+  <!-- UN-BYPASSABLE ACCOUNT BANNED OVERLAY -->
+  <div id="account-banned-overlay" style="display: none; position: fixed; inset: 0; background: #090a0f; z-index: 99999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff;">
+    <div style="font-size: 6rem; margin-bottom: 20px; animation: pulse 1.5s infinite; filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.8));">🚫</div>
+    <h1 style="font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #ef4444, #dc2626, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 12px;">
+      ACCOUNT PERMANENTLY BANNED
+    </h1>
+    <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 600px; line-height: 1.6; margin: 0 0 24px;">
+      Your account access has been suspended by a platform administrator due to terms of service violations.
+    </p>
+    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 18px 28px; max-width: 550px; width: 100%; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <strong style="color: #f87171; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">REASON FOR BAN</strong>
+      <span id="account-banned-reason-text" style="font-size: 1.1rem; color: #fff; font-weight: 700;">Violation of platform guidelines</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button onclick="location.reload()" class="btn-pill" style="background: #ef4444; border-color: #ef4444; color: #fff; font-weight: 800; padding: 12px 28px; font-size: 1rem;">🔄 Refresh Page</button>
+    </div>
+  </div>
+
+  <!-- Ambient Particle Background -->
+  <div id="nebula-bg"></div>
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- FAKE ERROR SCREEN PANIC OVERLAY (Google Classroom / Canvas LMS disguise) -->
+  <div id="fake-error-screen" class="fake-error-screen" style="display: none;">
+    <div class="fake-error-card">
+      <div style="font-size: 3rem; margin-bottom: 12px;">⚠️</div>
+      <h1 id="fake-error-title" style="font-size: 1.6rem; color: #1f2937; margin-bottom: 12px;">500 Server Error - Google Classroom</h1>
+      <p id="fake-error-desc" style="font-size: 0.95rem; color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
+        Google Classroom encountered a temporary internal server error. Please wait a few moments and reload.<br><br>
+        <code>Error Code 500 (server_load_timeout_cluster)</code>
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn-pill" onclick="window.location.reload()" style="background: #2563eb; color: #fff; border: none; padding: 10px 24px;">Reload Page</button>
+        <button class="btn-pill" onclick="window.location.replace('https://classroom.google.com')" style="background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 10px 24px;">Go to Google Home</button>
+      </div>
+      <div style="margin-top: 24px; font-size: 0.75rem; color: #9ca3af;">(Click screen 3 times rapidly to exit disguise)</div>
+    </div>
+  </div>
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookie-consent-banner" class="cookie-consent-banner" style="display: none;">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+      <span style="font-size: 1.4rem;">🍪</span>
+      <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
+        We use essential cookies and local session caching to persist your cloaked tabs, game save states, themes, and study preferences.
+      </p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-small" id="cookie-decline-btn" style="background: rgba(255,255,255,0.1); color: #cbd5e1;">Decline</button>
+      <button class="btn-small primary" id="cookie-accept-btn" style="background: var(--accent-color); color: #fff; font-weight: 800;">Accept All</button>
+    </div>
+  </div>
+
+  <!-- EXTENDED PRO SPOTIFY & YOUTUBE MUSIC PLAYER DOCK -->
+  <div id="pro-music-dock" class="pro-music-dock" style="display: none;">
+    <div class="music-dock-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.1rem;">🎧</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <strong style="color: #fbbf24; font-size: 0.85rem;">PRO MUSIC LOUNGE</strong>
+            <!-- Audio Equalizer Bars Animation -->
+            <div class="music-eq-visualizer">
+              <span class="music-eq-bar" style="height: 12px;"></span>
+              <span class="music-eq-bar" style="height: 16px;"></span>
+              <span class="music-eq-bar" style="height: 8px;"></span>
+              <span class="music-eq-bar" style="height: 14px;"></span>
+            </div>
+          </div>
+          <span id="music-current-title" style="color: #cbd5e1; font-size: 0.75rem;">Lofi Girl Radio</span>
+        </div>
+      </div>
+      <button id="music-dock-close" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem;">✕</button>
+    </div>
+
+    <div class="music-provider-tabs">
+      <button class="music-provider-btn active" id="music-provider-yt">🔴 YouTube</button>
+      <button class="music-provider-btn" id="music-provider-spotify">🟢 Spotify</button>
+    </div>
+
+    <!-- Music Control Deck: Prev, Shuffle, Repeat, Next -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 6px 16px 0;">
+      <button class="music-ctrl-btn" id="music-prev-btn" title="Previous Track">⏮️</button>
+      <button class="music-ctrl-btn" id="music-shuffle-btn" title="Toggle Shuffle">🔀</button>
+      <button class="music-ctrl-btn" id="music-repeat-btn" title="Toggle Repeat">🔁</button>
+      <button class="music-ctrl-btn" id="music-next-btn" title="Next Track">⏭️</button>
+    </div>
+
+    <div style="padding: 8px 16px 0;">
+      <iframe id="music-player-iframe" style="width: 100%; height: 85px; border-radius: 8px; border: none;" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    </div>
+
+    <div class="music-track-list" id="music-track-list"></div>
+
+    <div style="padding: 8px 16px 14px; display: flex; gap: 6px;">
+      <input type="text" id="music-custom-url-input" placeholder="Paste Spotify or YouTube link..." style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 0.78rem;">
+      <button class="btn-small primary" id="music-load-custom-btn" style="background: #fbbf24; color: #000; font-weight: 800;">Play</button>
+    </div>
+  </div>
+
+  <!-- MANDATORY LOGIN / REGISTRATION GATE (REALISTIC STUDENT WORKSPACE PORTAL) -->
+  <div id="mandatory-login-gate" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at top, #161b2e 0%, #080a10 100%); backdrop-filter: blur(28px); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: linear-gradient(145deg, rgba(20, 24, 38, 0.95), rgba(13, 15, 24, 0.98)); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-lg); padding: 48px 40px; width: 100%; max-width: 480px; box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 30px rgba(56, 189, 248, 0.15); text-align: center; position: relative;">
+      
+      <!-- SSO Academic Portal Header Badge -->
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); padding: 6px 14px; border-radius: 99px; font-size: 0.78rem; color: #38bdf8; font-weight: 700; margin-bottom: 16px;">
+        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
+        <span>STUDENT PORTAL • 256-BIT ENCRYPTED SSO</span>
+      </div>
+
+      <div style="font-size: 2.8rem; margin-bottom: 6px; filter: drop-shadow(0 0 16px rgba(56,189,248,0.4));">📚</div>
+      <div style="font-size: 1.7rem; font-weight: 900; letter-spacing: 0.5px; color: #f8fafc; margin-bottom: 4px;">Study Helper Workspace</div>
+      <h3 id="gate-form-title" style="color: var(--accent-color); font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;">Sign In to Your Student Account</h3>
+      <p style="color: var(--text-muted); font-size: 0.86rem; line-height: 1.5; margin-bottom: 22px;">Sign in to access your digital study notes, curriculum solvers, and academic suite.</p>
+
+      <!-- Quick Admin Credentials Banner -->
+      <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.82rem; color: #fbbf24; text-align: left; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <strong style="display: block; font-size: 0.8rem;">🔑 Admin Account Credentials:</strong>
+          <span>User: <code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #fff;">jordandaniels</code> | Pass: <code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #fff;">0422jojob</code></span>
+        </div>
+        <button type="button" onclick="document.getElementById('gate-username').value='jordandaniels'; document.getElementById('gate-password').value='0422jojob';" style="background: #fbbf24; color: #000; border: none; font-size: 0.72rem; font-weight: 800; padding: 6px 10px; border-radius: 6px; cursor: pointer; flex-shrink: 0;">Auto-Fill</button>
+      </div>
+
+      <form id="gate-auth-form" style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
+        <div class="form-group">
+          <label style="color: #cbd5e1; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
+            <span>Student / User ID</span>
+            <span style="color: var(--text-muted); font-weight: normal; font-size: 0.78rem;">e.g. jordandaniels</span>
+          </label>
+          <input type="text" id="gate-username" required placeholder="Enter student username..." style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div class="form-group">
+          <label style="color: #cbd5e1; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
+            <span>Password</span>
+            <span style="color: var(--text-muted); font-weight: normal; font-size: 0.78rem;">e.g. admin123</span>
+          </label>
+          <input type="password" id="gate-password" required placeholder="Enter password..." style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #94a3b8; cursor: pointer;">
+            <input type="checkbox" id="gate-remember-me" checked style="accent-color: var(--accent-color); width: 16px; height: 16px;">
+            <span>Remember me on this device</span>
+          </label>
+        </div>
+
+        <div id="gate-error-msg" style="color: #ef4444; font-size: 0.88rem; font-weight: 700; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); padding: 10px 14px; border-radius: 8px; display: none; text-align: center;"></div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 14px; margin-top: 6px; font-size: 1rem; font-weight: 800; background: var(--accent-gradient); border: none; box-shadow: 0 10px 25px rgba(235, 47, 95, 0.4);" id="gate-submit-btn">Sign In & Enter Workspace</button>
+      </form>
+
+      <div style="margin-top: 22px; font-size: 0.88rem; color: var(--text-muted);">
+        <span id="gate-toggle-text">New student or educator?</span>
+        <a href="#" id="gate-toggle-link" style="color: var(--accent-color); font-weight: 700; text-decoration: none; margin-left: 4px;">Create Account</a>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 12px;">
+        <span>🔒 Academic Workspace Protected</span>
+        <span>•</span>
+        <a href="#" id="gate-open-tos" style="color: #94a3b8; text-decoration: underline;">Terms & Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTIPLAYER PLAYTIME & HIGH-SCORE LEADERBOARDS MODAL -->
+  <div class="modal-overlay" id="leaderboards-modal">
+    <div class="modal-card" style="max-width: 680px;">
+      <button class="modal-close" id="leaderboards-modal-close">✕</button>
+      <h2 style="color: #fbbf24; margin-bottom: 6px; font-size: 1.4rem;">🏆 Global Multiplayer Leaderboards</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Real-time Socket.io player rankings tracked across the student network.</p>
+
+      <div class="music-provider-tabs" style="margin-bottom: 16px;">
+        <button class="music-provider-btn active" id="lb-tab-time">⏳ Total Playtime</button>
+        <button class="music-provider-btn" id="lb-tab-games">🎮 Games Played</button>
+      </div>
+
+      <div style="max-height: 420px; overflow-y: auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Total Playtime</th>
+              <th>Games Played</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: UPDATE LOG / PATCH NOTES MODAL -->
+  <div id="update-log-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(8, 10, 16, 0.92); backdrop-filter: blur(24px); z-index: 9998; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: linear-gradient(145deg, #141726, #0e101a); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: var(--radius-lg); padding: 36px 32px; width: 100%; max-width: 540px; box-shadow: 0 25px 60px rgba(0,0,0,0.85); text-align: left; position: relative;">
+      <button id="update-popup-close-btn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+      
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 99px;" id="update-popup-version">v2.8</span>
+        <span style="color: #8b5cf6; font-size: 0.85rem; font-weight: 700;">🚀 MEGA UPGRADE RELEASED</span>
+      </div>
+
+      <h2 id="update-popup-title" style="color: #f8fafc; font-size: 1.4rem; font-weight: 800; margin-bottom: 16px;">Platform Update & Notes</h2>
+      
+      <div id="update-popup-content" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px; color: #cbd5e1; font-size: 0.9rem; line-height: 1.6; max-height: 260px; overflow-y: auto; white-space: pre-line; margin-bottom: 18px;">
+        • Multiplayer High-Score & Playtime Leaderboards
+        • Sandboxed Multi-Tab In-App Browser & Speed Dial Tiles
+        • In-Chat Animated GIF & Sticker Picker + Live Whiteboard
+        • Cloud Game Saves & 1-5 Star Community Ratings
+        • Working Custom Theme Creator & Color Palette Studio
+        • Admin Activity Radar Analytics & Catalog Bulk Importer
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer;">
+          <input type="checkbox" id="update-popup-never-show" style="accent-color: var(--accent-color);">
+          <span>Don't show update popups automatically in the future</span>
+        </label>
+      </div>
+
+      <button class="btn-pill primary" id="update-popup-dismiss-btn" style="width: 100%; justify-content: center; padding: 12px; background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none; font-weight: 800;">🌟 Awesome, Let's Go!</button>
+    </div>
+  </div>
+
+  <!-- CUSTOM THEME CREATOR STUDIO MODAL -->
+  <div class="modal-overlay" id="custom-theme-modal">
+    <div class="modal-card" style="max-width: 580px;">
+      <button class="modal-close" id="custom-theme-close">✕</button>
+      <h2 style="color: var(--accent-color); margin-bottom: 6px; font-size: 1.4rem;">🎨 Custom Theme Creator Studio</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Design your own color palette with live preview and save directly to your browser.</p>
+
+      <!-- Live Theme Color Preview Box -->
+      <div id="custom-theme-preview-box" style="padding: 16px; border-radius: 10px; border: 2px solid #38bdf8; background: #090a0f; margin-bottom: 18px;">
+        <div class="preview-subcard" style="background: #12141d; padding: 12px; border-radius: 8px; margin-bottom: 10px; color: #fff;">
+          <strong>Live Preview Card</strong>
+          <p style="font-size: 0.8rem; margin: 4px 0 0; color: inherit; opacity: 0.8;">Sample text and card background styling</p>
+        </div>
+        <button class="preview-btn" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Sample Accent Button</button>
+      </div>
+
+      <form id="custom-theme-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label>Theme Name</label>
+          <input type="text" id="custom-theme-name" required placeholder="e.g. Electric Violet">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Background Color</label>
+            <input type="color" id="custom-theme-bg" value="#090a0f" style="width: 100%; height: 38px; padding: 2px; border-radius: 6px; cursor: pointer;">
+          </div>
+          <div class="form-group">
+            <label>Card Background</label>
+            <input type="color" id="custom-theme-card" value="#12141d" style="width: 100%; height: 38px; padding: 2px; border-radius: 6px; cursor: pointer;">
+          </div>
+          <div class="form-group">
+            <label>Accent Neon Color</label>
+            <input type="color" id="custom-theme-accent" value="#38bdf8" style="width: 100%; height: 38px; padding: 2px; border-radius: 6px; cursor: pointer;">
+          </div>
+          <div class="form-group">
+            <label>Main Text Color</label>
+            <input type="color" id="custom-theme-text" value="#ffffff" style="width: 100%; height: 38px; padding: 2px; border-radius: 6px; cursor: pointer;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Muted Subtext Color</label>
+          <input type="color" id="custom-theme-muted" value="#94a3b8" style="width: 100%; height: 38px; padding: 2px; border-radius: 6px; cursor: pointer;">
+        </div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 6px; font-weight: 800;">💾 Save & Apply Custom Theme</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROFILE CUSTOMIZATION & PRO PERKS MODAL -->
+  <div class="modal-overlay" id="profile-edit-modal">
+    <div class="modal-card" style="max-width: 540px; max-height: 85vh; overflow-y: auto;">
+      <button class="modal-close" id="profile-modal-close">✕</button>
+      <h2 style="color: var(--accent-color); margin-bottom: 4px; font-size: 1.35rem;">👤 Profile & Identity Studio</h2>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Customize your avatar PFP, display nickname, bio status, PRO glows, and account security.</p>
+      
+      <!-- Live Profile Preview Card -->
+      <div style="display: flex; align-items: center; gap: 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 16px;">
+        <div id="profile-preview-avatar" style="width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 2px solid var(--accent-color); box-shadow: 0 0 14px rgba(235, 47, 95, 0.35); flex-shrink: 0;">👤</div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong id="profile-preview-name" style="font-size: 1.05rem; color: #fff;">Student</strong>
+            <span class="chat-badge member" id="profile-preview-role">MEMBER</span>
+          </div>
+          <p id="profile-preview-bio" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">No status bio set yet.</p>
+        </div>
+      </div>
+
+      <form id="profile-edit-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Choose Avatar Icon Preset</label>
+          <div id="profile-presets-grid" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Or Custom Avatar Image URL (GIF / Animated WebP Supported)</label>
+          <input type="url" id="profile-custom-pfp-url" placeholder="https://... or animated GIF link">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Or Upload Local Image / GIF Avatar File</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="file" id="profile-avatar-file-input" accept="image/*" style="display: none;">
+            <button type="button" class="btn-pill" id="profile-upload-file-btn" style="padding: 8px 14px; font-size: 0.82rem; background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #38bdf8;">📁 Choose Local File...</button>
+            <span id="profile-file-name-label" style="font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">No file chosen</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Display Nickname</label>
+          <input type="text" id="profile-display-name" placeholder="e.g. Jordan ⚡" maxlength="50">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Bio / Status Quote</label>
+          <input type="text" id="profile-bio" placeholder="e.g. Grinding Slope highscores 🚀" maxlength="200">
+        </div>
+
+        <!-- PRO EXCLUSIVE PERKS CUSTOMIZER -->
+        <div id="profile-pro-perks-section" style="display: none; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: var(--radius-md); padding: 12px 14px;">
+          <strong style="color: #fbbf24; font-size: 0.85rem; display: block; margin-bottom: 8px;">👑 PRO EXCLUSIVE PERKS</strong>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label style="color: #fbbf24; font-size: 0.78rem;">Chat Name Glow Effect</label>
+              <select id="profile-pro-chat-glow" class="proxy-select-dropdown">
+                <option value="gold">⚡ Golden Aura</option>
+                <option value="rainbow">🌈 Rainbow Chroma</option>
+                <option value="cyan">💎 Cyberpunk Cyan</option>
+                <option value="fire">🔥 Inferno Flame</option>
+                <option value="emerald">🍃 Matrix Emerald</option>
+                <option value="purple">🔮 Mystic Purple</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="color: #fbbf24; font-size: 0.78rem;">VIP Title Flair Tag</label>
+              <input type="text" id="profile-pro-custom-flair" placeholder="e.g. ⚡ VIP ELITE" maxlength="30">
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; margin-top: 4px;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px;">Change Password (Optional)</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="password" id="profile-curr-pass" placeholder="Current Password">
+            <input type="password" id="profile-new-pass" placeholder="New Password">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 11px; margin-top: 8px; font-weight: 800;">Save Profile Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MANDATORY PASSWORD RESET MODAL (BASE64 ENCODED) -->
+  <div class="modal-overlay" id="force-password-reset-modal" style="z-index: 99999;">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div style="font-size: 2.6rem; margin-bottom: 8px;">🔒</div>
+      <h2 style="color: #fbbf24; margin-bottom: 6px; font-size: 1.35rem;">Password Reset Required</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 18px;">
+        Security Notice: An administrator has initiated a password update for your account. Please create a new password to proceed.
+      </p>
+
+      <form id="force-password-reset-form" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">New Password</label>
+          <input type="password" id="force-new-password" required minlength="4" placeholder="Enter new password (min 4 chars)...">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Confirm New Password</label>
+          <input type="password" id="force-confirm-password" required minlength="4" placeholder="Confirm new password...">
+        </div>
+        <div id="force-reset-error" style="color: #ef4444; font-size: 0.85rem; display: none; text-align: center;"></div>
+        <button type="submit" class="btn-pill primary" id="force-reset-submit-btn" style="width: 100%; justify-content: center; padding: 12px; font-weight: 800; margin-top: 6px;">Update Password & Continue</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- COMMUNITY POLLS & GAME VOTING MODAL -->
+  <div class="modal-overlay" id="polls-modal">
+    <div class="modal-card" style="max-width: 600px;">
+      <button class="modal-close" id="polls-modal-close">✕</button>
+      <h2 style="color: #38bdf8; margin-bottom: 6px; font-size: 1.4rem;">📊 Community Polls & Game Voting</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Vote on upcoming platform features, library releases, and community ideas.</p>
+      
+      <div id="community-polls-container" style="max-height: 480px; overflow-y: auto; padding-right: 6px;"></div>
+    </div>
+  </div>
+
+  <!-- MAINTENANCE SCREEN -->
+  <div id="maintenance-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 48px 32px; border-radius: var(--radius-lg); max-width: 540px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+      <div style="font-size: 3rem; margin-bottom: 12px;">🚧</div>
+      <h1 style="color: var(--accent-color); font-size: 2rem; margin-bottom: 12px; font-weight: 800;">UNDER MAINTENANCE</h1>
+      <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 24px;">The Study Helper platform is currently undergoing scheduled maintenance. Please check back shortly!</p>
+      <button class="btn-pill primary" id="maintenance-admin-login-btn" style="margin: 0 auto;">Administrator Login</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Floating Pill Navigation -->
+    <header class="floating-nav">
+      <div class="nav-brand" id="nav-brand-btn">
+        <span id="nav-avatar-icon" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;">📚</span>
+        <span id="nav-profile-name">Hello, Student</span>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-view="library" title="Library">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </button>
+        <button class="nav-btn" data-view="pro" title="PRO Exclusive Lounge" style="color: #fbbf24;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </button>
+        <button class="nav-btn" data-view="chat" title="Global Chat, DMs, Rooms & Whiteboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span id="chat-dm-badge" style="display: none; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: #38bdf8; border-radius: 50%;"></span>
+        </button>
+        <button class="nav-btn" data-view="browser" title="Sandboxed Multi-Tab Web Browser">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        </button>
+        </button>
+        
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+        </button>
+        <button class="nav-btn" data-view="paint" title="Paint Studio Deluxe" style="color: #a855f7;">
+          <span style="font-size: 1.15rem;">🎨</span>
+        </button>
+        <button class="nav-btn" data-view="soundboard" title="Interactive Web Audio Soundboard" style="color: #ec4899;">
+          <span style="font-size: 1.15rem;">🔊</span>
+        </button>
+        <button class="nav-btn" data-view="settings" title="Theme Studio & Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <!-- LEADERBOARDS DIRECT BUTTON -->
+        <button class="nav-btn" id="nav-leaderboards-btn" title="Multiplayer High-Score Leaderboards" onclick="document.getElementById('open-leaderboards-btn')?.click()" style="color: #fbbf24; font-size: 1.1rem;">
+          🏆
+        </button>
+        <!-- ADMIN ONLY BUTTONS -->
+        <button class="nav-btn" data-view="games" id="add-game-nav-btn" title="Add Custom Item" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 18 6 6 6 6 2"></polygon><rect x="3" y="6" width="18" height="16" rx="2"></rect><circle cx="8" cy="14" r="2"></circle><path d="M14 12h4"></path><path d="M16 10v4"></path></svg>
+        </button>
+        <button class="nav-btn" data-view="admin" id="admin-nav-btn" title="Admin Panel" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span class="nav-badge"></span>
+        </button>
+        <button class="nav-btn" id="auth-modal-btn" title="User Account / Sign In">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- GLOBAL ANNOUNCEMENT BANNER -->
+    <div id="announcement-banner" class="global-announcement-banner" style="display: none;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.3rem;">📢</span>
+        <div>
+          <strong id="ann-banner-title" style="color: #fbbf24; font-size: 0.92rem; display: block;">Announcement</strong>
+          <span id="ann-banner-msg" style="color: var(--text-main); font-size: 0.85rem;">Message</span>
+        </div>
+      </div>
+      <button id="ann-banner-close" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; padding: 4px 8px;">✕</button>
+    </div>
+
+    <!-- SECTION 1: GAME LIBRARY -->
+    <main class="page-view active" id="view-library">
+      <div class="header-title-section">
+        <h1>LIBRARY & REPOSITORY</h1>
+      </div>
+
+      <!-- Minimalist Profile Strip with Real-Time Visitor Count & Leaderboards -->
+      <div class="profile-strip">
+        <div class="profile-left" id="profile-card-trigger" title="Click to view & edit your profile">
+          <span id="profile-strip-avatar" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem;">👤</span>
+          <span class="profile-tag" id="profile-active-tag">Student User</span>
+          <span class="visitor-counter-pill" title="Total Website Visits">👁️ <span id="site-visitor-count">1,420</span></span>
+        </div>
+        <div class="profile-actions">
+          <button class="btn-pill" id="open-leaderboards-btn" style="color: #fbbf24;" title="Multiplayer High-Score Leaderboards">🏆 Leaderboards</button>
+          <button class="btn-pill" id="pro-music-toggle-btn" style="color: #fbbf24; display: none;" title="Open Spotify / YouTube Music Dock">🎵 Music</button>
+          <button class="btn-pill" id="open-polls-modal-btn" style="color: #38bdf8;" title="Vote on Community Polls">📊 Polls</button>
+          <button class="btn-pill" id="open-study-timer-btn" style="color: #ef4444;" title="Focus Study Timer & Ambient sounds">⏱️ Study Mode</button>
+          
+          <!-- Consolidated Tools Dropdown Menu -->
+          <div class="dropdown-wrap">
+            <button class="btn-pill" id="quick-tools-btn" title="Platform tools and shortcuts">
+              <span>✨ Tools</span>
+              <span style="font-size: 0.7rem;">▼</span>
+            </button>
+            <div class="dropdown-menu" id="quick-tools-menu" style="display: none;">
+              <button class="dropdown-item" id="open-profile-edit-btn">✏️ Edit Profile</button>
+              <button class="dropdown-item" id="open-updates-modal-btn">📋 Update Logs</button>
+              <button class="dropdown-item" id="open-suggest-modal-btn">💡 Suggest Game</button>
+              <button class="dropdown-item" id="open-bug-modal-btn">🐛 Report Bug</button>
+              <button class="dropdown-item" id="launch-site-blank-btn">🚀 about:blank Cloak</button>
+              <button class="dropdown-item" id="open-tos-btn">📜 Terms of Service</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Library Filter Tabs (All Games, Favorites, Custom Playlists) -->
+      <div class="catalog-filter-tabs-bar">
+        <button class="catalog-tab-btn active" id="tab-filter-all" data-filter="all">🎮 All Catalog Items</button>
+        <button class="catalog-tab-btn" id="tab-filter-favs" data-filter="favorites">★ My Favorites <span class="catalog-counter-pill" id="favs-count-badge">0</span></button>
+        <button class="catalog-tab-btn" id="tab-filter-playlists" data-filter="playlists">📁 Custom Playlists</button>
+      </div>
+
+      <div class="search-controls-bar">
+        <div class="search-input-wrapper">
+          <div class="search-input-box">
+            <input type="text" id="game-search-input" placeholder="Search catalog...">
+          </div>
+          <div class="view-mode-buttons">
+            <button class="view-btn active" id="view-grid-btn" title="Grid View">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+            <button class="view-btn" id="view-list-btn" title="List View">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-sub-bar">
+          <div class="sort-select-wrap">
+            <span>Sort by:</span>
+            <select class="sort-select" id="game-sort-select">
+              <option value="trending">🔥 Trending</option>
+              <option value="recent">🕒 Recently Added</option>
+              <option value="az">🔤 Title (A-Z)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="games-grid-container" id="games-grid"></div>
+    </main>
+
+    <!-- SECTION 1B: WEB APPS -->
+    <main class="page-view" id="view-apps">
+      <div class="header-title-section">
+        <h1>WEB APPLICATIONS & SHORTCUTS</h1>
+      </div>
+      <div class="search-controls-bar">
+        <div class="search-input-wrapper" style="max-width: 100%;">
+          <div class="search-input-box" style="flex: 1;">
+            <input type="text" id="app-search-input" placeholder="Search apps...">
+          </div>
+        </div>
+      </div>
+      <div class="games-grid-container" id="apps-grid"></div>
+    </main>
+
+
+
+    <!-- SECTION 1D: PAINT VIEW -->
+    <main class="page-view" id="view-paint">
+      <div class="header-title-section">
+        <h1>🎨 PAINT STUDIO DELUXE</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Express your creativity! Draw, pick colors, adjust sizes, and download your local creations.</p>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+        <div style="background: rgba(20,23,36,0.8); border: 1px solid var(--card-border); padding: 20px; border-radius: var(--radius-lg); width: 220px; display: flex; flex-direction: column; gap: 16px;">
+          <h3 style="color: #38bdf8; font-size: 1.1rem; margin: 0;">🛠️ Controls</h3>
+          
+          <div class="form-group">
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Brush Color</label>
+            <input type="color" id="paint-color" value="#38bdf8" style="width: 100%; height: 38px; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Brush Size: <span id="paint-size-val">5</span>px</label>
+            <input type="range" id="paint-size" min="1" max="50" value="5" style="width: 100%;">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-pill" id="paint-tool-brush" style="width:100%; background: var(--accent-gradient); color:#fff; font-weight:700;">🖌️ Brush Tool</button>
+            <button class="btn-pill" id="paint-tool-eraser" style="width:100%; background: #141724; border-color: var(--card-border); font-weight:700;">🧽 Eraser</button>
+            <button class="btn-pill danger" id="paint-tool-clear" style="width:100%; font-weight:700;">🗑️ Clear Canvas</button>
+            <button class="btn-pill primary" id="paint-tool-download" style="width:100%; font-weight:700; background: #10b981; border-color: #10b981; color:#000;">💾 Save Drawing</button>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-width: 320px; background: #fff; border: 4px solid var(--card-border); border-radius: 12px; overflow: hidden; height: 500px; position: relative;">
+          <canvas id="paint-canvas" style="display: block; width: 100%; height: 100%; cursor: crosshair; background: #fff;"></canvas>
+        </div>
+      </div>
+    </main>
+
+
+
+
+    <!-- SECTION 2: PRO & ROLE TIERS HEADQUARTERS (COMING SOON DISPLAY) -->
+    <section class="page-view" id="view-pro">
+      <div class="pro-content" style="text-align:center;max-width:800px;">
+    <h2>🚧 COMING SOON</h2>
+    <p>Premium memberships, role upgrades, and subscription tiers are currently under development. All 64+ unblocked games, proxy browsers, audio dock streams, and arcade tools remain 100% FREE for all players!</p>
+    <div style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+      <button class="btn-pill" onclick="document.querySelector('.nav-btn[data-view=\"library\"]').click()">🎮 Browse Free Library</button>
+      <button class="btn-pill" onclick="document.querySelector('.nav-btn[data-view=\"chat\"]').click()">💬 Open Live Chat</button>
+    </div>
+  </div>
+    </section>
+
+    <!-- SECTION 3: ADD / EMBED CUSTOM HTML (Admin Only) -->
+    <section class="page-view" id="view-games">
+      <div class="header-title-section">
+        <h1>ADD CUSTOM ITEM</h1>
+      </div>
+      <div class="modal-card" style="max-width: 780px; margin: 0 auto;">
+        <h3 style="margin-bottom: 20px; color: var(--accent-color);">Embed HTML5 or Iframe</h3>
+        <form id="add-game-form" class="game-form-grid">
+          <div class="form-group">
+            <label>Item Title</label>
+            <input type="text" id="add-game-title" placeholder="e.g. Interactive 3D Model" required>
+          </div>
+          <div class="form-group">
+            <label>Author / Creator</label>
+            <input type="text" id="add-game-author" placeholder="e.g. Academic Lab">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="add-game-category">
+              <option value="Action">Action</option>
+              <option value="Puzzle">Puzzle & Logic</option>
+              <option value="Retro">Retro Arcade</option>
+              <option value="Sports">Sports</option>
+              <option value="Skill">Skill & Speed</option>
+              <option value="Horror">Horror</option>
+              <option value="Apps">Apps</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Embed Format</label>
+            <select id="add-game-type">
+              <option value="html_code">Raw HTML / JS Canvas Code</option>
+              <option value="iframe_url">External URL / Iframe</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Thumbnail Image URL</label>
+            <input type="url" id="add-game-thumb" placeholder="https://images.unsplash.com/...">
+          </div>
+          <div class="form-group full">
+            <label>Embed Code or Direct URL</label>
+            <textarea id="add-game-code" placeholder="Paste full <html> / <canvas> code or direct embed URL..." required></textarea>
+          </div>
+          <div class="form-group full" id="vip-checkbox-group">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="add-game-vip">
+              <span>Lock for PRO Lounge Members Only</span>
+            </label>
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn-pill primary" style="justify-content: center; width: 100%; padding: 12px;">Publish Item to Library</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECTION 4: REAL-TIME GLOBAL CHAT, DMs, ROOMS & WHITEBOARD -->
+    <section class="page-view" id="view-chat">
+      <div class="header-title-section">
+        <h1>COMMUNITY MESSAGING</h1>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-mode-tabs">
+          <button class="chat-mode-tab active" data-mode="global">🌍 Global Chat</button>
+          <button class="chat-mode-tab" data-mode="voice" style="color: #10b981; font-weight: 800;">🎤 Voice Rooms</button>
+          <button class="chat-mode-tab" data-mode="dm">💬 Direct Messages</button>
+          <button class="chat-mode-tab" data-mode="room">🔒 Private Rooms</button>
+          <button class="chat-mode-tab" data-mode="whiteboard">🎨 Live Whiteboard</button>
+        </div>
+
+        <!-- VOICE ROOMS CONTAINER -->
+        <div id="chat-voice-container" style="display: none; padding: 20px; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); padding: 14px 18px; border-radius: var(--radius-md);">
+            <div>
+              <strong style="color: #10b981; font-size: 1.1rem;">🎤 Ephemeral WebRTC Voice Lounge</strong>
+              <span style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Join or create voice channels for study groups and game comms.</span>
+            </div>
+            <button class="btn-pill primary" id="create-voice-channel-btn" style="background: #10b981; border-color: #10b981; color: #000; font-weight: 800;">＋ Create Voice Room</button>
+          </div>
+
+          <div id="voice-connected-bar" style="display: none; align-items: center; justify-content: space-between; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; padding: 12px 18px; border-radius: var(--radius-md);">
+            <strong id="voice-connected-label" style="color: #38bdf8; font-size: 0.95rem;">Connected to Voice</strong>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-small" id="voice-mute-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎙️ Mute Mic</button>
+              <button class="btn-small" id="voice-deafen-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎧 Deafen</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 8px;">
+            <h4 style="color: #38bdf8; margin: 0 0 10px; font-size: 0.95rem;">Active Participants in Channel</h4>
+            <div id="voice-participants-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
+          </div>
+
+          <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">Available Voice Channels</h4>
+          <div id="voice-channels-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+
+        <div class="chat-header">
+          <div class="chat-header-title" id="chat-global-subhead">
+            <span class="online-dot"></span>
+            <span id="chat-online-count">Online</span>
+          </div>
+
+          <div id="chat-dm-bar" style="display: none; align-items: center; gap: 10px; width: 100%;">
+            <input type="text" id="chat-dm-target-user" placeholder="Enter student username to DM..." style="flex: 1; padding: 6px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+            <button class="btn-small primary" id="chat-start-dm-btn">Open DM</button>
+            <span id="chat-dm-active-label" style="font-size: 0.82rem; color: #38bdf8; font-weight: 700;"></span>
+          </div>
+
+          <div id="chat-room-bar" style="display: none; align-items: center; gap: 10px; width: 100%;">
+            <input type="text" id="chat-room-code-input" placeholder="Enter Room Code (e.g. squad42)..." style="flex: 1; padding: 6px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+            <button class="btn-small primary" id="chat-join-room-btn">Join / Create Room</button>
+            <span id="chat-room-active-label" style="font-size: 0.82rem; color: #fbbf24; font-weight: 700;"></span>
+          </div>
+
+          <span id="chat-slowmode-indicator" style="display: none; font-size: 0.78rem; color: #f59e0b; font-weight: 700;"></span>
+        </div>
+
+        <!-- COLLABORATIVE WHITEBOARD VIEW -->
+        <div id="chat-whiteboard-container" class="chat-whiteboard-container" style="display: none;">
+          <div class="whiteboard-toolbar">
+            <span style="font-weight: 700; color: #38bdf8; font-size: 0.9rem;">🎨 Shared Canvas</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button class="wb-color-btn active" data-color="#38bdf8" style="background: #38bdf8;"></button>
+              <button class="wb-color-btn" data-color="#10b981" style="background: #10b981;"></button>
+              <button class="wb-color-btn" data-color="#f43f5e" style="background: #f43f5e;"></button>
+              <button class="wb-color-btn" data-color="#fbbf24" style="background: #fbbf24;"></button>
+              <button class="wb-color-btn" data-color="#ffffff" style="background: #ffffff;"></button>
+              <button class="btn-small" id="wb-eraser-btn" style="background: rgba(255,255,255,0.1); color: #fff;">🧹 Eraser</button>
+              <button class="btn-small danger" id="wb-clear-btn">Clear</button>
+            </div>
+          </div>
+          <canvas id="whiteboard-canvas" class="whiteboard-canvas"></canvas>
+        </div>
+
+        <div class="chat-messages-area" id="chat-messages"></div>
+
+        <!-- GIF & Sticker Keyboard Drawer -->
+        <div id="chat-gif-drawer" class="chat-gif-drawer" style="display: none;">
+          <div style="padding: 10px 12px 6px;">
+            <input type="text" id="chat-gif-search" placeholder="Search 50+ animated GIFs & stickers..." style="width: 100%; padding: 6px 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 0.8rem;">
+          </div>
+          <div id="chat-gif-categories" style="display: flex; gap: 4px; padding: 0 12px 8px; overflow-x: auto; scrollbar-width: none;">
+            <button class="gif-cat-btn active" data-cat="all" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; white-space: nowrap;">🔥 All</button>
+            <button class="gif-cat-btn" data-cat="memes" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">😂 Memes</button>
+            <button class="gif-cat-btn" data-cat="gaming" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">🎮 Gaming</button>
+            <button class="gif-cat-btn" data-cat="anime" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">🐱 Anime</button>
+            <button class="gif-cat-btn" data-cat="reactions" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">💬 Reactions</button>
+            <button class="gif-cat-btn" data-cat="stickers" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">✨ Stickers</button>
+          </div>
+          <div class="chat-gif-grid" id="chat-gif-grid"></div>
+        </div>
+
+        <form class="chat-input-box-wrapper" id="chat-form">
+          <button type="button" class="btn-small" id="chat-gif-btn" style="background: rgba(255,255,255,0.08); color: #fbbf24; border: 1px solid rgba(255,255,255,0.1); font-weight: 800;" title="Insert Animated GIF / Sticker">GIF</button>
+          <input type="text" id="chat-input" placeholder="Type a message... (press Enter to send)" autocomplete="off">
+          <button type="submit" class="btn-pill primary">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECTION 5: MULTI-TAB SANDBOXED BROWSER -->
+    <section class="page-view" id="view-browser">
+      <div class="header-title-section">
+        <h1>SANDBOXED MULTI-TAB BROWSER</h1>
+      </div>
+      <div class="browser-view-container">
+        <!-- Multi-Tab Strip -->
+        <div class="browser-tabs-header">
+          <div class="browser-tabs-strip" id="browser-tabs-strip"></div>
+          <button class="browser-new-tab-btn" id="browser-new-tab-btn" title="Open New Tab">＋</button>
+        </div>
+
+        <div class="browser-top-bar">
+          <div class="browser-controls">
+            <button class="browser-btn" id="browser-back" title="Back">◀</button>
+            <button class="browser-btn" id="browser-forward" title="Forward">▶</button>
+            <button class="browser-btn" id="browser-refresh" title="Reload">🔄</button>
+            <button class="browser-btn" id="browser-home" title="Speed Dial Home">🏠</button>
+            <button class="browser-btn" id="browser-open-blank-btn" title="Open proxy in about:blank disguise" style="color: #fbbf24;">🚀</button>
+          </div>
+
+          <!-- Proxy Emulation Engine Selector (Chrome, Firefox, Safari, Tor, Classroom) -->
+          <select id="browser-proxy-engine-select" class="browser-engine-select" title="Proxy Emulation Engine" style="background: #111420; border-color: #38bdf8; color: #38bdf8; font-weight: 700;">
+            <option value="chrome">🌐 Chrome 128 (Windows)</option>
+            <option value="firefox">🦊 Firefox 129 (Quantum)</option>
+            <option value="safari">🍎 Safari 17.5 (macOS)</option>
+            <option value="edge">🌊 Edge 128 (Windows)</option>
+            <option value="mobile">📱 Mobile (iOS iPhone)</option>
+            <option value="classroom">🎓 Google Classroom Stealth</option>
+            <option value="tor">🧅 Tor Onion Stealth</option>
+          </select>
+          
+          <select id="browser-search-engine-select" class="browser-engine-select" title="Search Engine">
+            <option value="duckduckgo">🦆 DuckDuckGo</option>
+            <option value="brave">🦁 Brave Search</option>
+            <option value="bing">🌐 Bing</option>
+            <option value="google">🔍 Google</option>
+          </select>
+
+          <div class="browser-address-bar">
+            <input type="text" id="browser-url-input" placeholder="Enter URL or search term...">
+          </div>
+          <button class="btn-pill primary" id="browser-go-btn">Go</button>
+        </div>
+
+        <!-- Speed Dial Grid (Shown on New Tab) -->
+        <div class="browser-speed-dial" id="browser-speed-dial">
+          <div class="speed-dial-header">
+            <h2>⚡ Quick Launch & Bookmarks</h2>
+            <p>Select a study bookmark or enter a URL above</p>
+          </div>
+          <div class="speed-dial-grid" id="browser-speed-dial-grid"></div>
+        </div>
+
+        <div class="browser-viewport">
+          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank" style="display: none;"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: THEME STUDIO, PANIC KEY & PERSONAL SETTINGS -->
+    <section class="page-view" id="view-settings">
+      <div class="header-title-section">
+        <h1>THEME STUDIO & SETTINGS</h1>
+      </div>
+
+      <div class="settings-studio-container">
+        <aside class="themes-sidebar-panel">
+          <input type="text" class="themes-search-input" id="theme-search-input" placeholder="Search themes...">
+          <div class="themes-list-scroll" id="themes-preset-list"></div>
+          <button class="theme-btn-create" id="open-custom-theme-btn">🎨 Create Custom Theme</button>
+        </aside>
+
+        <div class="studio-main-panel">
+          <!-- Profile Card Shortcut in Settings -->
+          <div class="theme-settings-box">
+            <div class="theme-settings-title">
+              <span>👤 USER PROFILE & IDENTITY</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 480px;">Customize your avatar icon (PFP), display name, PRO chat name glows, and personal status bio.</p>
+              <button class="btn-pill primary" onclick="document.getElementById('open-profile-edit-btn').click()">Edit Profile</button>
+            </div>
+          </div>
+
+          <!-- Preset Disguise Switcher -->
+          <div class="theme-settings-box">
+            <div class="theme-settings-title">
+              <span>🎭 PRESET DISGUISE SWITCHER</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <p style="font-size: 0.85rem; color: var(--text-muted);">One-click instant tab and favicon disguises for academic platforms.</p>
+              <select id="preset-disguise-select" class="proxy-select-dropdown">
+                <option value="">Select Disguise Preset...</option>
+                <option value="desmos">📐 Desmos Graphing Calculator</option>
+                <option value="khan">📚 Khan Academy Learning</option>
+                <option value="quizlet">🧠 Quizlet Flashcards</option>
+                <option value="wikipedia">🌐 Wikipedia Encyclopedia</option>
+                <option value="classroom">🎓 Google Classroom</option>
+                <option value="docs">📝 Google Docs</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Emergency Panic Key & Fake Error Trigger -->
+          <div class="theme-settings-box">
+            <div class="theme-settings-title">
+              <span>🚨 PANIC KEY & STEALTH ERROR TRIGGER</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Pressing your panic hotkey instantly redirects to a safe site or brings up a fake server error screen.</p>
+              
+              <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+                <div class="form-group">
+                  <label>Panic Hotkey</label>
+                  <input type="text" id="panic-key-input" placeholder="e.g. ]" maxlength="10">
+                </div>
+                <div class="form-group">
+                  <label>Redirect Destination</label>
+                  <select id="panic-url-select" class="proxy-select-dropdown">
+                    <option value="https://classroom.google.com">Google Classroom</option>
+                    <option value="https://drive.google.com">Google Drive</option>
+                    <option value="https://docs.google.com">Google Docs</option>
+                    <option value="https://canvas.instructure.com">Canvas LMS</option>
+                    <option value="https://wikipedia.org">Wikipedia</option>
+                    <option value="custom">Custom URL...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" id="panic-custom-url-group" style="display: none;">
+                <label>Custom Redirect URL</label>
+                <input type="url" id="panic-custom-url-input" placeholder="https://example.com">
+              </div>
+
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-pill primary" id="save-panic-key-btn">Save Panic Key</button>
+                <button class="btn-pill" id="test-panic-key-btn" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;">Test Redirect</button>
+                <button class="btn-pill" id="panic-fake-error-btn" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #f59e0b;">Trigger Fake 500 Error</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification & Alert Control Preferences -->
+          <div class="theme-settings-box">
+            <div class="theme-settings-title">
+              <span>🔔 NOTIFICATION & POPUP PREFERENCES</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.92rem;">Disable Announcement Banners</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Never show the top global announcement banner</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="disable-announcements-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.92rem;">Disable Update Log Popups</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Never show automatic update popups on login</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="disable-updates-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Protection & Anti-Close Settings -->
+          <div class="theme-settings-box">
+            <div class="theme-settings-title">
+              <span>🛡️ ADVANCED BROWSER DEFENSE</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.95rem;">Anti-Close Protection</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Prompts before closing tab to prevent accidental loss</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="anti-close-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Preset Themes Swatches & In-Place Customizer -->
+          <div class="theme-settings-box">
+            <div class="theme-settings-title">
+              <span>≈ ACTIVE THEME PALETTE</span>
+              <span style="color: var(--accent-color); font-size: 0.8rem;">● Active Theme</span>
+            </div>
+
+            <div>
+              <div class="swatches-row" id="swatches-container">
+                <div class="swatch-item">
+                  <div class="swatch-color-box" id="swatch-bg" style="background: #090a0f;"></div>
+                  <span class="swatch-label">BG</span>
+                </div>
+                <div class="swatch-item">
+                  <div class="swatch-color-box" id="swatch-accent" style="background: #eb2f5f;"></div>
+                  <span class="swatch-label">ACCENT</span>
+                </div>
+                <div class="swatch-item">
+                  <div class="swatch-color-box" id="swatch-text" style="background: #ffffff;"></div>
+                  <span class="swatch-label">TEXT</span>
+                </div>
+                <div class="swatch-item">
+                  <div class="swatch-color-box" id="swatch-cardbg" style="background: #12141d;"></div>
+                  <span class="swatch-label">CARDBG</span>
+                </div>
+                <div class="swatch-item">
+                  <div class="swatch-color-box" id="swatch-muted" style="background: #94a3b8;"></div>
+                  <span class="swatch-label">MUTED</span>
+                </div>
+              </div>
+
+              <!-- Quick In-Place Theme Creator Box -->
+              <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                  <strong style="color: #fbbf24; font-size: 0.88rem;">✨ Instant Custom Color Studio</strong>
+                  <button class="btn-small primary" onclick="document.getElementById('open-custom-theme-btn').click()">Open Theme Studio Modal</button>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Customize and preview colors live, or click below to save as a new custom theme.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+                  <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Background</label>
+                    <input type="color" id="inline-theme-bg" value="#090a0f" style="width: 100%; height: 32px; border-radius: 4px; border: none; cursor: pointer;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Card Surface</label>
+                    <input type="color" id="inline-theme-card" value="#12141d" style="width: 100%; height: 32px; border-radius: 4px; border: none; cursor: pointer;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Accent Neon</label>
+                    <input type="color" id="inline-theme-accent" value="#38bdf8" style="width: 100%; height: 32px; border-radius: 4px; border: none; cursor: pointer;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Main Text</label>
+                    <input type="color" id="inline-theme-text" value="#ffffff" style="width: 100%; height: 32px; border-radius: 4px; border: none; cursor: pointer;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6.5: INTERACTIVE SOUNDBOARD -->
+    <section class="page-view" id="view-soundboard">
+      <div class="header-title-section">
+        <h1>INTERACTIVE SOUNDBOARD</h1>
+        <p>Synthesized Web Audio sound effects, meme sounds, and audio focus cues.</p>
+      </div>
+
+      <div class="view-content-wrapper" style="margin-top: 20px;">
+        <div id="soundboard-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: ADMIN CONTROL PANEL -->
+    <section class="page-view" id="view-admin">
+      <div class="header-title-section">
+        <h1>ADMIN CONTROL PANEL</h1>
+      </div>
+
+      <div class="admin-dashboard-container">
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <div>
+            <strong style="font-size: 1.1rem; display: block;">🚧 Maintenance Mode</strong>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Status: <strong id="admin-maintenance-status" style="color: #10b981;">OFF (Live to Public)</strong></span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="admin-maintenance-switch">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="admin-stats-grid" id="admin-stats-container">
+          <div class="admin-stat-card">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Total Users</span>
+            <span class="admin-stat-number" id="stat-users">0</span>
+          </div>
+          <div class="admin-stat-card">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Items in Catalog</span>
+            <span class="admin-stat-number" id="stat-games">0</span>
+          </div>
+          <div class="admin-stat-card">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">PRO Members</span>
+            <span class="admin-stat-number" id="stat-vips">0</span>
+          </div>
+          <div class="admin-stat-card">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Chat Messages</span>
+            <span class="admin-stat-number" id="stat-chats">0</span>
+          </div>
+        </div>
+
+        <div class="admin-tabs-nav">
+          <button class="admin-tab-btn active" data-tab="radar">📊 Activity Radar</button>
+          <button class="admin-tab-btn" data-tab="ownerfeatures" style="color: #fbbf24; font-weight: 800;">👑 Owner Controls</button>
+          <button class="admin-tab-btn" data-tab="users">Users & Moderation</button>
+          <button class="admin-tab-btn" data-tab="connections">⚡ Live Connections</button>
+          <button class="admin-tab-btn" data-tab="iptracker" onclick="window.adminFetchIpLogs()">🌐 IP Tracker</button>
+          <button class="admin-tab-btn" data-tab="bulk">📥 Bulk Importer</button>
+          <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
+          <button class="admin-tab-btn" data-tab="updates">Update Logs & Notes</button>
+          <button class="admin-tab-btn" data-tab="announcements">Announcements</button>
+          <button class="admin-tab-btn" data-tab="domains">Domain Filter</button>
+          <button class="admin-tab-btn" data-tab="games">Catalog</button>
+          <button class="admin-tab-btn" data-tab="filters">Name Filters</button>
+          <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions</button>
+          <button class="admin-tab-btn" data-tab="logs">Audit Logs</button>
+        </div>
+
+        <!-- Admin Tab: Activity Radar Dashboard -->
+        <div class="admin-tab-content" id="tab-radar">
+          <div style="margin-bottom: 14px;">
+            <h3>📊 Real-Time Activity Radar</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Live system diagnostics, peak usage metrics, and catalog popularity distribution.</p>
+          </div>
+          <div id="admin-radar-content"></div>
+        </div>
+
+        <!-- Admin Tab: Owner Feature Controls -->
+        <div class="admin-tab-content" id="tab-ownerfeatures" style="display: none;">
+          <div style="margin-bottom: 16px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); padding: 16px; border-radius: var(--radius-md);">
+            <h3 style="color: #fbbf24; margin: 0 0 6px;">👑 Owner Feature Controls</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Toggle access to platform features on/off instantly. Restricted features will be disabled for non-owner visitors.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">🌐 Unfiltered Proxy Engine</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">/api/proxy</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_proxy_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_proxy_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">💬 Real-Time Global Chat & DMs</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Socket.io Chat</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_chat_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_chat_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">🎮 Games & Apps Catalog</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Game Library</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_games_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_games_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">🪄 AI Study Assistant Engine</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Homework Solver</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_ai_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_ai_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">🔊 Synthesized Soundboard</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Audio Effects</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_soundboard_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_soundboard_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">📊 Community Polls & Voting</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Poll Engine</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_polls_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_polls_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <strong style="color: #fff;">🎧 Pro Voice Lounge</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Voice Signals</span>
+              </div>
+              <div>
+                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_voice_enabled', false)">Disable</button>
+                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_voice_enabled', true)">Enable</button>
+              </div>
+            </div>
+
+            <!-- Purge Chat History Card -->
+            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between; border-color: rgba(239, 68, 68, 0.4);">
+              <div>
+                <strong style="color: #ef4444;">🔥 Purge Global Chat History</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Wipe all chat messages permanently</span>
+              </div>
+              <button class="btn-small danger" onclick="window.ownerPurgeChat()" style="font-weight: 800;">🗑️ Purge Chat</button>
+            </div>
+
+            <!-- Global Slowmode Control Card -->
+            <div class="admin-stat-card" style="display: flex; flex-direction: column; gap: 8px; border-color: rgba(251, 191, 36, 0.4);">
+              <div>
+                <strong style="color: #fbbf24;">⏳ Set Global Chat Slowmode</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Enforce delay between student chat messages</span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-small" onclick="window.ownerSetSlowmode(0)" style="background: rgba(255,255,255,0.1); color: #fff;">Off (0s)</button>
+                <button class="btn-small" onclick="window.ownerSetSlowmode(3)" style="background: rgba(255,255,255,0.1); color: #fff;">3s</button>
+                <button class="btn-small" onclick="window.ownerSetSlowmode(5)" style="background: rgba(255,255,255,0.1); color: #fff;">5s</button>
+                <button class="btn-small" onclick="window.ownerSetSlowmode(10)" style="background: rgba(255,255,255,0.1); color: #fff;">10s</button>
+                <button class="btn-small" onclick="window.ownerSetSlowmode(30)" style="background: rgba(255,255,255,0.1); color: #fff;">30s</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tab: IP Tracker -->
+        <div class="admin-tab-content" id="tab-iptracker" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div>
+              <h3>🌐 Admin IP Tracker & Geolocation Security</h3>
+              <p style="color: var(--text-muted); font-size: 0.85rem;">Live tracking of incoming client IP addresses, user association, and IP ban management.</p>
+            </div>
+            <button class="btn-pill primary" onclick="window.adminFetchIpLogs()">🔄 Refresh IP Logs</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Username</th>
+                <th>User Agent</th>
+                <th>Location / ISP</th>
+                <th>Last Seen</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-ip-logs-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Bulk Catalog Importer -->
+        <div class="admin-tab-content" id="tab-bulk" style="display: none;">
+          <div style="margin-bottom: 14px;">
+            <h3>📥 Bulk Catalog Importer (JSON / CSV)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Upload a JSON or CSV file to import games and web tools instantly.</p>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 20px; border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 14px;">
+            <div class="form-group">
+              <label>Upload JSON or CSV File</label>
+              <input type="file" id="admin-bulk-file-input" accept=".json,.csv" style="padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 6px; color: #fff;">
+            </div>
+
+            <div class="form-group">
+              <label>Or Paste Raw JSON Array</label>
+              <textarea id="admin-bulk-json-input" placeholder='[{"title":"Game Name","author":"Lab","category":"Action","embed_type":"iframe_url","embed_content":"https://...","thumbnail_url":"https://..."}]' style="min-height: 120px; font-family: monospace; font-size: 0.8rem;"></textarea>
+            </div>
+
+            <button class="btn-pill primary" id="admin-bulk-import-btn" style="align-self: flex-start;">🚀 Run Bulk Catalog Import</button>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Users & Moderation -->
+        <div class="admin-tab-content" id="tab-users" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3>Registered Users & Active Moderation</h3>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">⏳ Chat Slowmode:</span>
+              <select id="admin-slowmode-select" class="proxy-select-dropdown" style="padding: 4px 8px; font-size: 0.8rem;">
+                <option value="0">Off (0s)</option>
+                <option value="3">3 Seconds</option>
+                <option value="5">5 Seconds</option>
+                <option value="10">10 Seconds</option>
+                <option value="30">30 Seconds</option>
+              </select>
+              <button class="btn-small primary" id="admin-slowmode-apply-btn">Apply</button>
+            </div>
+          </div>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User / Display</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Live Connections -->
+        <div class="admin-tab-content" id="tab-connections" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3>⚡ Live Active Sockets</h3>
+            <span class="chat-badge" id="admin-live-conn-count">0 Active</span>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Socket ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Current Activity</th>
+                <th>IP</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-connections-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Polls -->
+        <div class="admin-tab-content" id="tab-polls" style="display: none;">
+          <h3>📊 Create Community Poll</h3>
+          <form id="admin-poll-form" class="game-form-grid" style="margin: 14px 0 24px;">
+            <div class="form-group full">
+              <label>Poll Question</label>
+              <input type="text" id="poll-question-input" required placeholder="e.g. Which new arcade game should we add next?">
+            </div>
+            <div class="form-group full">
+              <label>Poll Options (comma separated)</label>
+              <input type="text" id="poll-options-input" required placeholder="e.g. Retro Space Runner, 3D Chess, Flappy Deluxe">
+            </div>
+            <div class="form-group full">
+              <button type="submit" class="btn-pill primary">Publish Community Poll</button>
+            </div>
+          </form>
+          <h3>Active Polls</h3>
+          <div id="admin-polls-list"></div>
+        </div>
+
+        <!-- Admin Tab: Updates -->
+        <div class="admin-tab-content" id="tab-updates" style="display: none;">
+          <h3>🚀 Publish Platform Update & Patch Notes</h3>
+          <form id="admin-update-form" class="game-form-grid" style="margin: 14px 0 24px;">
+            <div class="form-group">
+              <label>Version Tag</label>
+              <input type="text" id="update-version" placeholder="e.g. v2.8" required>
+            </div>
+            <div class="form-group">
+              <label>Update Title</label>
+              <input type="text" id="update-title" placeholder="e.g. Mega Upgrade Released" required>
+            </div>
+            <div class="form-group full">
+              <label>Patch Notes Content</label>
+              <textarea id="update-content" placeholder="• List bullet points of changes..." required style="min-height: 100px;"></textarea>
+            </div>
+            <div class="form-group full">
+              <button type="submit" class="btn-pill primary">Publish Update & Notify Visitors</button>
+            </div>
+          </form>
+          <h3>Previous Update Logs</h3>
+          <div id="admin-updates-list"></div>
+        </div>
+
+        <!-- Admin Tab: Announcements -->
+        <div class="admin-tab-content" id="tab-announcements" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3>Global Announcements</h3>
+            <button class="btn-small danger" id="admin-disable-ann-btn">🚫 Disable & Clear Active Announcement</button>
+          </div>
+          <form id="admin-announcement-form" class="game-form-grid" style="margin-top: 10px;">
+            <div class="form-group">
+              <label>Announcement Title</label>
+              <input type="text" id="ann-title" placeholder="e.g. System Update Released" required>
+            </div>
+            <div class="form-group">
+              <label>Style Type</label>
+              <select id="ann-type" class="proxy-select-dropdown">
+                <option value="info">Info (Blue)</option>
+                <option value="warning">Alert / Warning (Red)</option>
+                <option value="pro">PRO Exclusive (Gold)</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Message Content</label>
+              <textarea id="ann-message" placeholder="Type banner message for all visitors..." required style="min-height: 80px;"></textarea>
+            </div>
+            <div class="form-group full">
+              <label style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="ann-active" checked>
+                <span>Active on site</span>
+              </label>
+            </div>
+            <div class="form-group full">
+              <button type="submit" class="btn-pill primary">Publish Announcement</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Admin Tab: Blocked Domains -->
+        <div class="admin-tab-content" id="tab-domains" style="display: none;">
+          <h3>Restricted Domains for Standard Users</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Standard users who attempt to access these domains receive an automatic 30-minute timeout. PRO & Admin bypass this list.</p>
+          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+            <input type="text" id="new-blocked-domain" placeholder="Domain (e.g. tiktok.com)..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+            <input type="text" id="new-domain-reason" placeholder="Reason..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+            <button class="btn-pill primary" id="add-domain-btn">Block Domain</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Blocked Domain</th>
+                <th>Reason</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-domains-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Games Manager Studio -->
+        <div class="admin-tab-content" id="tab-games" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h3 style="color: #38bdf8; font-size: 1.25rem;">🎮 Easy Game Manager Studio</h3>
+              <p style="color: var(--text-muted); font-size: 0.83rem;">Manage cover art, categories, embed sources, and live stats across all catalog games.</p>
+            </div>
+            <button class="btn-pill primary" onclick="window.adminOpenAddGameModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 800;">
+              ➕ Add New Game
+            </button>
+          </div>
+
+          <!-- Controls & Search Toolbar -->
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border: 1px solid var(--card-border);">
+            <div style="flex: 1; min-width: 200px;">
+              <input type="text" id="admin-game-search" placeholder="🔍 Instant search by title or author..." style="width: 100%; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" oninput="window.adminFilterGames()">
+            </div>
+            <div>
+              <select id="admin-game-category-select" class="proxy-select-dropdown" style="font-size: 0.85rem; padding: 8px 12px;" onchange="window.adminFilterGames()">
+                <option value="ALL">All Categories</option>
+                <option value="Action">Action</option>
+                <option value="Sports">Sports</option>
+                <option value="Puzzle">Puzzle</option>
+                <option value="Simulation">Simulation</option>
+                <option value="Skill">Skill</option>
+                <option value="RPG">RPG</option>
+                <option value="Sandbox">Sandbox</option>
+                <option value="Retro">Retro</option>
+                <option value="Horror">Horror</option>
+                <option value="Apps">Apps</option>
+              </select>
+            </div>
+            <div style="display: flex; border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden;">
+              <button id="admin-game-view-grid-btn" onclick="window.adminSetGameView('grid')" style="padding: 6px 12px; background: var(--accent-gradient); color: #fff; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer;">🔲 Cards Grid</button>
+              <button id="admin-game-view-table-btn" onclick="window.adminSetGameView('table')" style="padding: 6px 12px; background: #141724; color: var(--text-muted); border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer;">📋 Table List</button>
+            </div>
+          </div>
+
+          <!-- Cards Grid View -->
+          <div id="admin-games-grid-view" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;"></div>
+
+          <!-- Table View -->
+          <div id="admin-games-table-view" style="display: none;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Cover</th>
+                  <th>Title & Author</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Clicks</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-games-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Suggestions -->
+        <div class="admin-tab-content" id="tab-suggestions" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3>💡 User Game & App Suggestions</h3>
+            <button class="btn-small primary" onclick="window.adminFetchSuggestions()" style="font-weight: 700;">🔄 Refresh Suggestions</button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+            Review submissions sent by community members. Click Approve to publish directly into the catalog (defaults to Action category, editable afterward) or Deny to discard.
+          </p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Suggested Title</th>
+                <th>Details / URL</th>
+                <th>Suggested By</th>
+                <th>Votes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-suggestions-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Filters -->
+        <div class="admin-tab-content" id="tab-filters" style="display: none;">
+          <h3>Content & Name Filter Rules</h3>
+          <div style="display: flex; gap: 10px; margin: 16px 0;">
+            <input type="text" id="new-filter-word" placeholder="Word or term to block..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+            <button class="btn-pill primary" id="add-filter-btn">Add Filter Rule</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Prohibited Word</th>
+                <th>Type</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-filters-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Searchable Logs -->
+        <div class="admin-tab-content" id="tab-logs" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3>Server Activity & Audit Logs</h3>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+            <input type="text" id="admin-log-search-user" placeholder="Filter by user / admin..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+            <select id="admin-log-search-action" class="proxy-select-dropdown" style="width: 220px; font-size: 0.85rem;">
+              <option value="">All Actions</option>
+              <option value="USER_LOGIN">User Logins</option>
+              <option value="BAN_USER">Bans & Suspensions</option>
+              <option value="UNBAN_USER">Unbans</option>
+              <option value="FORCE_PASSWORD_RESET">Forced Resets</option>
+              <option value="DELETE_USER">Account Deletions</option>
+              <option value="BULK_IMPORT_GAMES">Bulk Importer</option>
+              <option value="PROXY_ATTEMPT">Proxy Requests</option>
+            </select>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>User / Admin</th>
+                <th>Target</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="admin-logs-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ADMIN CONFIGURE USER PROFILE MODAL -->
+  <div class="modal-overlay" id="admin-user-profile-modal">
+    <div class="modal-card" style="max-width: 540px; max-height: 85vh; overflow-y: auto;">
+      <button class="modal-close" id="admin-user-profile-modal-close">✕</button>
+      <h2 style="color: #38bdf8; margin-bottom: 4px; font-size: 1.35rem;">🛠️ Configure Student Profile</h2>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Administer account details, display nickname, custom avatar, perks, or password for <strong id="admin-edit-target-username" style="color: #fff;"></strong>.</p>
+      
+      <form id="admin-user-profile-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="admin-edit-user-id">
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Account Role / Tier</label>
+          <select id="admin-edit-user-role" class="proxy-select-dropdown" style="width: 100%;">
+            <option value="member">👤 Student (Member)</option>
+            <option value="student_plus">🎓 Student Plus</option>
+            <option value="pro">⚡ PRO Member</option>
+            <option value="vip">⭐ VIP Member</option>
+            <option value="premium_vip">🌟 Premium VIP</option>
+            <option value="elite_patron">💎 Elite Patron</option>
+            <option value="moderator">⚔️ Moderator</option>
+            <option value="admin">🛡️ Administrator</option>
+            <option value="owner">👑 Owner / Creator</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Display Nickname</label>
+          <input type="text" id="admin-edit-user-display-name" placeholder="Display name...">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Avatar URL or Image Link</label>
+          <input type="text" id="admin-edit-user-avatar-url" placeholder="https://... or data:image/...">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Bio / Status Quote</label>
+          <input type="text" id="admin-edit-user-bio" placeholder="Bio status...">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Chat Name Glow</label>
+          <select id="admin-edit-user-glow" class="proxy-select-dropdown" style="width: 100%;">
+            <option value="gold">⚡ Golden Aura</option>
+            <option value="rainbow">🌈 Rainbow Chroma</option>
+            <option value="cyan">💎 Cyberpunk Cyan</option>
+            <option value="fire">🔥 Inferno Flame</option>
+            <option value="emerald">🍃 Matrix Emerald</option>
+            <option value="purple">🔮 Mystic Purple</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">VIP Custom Title Flair</label>
+          <input type="text" id="admin-edit-user-flair" placeholder="e.g. ⚡ VIP ELITE">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700; color: #fbbf24;">Set New Password (Optional)</label>
+          <input type="text" id="admin-edit-user-new-password" placeholder="Enter new plain password for user...">
+        </div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px; font-weight: 800; background: #38bdf8; color: #000;">💾 Save Student Profile Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN EDIT GAME MODAL -->
+  <div class="modal-overlay" id="admin-edit-game-modal">
+    <div class="modal-card" style="max-width: 580px; max-height: 85vh; overflow-y: auto;">
+      <button class="modal-close" id="admin-edit-game-modal-close">✕</button>
+      <h2 style="color: #38bdf8; margin-bottom: 4px; font-size: 1.35rem;" id="admin-game-modal-title">✏️ Edit Game Details</h2>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Configure metadata, category, cover thumbnail, and embed source code for your catalog.</p>
+      
+      <form id="admin-edit-game-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="admin-edit-game-id">
+
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <div style="width: 100px; height: 100px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid var(--card-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+            <img id="admin-edit-game-preview-img" src="" alt="Thumbnail Preview" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'">
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+            <div class="form-group">
+              <label style="font-size: 0.8rem; font-weight: 700;">Game Title</label>
+              <input type="text" id="admin-edit-game-title" placeholder="e.g. Slope 3D Runner" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.8rem; font-weight: 700;">Category</label>
+              <select id="admin-edit-game-category" class="proxy-select-dropdown" style="width: 100%;">
+                <option value="Action">Action</option>
+                <option value="Sports">Sports</option>
+                <option value="Puzzle">Puzzle</option>
+                <option value="Simulation">Simulation</option>
+                <option value="Skill">Skill</option>
+                <option value="RPG">RPG</option>
+                <option value="Sandbox">Sandbox</option>
+                <option value="Retro">Retro</option>
+                <option value="Horror">Horror</option>
+                <option value="Apps">Apps</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Thumbnail Cover Art Image URL</label>
+          <input type="url" id="admin-edit-game-thumbnail" placeholder="https://..." oninput="document.getElementById('admin-edit-game-preview-img').src = this.value">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Author / Developer</label>
+          <input type="text" id="admin-edit-game-author" placeholder="e.g. Y8 Games">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Embed Integration Type</label>
+          <select id="admin-edit-game-embed-type" class="proxy-select-dropdown" style="width: 100%;">
+            <option value="iframe_url">🌐 Direct iFrame URL Link</option>
+            <option value="builtin">📦 Built-In Nitro Arcade Engine</option>
+            <option value="html_code">💻 Raw HTML / JS Embed Code</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Embed Source Content / URL</label>
+          <textarea id="admin-edit-game-embed-content" placeholder="https://... or HTML code" style="min-height: 70px; font-family: monospace; font-size: 0.8rem;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700; color: #fbbf24;">Click Count / Plays Stat</label>
+          <input type="number" id="admin-edit-game-clicks" placeholder="0">
+        </div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px; font-weight: 800; background: #38bdf8; color: #000;">💾 Save Game Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUGGEST GAME MODAL -->
+  <div class="modal-overlay" id="suggest-modal">
+    <div class="modal-card" style="max-width: 520px;">
+      <button class="modal-close" id="suggest-modal-close">✕</button>
+      <h2 style="color: #38bdf8; margin-bottom: 8px; font-size: 1.3rem;">💡 Suggest a Game / Tool</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Have a game you want added? Send the link or name directly to the administrators.</p>
+      
+      <form id="suggest-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label>Game Title / Name</label>
+          <input type="text" id="suggest-title" required placeholder="e.g. Crossy Road Web">
+        </div>
+        <div class="form-group">
+          <label>Game Link / Embed URL / Details</label>
+          <textarea id="suggest-details" required placeholder="Paste game URL or describe how to get it..." style="min-height: 90px;"></textarea>
+        </div>
+        <button type="submit" class="btn-pill primary" style="justify-content: center; width: 100%; padding: 12px; background: #38bdf8; border-color: #38bdf8; color: #000; font-weight: 800;">Submit to Admins</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- REPORT BUG MODAL -->
+  <div class="modal-overlay" id="bug-modal">
+    <div class="modal-card" style="max-width: 520px;">
+      <button class="modal-close" id="bug-modal-close">✕</button>
+      <h2 style="color: #f43f5e; margin-bottom: 8px; font-size: 1.3rem;">🐛 Report an Issue or Bug</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Found a broken game, proxy glitch, or issue? Let administrators know immediately.</p>
+      
+      <form id="bug-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label>Bug Title / Summary</label>
+          <input type="text" id="bug-title" required placeholder="e.g. 1v1.LOL black screen on load">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="bug-category" class="proxy-select-dropdown">
+            <option value="Game Broken">Game Broken / Not Loading</option>
+            <option value="Proxy Issue">Proxy / Search Issue</option>
+            <option value="Chat Bug">Chat Issue</option>
+            <option value="UI Glitch">UI / Styling Glitch</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description & Steps</label>
+          <textarea id="bug-desc" required placeholder="Describe what happened..." style="min-height: 90px;"></textarea>
+        </div>
+        <button type="submit" class="btn-pill primary" style="justify-content: center; width: 100%; padding: 12px; background: #f43f5e; border-color: #f43f5e;">Submit Bug Report</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TERMS OF SERVICE MODAL -->
+  <div class="modal-overlay" id="tos-modal">
+    <div class="modal-card" style="max-width: 780px;">
+      <button class="modal-close" id="tos-modal-close">✕</button>
+      <h2 style="color: var(--accent-color); margin-bottom: 14px; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
+        <span>📜</span> Detailed Terms of Service & Acceptable Use Policy
+      </h2>
+      <div style="font-size: 0.88rem; line-height: 1.65; color: var(--text-muted); max-height: 480px; overflow-y: auto; padding-right: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 18px; border-radius: 12px;">
+        <h4 style="color: var(--text-main); margin: 0 0 6px; font-size: 1rem;">1. Acceptance of Terms & Eligibility</h4>
+        <p style="margin-bottom: 14px;">By accessing, registering, or utilizing NITRO (BETA), you enter into a binding agreement with the platform. If you do not agree to these terms in full, you are prohibited from using any services, web proxies, games, or community chat features.</p>
+
+        <h4 style="color: #38bdf8; margin: 14px 0 6px; font-size: 1rem;">2. User Account Security & Responsibility</h4>
+        <p style="margin-bottom: 14px;">Users are solely responsible for maintaining the confidentiality of their login credentials. Any activity originating from your account is deemed your responsibility. Sharing accounts, attempting brute-force authorization, or unauthorized rank elevation is strictly prohibited.</p>
+
+        <h4 style="color: #ef4444; margin: 14px 0 6px; font-size: 1rem;">3. Prohibited Conduct & Community Guidelines</h4>
+        <p style="margin-bottom: 14px;">Users agree not to: (a) broadcast hate speech, harassment, slurs, or explicit content; (b) attempt chat spamming or automated bot flooding; (c) impersonate platform administrators, staff, or the supreme owner; or (d) bypass automated security controls.</p>
+
+        <h4 style="color: #fbbf24; margin: 14px 0 6px; font-size: 1rem;">4. Intellectual Property & Game Embeds</h4>
+        <p style="margin-bottom: 14px;">All games, built-in canvas applications, and third-party embeds remain the intellectual property of their respective creators and publishers. NITRO provides sandboxed web embeds for educational and study break entertainment purposes only.</p>
+
+        <h4 style="color: #a855f7; margin: 14px 0 6px; font-size: 1rem;">5. Sandboxed Web Proxy Usage Disclaimer</h4>
+        <p style="margin-bottom: 14px;">The in-app web proxy relay is designed for testing web assets and discreet browsing. Utilizing the proxy to access illegal content, conduct cyber attacks, or breach network security policies is prohibited and subject to immediate IP and account bans.</p>
+
+        <h4 style="color: #10b981; margin: 14px 0 6px; font-size: 1rem;">6. Automated Content Moderation & Filter Logs</h4>
+        <p style="margin-bottom: 14px;">Automated filters continuously monitor public chat messages and username registration for policy violations. Messages violating filter lists are sanitized automatically, and repeat violations trigger automated mutes via the Raid Shield system.</p>
+
+        <h4 style="color: #f59e0b; margin: 14px 0 6px; font-size: 1rem;">7. IP Address Logging & Security Audits</h4>
+        <p style="margin-bottom: 14px;">To protect the platform against network abuse, DDoS attacks, and unauthorized proxy exploitation, client IP addresses, request headers, and user-agent metadata are logged automatically during session initialization and stored in administrative audit logs.</p>
+
+        <h4 style="color: #ec4899; margin: 14px 0 6px; font-size: 1rem;">8. VIP / PRO Tier Access & Perks</h4>
+        <p style="margin-bottom: 14px;">VIP and PRO access tiers provide advanced customization features, custom chat glows, title flairs, and unfiltered proxy routing. PRO perks are granted or revoked at the platform owner's discretion.</p>
+
+        <h4 style="color: #ef4444; margin: 14px 0 6px; font-size: 1rem;">9. Maintenance Mode & Owner Exclusive Access</h4>
+        <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be activated. When enabled, all non-owner connections (including standard admins, VIPs, and members) will be disconnected automatically, reserving exclusive system access to the platform Owner.</p>
+
+        <h4 style="color: var(--text-main); margin: 14px 0 6px; font-size: 1rem;">10. Limitation of Liability & Warranties</h4>
+        <p style="margin-bottom: 14px;">NITRO is provided "AS IS" without warranties of any kind. The platform administration assumes no liability for service interruptions, data loss, external proxied web content, or third-party game availability.</p>
+
+        <h4 style="color: #38bdf8; margin: 14px 0 6px; font-size: 1rem;">11. Copyright & DMCA Takedown Procedure</h4>
+        <p style="margin-bottom: 14px;">If you believe any content or game embedded on the platform infringes upon your copyright, please contact platform administrators with a formal takedown request containing proof of ownership for prompt removal.</p>
+
+        <h4 style="color: #10b981; margin: 14px 0 6px; font-size: 1rem;">12. Modifications to Terms & Contact Details</h4>
+        <p style="margin-bottom: 0;">The administration reserves the right to amend these Terms of Service at any time. Continued use of the platform following updates constitutes acceptance of the modified policy terms.</p>
+      </div>
+      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 18px; padding: 12px; font-weight: 800;">I Have Read & Agree to All Terms</button>
+    </div>
+  </div>
+
+  <!-- GAME PLAYER MODAL -->
+  <div class="modal-overlay" id="player-modal">
+    <div class="modal-card player-modal-card">
+      <div class="player-top-bar">
+        <div class="player-title-info">
+          <span style="font-size: 1.2rem;">🎮</span>
+          <strong id="player-game-title">Game Title</strong>
+          <span class="game-badge-vip" id="player-vip-badge" style="display: none; position: static; background: linear-gradient(135deg, #f59e0b, #d97706);">PRO</span>
+        </div>
+        <div class="player-actions">
+          <button class="btn-pill" id="player-cloud-save-btn" title="Back up game progress to account">☁️ Backup Save</button>
+          <button class="btn-pill" id="player-cloud-restore-btn" title="Restore previous cloud save">📥 Restore Save</button>
+          <button class="btn-pill" id="player-about-blank-btn" style="color: #fbbf24;" title="Launch item in about:blank cloaked tab">🚀 about:blank</button>
+          <button class="btn-pill" id="player-reload-btn">🔄 Reload</button>
+          <button class="btn-pill" id="player-fullscreen-btn">⛶ Fullscreen</button>
+          <button class="btn-pill" id="player-close-btn" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;">✕ Close</button>
+        </div>
+      </div>
+      <div class="player-frame-container" id="player-frame-wrapper"></div>
+    </div>
+  </div>
+
+  <!-- AUTHENTICATION MODAL -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="auth-modal-close">✕</button>
+      <div id="auth-logged-in-view" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+          <div id="auth-modal-avatar-preview" style="width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 2px solid var(--accent-color);">👤</div>
+          <div>
+            <strong id="auth-current-username" style="font-size: 1.2rem; display: block; color: #fff;">user</strong>
+            <span class="chat-badge" id="auth-current-role">MEMBER</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <button class="btn-pill primary" id="auth-edit-profile-btn" style="flex: 1; justify-content: center;">✏️ Edit Profile</button>
+          <button class="btn-pill" id="auth-logout-btn" style="flex: 1; justify-content: center; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444;">Log Out</button>
+        </div>
+      </div>
+
+      <div id="auth-form-view">
+        <h2 style="color: var(--accent-color); margin-bottom: 8px;" id="auth-form-title">Sign In to Study Helper</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;" id="auth-form-sub">Access your personal workspace and catalog tools.</p>
+        
+        <form id="auth-form" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label>Username / Student ID</label>
+            <input type="text" id="auth-username" required placeholder="Enter username...">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="auth-password" required placeholder="Enter password...">
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="modal-remember-me" checked style="accent-color: var(--accent-color); width: 16px; height: 16px;">
+            <label for="modal-remember-me" style="font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">Remember me on this device</label>
+          </div>
+          <div id="auth-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none;"></div>
+          <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px;" id="auth-submit-btn">Sign In</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-muted);">
+        <div style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--text-muted);">
+          <span id="auth-toggle-text">Don't have an account?</span>
+          <a href="#" id="auth-toggle-link" style="color: var(--accent-color); font-weight: 700; text-decoration: none; margin-left: 4px;">Register</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYER ACHIEVEMENTS & UNLOCKED BADGES SHOWCASE MODAL -->
+  <div class="modal-overlay" id="badges-modal">
+    <div class="modal-card" style="max-width: 680px;">
+      <button class="modal-close" id="badges-modal-close">✕</button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+        <span style="font-size: 2rem;">🏆</span>
+        <div>
+          <h2 style="color: #fbbf24; margin: 0; font-size: 1.4rem;">ACHIEVEMENTS & BADGES SHOWCASE</h2>
+          <p style="color: var(--text-muted); font-size: 0.84rem; margin: 2px 0 0;">Unlock exclusive profile badges by completing in-game milestones & secret easter eggs.</p>
+        </div>
+      </div>
+      <div class="badges-showcase-grid" id="badges-showcase-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; max-height: 440px; overflow-y: auto; padding-right: 4px;"></div>
+    </div>
+  </div>
+
+  <!-- STUDY MODE TIMER & SOUNDS MODAL -->
+  <div class="modal-overlay" id="study-timer-modal">
+    <div class="modal-card" style="max-width: 480px;">
+      <button class="modal-close" id="study-timer-modal-close">✕</button>
+      <h2 style="color: #ef4444; margin-bottom: 8px; font-size: 1.3rem;">⏱️ Study Focus Mode</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Stay productive! Run a Pomodoro timer and listen to ambient background sounds to focus.</p>
+      
+      <!-- Pomodoro Timer Area -->
+      <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.06);">
+        <div id="study-timer-display" style="font-size: 3rem; font-weight: 800; font-family: monospace; color: #fff; margin-bottom: 14px;">25:00</div>
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <button class="btn-pill" id="study-timer-start" style="background: #10b981; color: #000; font-weight: 700; border: none; cursor: pointer; padding: 10px 20px;">Start</button>
+          <button class="btn-pill" id="study-timer-pause" style="background: #f59e0b; color: #000; font-weight: 700; border: none; cursor: pointer; padding: 10px 20px;">Pause</button>
+          <button class="btn-pill danger" id="study-timer-reset" style="font-weight: 700; border: none; cursor: pointer; padding: 10px 20px;">Reset</button>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px;">
+          <button class="btn-small" onclick="window.setStudyDuration(25)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; cursor: pointer; padding: 6px 12px; border-radius: 4px;">Work (25m)</button>
+          <button class="btn-small" onclick="window.setStudyDuration(5)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; cursor: pointer; padding: 6px 12px; border-radius: 4px;">Short Break (5m)</button>
+          <button class="btn-small" onclick="window.setStudyDuration(15)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; cursor: pointer; padding: 6px 12px; border-radius: 4px;">Long Break (15m)</button>
+        </div>
+      </div>
+
+      <!-- Ambient Sound Loops -->
+      <div>
+        <h4 style="color: #38bdf8; margin: 0 0 10px; font-size: 0.95rem;">🎵 Ambient Focus Audio</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="font-size: 0.9rem;">🌧️ Rainstorm Ambient Loop</span>
+            <button class="btn-small" id="ambient-play-rain" onclick="window.toggleAmbient('rain')" style="background: #1e293b; font-size: 0.75rem; border: none; color: #fff; padding: 4px 10px; cursor: pointer; border-radius: 4px;">Play</button>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="font-size: 0.9rem;">🎧 Ambient Lofi Piano Loop</span>
+            <button class="btn-small" id="ambient-play-lofi" onclick="window.toggleAmbient('lofi')" style="background: #1e293b; font-size: 0.75rem; border: none; color: #fff; padding: 4px 10px; cursor: pointer; border-radius: 4px;">Play</button>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="font-size: 0.9rem;">🌊 Deep Ocean Waves Loop</span>
+            <button class="btn-small" id="ambient-play-waves" onclick="window.toggleAmbient('waves')" style="background: #1e293b; font-size: 0.75rem; border: none; color: #fff; padding: 4px 10px; cursor: pointer; border-radius: 4px;">Play</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Short Break Arcade -->
+      <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+        <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">🕹️ Short Break Arcade</h4>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-small" onclick="window.startMiniGame('snake')" style="flex: 1; background: #1e293b; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px;">🐍 Snake</button>
+          <button class="btn-small" onclick="window.startMiniGame('ttt')" style="flex: 1; background: #1e293b; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px;">❌ Tic-Tac-Toe</button>
+        </div>
+        
+        <div id="mini-arcade-container" style="display: none; margin-top: 14px; background: #141724; border: 1px solid var(--card-border); border-radius: 8px; padding: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong id="mini-game-title" style="color: #fff; font-size: 0.85rem;">Snake</strong>
+            <button class="btn-small" onclick="window.closeMiniGame()" style="background: rgba(239,68,68,0.2); border-color:#ef4444; color:#ef4444; font-size:0.7rem; padding: 2px 6px; cursor: pointer;">Close</button>
+          </div>
+          <div id="mini-game-frame" style="display: flex; justify-content: center; align-items: center;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLIC PLAYER PROFILE & BADGES CARD MODAL -->
+  <div class="modal-overlay" id="public-profile-modal">
+    <div class="modal-card" style="max-width: 580px; text-align: left;">
+      <button class="modal-close" id="public-profile-modal-close">✕</button>
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+        <div id="pub-profile-avatar" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; background: linear-gradient(135deg, #38bdf8, #6366f1); border: 2px solid var(--accent-color);">👤</div>
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <strong id="pub-profile-name" style="font-size: 1.3rem; color: #fff;">Student</strong>
+            <span id="pub-profile-role-badge" class="chat-badge owner">MEMBER</span>
+            <span id="pub-profile-flair-badge"></span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="pub-profile-handle">@student</div>
+          <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 4px; font-style: italic;" id="pub-profile-bio">No bio set.</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+          <span>🏆 Unlocked Player Badges</span>
+          <span id="pub-profile-badge-count" style="font-size: 0.75rem; background: rgba(251,191,36,0.2); color: #fbbf24; padding: 2px 8px; border-radius: 10px;">3 Unlocked</span>
+        </h4>
+        <div id="pub-profile-badges-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 240px; overflow-y: auto;"></div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <button class="btn-pill primary" id="pub-profile-dm-btn" style="flex: 1; justify-content: center;">💬 Send Direct Message</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

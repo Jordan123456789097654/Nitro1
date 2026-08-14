@@ -1,0 +1,22 @@
+import { getCurrentUser, showBannedScreen } from './auth.js';
+
+// Singleton Shared Socket.io Instance for all views & modules
+let sharedSocket = null;
+
+export function getSharedSocket() {
+  if (!sharedSocket && typeof io !== 'undefined') {
+    sharedSocket = io({
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 10,
+      timeout: 10000
+    });
+
+    sharedSocket.on('user_banned_event', (data) => {
+      const user = getCurrentUser();
+      if (user && (user.id == data.userId || user.username === data.username)) {
+        showBannedScreen(data.reason || 'Your account has been permanently suspended by an administrator.');
+      }
+    });
+  }
+  return sharedSocket;
+}

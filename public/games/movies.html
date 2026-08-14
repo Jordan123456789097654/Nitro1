@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Comic Relief Corner - Movies</title>
+<link rel="stylesheet" href="https://cloudflare.com">
+<link rel="stylesheet" href="style.css?v=unified_spacing">
+<script defer src="load.js"></script>
+</head>
+<body>
+<!-- SIDEBAR-->
+<div id="sidebar-container"></div>
+<!-- HEADER-->
+<div id="header-container"></div>
+<!--MAIN SECTION-->
+<div class="main">
+<div class="hero">
+<h1>Movies</h1>
+<p>Grab your popcorn!</p>
+</div>
+<!-- FEATURED WIDESCREEN CINEMA BOX -->
+<div class="featured-theater-block">
+<div class="theater-display-screen">
+<img src="coraline.jpeg" alt="Now Screening Feature" class="theater-img">
+</div>
+<div class="theater-display-details">
+<span class="trending-badge">Host's Favorite</span>
+<h2>Coraline</h2>
+<p>Coraline is a masterfully-made claymation film about being careful what you wish for
+"Because when you're scared but you still do it anyway, that's brave"</p>
+<a href="watch.html?title=CORALINE&file=https://archive.org" class="watch-nowbtn">Watch now</a>
+</div>
+</div>
+<!-- SEARCH & MOVIE CATEGORY BAR -->
+<div class="theater-filter-bar">
+<input type="text" placeholder="Search movies..." class="movie-search-input">
+<div class="movie-category-pills">
+<span class="movie-pill active">All</span>
+<span class="movie-pill">Comedy</span>
+<span class="movie-pill">Animation</span>
+<span class="movie-pill">Action</span>
+<span class="movie-pill">Sci-Fi</span>
+<span class="movie-pill">Horror</span>
+</div>
+</div>
+<!-- AUTOMATED 6-COLUMN POSTER GRID -->
+<div class="movie-poster-grid">
+<!-- CARD 1: BOSS BABY -->
+<a href="watch.html?title=BOSS BABY&file=https://archive.org" class="poster-card">
+<img src="bossbaby.jpeg" alt="Boss Baby">
+<div class="poster-info">
+<h3>Boss Baby</h3>
+</div>
+</a>
+<!-- CARD 2: SONIC THE HEDGEHOG 3 (UPDATED FILE ID) -->
+<a href="watch.html?title=Sonic the Hedgehog 3&file=https://google.com" class="poster-card">
+<img src="sonic3.jpeg" alt="Sonic the Hedgehog 3">
+<div class="poster-info">
+<h3>Sonic the Hedgehog 3</h3>
+</div>
+</a>
+<!-- CARD 3: DUNE PART 1 -->
+<a href="watch.html?title=DUNE PART 1&file=https://archive.org" class="poster-card">
+<img src="dune1.jpeg" alt="Dune Part 1">
+<div class="poster-info">
+<h3>Dune Part 1</h3>
+</div>
+</a>
+<!-- CARD 4: DUNE PART 2 -->
+<a href="watch.html?title=DUNE PART 2&file=https://archive.org" class="poster-card">
+<img src="dune2.jpeg" alt="Dune Part 2">
+<div class="poster-info">
+<h3>Dune Part 2</h3>
+</div>
+</a>
+<!-- CARD 5: FINDING NEMO -->
+<a href="watch.html?title=FINDING NEMO&file=https://archive.org" class="poster-card">
+<img src="findingnemo.jpeg" alt="Finding Nemo">
+<div class="poster-info">
+<h3>Finding Nemo</h3>
+</div>
+</a>
+<!-- CARD 6: CORALINE -->
+<a href="watch.html?title=CORALINE&file=https://archive.org" class="poster-card">
+<img src="swapped.png" alt="Coraline">
+<div class="poster-info">
+<h3>Coraline</h3>
+</div>
+</a>
+<!-- CARD 7: BACKROOMS -->
+<a href="watch.html?title=BACKROOMS&file=https://archive.org" class="poster-card">
+<img src="posters/backrooms.png" alt="Backrooms">
+<div class="poster-info">
+<h3>Backrooms</h3>
+</div>
+</a>
+<!-- CARD 8: WHIPLASH -->
+<a href="watch.html?title=WHIPLASH&file=https://archive.org" class="poster-card">
+<img src="posters/whiplash.png" alt="Whiplash">
+<div class="poster-info">
+<h3>Whiplash</h3>
+</div>
+</a>
+<!-- CARD 9: AGGRETSUKO -->
+<a href="watch.html?title=AGGRETSUKO&file=https://archive.org" class="poster-card">
+<img src="posters/aggretsuko.png" alt="Aggretsuko">
+<div class="poster-info">
+<h3>Aggretsuko</h3>
+</div>
+</a>
+<!-- CARD 10: SPIDER-MAN: FAR FROM HOME -->
+<a href="watch.html?title=SPIDER-MAN: FAR FROM HOME&file=https://archive.org" class="poster-card">
+<img src="posters/spiderman.png" alt="Spider-Man: Far From Home">
+<div class="poster-info">
+<h3>Spider-Man: Far From Home</h3>
+</div>
+</a>
+<!-- CARD 11: MICHAEL -->
+<a href="watch.html?title=MICHAEL&file=https://archive.org" class="poster-card">
+<img src="posters/michael.png" alt="Michael">
+<div class="poster-info">
+<h3>Michael</h3>
+</div>
+</a>
+<!-- CARD 12: THE MATRIX REBOOT -->
+<a href="watch.html?title=THE MATRIX REBOOT&file=https://archive.org" class="poster-card">
+<img src="posters/matrix.png" alt="The Matrix Reboot">
+<div class="poster-info">
+<h3>The Matrix Reboot</h3>
+</div>
+</a>
+</div>
+</div>
+<!-- DYNAMIC MODAL OVERLAY PLAYER SYSTEM (SAME-TAB INTERCEPTOR) -->
+<div id="movie-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 5, 9, 0.85); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center;">
+<div style="background: #1f121b; border: 1px solid rgba(255, 105, 180, 0.25); border-radius: 20px; padding: 25px; width: 90%; max-width: 850px; position: relative; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);">
+<!-- X Close Button -->
+<button id="close-modal-btn" style="position: absolute; top: 15px; left: 20px; background: transparent; border: none; color: #ff69b4; font-size: 2rem; font-weight: bold; cursor: pointer; padding: 0; line-height: 1; z-index: 11000;">✕</button>
+<!-- Movie Header Title Block -->
+<div class="hero" style="padding: 0 0 15px 40px;">
+<h1 id="dynamic-title" style="font-size: 24px; text-shadow: 0 0 3px #ff69b4, 0 0 8px rgba(255,105,180,.7); margin: 0;">Loading Video...</h1>
+</div>
+<!-- DYNAMIC VIEWPORT CONTAINER -->
+<div class="movie-player-wrapper" style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+<iframe id="dynamic-player" allow="autoplay; fullscreen" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000;">
+</iframe>
+</div>
+</div>
+</div>
+<!-- SCRIPT ENGINE: INTERCEPTS CLICKS AND CHECKS FILE TYPES -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+const modal = document.getElementById("movie-modal");
+const titleElement = document.getElementById("dynamic-title");
+const player = document.getElementById("dynamic-player"); 
+const closeBtn = document.getElementById("close-modal-btn");
+const movieLinks = document.querySelectorAll(".watch-now-btn, .poster-card");
+movieLinks.forEach(link => {
+link.addEventListener("click", function(e) {
+e.preventDefault(); 
+const hrefAttr = this.getAttribute("href");
+if (hrefAttr && hrefAttr.includes("watch.html")) {
+const urlData = new URLSearchParams(hrefAttr.substring(hrefAttr.indexOf('?')));
+const movieTitle = urlData.get('title');
+let movieFileUrl = urlData.get('file');
+if (movieTitle) {
+titleElement.innerText = "Now Playing: " + movieTitle;
+}
+if (movieFileUrl && movieFileUrl !== "PASTE_LINK_HERE") {
+// CASE 1: ARCHIVE.ORG HANDLING
+if (movieFileUrl.includes("archive.org")) {
+player.removeAttribute("srcdoc");
+let identifier = "";
+if (movieFileUrl.includes("/details/")) {
+identifier = movieFileUrl.split("/details/")[1].split(/[?#]/)[0];
+} else if (movieFileUrl.includes("/download/")) {
+identifier = movieFileUrl.split("/download/")[1].split("/")[0];
+} else if (movieFileUrl.includes("/embed/")) {
+identifier = movieFileUrl.split("/embed/")[1].split(/[?#]/)[0];
+} else {
+identifier = movieFileUrl.split('/').filter(Boolean).pop();
+}
+if (identifier) {
+player.src = "https://archive.org" + identifier;
+}
+// CASE 2: GOOGLE DRIVE PREVIEW VIEWPORT (Bypasses 100MB Direct Video Crash)
+} else if (movieFileUrl.includes("://google.com")) {
+player.removeAttribute("srcdoc");
+let fileIdMatch = movieFileUrl.match(/\/d\/([a-zA-Z0-9-_]+)/) || movieFileUrl.match(/id=([a-zA-Z0-9-_]+)/);
+if (fileIdMatch && fileIdMatch[1]) {
+let driveFileId = fileIdMatch[1];
+// Automatically routes large movie file IDs cleanly into Google's native iframe web player frame template
+player.src = "https://google.com" + driveFileId + "/preview";
+} else {
+titleElement.innerText = "Invalid Google Drive Link Format.";
+}
+// CASE 3: ALL OTHER WEB EXTENSIONS / DIRECT LINKS
+} else {
+player.removeAttribute("src");
+const lowUrl = movieFileUrl.toLowerCase();
+if (lowUrl.includes(".mp4") || lowUrl.includes(".mkv") || lowUrl.includes(".webm") || lowUrl.includes(".mov")) {
+const inlineStreamHTML = `
+<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:0; background:#000; overflow:hidden; display:flex; align-items:center; justify-content:center; height:100vh;">
+<video controls autoplay style="max-width:100%; max-height:100%; width:100%; height:auto;">
+<source src="${movieFileUrl}" type="video/mp4">
+Your browser does not support direct streaming containers.
+</video>
+</body>
+</html>`;
+player.srcdoc = inlineStreamHTML;
+} else {
+player.removeAttribute("srcdoc");
+player.src = movieFileUrl;
+}
+}
+} else {
+titleElement.innerText = "No video link provided.";
+}
+modal.style.display = "flex";
+document.body.style.overflow = "hidden"; 
+}
+});
+});
+function closeModalWindow() {
+modal.style.display = "none";
+document.body.style.overflow = "auto"; 
+player.removeAttribute("srcdoc");
+player.src = ""; 
+}
+closeBtn.addEventListener("click", closeModalWindow);
+modal.addEventListener("click", function(e) {
+if (e.target === modal) {
+closeModalWindow();
+}
+});
+});
+</script>

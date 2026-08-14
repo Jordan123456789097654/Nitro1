@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="tab-title">Gohan's Tutoring | Unblocked Games</title>
+    <link id="tab-icon" rel="icon" type="image/png" href="Favicon.png">
+    <style>
+        :root { --primary: #bec2cb; --bg: #0b0c10; --accent: #1f2833; --bg-opacity: 0.25; }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+        body, html { margin: 0; padding: 0; background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; cursor: none !important; overflow-x: hidden; }
+        
+        /* BACKGROUND & CURSOR */
+        #bg-canvas { position: fixed; inset: 0; z-index: 1; opacity: var(--bg-opacity); pointer-events: none; transition: opacity 0.3s; }
+        #custom-cursor { width: 10px; height: 10px; background: #fff; border-radius: 50%; position: fixed; pointer-events: none; z-index: 1000000; box-shadow: 0 0 15px #fff; transform: translate(-50%, -50%); transition: transform 0.1s ease-out; }
+        .cursor-hover { transform: translate(-50%, -50%) scale(3.5) !important; background: rgba(255,255,255,0.2) !important; }
+
+        /* SETTINGS HUB - Fixed Cursor */
+        #settings-hub { display: none; position: fixed; top: 20px; right: 20px; background: rgba(31, 40, 51, 0.98); border: 1px solid var(--primary); border-radius: 15px; z-index: 100001; padding: 20px; width: 220px; box-shadow: 0 0 30px rgba(0,0,0,0.9); backdrop-filter: blur(15px); cursor: none !important; }
+        #settings-hub *, #settings-hub input, #settings-hub select { cursor: none !important; }
+        
+        .setting-item { margin-bottom: 15px; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; color: var(--primary); }
+        .setting-item select, .setting-item input { width: 100%; margin-top: 8px; background: #000; border: 1px solid #444; color: #fff; padding: 5px; outline: none; }
+        
+        .hub-toggle { position: fixed; top: 20px; right: 20px; z-index: 100002; background: var(--accent); border: 1px solid var(--primary); color: #fff; padding: 12px; border-radius: 50%; cursor: none !important; font-size: 1.2rem; line-height: 1; transition: 0.3s; }
+        .hub-toggle:hover { background: var(--primary); color: #000; }
+
+        /* INTRO */
+        #intro-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s; }
+        .intro-text { font-size: clamp(2rem, 8vw, 4rem); font-weight: bold; display: flex; gap: 15px; }
+        .slide-gohan { color: #fff; transform: translateX(-100vw); animation: slideIn 0.8s forwards; }
+        .slide-tutoring { color: var(--primary); transform: translateX(100vw); animation: slideIn 0.8s 0.2s forwards; }
+        @keyframes slideIn { to { transform: translateX(0); } }
+
+        /* CONTENT */
+        .content-layer { position: relative; z-index: 10; display: none; opacity: 0; transition: opacity 1.2s; text-align: center; width: 100%; min-height: 100vh; overflow-y: auto; padding-bottom: 80px; }
+        .logo-container img { width: 600px; max-width: 90%; margin-top: 8vh; }
+        #typeLine { color: var(--primary); font-family: monospace; font-size: 1.1rem; height: 40px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        #gameSearch { width: 85%; max-width: 550px; padding: 18px 30px; background: rgba(31, 40, 51, 0.9); color: #fff; border: 2px solid var(--primary); border-radius: 40px; outline: none; font-size: 1.1rem; margin-bottom: 40px; cursor: none !important; }
+
+        <!-- YOUR ORIGINAL GRID CODE -->
+<style>
+    .game-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+        gap: 20px; 
+        max-width: 1400px; 
+        margin: 0 auto; 
+        padding: 0 20px; 
+    }
+    .game-box { 
+        background: rgba(31, 40, 51, 0.7); 
+        border-radius: 12px; 
+        overflow: hidden; 
+        border: 1px solid rgba(190, 194, 203, 0.2); 
+        text-decoration: none; 
+        color: #fff; 
+        transition: 0.3s; 
+        cursor: none !important; 
+    }
+    .game-box:hover { 
+        transform: translateY(-8px); 
+        border-color: var(--primary); 
+    }
+    .thumbnail { 
+        width: 100%; 
+        height: 140px; 
+        background: #111; 
+    }
+    .game-name { 
+        padding: 15px; 
+        font-weight: bold; 
+        font-size: 0.8rem; 
+        text-transform: uppercase; 
+    }
+</style>
+
+<!-- YOUR GRID + 100 LINES -->
+ <!-- YOUR ORIGINAL GRID CODE -->
+<style>
+    .game-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+        gap: 20px; 
+        max-width: 1400px; 
+        margin: 0 auto; 
+
+        </div>
+        <p style="color:#555; margin-top:20px; font-family:monospace;">[ CLICK TO BYPASS ]</p>
+    </div>
+
+    <div class="content-layer" id="main-site">
+        <div class="logo-container">
+            <img src="logoo.png" alt="Logo" onerror="this.src='https://placeholder.com'">
+            <div id="typeLine"></div>
+        </div>
+        <input type="text" id="gameSearch" placeholder="SEARCH DATABASE..." autocomplete="off">
+        <div class="game-grid" id="grid">
+            <a href="javascript:void(0)" onclick="pickRandom()" class="game-box" style="background:var(--primary);color:#000;"><div style="height:140px;display:flex;align-items:center;justify-content:center;font-size:3rem;">?</div><div class="game-name">Random Game</div></a>
+            <script>for(let i=1;i<=100;i++){document.write(`<a href="javascript:void(0)" onclick="playGame('game${i}.html')" class="game-box"><div class="thumbnail"></div><div class="game-name">Game ${i}</div></a>`)}</script>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bg-canvas'), ctx = canvas.getContext('2d');
+        const cursor = document.getElementById('custom-cursor');
+        let w = canvas.width = window.innerWidth, h = canvas.height = window.innerHeight;
+        let bgType = 'matrix', activeUrl = "";
+
+        // Matrix
+        let cols = Math.floor(w/20), drops = Array(cols).fill(1);
+        // Constellations
+        let particles = [];
+        class Particle {
+            constructor() { this.x = Math.random()*w; this.y = Math.random()*h; this.vx = Math.random()*1.5-0.75; this.vy = Math.random()*1.5-0.75; }
+            update() { this.x += this.vx; this.y += this.vy; if(this.x<0||this.x>w) this.vx*=-1; if(this.y<0||this.y>h) this.vy*=-1; }
+        }
+        for(let i=0; i<80; i++) particles.push(new Particle());
+
+        function animate() {
+            if(bgType === 'matrix') {
+                ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,w,h);
+                ctx.fillStyle = '#bec2cb'; ctx.font = '15px monospace';
+                drops.forEach((y, i) => {
+                    ctx.fillText(String.fromCharCode(33+Math.random()*94), i*20, y*20);
+                    if(y*20 > h && Math.random() > 0.975) drops[i] = 0; drops[i]++;
+                });
+            } else {
+                ctx.clearRect(0,0,w,h); ctx.fillStyle = '#fff'; ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                particles.forEach(p => {
+                    p.update(); ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill();
+                    particles.forEach(p2 => {
+                        let d = Math.hypot(p.x-p2.x, p.y-p2.y);
+                        if(d<110) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
+                    });
+                });
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.onresize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; cols = Math.floor(w/20); drops = Array(cols).fill(1); };
+        document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
+
+        function initialize() {
+            const intro = document.getElementById('intro-overlay');
+            if (intro.style.display === 'none') return;
+            intro.style.opacity = '0';
+            setTimeout(() => { intro.style.display = 'none'; document.getElementById('main-site').style.display = 'block'; setTimeout(() => document.getElementById('main-site').style.opacity = '1', 50); startRotation(); }, 800);
+        }
+
+        const texts = ['Best "Tutoring"', 'Gohan is awesome', 'life is hard but I\'m harder', 'I recommend you to click Panic when the teacher sits down with his laptop', 'Do your Iready'];
+        let tIdx = 0;
+        function startRotation() { document.getElementById('typeLine').innerText = texts[tIdx]; tIdx = (tIdx + 1) % texts.length; setTimeout(startRotation, 6000); }
+
+        document.getElementById('gameSearch').onkeyup = function() {
+            let v = this.value.toLowerCase();
+            document.querySelectorAll('.game-box').forEach(b => b.style.display = b.innerText.toLowerCase().includes(v) ? "block" : "none");
+        };
+
+        function playGame(u) { activeUrl = u; document.getElementById('game-frame').src = u; document.getElementById('game-overlay').style.display = 'block'; document.body.style.overflow = "hidden"; }
+        function closeGame() { document.getElementById('game-overlay').style.display = 'none'; document.getElementById('game-frame').src = ""; document.body.style.overflow = "auto"; }
+        function openExternal() {
+            const win = window.open('about:blank', '_blank');
+            if (win) { win.document.title = "Google"; const ifr = win.document.createElement('iframe'); ifr.src = window.location.origin + '/' + activeUrl; ifr.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;border:none;"; win.document.body.style.margin = "0"; win.document.body.appendChild(ifr); }
+        }
+
+        function toggleSettings() { 
+            const s = document.getElementById('settings-hub'); 
+            const b = document.getElementById('sett-btn');
+            const isOpen = s.style.display === 'block';
+            s.style.display = isOpen ? 'none' : 'block'; 
+            b.innerText = isOpen ? '⚙️' : '✕';
+        }
+
+        function changeBG(v) { bgType = v; ctx.clearRect(0,0,w,h); }
+        function changeDim(v) { document.documentElement.style.setProperty('--bg-opacity', v/100); }
+        function changeCursorColor(v) { cursor.style.background = v; cursor.style.boxShadow = `0 0 15px ${v}`; }
+        function panic() { window.location.href = 'https://i-ready.com'; }
+        function pickRandom() { const n = Math.floor(Math.random()*100)+1; playGame(`game${n}.html`); }
+        
+        document.onkeydown = (e) => { if(e.key === "Escape") panic(); };
+
+        // Global Hover Logic
+        document.addEventListener('mouseover', e => { 
+            if(['A','BUTTON','INPUT','SELECT'].includes(e.target.tagName)) cursor.classList.add('cursor-hover'); 
+        });
+        document.addEventListener('mouseout', e => { 
+            if(['A','BUTTON','INPUT','SELECT'].includes(e.target.tagName)) cursor.classList.remove('cursor-hover'); 
+        });
+    </script>
+</body>
+</html>

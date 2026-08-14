@@ -1,0 +1,178 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>The Comic Relief Corner - Chatroom</title> 
+    
+    <!-- Font Awesome --> 
+    <link rel="stylesheet" href="https://cloudflare.com"> 
+    
+    <!-- Your CSS (Unified Spacing Architecture) --> 
+    <link rel="stylesheet" href="style.css?v=unified_spacing"> 
+    
+    <!-- Loader Script (Dynamically pulls from header.html & sidebar.html) --> 
+    <script defer src="load.js"></script>
+
+    <!-- Include Supabase Core Database SDK Framework Client Package -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* Extra custom styling to align the chat element cleanly within your .main canvas workspace */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            background: #1f121b; /* Matches your core UI panel background */
+            border: 1px solid rgba(255, 105, 180, 0.15); /* System signature pink glow frame */
+            border-radius: 20px;
+            padding: 25px;
+            box-sizing: border-box;
+            height: 550px;
+            width: 100%;
+            max-width: 700px;
+            margin: 25px auto 0 auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .chat-header h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 3px #ff69b4, 0 0 8px rgba(255, 105, 180, 0.7); /* Signature website glow */
+        }
+
+        .messages-window {
+            flex: 1;
+            background: #0a0509; /* Deep inner backdrop match */
+            border: 1px solid rgba(255, 105, 180, 0.1);
+            border-radius: 14px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Webkit Scrollbar overrides matching your system aesthetic guidelines */
+        .messages-window::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-window::-webkit-scrollbar-thumb {
+            background: #ff69b4;
+            border-radius: 10px;
+        }
+
+        .chat-bubble {
+            color: #e7e7e7;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .chat-meta {
+            font-size: 0.75rem;
+            color: #ff69b4;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 6px;
+        }
+
+        .chat-timestamp {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .chat-input-bar {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #120910;
+            border: 1px solid rgba(255, 105, 180, 0.2);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #ff69b4;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.2);
+        }
+
+        .chat-send-btn {
+            background: transparent;
+            border: 1px solid #ff69b4;
+            color: #ff69b4;
+            padding: 0 22px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .chat-send-btn:hover {
+            background: #ff69b4;
+            color: #120910;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
+        }
+    </style>
+</head> 
+<body> 
+    
+    <!-- AUTOMATIC SIDEBAR INJECTION POINT (Pulls straight from sidebar.html) --> 
+    <div id="sidebar-container"></div> 
+    
+    <!-- AUTOMATIC HEADER INJECTION POINT (Pulls straight from header.html) --> 
+    <div id="header-container"></div> 
+    
+    <!-- MAIN WORKSPACE LAYER --> 
+    <div class="main"> 
+        <div class="hero"> 
+            <h1>Live Transmission Hub</h1> 
+            <p>Connect with other operators inside the room.</p> 
+        </div> 
+
+        <!-- 1. NEON LOG IN & SIGN UP INTERFACE GATEWAY -->
+        <div id="auth-container" class="chat-container">
+            <div class="chat-header">
+                <h2 id="auth-title">System Access</h2>
+            </div>
+            <form id="auth-form" class="chat-input-bar" style="flex-direction: column; gap: 15px;">
+                <input type="email" id="auth-email" class="chat-input" placeholder="Enter Secure Email Address..." required>
+                <input type="password" id="auth-password" class="chat-input" placeholder="Enter Key Password..." minlength="6" required>
+                
+                <div style="display: flex; gap: 12px; width: 100%;">
+                    <button type="submit" id="login-btn" class="chat-send-btn" style="flex: 1; height: 45px;">LOG IN</button>
+                    <button type="button" id="signup-btn" class="chat-send-btn" style="flex: 1; height: 45px; border-color: #00bfff; color: #00bfff;">REGISTER</button>
+                </div>
+                <p id="auth-error" style="color: #ff4500; font-size: 0.85rem; margin: 5px 0 0 0; display: none;"></p>
+            </form>
+        </div>
+
+        <!-- 2. SECURE CHAT INTERFACE (Hidden dynamically until logged in) -->
+        <div id="secure-chat-container" class="chat-container" style="display: none;">
+            <div class="chat-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <h2 style="margin: 0;">Chat Lobby</h2>
+                <button id="logout-btn" class="chat-send-btn" style="padding: 4px 12px; font-size: 0.8rem; border-color: #aaa; color: #aaa;">DISCONNECT</button>
+            </div>
+            <div class="messages-window" id="chat-window">
+                <!-- Database transmissions stream here -->
+            </div>
+            <form class="chat-input-bar" id="chat-form">
+                <input type="text" id="chat-msg" class="chat-input" placeholder="Type an encrypted transmission..." autocomplete="off" required>
+                <button type="submit" class="chat-send-btn">SEND</button>
+            </form>
+        </div>
+    </div> 
