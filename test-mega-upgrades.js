@@ -4,7 +4,7 @@ const http = require('http');
 const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
-function request(method, path, body = null, headers = {}) {
+function request(method, path, body = null, headers = {}) { 
   return new Promise((resolve, reject) => {
     const url = new URL(path, BASE_URL);
     const options = {
