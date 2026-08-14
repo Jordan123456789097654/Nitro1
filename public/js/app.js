@@ -404,8 +404,23 @@ export async function checkStatusAndAnnouncements() {
     } else {
       annBanner.style.display = 'none';
     }
-  } catch (e) {}
 }
+
+window.setDisguisePreset = function(presetKey) {
+  const PRESETS = {
+    classroom: { title: 'Classes', icon: FAVICON_MAP.classroom },
+    canvas: { title: 'Dashboard', icon: FAVICON_MAP.canvas },
+    docs: { title: 'Untitled document - Google Docs', icon: FAVICON_MAP.docs },
+    desmos: { title: 'Desmos | Graphing Calculator', icon: FAVICON_MAP.desmos },
+    khan: { title: 'Dashboard | Khan Academy', icon: FAVICON_MAP.khan },
+    drive: { title: 'Google Drive - My Drive', icon: FAVICON_MAP.drive },
+    reset: { title: 'Nitro OS | Gaming & Unblocked Apps', icon: FAVICON_MAP.default }
+  };
+  const config = PRESETS[presetKey] || PRESETS.reset;
+  document.title = config.title;
+  applyFavicon(config.icon);
+  localStorage.setItem('nitro_custom_title', config.title);
+};
 
 // Panic Key & Emergency Quick Redirect Engine
 function initPanicKeySystem() {
