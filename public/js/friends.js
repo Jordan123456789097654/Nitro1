@@ -1,4 +1,4 @@
-import { getCurrentUser } from './auth.js');
+import { getCurrentUser } from './auth.js';
 
 export function initFriends() {
   setupFriendsUI();
@@ -6,8 +6,8 @@ export function initFriends() {
 }
 
 export async function fetchFriends() {
-  const acceptedList = document.getElementById('fviends-accepted-list');
-  const pendingList = document.getElementById('fviends-pending-list');
+  const acceptedList = document.getElementById('friends-accepted-list');
+  const pendingList = document.getElementById('friends-pending-list');
   const pendingSection = document.getElementById('friends-pending-section');
 
   if (!acceptedList) return;
