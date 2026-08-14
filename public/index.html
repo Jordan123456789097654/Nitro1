@@ -449,10 +449,14 @@
         </button>
         </button>
         
+        <button class="nav-btn" data-view="apps" title="Web Applications">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
         </button>
         <button class="nav-btn" data-view="paint" title="Paint Studio Deluxe" style="color: #a855f7;">
           <span style="font-size: 1.15rem;">🎨</span>
+        </button>
+        <button class="nav-btn" data-view="contact" title="Contact Us & Support" style="color: #38bdf8;">
+          <span style="font-size: 1.15rem;">✉️</span>
         </button>
         <button class="nav-btn" data-view="soundboard" title="Interactive Web Audio Soundboard" style="color: #ec4899;">
           <span style="font-size: 1.15rem;">🔊</span>
@@ -517,6 +521,7 @@
             </button>
             <div class="dropdown-menu" id="quick-tools-menu" style="display: none;">
               <button class="dropdown-item" id="open-profile-edit-btn">✏️ Edit Profile</button>
+              <button class="dropdown-item" id="open-contact-menu-btn" onclick="document.querySelector('.nav-btn[data-view=\'contact\']')?.click()">✉️ Contact Us</button>
               <button class="dropdown-item" id="open-updates-modal-btn">📋 Update Logs</button>
               <button class="dropdown-item" id="open-suggest-modal-btn">💡 Suggest Game</button>
               <button class="dropdown-item" id="open-bug-modal-btn">🐛 Report Bug</button>
@@ -1326,6 +1331,44 @@
 
         <!-- Admin Tab: Users & Moderation -->
         <div class="admin-tab-content" id="tab-users" style="display: none;">
+          <!-- Account Creation Form Card -->
+          <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); padding: 18px 22px; border-radius: var(--radius-md); margin-bottom: 20px;">
+            <h4 style="color: #38bdf8; margin: 0 0 8px; font-size: 1.05rem;">➕ Create New User Account</h4>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 14px;">Directly provision new student, PRO, admin, or owner accounts with custom roles and credentials.</p>
+
+            <form id="admin-create-user-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+              <div>
+                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Username</label>
+                <input type="text" id="admin-new-username" placeholder="e.g. alex2026" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" required>
+              </div>
+
+              <div>
+                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Display Name</label>
+                <input type="text" id="admin-new-displayname" placeholder="e.g. Alex ⚡" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+              </div>
+
+              <div>
+                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Initial Password</label>
+                <input type="password" id="admin-new-password" placeholder="Password..." style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" required>
+              </div>
+
+              <div>
+                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">User Role</label>
+                <select id="admin-new-role" class="proxy-select-dropdown" style="width: 100%; padding: 7px 10px; font-size: 0.85rem;">
+                  <option value="member">Student Member</option>
+                  <option value="pro">⚡ PRO Lounge</option>
+                  <option value="student_plus">🎓 Student Plus</option>
+                  <option value="vip">⭐ VIP Rank</option>
+                  <option value="moderator">🛡️ Moderator</option>
+                  <option value="admin">🛡️ Admin</option>
+                  <option value="owner">👑 Owner</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn-pill primary" style="justify-content: center; height: 36px; padding: 0 16px;">Create Account</button>
+            </form>
+          </div>
+
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
             <h3>Registered Users & Active Moderation</h3>
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -1607,6 +1650,86 @@
             <tbody id="admin-logs-tbody"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- SECTION 8: CONTACT US PAGE -->
+    <section class="page-view" id="view-contact">
+      <div class="header-title-section">
+        <h1>CONTACT US & SUPPORT</h1>
+        <p>Get in touch with the Nitro team for inquiries, support, legal/DMCA, or ownership matters.</p>
+      </div>
+
+      <div class="view-content-wrapper" style="margin-top: 20px; max-width: 960px; margin-left: auto; margin-right: auto;">
+        
+        <!-- Departmental Email Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 28px;">
+          
+          <div class="admin-stat-card" style="border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
+            <div style="font-size: 1.5rem; margin-bottom: 6px;">💬</div>
+            <strong style="color: #38bdf8; font-size: 1.05rem; display: block; margin-bottom: 4px;">General Support & Billing</strong>
+            <span style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 12px;">Technical help, account assistance, or platform feedback.</span>
+            <a href="mailto:support@nitromath.org" style="color: #38bdf8; font-weight: 800; font-size: 0.9rem; word-break: break-all;">support@nitromath.org</a>
+          </div>
+
+          <div class="admin-stat-card" style="border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05);">
+            <div style="font-size: 1.5rem; margin-bottom: 6px;">👑</div>
+            <strong style="color: #fbbf24; font-size: 1.05rem; display: block; margin-bottom: 4px;">Platform Ownership & Business</strong>
+            <span style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 12px;">Direct owner inquiries, partnerships, and business proposals.</span>
+            <a href="mailto:jordan@nitromath.org" style="color: #fbbf24; font-weight: 800; font-size: 0.9rem; word-break: break-all;">jordan@nitromath.org</a>
+          </div>
+
+          <div class="admin-stat-card" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
+            <div style="font-size: 1.5rem; margin-bottom: 6px;">⚖️</div>
+            <strong style="color: #ef4444; font-size: 1.05rem; display: block; margin-bottom: 4px;">Legal & DMCA Inquiries</strong>
+            <span style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 12px;">Legal correspondence, DMCA notices, and copyright compliance.</span>
+            <a href="mailto:legal@nitromath.org" style="color: #ef4444; font-weight: 800; font-size: 0.9rem; word-break: break-all;">legal@nitromath.org</a>
+          </div>
+
+        </div>
+
+        <!-- Contact Submission Form -->
+        <div class="modal-card" style="max-width: 100%; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--card-border); padding: 24px; border-radius: var(--radius-md);">
+          <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.2rem;">📩 Send an Inquiry Message</h3>
+          
+          <form id="contact-us-form" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Your Full Name</label>
+                <input type="text" id="contact-name-input" placeholder="e.g. Jordan Daniels" style="width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.9rem;" required>
+              </div>
+
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Your Email Address</label>
+                <input type="email" id="contact-email-input" placeholder="e.g. student@school.edu" style="width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.9rem;" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px;">
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Department</label>
+                <select id="contact-dept-select" class="proxy-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.88rem;">
+                  <option value="support">💬 General Support (support@nitromath.org)</option>
+                  <option value="ownership">👑 Ownership (jordan@nitromath.org)</option>
+                  <option value="legal">⚖️ Legal / DMCA (legal@nitromath.org)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Subject</label>
+                <input type="text" id="contact-subject-input" placeholder="Brief summary of inquiry..." style="width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.9rem;" required>
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Message Details</label>
+              <textarea id="contact-message-input" placeholder="Please describe your request in detail..." style="width: 100%; min-height: 140px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.9rem;" required></textarea>
+            </div>
+
+            <button type="submit" class="btn-pill primary" style="justify-content: center; padding: 12px 24px; font-size: 1rem; align-self: flex-start;">✉️ Send Inquiry</button>
+          </form>
+        </div>
+
       </div>
     </section>
   </div>

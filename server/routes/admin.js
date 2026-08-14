@@ -40,6 +40,38 @@ const requireOwner = (req, res, next) => {
 
 router.use(requireAdmin);
 
+// ADMIN/OWNER CREATE USER ACCOUNT
+router.post('/users/create', async (req, res) => {
+  const { username, display_name, password, role, avatar_url } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and Password are required.' });
+  }
+
+  try {
+    const existing = await db.getUserByUsername(username);
+    if (existing) {
+      return res.status(400).json({ error: 'Username is already taken.' });
+    }
+
+    const newUser = await db.createUserAdmin({ username, display_name, password, role: role || 'member', avatar_url });
+    if (!newUser) {
+      return res.status(500).json({ error: 'Failed to create user account.' });
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'USER_CREATED_BY_ADMIN',
+      admin: req.adminUser.username,
+      target: username,
+      details: `Created new user account @${username} with role ${role || 'member'}`
+    });
+
+    res.json({ success: true, message: `Account @${username} created successfully!`, user: newUser });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error creating account.' });
+  }
+});
+
 // OWNER-ONLY FEATURE TOGGLES API
 router.get('/features', async (req, res) => {
   try {

@@ -28,7 +28,41 @@ export function initAdmin() {
   setupAnnouncementDisableControls();
   setupUpdateDisableControls();
   setupBulkImporter();
+  setupCreateUserForm();
   connectAdminSocket();
+}
+
+function setupCreateUserForm() {
+  const form = document.getElementById('admin-create-user-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('admin-new-username').value.trim();
+    const display_name = document.getElementById('admin-new-displayname').value.trim();
+    const password = document.getElementById('admin-new-password').value.trim();
+    const role = document.getElementById('admin-new-role').value;
+
+    if (!username || !password) return alert('Username and Password are required.');
+
+    try {
+      const res = await authFetch('/api/admin/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, display_name, password, role })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Account @${username} created successfully!`);
+        form.reset();
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to create user account.');
+      }
+    } catch (err) {
+      alert('Error creating user account.');
+    }
+  });
 }
 
 // Global Admin Kick Handler

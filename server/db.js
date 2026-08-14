@@ -230,6 +230,17 @@ const db = {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(user_id, friend_id)
         );
+
+        CREATE TABLE IF NOT EXISTS contact_messages (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          email VARCHAR(150) NOT NULL,
+          department VARCHAR(50) NOT NULL,
+          subject VARCHAR(200) NOT NULL,
+          message TEXT NOT NULL,
+          is_resolved BOOLEAN DEFAULT false,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       // Safe column additions
@@ -1821,6 +1832,43 @@ const db = {
         WHERE f.friend_id = $1 AND f.status = 'pending'
         ORDER BY f.id DESC
       `, [userId]);
+      return res.rows;
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async createUserAdmin({ username, display_name, password, role = 'member', avatar_url = '' }) {
+    try {
+      const cleanUsername = username.trim().toLowerCase();
+      const b64Password = Buffer.from(password, 'utf8').toString('base64');
+      const res = await pool.query(
+        'INSERT INTO users (username, display_name, password_hash, role, avatar_url, force_password_reset) VALUES ($1, $2, $3, $4, $5, false) RETURNING *',
+        [cleanUsername, display_name || cleanUsername, b64Password, role, avatar_url]
+      );
+      return res.rows[0];
+    } catch (e) {
+      console.error('createUserAdmin error:', e.message);
+      return null;
+    }
+  },
+
+  async createContactMessage(name, email, department, subject, message) {
+    try {
+      const res = await pool.query(
+        'INSERT INTO contact_messages (name, email, department, subject, message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, email, department, subject, message]
+      );
+      return res.rows[0];
+    } catch (e) {
+      console.error('createContactMessage error:', e.message);
+      return null;
+    }
+  },
+
+  async getContactMessages() {
+    try {
+      const res = await pool.query('SELECT * FROM contact_messages ORDER BY id DESC LIMIT 50');
       return res.rows;
     } catch (e) {
       return [];
