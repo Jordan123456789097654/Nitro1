@@ -33,7 +33,7 @@ router.post('/submit', async (req, res) => {
 
     res.json({
       success: true,
-      message: `Your inquiry has been sent to ${targetEmail}. We will respond shortly! ,
+      message: `Your inquiry has been sent to ${targetEmail}. We will respond shortly!`,
       targetEmail,
       inquiry: newMail
     });
