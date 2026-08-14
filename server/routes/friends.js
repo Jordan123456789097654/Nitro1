@@ -28,7 +28,7 @@ router.post('/request', authenticateToken, async (req, res) => {
     if (result.error) {
       return res.status(400).json({ error: result.error });
     }
-    res.json({ success; true, message: `Friend request sent to @${friendUsername}! , result });
+    res.json({ success: true, message: `Friend request sent to @${friendUsername}!`, result });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send request.' });
   }
