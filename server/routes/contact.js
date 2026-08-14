@@ -10,24 +10,40 @@ const departmentEmailMap = {
   support: 'support@nitromath.org'
 };
 
-// Create Mail Transporter
-function getTransporter() {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT, 10) || 587;
+let cachedTransporter = null;
+
+async function getTransporter() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   if (user && pass) {
     return nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT, 10) || 587,
+      secure: parseInt(process.env.SMTP_PORT, 10) === 465,
       auth: { user, pass }
     });
   }
 
-  // Fallback json transport for logging dispatches when SMTP credentials not provided
-  return nodemailer.createTransport({ jsonTransport: true });
+  if (!cachedTransporter) {
+    try {
+      const testAccount = await nodemailer.createTestAccount();
+      cachedTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass
+        }
+      });
+      console.log(`✉️ Zero-Config SMTP Email Dispatcher Active: ${testAccount.user}`);
+    } catch (e) {
+      cachedTransporter = nodemailer.createTransport({ jsonTransport: true });
+    }
+  }
+
+  return cachedTransporter;
 }
 
 // Submit Contact Message
@@ -46,7 +62,7 @@ router.post('/submit', async (req, res) => {
     const newMail = await db.createContactMessage(name.trim(), email.trim(), cleanDept, subject.trim(), message.trim());
 
     // 2. Dispatch Email via Nodemailer
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
     const mailOptions = {
       from: `"${name.trim()}" <${process.env.SMTP_USER || 'noreply@nitromath.org'}>`,
       replyTo: email.trim(),
@@ -72,10 +88,12 @@ router.post('/submit', async (req, res) => {
     };
 
     let emailSent = false;
+    let previewUrl = null;
     try {
-      await transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail(mailOptions);
       emailSent = true;
-      console.log(`✉️ Contact email dispatched to ${targetEmail}`);
+      previewUrl = nodemailer.getTestMessageUrl(info);
+      console.log(`✉️ Contact email dispatched to ${targetEmail}${previewUrl ? ' | Preview: ' + previewUrl : ''}`);
     } catch (mailErr) {
       console.warn(`⚠️ SMTP Dispatch notice: ${mailErr.message}`);
     }
