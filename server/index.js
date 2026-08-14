@@ -248,6 +248,7 @@ app.use('/api/proxy', proxyRoutes);
 app.use('/api/updates', updatesRoutes);
 app.use('/api/polls', pollsRoutes);
 app.use('/api/voice', require('./routes/voice'));
+app.use('/api/friends', require('./routes/friends'));
 
 // Initialize Real-time Socket.io Chat, DMs & Live Monitoring
 initChatSocket(io);

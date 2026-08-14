@@ -216,8 +216,9 @@ function initChatSocket(io) {
 
         const role = (dbUser && dbUser.role) || user.role || 'member';
         const cleanText = await sanitizeContent(messageContent.slice(0, 400));
+        const audioUrl = data.audioUrl || '';
 
-        const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText);
+        const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, audioUrl);
         io.emit('new_message', newMsg);
       } catch (err) {
         console.error('Chat error:', err);

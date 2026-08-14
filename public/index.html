@@ -696,10 +696,35 @@
       <div class="chat-container">
         <div class="chat-mode-tabs">
           <button class="chat-mode-tab active" data-mode="global">🌍 Global Chat</button>
+          <button class="chat-mode-tab" data-mode="friends" style="color: #38bdf8; font-weight: 800;">👥 Friends</button>
           <button class="chat-mode-tab" data-mode="voice" style="color: #10b981; font-weight: 800;">🎤 Voice Rooms</button>
           <button class="chat-mode-tab" data-mode="dm">💬 Direct Messages</button>
           <button class="chat-mode-tab" data-mode="room">🔒 Private Rooms</button>
           <button class="chat-mode-tab" data-mode="whiteboard">🎨 Live Whiteboard</button>
+        </div>
+
+        <!-- FRIENDS LIST CONTAINER -->
+        <div id="chat-friends-container" style="display: none; padding: 20px; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); padding: 14px 18px; border-radius: var(--radius-md);">
+            <div>
+              <strong style="color: #38bdf8; font-size: 1.1rem;">👥 Friends & Connections</strong>
+              <span style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Connect with classmates, see who is online, and invite friends to voice rooms or DMs.</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="friend-request-username-input" placeholder="Enter student @username..." style="padding: 6px 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem; width: 200px;">
+              <button class="btn-pill primary" id="send-friend-request-btn">＋ Add Friend</button>
+            </div>
+          </div>
+
+          <div id="friends-pending-section" style="display: none;">
+            <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">Pending Friend Requests</h4>
+            <div id="friends-pending-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <div>
+            <h4 style="color: #38bdf8; margin: 0 0 10px; font-size: 0.95rem;">My Friends List</h4>
+            <div id="friends-accepted-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
         </div>
 
         <!-- VOICE ROOMS CONTAINER -->
@@ -787,6 +812,7 @@
 
         <form class="chat-input-box-wrapper" id="chat-form">
           <button type="button" class="btn-small" id="chat-gif-btn" style="background: rgba(255,255,255,0.08); color: #fbbf24; border: 1px solid rgba(255,255,255,0.1); font-weight: 800;" title="Insert Animated GIF / Sticker">GIF</button>
+          <button type="button" class="btn-small" id="chat-voice-record-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800;" title="Record 15s Voice Memo">🎙️ Mic</button>
           <input type="text" id="chat-input" placeholder="Type a message... (press Enter to send)" autocomplete="off">
           <button type="submit" class="btn-pill primary">Send</button>
         </form>
@@ -878,7 +904,7 @@
             </div>
           </div>
 
-          <!-- Preset Disguise Switcher -->
+          <!-- Preset Disguise Switcher & Custom Builder -->
           <div class="theme-settings-box">
             <div class="theme-settings-title">
               <span>🎭 PRESET DISGUISE SWITCHER</span>
@@ -894,6 +920,24 @@
                 <option value="classroom">🎓 Google Classroom</option>
                 <option value="docs">📝 Google Docs</option>
               </select>
+            </div>
+
+            <!-- Custom Disguise Builder -->
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+              <form id="custom-disguise-builder-form" style="display: flex; flex-direction: column; gap: 10px;">
+                <strong style="color: #fbbf24; font-size: 0.88rem;">🎨 Create Custom Disguise Preset</strong>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Custom Tab Title</label>
+                    <input type="text" id="custom-disguise-title-input" placeholder="e.g. Science Homework - Docs" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.82rem;" required>
+                  </div>
+                  <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Favicon Image URL</label>
+                    <input type="url" id="custom-disguise-icon-input" placeholder="https://www.google.com/favicon.ico" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.82rem;">
+                  </div>
+                </div>
+                <button type="submit" class="btn-pill primary" style="align-self: flex-start; padding: 6px 16px;">✨ Apply & Save Disguise</button>
+              </form>
             </div>
           </div>
 

@@ -218,6 +218,18 @@ const db = {
           banned_by VARCHAR(50),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS audio_url TEXT DEFAULT '';
+        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS audio_url TEXT DEFAULT '';
+
+        CREATE TABLE IF NOT EXISTS friendships (
+          id SERIAL PRIMARY KEY,
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          friend_id INT REFERENCES users(id) ON DELETE CASCADE,
+          status VARCHAR(20) DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, friend_id)
+        );
       `);
 
       // Safe column additions
@@ -1076,13 +1088,13 @@ const db = {
     }
   },
 
-  async createChatMessage(user_id, username, role, message) {
+  async createChatMessage(user_id, username, role, message, audio_url = '') {
     try {
       const res = await pool.query(`
-        INSERT INTO chat_messages (user_id, username, role, message)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO chat_messages (user_id, username, role, message, audio_url)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
-      `, [user_id, username, role, message]);
+      `, [user_id, username, role, message, audio_url]);
       
       const fullMsg = await pool.query(`
         SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair
@@ -1093,7 +1105,7 @@ const db = {
 
       return fullMsg.rows[0] || res.rows[0];
     } catch (e) {
-      return { id: Date.now(), user_id, username, role, message, created_at: new Date() };
+      return { id: Date.now(), user_id, username, role, message, audio_url, created_at: new Date() };
     }
   },
 
@@ -1735,6 +1747,83 @@ const db = {
     } catch (e) {
       console.error('clearAllChatMessages error:', e.message);
       return false;
+    }
+  },
+
+  // Friend System
+  async sendFriendRequest(userId, friendUsername) {
+    try {
+      const friend = await this.getUserByUsername(friendUsername);
+      if (!friend) return { error: 'User not found.' };
+      if (friend.id === userId) return { error: 'Cannot add yourself as a friend.' };
+
+      const existing = await pool.query(
+        "SELECT * FROM friendships WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)",
+        [userId, friend.id]
+      );
+      if (existing.rows.length) {
+        return { error: 'Friend request or relationship already exists.' };
+      }
+
+      const res = await pool.query(
+        "INSERT INTO friendships (user_id, friend_id, status) VALUES ($1, $2, 'pending') RETURNING *",
+        [userId, friend.id]
+      );
+      return { success: true, friendship: res.rows[0], friend };
+    } catch (e) {
+      console.error('sendFriendRequest error:', e.message);
+      return { error: 'Failed to send friend request.' };
+    }
+  },
+
+  async respondFriendRequest(userId, requestId, status) {
+    try {
+      if (!['accepted', 'declined'].includes(status)) return false;
+
+      if (status === 'declined') {
+        await pool.query("DELETE FROM friendships WHERE id = $1 AND friend_id = $2", [requestId, userId]);
+        return { success: true, status: 'declined' };
+      }
+
+      const res = await pool.query(
+        "UPDATE friendships SET status = 'accepted' WHERE id = $1 AND friend_id = $2 RETURNING *",
+        [requestId, userId]
+      );
+      return { success: Boolean(res.rows.length), status: 'accepted' };
+    } catch (e) {
+      return false;
+    }
+  },
+
+  async getUserFriends(userId) {
+    try {
+      const res = await pool.query(`
+        SELECT f.id as friendship_id, f.status, f.created_at,
+               u.id as user_id, u.username, u.display_name, u.role, u.avatar_url
+        FROM friendships f
+        JOIN users u ON (CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END) = u.id
+        WHERE (f.user_id = $1 OR f.friend_id = $1) AND f.status = 'accepted'
+        ORDER BY u.username ASC
+      `, [userId]);
+      return res.rows;
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async getPendingFriendRequests(userId) {
+    try {
+      const res = await pool.query(`
+        SELECT f.id as request_id, f.created_at,
+               u.id as sender_id, u.username as sender_username, u.display_name as sender_display_name, u.avatar_url
+        FROM friendships f
+        JOIN users u ON f.user_id = u.id
+        WHERE f.friend_id = $1 AND f.status = 'pending'
+        ORDER BY f.id DESC
+      `, [userId]);
+      return res.rows;
+    } catch (e) {
+      return [];
     }
   }
 };

@@ -10,6 +10,7 @@ import { initStudyTimer, initPaintCanvas } from './widgets.js';
 import { initAiHelper } from './ai.js';
 import { initSoundboard } from './soundboard.js';
 import { initVoiceRooms } from './voice.js';
+import { initFriends, fetchFriends } from './friends.js';
 
 export const FAVICON_MAP = {
   default: '/favicon.svg',
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAiHelper();
   initSoundboard();
   initVoiceRooms();
+  initFriends();
   initToolsDropdown();
   initCloakMode();
   initPersonalBranding();
@@ -196,6 +198,25 @@ function initPresetDisguiseSwitcher() {
       alert(`🎭 Disguise applied: ${p.title}`);
     }
   });
+
+  const customForm = document.getElementById('custom-disguise-builder-form');
+  if (customForm) {
+    customForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('custom-disguise-title-input').value.trim();
+      const icon = document.getElementById('custom-disguise-icon-input').value.trim() || FAVICON_MAP.classroom;
+
+      if (!title) return;
+
+      document.title = title;
+      applyFavicon(icon);
+
+      localStorage.setItem('nitro_custom_title', title);
+      localStorage.setItem('nitro_custom_icon_url', icon);
+
+      alert(`✨ Custom Disguise Applied & Saved: "${title}"`);
+    });
+  }
 }
 
 // Dropdown Tools Menu Handler

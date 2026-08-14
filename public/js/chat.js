@@ -62,6 +62,73 @@ export function initChat() {
   setupDmForm();
   setupGifPicker();
   setupWhiteboard();
+  setupVoiceRecorder();
+}
+
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecordingVoice = false;
+
+function setupVoiceRecorder() {
+  const btn = document.getElementById('chat-voice-record-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    const user = getCurrentUser();
+    if (!user) return alert('Please log in to record voice memos.');
+
+    if (isRecordingVoice) {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        isRecordingVoice = false;
+        btn.textContent = '🎙️ Mic';
+        btn.style.background = 'rgba(239,68,68,0.15)';
+        btn.style.color = '#ef4444';
+
+        stream.getTracks().forEach(track => track.stop());
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          const base64Audio = reader.result;
+          if (activeChatMode === 'global') {
+            socket.emit('send_message', { user, text: '🎙️ Voice Memo', audioUrl: base64Audio });
+          } else if (activeChatMode === 'dm' && activeDmRecipient) {
+            socket.emit('send_dm', { sender: user, recipientUsername: activeDmRecipient, text: '🎙️ Voice Memo', audioUrl: base64Audio });
+          }
+        };
+      };
+
+      mediaRecorder.start();
+      isRecordingVoice = true;
+      btn.textContent = '🔴 Rec...';
+      btn.style.background = '#ef4444';
+      btn.style.color = '#fff';
+
+      setTimeout(() => {
+        if (isRecordingVoice && mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      }, 15000);
+    } catch (err) {
+      alert('Microphone access denied or unavailable.');
+    }
+  });
 }
 
 function setupGifPicker() {
@@ -266,6 +333,8 @@ function setupChatTabs() {
       const chatMessagesContainer = document.getElementById('chat-messages');
       const chatInputForm = document.getElementById('chat-form');
 
+      const friendsContainer = document.getElementById('chat-friends-container');
+
       if (activeChatMode === 'voice') {
         if (globalHeader) globalHeader.style.display = 'none';
         if (dmBar) dmBar.style.display = 'none';
@@ -273,19 +342,30 @@ function setupChatTabs() {
         if (chatMessagesContainer) chatMessagesContainer.style.display = 'none';
         if (chatInputForm) chatInputForm.style.display = 'none';
         if (whiteboardContainer) whiteboardContainer.style.display = 'none';
+        if (friendsContainer) friendsContainer.style.display = 'none';
         if (voiceContainer) voiceContainer.style.display = 'flex';
         return;
       }
 
-      if (voiceContainer) voiceContainer.style.display = 'none';
-
-      if (activeChatMode === 'whiteboard') {
+      if (activeChatMode === 'friends') {
         if (globalHeader) globalHeader.style.display = 'none';
         if (dmBar) dmBar.style.display = 'none';
         if (roomBar) roomBar.style.display = 'none';
         if (chatMessagesContainer) chatMessagesContainer.style.display = 'none';
         if (chatInputForm) chatInputForm.style.display = 'none';
+        if (whiteboardContainer) whiteboardContainer.style.display = 'none';
+        if (voiceContainer) voiceContainer.style.display = 'none';
+        if (friendsContainer) friendsContainer.style.display = 'flex';
+        return;
+      }
+
+      if (voiceContainer) voiceContainer.style.display = 'none';
+      if (friendsContainer) friendsContainer.style.display = 'none';
+
+      if (activeChatMode === 'whiteboard') {
         if (whiteboardContainer) whiteboardContainer.style.display = 'flex';
+        if (chatMessagesContainer) chatMessagesContainer.style.display = 'none';
+        if (chatInputForm) chatInputForm.style.display = 'none';
         initWhiteboardCanvas();
         return;
       }
@@ -533,7 +613,7 @@ function setupChatForm() {
   });
 }
 
-function formatMessageText(text, gifUrl) {
+function formatMessageText(text, gifUrl, audioUrl) {
   const content = text || '';
   let html = '';
   if (content.includes('[GIF:')) {
@@ -542,6 +622,30 @@ function formatMessageText(text, gifUrl) {
     });
   } else {
     html = escapeHtml(content);
+  }
+
+  // Rich YouTube Video Embed Cards
+  html = html.replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))[^\s]*/gi, (match, url, videoId) => {
+    return `<div class="chat-rich-embed" style="margin-top: 8px; max-width: 440px; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-border);">
+      <iframe src="https://www.youtube.com/embed/${videoId}" style="width: 100%; height: 220px; border: none;" allowfullscreen></iframe>
+    </div>`;
+  });
+
+  // Rich Image Lightbox Cards
+  html = html.replace(/(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp))[^\s]*/gi, (match, url) => {
+    return `<div class="chat-rich-embed" style="margin-top: 6px; max-width: 320px; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-border);">
+      <img src="${url}" style="width: 100%; max-height: 220px; object-fit: contain; cursor: pointer;" onclick="window.open('${url}', '_blank')">
+    </div>`;
+  });
+
+  // Inline Voice Audio Player Card
+  if (audioUrl && audioUrl.trim()) {
+    html += `
+      <div class="chat-audio-card" style="margin-top: 8px; padding: 10px 14px; background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; display: flex; align-items: center; gap: 10px; max-width: 320px;">
+        <span style="font-size: 1.2rem;">🎙️</span>
+        <audio controls src="${audioUrl}" style="height: 32px; width: 100%;"></audio>
+      </div>
+    `;
   }
 
   if (gifUrl) {
@@ -588,7 +692,7 @@ function appendChatMessage(msg) {
   const avatarFrameClass = msg.avatar_frame ? `avatar-frame-${msg.avatar_frame}` : '';
 
   const rawContent = msg.message !== undefined ? msg.message : (msg.text !== undefined ? msg.text : (msg.content || ''));
-  const bodyHtml = formatMessageText(rawContent, msg.gif_url || msg.gifUrl);
+  const bodyHtml = formatMessageText(rawContent, msg.gif_url || msg.gifUrl, msg.audio_url || msg.audioUrl);
 
   row.innerHTML = `
     <div style="display: flex; gap: 10px; width: 100%;">
