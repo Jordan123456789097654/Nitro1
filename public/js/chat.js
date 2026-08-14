@@ -615,42 +615,48 @@ function setupChatForm() {
 
 function formatMessageText(text, gifUrl, audioUrl) {
   const content = text || '';
-  let html = '';
-  if (content.includes('[GIF:')) {
-    html = content.replace(/\[GIF:(https?:\/\/[^\]]+)\]/gi, (match, url) => {
-      return `<div class="chat-gif-wrapper"><img src="${url}" class="chat-inline-gif" loading="lazy" alt="GIF" onerror="this.onerror=null; this.src='https://media.tenor.com/2roovnT3zCIAAAAC/cat-cat-vibe.gif';"></div>`;
-    });
-  } else {
-    html = escapeHtml(content);
+
+  // 1. If message is a dedicated GIF syntax [GIF:url]
+  if (content.trim().startsWith('[GIF:') && content.includes(']')) {
+    const match = content.match(/\[GIF:(https?:\/\/[^\]]+)\]/i);
+    const url = match ? match[1] : (gifUrl || '');
+    if (url) {
+      return `<div class="chat-gif-wrapper"><img src="${escapeHtml(url)}" class="chat-inline-gif" loading="lazy" alt="GIF" onerror="this.onerror=null; this.parentElement.style.display='none';"></div>`;
+    }
   }
 
-  // Rich YouTube Video Embed Cards
-  html = html.replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))[^\s]*/gi, (match, url, videoId) => {
+  // 2. Escape raw HTML input
+  let html = escapeHtml(content);
+
+  // 3. YouTube Rich Cards
+  html = html.replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))[^\s<]*/gi, (match, url, videoId) => {
     return `<div class="chat-rich-embed" style="margin-top: 8px; max-width: 440px; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-border);">
       <iframe src="https://www.youtube.com/embed/${videoId}" style="width: 100%; height: 220px; border: none;" allowfullscreen></iframe>
     </div>`;
   });
 
-  // Rich Image Lightbox Cards
-  html = html.replace(/(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp))[^\s]*/gi, (match, url) => {
+  // 4. Standalone Image Links (only on raw text, avoiding inner attributes)
+  html = html.replace(/(https?:\/\/[^\s<]+\.(?:png|jpg|jpeg|gif|webp))[^\s<]*/gi, (match, url) => {
     return `<div class="chat-rich-embed" style="margin-top: 6px; max-width: 320px; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-border);">
-      <img src="${url}" style="width: 100%; max-height: 220px; object-fit: contain; cursor: pointer;" onclick="window.open('${url}', '_blank')">
+      <img src="${url}" style="width: 100%; max-height: 220px; object-fit: contain; border-radius: 6px; cursor: pointer;" onclick="window.open('${url}', '_blank')" onerror="this.onerror=null; this.parentElement.style.display='none';">
     </div>`;
   });
 
-  // Inline Voice Audio Player Card
+  // 5. Audio Player Attachment
   if (audioUrl && audioUrl.trim()) {
     html += `
       <div class="chat-audio-card" style="margin-top: 8px; padding: 10px 14px; background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; display: flex; align-items: center; gap: 10px; max-width: 320px;">
         <span style="font-size: 1.2rem;">🎙️</span>
-        <audio controls src="${audioUrl}" style="height: 32px; width: 100%;"></audio>
+        <audio controls src="${escapeHtml(audioUrl)}" style="height: 32px; width: 100%;"></audio>
       </div>
     `;
   }
 
-  if (gifUrl) {
-    html += `<div class="chat-gif-wrapper"><img src="${gifUrl}" class="chat-inline-gif" loading="lazy" alt="GIF" onerror="this.onerror=null; this.src='https://media.tenor.com/2roovnT3zCIAAAAC/cat-cat-vibe.gif';"></div>`;
+  // 6. Direct gifUrl payload attachment
+  if (gifUrl && !content.includes('[GIF:')) {
+    html += `<div class="chat-gif-wrapper"><img src="${escapeHtml(gifUrl)}" class="chat-inline-gif" loading="lazy" alt="GIF" onerror="this.onerror=null; this.parentElement.style.display='none';"></div>`;
   }
+
   return html;
 }
 
