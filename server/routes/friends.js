@@ -1,7 +1,31 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const db = require('../db');
-const { authenticateToken } = require('./auth');
+
+const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+
+function authenticateToken(req, res, next) {
+  let token = null;
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies && req.cookies.nitro_jwt_token) {
+    token = req.cookies.nitro_jwt_token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token.' });
+  }
+}
 
 // Get user's friend list & pending requests
 router.get('/list', authenticateToken, async (req, res) => {
@@ -43,7 +67,7 @@ router.post('/respond', authenticateToken, async (req, res) => {
 
   try {
     const result = await db.respondFriendRequest(req.user.id, requestId, status);
-    if (!result || !reqult.success) {
+    if (!result || !result.success) {
       return res.status(400).json({ error: 'Failed to process request.' });
     }
     res.json({ success: true, status: result.status });
