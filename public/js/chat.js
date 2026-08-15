@@ -401,6 +401,7 @@ function setupChatTabs() {
         if (whiteboardContainer) whiteboardContainer.style.display = 'none';
         if (voiceContainer) voiceContainer.style.display = 'none';
         if (friendsContainer) friendsContainer.style.display = 'flex';
+        if (window.fetchFriends) window.fetchFriends();
         return;
       }
 

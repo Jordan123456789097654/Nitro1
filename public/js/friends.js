@@ -22,6 +22,16 @@ function setupFriendSocketListeners() {
   });
 }
 
+function getAuthToken() {
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+  return localStorage.getItem('nitro_jwt_token') || getCookie('nitro_jwt_token');
+}
+
 export async function fetchFriends() {
   const acceptedList = document.getElementById('friends-accepted-list');
   const pendingList = document.getElementById('friends-pending-list');
@@ -30,15 +40,25 @@ export async function fetchFriends() {
   if (!acceptedList) return;
 
   try {
-    const token = localStorage.getItem('nitro_jwt_token');
-    if (!token) {
+    const token = getAuthToken();
+    const currentUser = getCurrentUser();
+
+    if (!token && !currentUser) {
       acceptedList.innerHTML = '<div style="color: var(--text-muted); padding: 16px;">Please sign in to view and add friends.</div>';
+      if (pendingSection) pendingSection.style.display = 'none';
       return;
     }
 
-    const res = await fetch('/api/friends/list', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    const headers = {};
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    const res = await fetch('/api/friends/list', { headers });
+    if (!res.ok) {
+      acceptedList.innerHTML = '<div style="color: var(--text-muted); padding: 16px;">Please sign in to view and add friends.</div>';
+      if (pendingSection) pendingSection.style.display = 'none';
+      return;
+    }
+
     const data = await res.json();
     const friends = data.friends || [];
     const pending = data.pending || [];
@@ -47,7 +67,7 @@ export async function fetchFriends() {
       if (pendingSection) pendingSection.style.display = 'block';
       if (pendingList) {
         pendingList.innerHTML = pending.map(p => 
-          `<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 10px 14px; border-radius: 8px;">
+          `<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 10px 14px; border-radius: 8px; margin-bottom: 6px;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span style="font-size: 1.2rem;">👤</span>
               <div>
@@ -56,11 +76,18 @@ export async function fetchFriends() {
               </div>
             </div>
             <div style="display: flex; gap: 6px;">
-              <button class="btn-small primary" onclick="window.respondFriendRequest(${p.request_id}, 'accepted')">Accept</button>
-              <button class="btn-small danger" onclick="window.respondFriendRequest(${p.request_id}, 'declined')">Decline</button>
+              <button class="btn-small primary btn-accept-req" data-req-id="${p.request_id}">Accept</button>
+              <button class="btn-small danger btn-decline-req" data-req-id="${p.request_id}">Decline</button>
             </div>
           </div>`
         ).join('');
+
+        pendingList.querySelectorAll('.btn-accept-req').forEach(btn => {
+          btn.addEventListener('click', () => window.respondFriendRequest(btn.dataset.reqId, 'accepted'));
+        });
+        pendingList.querySelectorAll('.btn-decline-req').forEach(btn => {
+          btn.addEventListener('click', () => window.respondFriendRequest(btn.dataset.reqId, 'declined'));
+        });
       }
     } else {
       if (pendingSection) pendingSection.style.display = 'none';
@@ -68,7 +95,9 @@ export async function fetchFriends() {
 
     window._cachedFriends = friends;
     renderFriendStatuses();
-  } catch (e) {}
+  } catch (e) {
+    console.error('fetchFriends error:', e);
+  }
 }
 
 function renderFriendStatuses() {
@@ -133,7 +162,7 @@ export async function sendFriendRequest(friendUsername) {
   const uname = String(friendUsername || '').trim().replace(/^@/, '');
   if (!uname) throw new Error('Please enter a student @username.');
 
-  const token = localStorage.getItem('nitro_jwt_token');
+  const token = getAuthToken();
   if (!token) throw new Error('Please sign in to send a friend request.');
 
   const res = await fetch('/api/friends/request', {
@@ -189,7 +218,7 @@ window.quickDmUser = (username) => {
 
 window.respondFriendRequest = async (requestId, status) => {
   try {
-    const token = localStorage.getItem('nitro_jwt_token');
+    const token = getAuthToken();
     const res = await fetch('/api/friends/respond', {
       method: 'POST',
       headers: {
