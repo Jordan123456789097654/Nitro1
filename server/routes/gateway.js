@@ -130,6 +130,22 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
           Object.defineProperty(window, 'parent', { get: function() { return window; }, configurable: true });
         } catch(e) {}
 
+        // History API Security Patch to prevent cross-origin SecurityError
+        try {
+          var _origReplace = history.replaceState;
+          var _origPush = history.pushState;
+          history.replaceState = function(state, unused, url) {
+            try {
+              return _origReplace.call(history, state, unused, window.location.href);
+            } catch (e) {}
+          };
+          history.pushState = function(state, unused, url) {
+            try {
+              return _origPush.call(history, state, unused, window.location.href);
+            } catch (e) {}
+          };
+        } catch(e) {}
+
         // Disable Service Worker registration inside gateway iframe to avoid cross-origin registration errors
         if (navigator.serviceWorker) {
           navigator.serviceWorker.register = function() {

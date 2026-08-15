@@ -195,10 +195,6 @@ window.fullscreenSoundboardHub = function() {
 
 export function initSoundboard() {
   const socket = getSharedSocket();
-  const containerCustom = document.getElementById('soundboard-grid-custom');
-  if (!containerGlobal) return;
-
-  const socket = getSharedSocket();
   if (socket) {
     socket.on('sound_effect_broadcast', ({ soundKey, audioUrl }) => {
       if (soundKey && SOUND_EFFECTS[soundKey]) {
