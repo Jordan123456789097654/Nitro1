@@ -8,59 +8,120 @@ const { sendDiscordLog } = require('../discordLogger');
 
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
-// Engine Spoofing Profiles
+// -------------------------------------------------------------
+// 1. ENGINE SPOOFING PROFILES & COOKIE STORAGE
+// -------------------------------------------------------------
 const GATEWAY_ENGINES = {
-  chrome: {
+  turbo: {
+    name: '⚡ Stealth Turbo Engine',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
     secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
     platform: '"Windows"',
     mobile: '?0'
   },
-  firefox: {
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0',
-    secChUa: '',
-    platform: '"Windows"',
-    mobile: '?0'
-  },
-  safari: {
+  shield: {
+    name: '🛡️ Shield Ultra Engine',
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15',
     secChUa: '',
     platform: '"macOS"',
     mobile: '?0'
   },
-  edge: {
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0',
-    secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"',
-    platform: '"Windows"',
-    mobile: '?0'
-  },
-  classroom: {
+  academic: {
+    name: '🎓 Academic Disguise Engine',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Google-Classroom/2.4',
     secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
     platform: '"Windows"',
     mobile: '?0',
     referer: 'https://classroom.google.com/'
+  },
+  mirror: {
+    name: '🌀 Dynamic Mirror Engine',
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+    secChUa: '"Chromium";v="128", "Not;A=Brand";v="24"',
+    platform: '"Linux"',
+    mobile: '?0'
   }
 };
 
-// SSRF IP Validation
+// In-Memory Cookie Store per Session Key
+const SESSION_COOKIE_STORE = new Map();
+
+function getSessionCookies(sessionKey, targetDomain) {
+  const store = SESSION_COOKIE_STORE.get(sessionKey);
+  if (!store) return '';
+  const cookies = [];
+  const now = Date.now();
+  for (const [key, item] of store.entries()) {
+    if (item.expires && item.expires < now) {
+      store.delete(key);
+      continue;
+    }
+    if (!item.domain || targetDomain.includes(item.domain.replace(/^\./, ''))) {
+      cookies.push(`${item.name}=${item.value}`);
+    }
+  }
+  return cookies.join('; ');
+}
+
+function storeSessionCookies(sessionKey, targetDomain, setCookieHeader) {
+  if (!setCookieHeader) return;
+  if (!SESSION_COOKIE_STORE.has(sessionKey)) {
+    SESSION_COOKIE_STORE.set(sessionKey, new Map());
+  }
+  const store = SESSION_COOKIE_STORE.get(sessionKey);
+  const cookieLines = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+
+  for (const line of cookieLines) {
+    const parts = line.split(';').map(p => p.trim());
+    if (parts.length === 0) continue;
+    const [kv] = parts;
+    const eqIdx = kv.indexOf('=');
+    if (eqIdx === -1) continue;
+    const name = kv.substring(0, eqIdx).trim();
+    const value = kv.substring(eqIdx + 1).trim();
+
+    let domain = targetDomain;
+    let expires = null;
+
+    for (let i = 1; i < parts.length; i++) {
+      const pLower = parts[i].toLowerCase();
+      if (pLower.startsWith('domain=')) {
+        domain = parts[i].substring(7).trim();
+      } else if (pLower.startsWith('expires=')) {
+        const expDate = new Date(parts[i].substring(8).trim());
+        if (!isNaN(expDate.getTime())) expires = expDate.getTime();
+      } else if (pLower.startsWith('max-age=')) {
+        const seconds = parseInt(parts[i].substring(8).trim(), 10);
+        if (!isNaN(seconds)) expires = Date.now() + (seconds * 1000);
+      }
+    }
+
+    store.set(name, { name, value, domain, expires });
+  }
+}
+
+// -------------------------------------------------------------
+// 2. SSRF PROTECTION
+// -------------------------------------------------------------
 function isInternalOrPrivateHost(hostname) {
   const host = hostname.toLowerCase();
   if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '::1' || host.endsWith('.local')) {
     return true;
   }
-  // Check private IP ranges
   const ipParts = host.split('.').map(Number);
   if (ipParts.length === 4 && !ipParts.some(isNaN)) {
-    if (ipParts[0] === 10) return true; // 10.0.0.0/8
-    if (ipParts[0] === 172 && ipParts[1] >= 16 && ipParts[1] <= 31) return true; // 172.16.0.0/12
-    if (ipParts[0] === 192 && ipParts[1] === 168) return true; // 192.168.0.0/16
-    if (ipParts[0] === 169 && ipParts[1] === 254) return true; // 169.254.169.254 metadata
+    if (ipParts[0] === 10) return true;
+    if (ipParts[0] === 172 && ipParts[1] >= 16 && ipParts[1] <= 31) return true;
+    if (ipParts[0] === 192 && ipParts[1] === 168) return true;
+    if (ipParts[0] === 169 && ipParts[1] === 254) return true;
     if (ipParts[0] === 127) return true;
   }
   return false;
 }
 
+// -------------------------------------------------------------
+// 3. URL REWRITING & CLIENT RELAY INJECTION
+// -------------------------------------------------------------
 function resolveAndGatewayUrl(rawUrl, baseUrl, gatewayPrefix) {
   if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
   const trimmed = rawUrl.trim();
@@ -96,10 +157,10 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
 
   let rewritten = htmlContent;
 
-  // Remove meta CSP and X-Frame-Options tags that block iframe rendering
+  // Remove meta CSP and X-Frame-Options tags
   rewritten = rewritten.replace(/<meta[^>]*http-equiv=["']?(Content-Security-Policy|X-Frame-Options)["']?[^>]*>/gi, '');
 
-  // Strip inline frame buster scripts that blank or redirect framed pages
+  // Strip inline frame buster scripts
   rewritten = rewritten.replace(/if\s*\(\s*(self|window)\.top\s*!==?\s*(self|window)\.self\s*\)\s*\{[^}]*\}/gi, '');
   rewritten = rewritten.replace(/top\.location\.href\s*=\s*self\.location\.href/gi, '');
   rewritten = rewritten.replace(/top\.location\s*=\s*self\.location/gi, '');
@@ -116,7 +177,7 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
     return `style=${quote}${rewrittenCss}${quote}`;
   });
 
-  // Inject Base URL, Frame-Buster Shield & XHR Interceptor Relay Script into <head>
+  // Inject Base URL, Frame-Buster Shield & Client Relay Interceptor
   const clientRelayScript = `
     <base href="${baseUrl}">
     <script>
@@ -130,7 +191,7 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
           Object.defineProperty(window, 'parent', { get: function() { return window; }, configurable: true });
         } catch(e) {}
 
-        // History API Security Patch to prevent cross-origin SecurityError
+        // History API Security Patch
         try {
           var _origReplace = history.replaceState;
           var _origPush = history.pushState;
@@ -146,7 +207,7 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
           };
         } catch(e) {}
 
-        // Disable Service Worker registration inside gateway iframe to avoid cross-origin registration errors
+        // Disable Service Worker registration inside gateway iframe
         if (navigator.serviceWorker) {
           navigator.serviceWorker.register = function() {
             return Promise.reject(new Error('ServiceWorker disabled in gateway.'));
@@ -194,7 +255,8 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
             return origXhrOpen.call(this, method, pUrl, async, user, password);
           };
         }
-        // Override window.open to keep popups in gateway
+
+        // Override window.open
         var origOpen = window.open;
         window.open = function(url, target, features) {
           if (url) {
@@ -257,7 +319,7 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
           }
         }, true);
 
-        // Intercept form submissions to keep subdomain searches & logins in gateway
+        // Intercept form submissions
         document.addEventListener('submit', function(e) {
           var form = e.target;
           if (form && form.action) {
@@ -283,7 +345,9 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
   return rewritten;
 }
 
-// Remade High-Speed Unrestricted & Sandboxed Gateway Router
+// -------------------------------------------------------------
+// 4. MAIN PROXY GATEWAY ROUTER
+// -------------------------------------------------------------
 router.all('/', async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -296,19 +360,19 @@ router.all('/', async (req, res) => {
 
   // Check Feature Toggle
   try {
-    const features = await db.getFeatureSettings();
-    if (features.feature_gateway_enabled === 'false') {
-      const isOwner = req.user && (req.user.role === 'owner' || req.user.username.toLowerCase() === 'jordandaniels');
-      if (!isOwner) {
+    const isEnabled = await db.getSetting('enable_gateway');
+    if (isEnabled === 'false') {
+      const user = req.user;
+      if (!user || (!['owner', 'admin'].includes(user.role))) {
         return res.status(503).send(`
           <!DOCTYPE html>
           <html>
           <head>
             <meta charset="UTF-8">
-            <title>Gateway Feature Offline</title>
+            <title>Gateway Disabled</title>
             <style>
-              body { background: #090a0f; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-              .card { background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 500px; }
+              body { background: #090a0f; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+              .card { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 500px; }
               h2 { color: #ef4444; margin-top: 0; }
             </style>
           </head>
@@ -356,8 +420,7 @@ router.all('/', async (req, res) => {
       <body>
         <div class="card">
           <h2>🚫 Gateway Access Revoked</h2>
-          <p>Your web gateway access has been restricted by an administrator or due to violation strikes.${timeoutMsg}</p>
-          <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 20px;">Contact platform support or owner if you believe this is an error.</p>
+          <p>Your web gateway access has been restricted by an administrator.${timeoutMsg}</p>
         </div>
       </body>
       </html>
@@ -390,7 +453,7 @@ router.all('/', async (req, res) => {
 
   const hostname = parsedUrl.hostname.toLowerCase();
 
-  // Built-in Ad & Tracker Suppressor Filter (Prevents 404 & Strict MIME type errors)
+  // Built-in Ad & Tracker Suppressor Filter
   const isAdDomain = [
     'adsinnov.com',
     'doubleclick.net',
@@ -417,8 +480,21 @@ router.all('/', async (req, res) => {
     return res.status(403).send(`
       <!DOCTYPE html>
       <html>
-      <head><meta charset="UTF-8"><style>body{background:#090a0f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}.card{background:rgba(239,68,68,0.15);border:1px solid #ef4444;padding:40px;border-radius:16px;text-align:center;}</style></head>
-      <body><div class="card"><h2 style="color:#ef4444;">🛡️ SSRF Security Block</h2><p>Access to local and private IP addresses is blocked.</p></div></body>
+      <head>
+        <meta charset="UTF-8">
+        <title>Access Restricted</title>
+        <style>
+          body { background: #090a0f; color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+          .card { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 480px; }
+          h2 { color: #ef4444; margin-top: 0; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2>🚫 Access Restricted</h2>
+          <p>Access to internal network addresses or private IPs is restricted.</p>
+        </div>
+      </body>
       </html>
     `);
   }
@@ -436,21 +512,17 @@ router.all('/', async (req, res) => {
           <html>
           <head>
             <meta charset="UTF-8">
-            <title>Domain Access Restricted</title>
+            <title>Domain Restricted</title>
             <style>
-              body { background: #090a0f; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-              .card { background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; padding: 44px; border-radius: 18px; max-width: 520px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); }
-              h2 { color: #fbbf24; font-size: 1.8rem; margin-top: 0; }
-              p { color: #cbd5e1; font-size: 1rem; line-height: 1.6; }
-              code { background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 6px; color: #f59e0b; font-family: monospace; }
+              body { background: #090a0f; color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+              .card { background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; padding: 40px; border-radius: 16px; max-width: 480px; }
+              h2 { color: #fbbf24; margin-top: 0; }
             </style>
           </head>
           <body>
             <div class="card">
-              <div style="font-size: 4rem; margin-bottom: 12px;">🚫</div>
-              <h2>Domain Access Restricted</h2>
-              <p>The domain <code>${hostname}</code> has been restricted by the platform administrator.</p>
-              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 18px;">Reason: ${matched.reason || 'Policy restriction'}</p>
+              <h2>🚫 Domain Restricted</h2>
+              <p>The domain <code>${hostname}</code> has been restricted by platform policy.</p>
             </div>
           </body>
           </html>
@@ -459,61 +531,74 @@ router.all('/', async (req, res) => {
     } catch (e) {}
   }
 
-  // Fetch Target Content
-  try {
-    const selectedEngineKey = (req.query.engine || req.headers['x-gateway-engine'] || 'chrome').toLowerCase().trim();
-    const engineConfig = GATEWAY_ENGINES[selectedEngineKey] || GATEWAY_ENGINES.chrome;
+  // Engine Resolution & Headers
+  const selectedEngineKey = req.query.engine || 'turbo';
+  const engineConfig = GATEWAY_ENGINES[selectedEngineKey] || GATEWAY_ENGINES.turbo;
 
-    const fetchHeaders = {
-      'User-Agent': engineConfig.userAgent,
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
-      'Sec-Fetch-User': '?1',
-      'Upgrade-Insecure-Requests': '1'
-    };
+  const sessionKey = user.username || req.ip || 'default_session';
+  const sessionCookies = getSessionCookies(sessionKey, hostname);
 
-    if (engineConfig.secChUa) fetchHeaders['Sec-Ch-Ua'] = engineConfig.secChUa;
-    if (engineConfig.platform) fetchHeaders['Sec-Ch-Ua-Platform'] = engineConfig.platform;
-    if (engineConfig.mobile) fetchHeaders['Sec-Ch-Ua-Mobile'] = engineConfig.mobile;
-    if (engineConfig.referer !== undefined) {
-      if (engineConfig.referer) fetchHeaders['Referer'] = engineConfig.referer;
-    } else {
-      fetchHeaders['Referer'] = parsedUrl.origin;
-    }
+  const fetchHeaders = {
+    'User-Agent': engineConfig.userAgent,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1'
+  };
 
-    const fetchOptions = {
-      method: ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method) ? req.method : 'GET',
-      headers: fetchHeaders,
-      redirect: 'follow',
-      timeout: 15000,
-      compress: false
-    };
+  if (sessionCookies) {
+    fetchHeaders['Cookie'] = sessionCookies;
+  }
 
-    if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
-      if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
-        fetchOptions.body = req.body;
-      } else if (typeof req.body === 'object') {
-        if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
-          fetchOptions.body = JSON.stringify(req.body);
-          fetchOptions.headers['Content-Type'] = 'application/json';
-        } else {
-          const params = new URLSearchParams();
-          for (const [k, v] of Object.entries(req.body)) {
-            params.append(k, v);
-          }
-          fetchOptions.body = params.toString();
-          fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+  if (engineConfig.secChUa) fetchHeaders['Sec-Ch-Ua'] = engineConfig.secChUa;
+  if (engineConfig.platform) fetchHeaders['Sec-Ch-Ua-Platform'] = engineConfig.platform;
+  if (engineConfig.mobile) fetchHeaders['Sec-Ch-Ua-Mobile'] = engineConfig.mobile;
+  if (engineConfig.referer !== undefined) {
+    if (engineConfig.referer) fetchHeaders['Referer'] = engineConfig.referer;
+  } else {
+    fetchHeaders['Referer'] = parsedUrl.origin;
+  }
+
+  const fetchOptions = {
+    method: ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method) ? req.method : 'GET',
+    headers: fetchHeaders,
+    redirect: 'follow',
+    timeout: 15000,
+    compress: false
+  };
+
+  if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+    if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
+      fetchOptions.body = req.body;
+    } else if (typeof req.body === 'object') {
+      if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+        fetchOptions.body = JSON.stringify(req.body);
+        fetchOptions.headers['Content-Type'] = 'application/json';
+      } else {
+        const params = new URLSearchParams();
+        for (const [k, v] of Object.entries(req.body)) {
+          params.append(k, v);
         }
+        fetchOptions.body = params.toString();
+        fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
       }
     }
+  }
 
+  try {
     const response = await fetch(parsedUrl.href, fetchOptions);
     const finalUrl = response.url || parsedUrl.href;
     const contentType = response.headers.get('content-type') || 'text/html';
+
+    // Store returned Set-Cookie headers in session cookie store
+    const rawSetCookies = response.headers.raw()['set-cookie'];
+    if (rawSetCookies && rawSetCookies.length > 0) {
+      storeSessionCookies(sessionKey, hostname, rawSetCookies);
+    }
 
     let buffer = await response.buffer();
     const contentEncoding = response.headers.get('content-encoding');
