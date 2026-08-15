@@ -32,11 +32,11 @@ export async function fetchFriends() {
         pendingList.innerHTML = pending.map(p => 
           '<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 10px 14px; border-radius: 8px;">' +
             '<div style="display: flex; align-items: center; gap: 10px;">' +
-              '<span style="font-size: 1.2rem;">??</span>' +
+              '<span style="font-size: 1.2rem;">👤</span>' +
               '<div>' +
                 '<strong style="color: #fbbf24;">' + safeHtml(p.sender_display_name || p.sender_username) + '</strong>' +
                 '<span style="display: block; font-size: 0.78rem; color: #94a3b8;">@' + safeHtml(p.sender_username) + '</span>' +
-              '</div>' +
+                '</div>' +
             '</div>' +
             '<div style="display: flex; gap: 6px;">' +
               '<button class="btn-small primary" onclick="window.respondFriendRequest(' + p.request_id + ', \'accepted\')">Accept</button>' +
@@ -57,15 +57,15 @@ export async function fetchFriends() {
     acceptedList.innerHTML = friends.map(f => 
       '<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 12px 16px; border-radius: 12px;">' +
         '<div style="display: flex; align-items: center; gap: 12px;">' +
-          '<span style="font-size: 1.5rem;">??</span>' +
+          '<span style="font-size: 1.5rem;">🎓</span>' +
           '<div>' +
             '<strong style="color: #fff; font-size: 0.95rem;">' + safeHtml(f.display_name || f.username) + '</strong>' +
             '<span style="display: block; font-size: 0.78rem; color: #38bdf8;">@' + safeHtml(f.username) + '</span>' +
           '</div>' +
         '</div>' +
         '<div style="display: flex; gap: 8px;">' +
-          '<button class="btn-small primary" onclick="window.quickDmUser(\'' + f.username + '\')">?? DM</button>' +
-          '<button class="btn-small" style="background: #10b981; color: #000; font-weight: 800;" onclick="window.inviteFriendVoice(\'' + f.username + '\')">?? Voice</button>' +
+          '<button class="btn-small primary" onclick="window.quickDmUser(\'' + f.username + '\')">💬 DM</button>' +
+          '<button class="btn-small" style="background: #10b981; color: #000; font-weight: 800;" onclick="window.inviteFriendVoice(\'' + f.username + '\')">🎤 Voice</button>' +
         '</div>' +
       '</div>'
     ).join('');
@@ -116,6 +116,19 @@ function setupFriendsUI() {
     });
   }
 }
+
+window.quickDmUser = (username) => {
+  const dmTab = document.querySelector('.chat-mode-tab[data-mode="dm"]');
+  if (dmTab) dmTab.click();
+  setTimeout(() => {
+    const dmInput = document.getElementById('chat-dm-target-user');
+    if (dmInput) {
+      dmInput.value = username;
+      const dmSubmit = document.getElementById('chat-start-dm-btn');
+      if (dmSubmit) dmSubmit.click();
+    }
+  }, 100);
+};
 
 window.respondFriendRequest = async (requestId, status) => {
   try {

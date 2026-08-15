@@ -271,6 +271,16 @@ const db = {
         ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INT DEFAULT 0;
         ALTER TABLE user_game_stats ADD COLUMN IF NOT EXISTS coins INT DEFAULT 0;
         ALTER TABLE user_game_stats ADD COLUMN IF NOT EXISTS xp INT DEFAULT 0;
+
+        CREATE TABLE IF NOT EXISTS custom_soundboard_sounds (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(100) NOT NULL,
+          icon VARCHAR(20) DEFAULT '🎵',
+          audio_url TEXT NOT NULL,
+          is_global BOOLEAN DEFAULT false,
+          uploaded_by VARCHAR(50),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       // Seed / Update admin with Base64 encoded password
@@ -1516,6 +1526,73 @@ const db = {
     } catch (e) {
       console.error('getDMs error:', e.message);
       return [];
+    }
+  },
+
+  async getUserConversations(username) {
+    try {
+      const res = await pool.query(`
+        SELECT DISTINCT ON (other_user) 
+          other_user, message, created_at
+        FROM (
+          SELECT 
+            CASE 
+              WHEN LOWER(sender_username) = LOWER($1) THEN receiver_username 
+              ELSE sender_username 
+            END AS other_user,
+            COALESCE(content, message) as message,
+            created_at
+          FROM direct_messages
+          WHERE LOWER(sender_username) = LOWER($1) OR LOWER(receiver_username) = LOWER($1)
+        ) sub
+        ORDER BY other_user, created_at DESC
+      `, [username]);
+      return res.rows;
+    } catch (e) {
+      console.error('getUserConversations error:', e.message);
+      return [];
+    }
+  },
+
+  async getSoundboardSounds(username) {
+    try {
+      const res = await pool.query(`
+        SELECT * FROM custom_soundboard_sounds
+        WHERE is_global = true OR LOWER(uploaded_by) = LOWER($1)
+        ORDER BY is_global DESC, id DESC
+      `, [username || '']);
+      return res.rows;
+    } catch (e) {
+      console.error('getSoundboardSounds error:', e.message);
+      return [];
+    }
+  },
+
+  async createSoundboardSound({ title, icon, audioUrl, isGlobal, uploadedBy }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO custom_soundboard_sounds (title, icon, audio_url, is_global, uploaded_by)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [title, icon || '🎵', audioUrl, isGlobal || false, uploadedBy]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createSoundboardSound error:', e.message);
+      throw e;
+    }
+  },
+
+  async deleteSoundboardSound(id, username, isOwnerOrAdmin) {
+    try {
+      if (isOwnerOrAdmin) {
+        await pool.query('DELETE FROM custom_soundboard_sounds WHERE id = $1', [id]);
+      } else {
+        await pool.query('DELETE FROM custom_soundboard_sounds WHERE id = $1 AND LOWER(uploaded_by) = LOWER($2)', [id, username]);
+      }
+      return true;
+    } catch (e) {
+      console.error('deleteSoundboardSound error:', e.message);
+      return false;
     }
   },
 

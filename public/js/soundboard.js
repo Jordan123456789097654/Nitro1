@@ -170,20 +170,41 @@ export const SOUND_EFFECTS = {
   }
 };
 
+function playAudioUrl(url) {
+  if (!url) return;
+  try {
+    const audio = new Audio(url);
+    audio.play().catch(e => console.warn('Audio playback error:', e));
+  } catch (e) {
+    console.error('Audio url error:', e);
+  }
+}
+
 export function initSoundboard() {
-  const container = document.getElementById('soundboard-grid');
-  if (!container) return;
+  const containerGlobal = document.getElementById('soundboard-grid');
+  const containerCustom = document.getElementById('soundboard-grid-custom');
+  if (!containerGlobal) return;
 
   const socket = getSharedSocket();
   if (socket) {
-    socket.on('sound_effect_broadcast', ({ soundKey }) => {
-      if (SOUND_EFFECTS[soundKey]) {
+    socket.on('sound_effect_broadcast', ({ soundKey, audioUrl }) => {
+      if (soundKey && SOUND_EFFECTS[soundKey]) {
         SOUND_EFFECTS[soundKey]();
+      } else if (audioUrl) {
+        playAudioUrl(audioUrl);
       }
     });
   }
 
-  const SOUND_ITEMS = [
+  setupUploadModal();
+  loadSoundboards();
+}
+
+async function loadSoundboards() {
+  const containerGlobal = document.getElementById('soundboard-grid');
+  const containerCustom = document.getElementById('soundboard-grid-custom');
+
+  const BUILTIN_ITEMS = [
     { key: 'vineboom', label: '💥 Vine Boom', icon: '💥', color: '#ef4444' },
     { key: 'bruh', label: '🗿 Bruh Sound', icon: '🗿', color: '#a855f7' },
     { key: 'victorychime', label: '🔔 Victory Chime', icon: '🔔', color: '#10b981' },
@@ -195,30 +216,275 @@ export function initSoundboard() {
     { key: 'beep', label: '🔔 Alert Tone', icon: '🔔', color: '#ec4899' }
   ];
 
-  container.innerHTML = '';
-  SOUND_ITEMS.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'soundboard-card-btn';
-    btn.style.borderColor = item.color;
-    btn.innerHTML = `
-      <div style="font-size: 2.2rem; margin-bottom: 6px;">${item.icon}</div>
-      <div style="font-weight: 700; font-size: 0.95rem; color: #fff;">${item.label}</div>
-      <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Playable in Voice & Chat</div>
-    `;
+  if (containerGlobal) {
+    containerGlobal.innerHTML = '';
+    BUILTIN_ITEMS.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'soundboard-card-btn';
+      btn.style.borderColor = item.color;
+      btn.innerHTML = `
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">${item.icon}</div>
+        <div style="font-weight: 700; font-size: 0.95rem; color: #fff;">${item.label}</div>
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Built-in Web Audio</div>
+      `;
 
-    btn.addEventListener('click', () => {
-      if (SOUND_EFFECTS[item.key]) {
-        SOUND_EFFECTS[item.key]();
-        btn.classList.add('sound-playing');
-        setTimeout(() => btn.classList.remove('sound-playing'), 300);
+      btn.addEventListener('click', () => {
+        if (SOUND_EFFECTS[item.key]) {
+          SOUND_EFFECTS[item.key]();
+          btn.classList.add('sound-playing');
+          setTimeout(() => btn.classList.remove('sound-playing'), 300);
 
-        if (socket) {
-          const user = getCurrentUser();
-          socket.emit('play_sound_effect', { soundKey: item.key, username: user ? user.username : 'Guest' });
+          const socket = getSharedSocket();
+          if (socket) {
+            const user = getCurrentUser();
+            socket.emit('play_sound_effect', { soundKey: item.key, username: user ? user.username : 'Guest' });
+          }
+        }
+      });
+
+      containerGlobal.appendChild(btn);
+    });
+  }
+
+  // Fetch Custom & Admin Uploaded Sounds from API
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+    const res = await fetch('/api/soundboard', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    const data = await res.json();
+
+    if (data.success && data.sounds) {
+      const user = getCurrentUser();
+      const isOwnerOrAdmin = user && (user.role === 'owner' || user.role === 'admin');
+
+      const customSounds = data.sounds.filter(s => !s.is_global);
+      const globalCustomSounds = data.sounds.filter(s => s.is_global);
+
+      // Render admin global sounds into global grid
+      globalCustomSounds.forEach(sound => {
+        const btn = createCustomSoundCard(sound, isOwnerOrAdmin, user);
+        if (containerGlobal) containerGlobal.appendChild(btn);
+      });
+
+      // Render user custom sounds into custom grid
+      if (containerCustom) {
+        containerCustom.innerHTML = '';
+        if (customSounds.length === 0) {
+          containerCustom.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No custom uploaded sounds yet. Click "Upload Custom Sound" above to add your own!</div>';
+        } else {
+          customSounds.forEach(sound => {
+            const btn = createCustomSoundCard(sound, isOwnerOrAdmin, user);
+            containerCustom.appendChild(btn);
+          });
         }
       }
-    });
-
-    container.appendChild(btn);
-  });
+    }
+  } catch (e) {
+    console.error('Failed to load soundboards:', e);
+  }
 }
+
+function createCustomSoundCard(sound, isOwnerOrAdmin, currentUser) {
+  const card = document.createElement('div');
+  card.className = 'soundboard-card-btn';
+  card.style.borderColor = sound.is_global ? '#fbbf24' : '#38bdf8';
+  card.style.position = 'relative';
+
+  const canDelete = isOwnerOrAdmin || (currentUser && currentUser.username.toLowerCase() === (sound.uploaded_by || '').toLowerCase());
+  const deleteBtn = canDelete ? `<button class="sound-delete-btn" style="position: absolute; top: 6px; right: 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center;" title="Delete Sound">✕</button>` : '';
+
+  card.innerHTML = `
+    ${deleteBtn}
+    <div style="font-size: 2.2rem; margin-bottom: 6px;">${sound.icon || '🎵'}</div>
+    <div style="font-weight: 700; font-size: 0.95rem; color: #fff;">${escapeHtml(sound.title)}</div>
+    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Uploaded by @${escapeHtml(sound.uploaded_by || 'User')}</div>
+  `;
+
+  card.addEventListener('click', (e) => {
+    if (e.target.classList.contains('sound-delete-btn')) {
+      e.stopPropagation();
+      deleteSound(sound.id);
+      return;
+    }
+
+    playAudioUrl(sound.audio_url);
+    card.classList.add('sound-playing');
+    setTimeout(() => card.classList.remove('sound-playing'), 300);
+
+    const socket = getSharedSocket();
+    if (socket) {
+      socket.emit('play_sound_effect', { audioUrl: sound.audio_url, username: currentUser ? currentUser.username : 'Guest' });
+    }
+  });
+
+  return card;
+}
+
+async function deleteSound(id) {
+  if (!confirm('Are you sure you want to delete this soundboard sound?')) return;
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+    const res = await fetch(`/api/soundboard/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadSoundboards();
+    } else {
+      alert(data.error || 'Failed to delete sound.');
+    }
+  } catch (e) {
+    alert('Error deleting sound: ' + e.message);
+  }
+}
+
+window.openSoundUploadModal = function() {
+  const modal = document.getElementById('soundboard-upload-modal');
+  if (!modal) return;
+  const user = getCurrentUser();
+  const globalCheckDiv = document.getElementById('sound-admin-global-check');
+  const isOwnerOrAdmin = user && (user.role === 'owner' || user.role === 'admin');
+  if (globalCheckDiv) globalCheckDiv.style.display = isOwnerOrAdmin ? 'block' : 'none';
+  modal.classList.add('active');
+};
+
+function setupUploadModal() {
+  const modal = document.getElementById('soundboard-upload-modal');
+  const openBtn = document.getElementById('open-sound-upload-btn');
+  const closeBtn = document.getElementById('soundboard-upload-modal-close');
+  const form = document.getElementById('soundboard-upload-form');
+
+  const fileInput = document.getElementById('sound-upload-file-input');
+  const chooseFileBtn = document.getElementById('sound-choose-file-btn');
+  const fileNameLabel = document.getElementById('sound-file-name-label');
+
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      window.openSoundUploadModal();
+    });
+  }
+
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+  }
+
+  if (chooseFileBtn && fileInput) {
+    chooseFileBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        fileNameLabel.textContent = fileInput.files[0].name;
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('sound-upload-title').value;
+      const icon = document.getElementById('sound-upload-icon').value || '🎵';
+      const urlInput = document.getElementById('sound-upload-url-input').value;
+      const isGlobal = document.getElementById('sound-upload-is-global')?.checked || false;
+
+      let audioUrl = urlInput;
+
+      if (!audioUrl && fileInput && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          return alert('Audio file must be smaller than 5MB.');
+        }
+        audioUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (evt) => resolve(evt.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (!audioUrl) {
+        return alert('Please enter an Audio URL or choose a local audio file.');
+      }
+
+      try {
+        const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+        const res = await fetch('/api/soundboard/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ title, icon, audioUrl, isGlobal })
+        });
+        const data = await res.json();
+        if (data.success) {
+          modal.classList.remove('active');
+          form.reset();
+          if (fileNameLabel) fileNameLabel.textContent = 'No file selected';
+          loadSoundboards();
+        } else {
+          alert(data.error || 'Upload failed.');
+        }
+      } catch (err) {
+        alert('Upload error: ' + err.message);
+      }
+    });
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+window.adminFetchSoundboard = async function() {
+  const tbody = document.getElementById('admin-soundboard-tbody');
+  if (!tbody) return;
+
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+    const res = await fetch('/api/soundboard', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    const data = await res.json();
+
+    if (data.success && data.sounds) {
+      if (data.sounds.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding:16px; text-align:center; color:var(--text-muted);">No custom or global soundboards uploaded yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.sounds.map(sound => `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <td style="padding: 10px 12px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.4rem;">${sound.icon || '🎵'}</span>
+            <strong style="color: #fff;">${escapeHtml(sound.title)}</strong>
+          </td>
+          <td style="padding: 10px 12px;">
+            <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; font-weight: 800; background: ${sound.is_global ? 'rgba(251, 191, 36, 0.2)' : 'rgba(56, 189, 248, 0.2)'}; color: ${sound.is_global ? '#fbbf24' : '#38bdf8'};">
+              ${sound.is_global ? '🌐 GLOBAL' : '👤 USER CUSTOM'}
+            </span>
+          </td>
+          <td style="padding: 10px 12px; color: var(--text-muted); font-size: 0.85rem;">@${escapeHtml(sound.uploaded_by || 'User')}</td>
+          <td style="padding: 10px 12px;">
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-small" onclick="window.adminPlaySound('${encodeURIComponent(sound.audio_url)}')" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #10b981; font-weight: 700;">🔊 Test Play</button>
+              <button class="btn-small danger" onclick="window.adminDeleteSound(${sound.id})">🗑️ Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (e) {
+    console.error('adminFetchSoundboard error:', e);
+  }
+};
+
+window.adminPlaySound = (audioUrl) => {
+  playAudioUrl(decodeURIComponent(audioUrl));
+};
+
+window.adminDeleteSound = async (id) => {
+  if (!confirm('Are you sure you want to delete this soundboard entry?')) return;
+  await deleteSound(id);
+  window.adminFetchSoundboard();
+};

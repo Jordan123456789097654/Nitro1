@@ -224,6 +224,20 @@ function setupSocketListeners() {
   socket.off('private_room_system_msg');
   socket.off('message_deleted');
 
+  socket.off('open_dms_list');
+  socket.off('open_dms_update');
+
+  socket.on('open_dms_list', (conversations) => {
+    renderOpenDmsPills(conversations);
+  });
+
+  socket.on('open_dms_update', () => {
+    const user = getCurrentUser();
+    if (user && socket) {
+      socket.emit('get_open_dms', { username: user.username });
+    }
+  });
+
   socket.on('initial_messages', (messages) => {
     if (activeChatMode === 'global') {
       container.innerHTML = '';
@@ -317,6 +331,37 @@ function setupSocketListeners() {
   });
 }
 
+function renderOpenDmsPills(conversations) {
+  const container = document.getElementById('chat-open-dms-pills');
+  if (!container) return;
+
+  if (!conversations || conversations.length === 0) {
+    container.innerHTML = '<span style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">No open conversations yet. Type a username above!</span>';
+    return;
+  }
+
+  container.innerHTML = conversations.map(c => {
+    const isActive = activeDmRecipient && activeDmRecipient.toLowerCase() === c.other_user.toLowerCase();
+    return `
+      <button class="btn-small" onclick="window.openDmConversation('${c.other_user}')" style="background: ${isActive ? '#38bdf8' : 'rgba(255,255,255,0.08)'}; color: ${isActive ? '#000' : '#fff'}; font-weight: 700; border: 1px solid ${isActive ? '#38bdf8' : 'rgba(255,255,255,0.12)'}; padding: 4px 10px; border-radius: 99px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="${escapeHtml(c.message || '')}">
+        <span>💬</span>
+        <span>@${escapeHtml(c.other_user)}</span>
+      </button>
+    `;
+  }).join('');
+}
+
+window.openDmConversation = (targetUsername) => {
+  if (!targetUsername) return;
+  const user = getCurrentUser();
+  if (!user) return alert('Please log in to chat.');
+
+  activeDmRecipient = targetUsername;
+  document.getElementById('chat-dm-active-label').textContent = `💬 Chatting with @${targetUsername}`;
+  socket.emit('get_dm_history', { username1: user.username, username2: targetUsername });
+  socket.emit('get_open_dms', { username: user.username });
+};
+
 function setupChatTabs() {
   const tabs = document.querySelectorAll('.chat-mode-tab');
   tabs.forEach(tab => {
@@ -389,7 +434,11 @@ function setupChatTabs() {
         if (roomBar) roomBar.style.display = 'none';
         const notifBadge = document.getElementById('chat-dm-badge');
         if (notifBadge) notifBadge.style.display = 'none';
-        chatMessagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">Enter a student username above to start a private 1-on-1 direct message conversation.</div>';
+        const user = getCurrentUser();
+        if (user && socket) {
+          socket.emit('get_open_dms', { username: user.username });
+        }
+        chatMessagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">Enter a student username above or click an Open DM to load your conversation.</div>';
       } else if (activeChatMode === 'room') {
         if (globalHeader) globalHeader.style.display = 'none';
         if (dmBar) dmBar.style.display = 'none';
@@ -725,15 +774,17 @@ function appendChatMessage(msg) {
 
   row.innerHTML = `
     <div style="display: flex; gap: 10px; width: 100%;">
-      <div class="chat-msg-avatar ${avatarFrameClass}" id="msg-avatar-${msg.id || Date.now()}" style="width: 34px; height: 34px; flex-shrink: 0; font-size: 1.1rem; border-radius: 50%;"></div>
+      <div class="chat-msg-avatar ${avatarFrameClass}" id="msg-avatar-${msg.id || Date.now()}" onclick="window.openPublicProfile('${msg.username || ''}')" style="width: 34px; height: 34px; flex-shrink: 0; font-size: 1.1rem; border-radius: 50%; cursor: pointer;" title="Click to view @${msg.username || ''}'s profile"></div>
       <div style="flex: 1;">
         <div class="chat-msg-header">
-          <strong class="chat-msg-username ${glowClass}" onclick="window.openPublicProfile('${msg.username || ''}')" style="cursor: pointer;" title="Click to view profile & unlocked badges">
-            ${escapeHtml(displayName)}
-            ${customFlair}
-            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">(@${msg.username || 'user'})</span>
-          </strong>
-          ${roleBadge}
+          <div onclick="window.openPublicProfile('${msg.username || ''}')" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Click to view @${msg.username || ''}'s profile">
+            <strong class="chat-msg-username ${glowClass}">
+              ${escapeHtml(displayName)}
+              ${customFlair}
+              <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">(@${msg.username || 'user'})</span>
+            </strong>
+            ${roleBadge}
+          </div>
           <span class="chat-msg-time">${time}</span>
           ${deleteBtn}
         </div>
@@ -747,9 +798,12 @@ function appendChatMessage(msg) {
 }
 
 function appendDmMessage(dm) {
+  if (!dm) return;
   const container = document.getElementById('chat-messages');
+  if (!container) return;
+
   const user = getCurrentUser();
-  const isMine = user && dm.sender_username.toLowerCase() === user.username.toLowerCase();
+  const isMine = user && dm.sender_username && dm.sender_username.toLowerCase() === user.username.toLowerCase();
 
   const row = document.createElement('div');
   row.className = 'chat-message-row';
@@ -757,13 +811,14 @@ function appendDmMessage(dm) {
   row.style.borderLeft = isMine ? '3px solid #38bdf8' : '3px solid #8b5cf6';
 
   const time = formatChatTimestamp(dm.created_at);
+  const rawText = dm.content !== undefined ? dm.content : (dm.message !== undefined ? dm.message : (dm.text || ''));
 
   row.innerHTML = `
-    <div class="chat-msg-header">
-      <strong style="color: ${isMine ? '#38bdf8' : '#8b5cf6'};">${dm.sender_username}</strong>
-      <span class="chat-msg-time">${time}</span>
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+      <strong style="color: ${isMine ? '#38bdf8' : '#8b5cf6'}; cursor: pointer; font-size: 0.92rem;" onclick="window.openPublicProfile('${dm.sender_username || ''}')" title="Click to view @${dm.sender_username || ''}'s profile">@${escapeHtml(dm.sender_username || 'user')}</strong>
+      <span class="chat-msg-time" style="font-size: 0.75rem; color: #94a3b8;">${time}</span>
     </div>
-    <div class="chat-msg-body">${formatMessageText(dm.message)}</div>
+    <div class="chat-msg-body" style="font-size: 0.92rem; color: #f8fafc;">${formatMessageText(rawText)}</div>
   `;
 
   container.appendChild(row);

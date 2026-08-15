@@ -257,10 +257,12 @@ function initChatSocket(io) {
         for (const [sId, c] of activeConnections.entries()) {
           if (c.username && c.username.toLowerCase() === recipientUsername.toLowerCase()) {
             io.to(sId).emit('new_dm', newDm);
+            io.to(sId).emit('open_dms_update');
           }
         }
 
         socket.emit('new_dm', newDm);
+        socket.emit('open_dms_update');
       } catch (e) {
         console.error('DM error:', e);
       }
@@ -274,6 +276,16 @@ function initChatSocket(io) {
         socket.emit('dm_history', { otherUser: username2, messages: history });
       } catch (e) {
         console.error('DM history error:', e);
+      }
+    });
+
+    socket.on('get_open_dms', async ({ username }) => {
+      if (!username) return;
+      try {
+        const convos = await db.getUserConversations(username);
+        socket.emit('open_dms_list', convos);
+      } catch (e) {
+        socket.emit('open_dms_list', []);
       }
     });
 

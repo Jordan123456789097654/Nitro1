@@ -134,15 +134,6 @@
       <h3 id="gate-form-title" style="color: var(--accent-color); font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;">Sign In to Your Student Account</h3>
       <p style="color: var(--text-muted); font-size: 0.86rem; line-height: 1.5; margin-bottom: 22px;">Sign in to access your digital study notes, curriculum solvers, and academic suite.</p>
 
-      <!-- Quick Admin Credentials Banner -->
-      <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.82rem; color: #fbbf24; text-align: left; display: flex; align-items: center; justify-content: space-between;">
-        <div>
-          <strong style="display: block; font-size: 0.8rem;">🔑 Admin Account Credentials:</strong>
-          <span>User: <code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #fff;">jordandaniels</code> | Pass: <code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #fff;">0422jojob</code></span>
-        </div>
-        <button type="button" onclick="document.getElementById('gate-username').value='jordandaniels'; document.getElementById('gate-password').value='0422jojob';" style="background: #fbbf24; color: #000; border: none; font-size: 0.72rem; font-weight: 800; padding: 6px 10px; border-radius: 6px; cursor: pointer; flex-shrink: 0;">Auto-Fill</button>
-      </div>
-
       <form id="gate-auth-form" style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
         <div class="form-group">
           <label style="color: #cbd5e1; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
@@ -468,11 +459,8 @@
         <button class="nav-btn" id="nav-leaderboards-btn" title="Multiplayer High-Score Leaderboards" onclick="document.getElementById('open-leaderboards-btn')?.click()" style="color: #fbbf24; font-size: 1.1rem;">
           🏆
         </button>
-        <!-- ADMIN ONLY BUTTONS -->
-        <button class="nav-btn" data-view="games" id="add-game-nav-btn" title="Add Custom Item" style="display: none;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 18 6 6 6 6 2"></polygon><rect x="3" y="6" width="18" height="16" rx="2"></rect><circle cx="8" cy="14" r="2"></circle><path d="M14 12h4"></path><path d="M16 10v4"></path></svg>
-        </button>
-        <button class="nav-btn" data-view="admin" id="admin-nav-btn" title="Admin Panel" style="display: none;">
+        <!-- ADMIN ONLY BUTTON -->
+        <button class="nav-btn" data-view="admin" id="admin-nav-btn" title="Admin Dashboard" style="display: none; color: #ef4444;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
           <span class="nav-badge"></span>
         </button>
@@ -937,9 +925,17 @@
             <span id="chat-online-count">Online</span>
           </div>
 
-          <div id="chat-dm-bar" style="display: none; align-items: center; gap: 10px; width: 100%;">
-            <input type="text" id="chat-dm-target-user" placeholder="Enter student username to DM..." style="flex: 1; padding: 6px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
-            <button class="btn-small primary" id="chat-start-dm-btn">Open DM</button>
+          <div id="chat-dm-bar" style="display: none; flex-direction: column; gap: 8px; width: 100%; padding: 4px 0;">
+            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+              <input type="text" id="chat-dm-target-user" placeholder="Enter student username to DM..." style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.88rem;">
+              <button class="btn-pill primary" id="chat-start-dm-btn">Open DM</button>
+            </div>
+            
+            <div id="chat-open-dms-section" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">💬 Open DMs:</span>
+              <div id="chat-open-dms-pills" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;"></div>
+            </div>
+
             <span id="chat-dm-active-label" style="font-size: 0.82rem; color: #38bdf8; font-weight: 700;"></span>
           </div>
 
@@ -1271,27 +1267,45 @@
 
     <!-- SECTION 6.5: INTERACTIVE SOUNDBOARD -->
     <section class="page-view" id="view-soundboard">
-      <div class="header-title-section">
-        <h1>INTERACTIVE SOUNDBOARD</h1>
-        <p>Synthesized Web Audio sound effects, meme sounds, and audio focus cues.</p>
+      <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h1>INTERACTIVE SOUNDBOARD</h1>
+          <p>Web Audio sound effects, user-uploaded custom sounds, and global community soundboards.</p>
+        </div>
+        <button class="btn-pill primary" id="open-sound-upload-btn" onclick="window.openSoundUploadModal?.()" style="font-weight: 800; padding: 10px 18px;">➕ Upload Custom Sound</button>
       </div>
 
       <div class="view-content-wrapper" style="margin-top: 20px;">
-        <div id="soundboard-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;"></div>
+        <h3 style="color: #fbbf24; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>🌐</span> Global Community Soundboard
+        </h3>
+        <div id="soundboard-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px;"></div>
+
+        <h3 style="color: #38bdf8; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>👤</span> Custom Uploaded Soundboards
+        </h3>
+        <div id="soundboard-grid-custom" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;"></div>
       </div>
     </section>
 
-    <!-- SECTION 7: ADMIN CONTROL PANEL -->
+    <!-- SECTION 7: ADMIN DASHBOARD & MODERATION HUB -->
     <section class="page-view" id="view-admin">
-      <div class="header-title-section">
-        <h1>ADMIN CONTROL PANEL</h1>
+      <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h1 style="background: linear-gradient(90deg, #ef4444, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ADMIN DASHBOARD & MODERATION HUB</h1>
+          <p>Real-time analytics, user moderation, socket connection diagnostics, and catalog management.</p>
+        </div>
       </div>
 
-      <div class="admin-dashboard-container">
-        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+      <div class="admin-dashboard-container" style="margin-top: 16px;">
+        <!-- Maintenance Mode Bar -->
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; backdrop-filter: blur(12px);">
           <div>
-            <strong style="font-size: 1.1rem; display: block;">🚧 Maintenance Mode</strong>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Status: <strong id="admin-maintenance-status" style="color: #10b981;">OFF (Live to Public)</strong></span>
+            <strong style="font-size: 1.05rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+              <span>🚧 Maintenance Mode</span>
+              <span id="admin-maintenance-status" style="font-size: 0.78rem; padding: 2px 10px; border-radius: 99px; background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 800;">OFF (Live Public Access)</span>
+            </strong>
+            <span style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; display: block;">Toggle maintenance mode to restrict non-admin student access during system updates.</span>
           </div>
           <label class="switch">
             <input type="checkbox" id="admin-maintenance-switch">
@@ -1299,271 +1313,93 @@
           </label>
         </div>
 
-        <div class="admin-stats-grid" id="admin-stats-container">
-          <div class="admin-stat-card">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Total Users</span>
-            <span class="admin-stat-number" id="stat-users">0</span>
+        <!-- Metric Overview Cards -->
+        <div class="admin-stats-grid" id="admin-stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px;">
+          <div class="admin-stat-card" style="background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 18px;">
+            <span style="font-size: 0.82rem; color: #38bdf8; font-weight: 700; display: block;">👥 Registered Users</span>
+            <span class="admin-stat-number" id="stat-users" style="font-size: 1.8rem; font-weight: 900; color: #fff;">0</span>
           </div>
-          <div class="admin-stat-card">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Items in Catalog</span>
-            <span class="admin-stat-number" id="stat-games">0</span>
+          <div class="admin-stat-card" style="background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 18px;">
+            <span style="font-size: 0.82rem; color: #fbbf24; font-weight: 700; display: block;">🎮 Items in Catalog</span>
+            <span class="admin-stat-number" id="stat-games" style="font-size: 1.8rem; font-weight: 900; color: #fff;">0</span>
           </div>
-          <div class="admin-stat-card">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">PRO Members</span>
-            <span class="admin-stat-number" id="stat-vips">0</span>
+          <div class="admin-stat-card" style="background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 18px;">
+            <span style="font-size: 0.82rem; color: #a855f7; font-weight: 700; display: block;">⭐ PRO / VIP Members</span>
+            <span class="admin-stat-number" id="stat-vips" style="font-size: 1.8rem; font-weight: 900; color: #fff;">0</span>
           </div>
-          <div class="admin-stat-card">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Chat Messages</span>
-            <span class="admin-stat-number" id="stat-chats">0</span>
+          <div class="admin-stat-card" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 18px;">
+            <span style="font-size: 0.82rem; color: #ef4444; font-weight: 700; display: block;">💬 Chat Messages Sent</span>
+            <span class="admin-stat-number" id="stat-chats" style="font-size: 1.8rem; font-weight: 900; color: #fff;">0</span>
           </div>
         </div>
 
-        <div class="admin-tabs-nav">
+        <!-- Sleek Admin Sub-Navigation Tabs -->
+        <div class="admin-tabs-nav" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
           <button class="admin-tab-btn active" data-tab="radar">📊 Activity Radar</button>
-          <button class="admin-tab-btn" data-tab="ownerfeatures" style="color: #fbbf24; font-weight: 800;">👑 Owner Controls</button>
-          <button class="admin-tab-btn" data-tab="users">Users & Moderation</button>
+          <button class="admin-tab-btn" data-tab="users">👥 Users & Moderation</button>
           <button class="admin-tab-btn" data-tab="connections">⚡ Live Connections</button>
           <button class="admin-tab-btn" data-tab="iptracker" onclick="window.adminFetchIpLogs()">🌐 IP Tracker</button>
           <button class="admin-tab-btn" data-tab="bulk">📥 Bulk Importer</button>
           <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
-          <button class="admin-tab-btn" data-tab="updates">Update Logs & Notes</button>
-          <button class="admin-tab-btn" data-tab="announcements">Announcements</button>
-          <button class="admin-tab-btn" data-tab="domains">Domain Filter</button>
-          <button class="admin-tab-btn" data-tab="games">Catalog</button>
-          <button class="admin-tab-btn" data-tab="filters">Name Filters</button>
+          <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
+          <button class="admin-tab-btn" data-tab="announcements">📢 Announcements</button>
+          <button class="admin-tab-btn" data-tab="domains">🚫 Domain Filters</button>
+          <button class="admin-tab-btn" data-tab="games">🎮 Catalog</button>
           <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions</button>
-          <button class="admin-tab-btn" data-tab="logs">Audit Logs</button>
+          <button class="admin-tab-btn" data-tab="soundboard" onclick="window.adminFetchSoundboard()">🔊 Manage Soundboards</button>
+          <button class="admin-tab-btn" data-tab="logs">📜 Audit Logs</button>
         </div>
 
-        <!-- Admin Tab: Activity Radar Dashboard -->
+        <!-- Admin Tab: Activity Radar -->
         <div class="admin-tab-content" id="tab-radar">
           <div style="margin-bottom: 14px;">
-            <h3>📊 Real-Time Activity Radar</h3>
+            <h3 style="color: #38bdf8;">📊 Real-Time Activity Radar</h3>
             <p style="color: var(--text-muted); font-size: 0.85rem;">Live system diagnostics, peak usage metrics, and catalog popularity distribution.</p>
           </div>
           <div id="admin-radar-content"></div>
         </div>
 
-        <!-- Admin Tab: Owner Feature Controls -->
-        <div class="admin-tab-content" id="tab-ownerfeatures" style="display: none;">
-          <div style="margin-bottom: 16px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); padding: 16px; border-radius: var(--radius-md);">
-            <h3 style="color: #fbbf24; margin: 0 0 6px;">👑 Owner Feature Controls</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Toggle access to platform features on/off instantly. Restricted features will be disabled for non-owner visitors.</p>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">🌐 Unfiltered Proxy Engine</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">/api/proxy</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_proxy_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_proxy_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">💬 Real-Time Global Chat & DMs</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Socket.io Chat</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_chat_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_chat_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">🎮 Games & Apps Catalog</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Game Library</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_games_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_games_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">🪄 AI Study Assistant Engine</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Homework Solver</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_ai_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_ai_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">🔊 Synthesized Soundboard</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Audio Effects</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_soundboard_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_soundboard_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">📊 Community Polls & Voting</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Poll Engine</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_polls_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_polls_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <strong style="color: #fff;">🎧 Pro Voice Lounge</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Voice Signals</span>
-              </div>
-              <div>
-                <button class="btn-small danger" onclick="window.toggleFeatureControl('feature_voice_enabled', false)">Disable</button>
-                <button class="btn-small primary" onclick="window.toggleFeatureControl('feature_voice_enabled', true)">Enable</button>
-              </div>
-            </div>
-
-            <!-- Purge Chat History Card -->
-            <div class="admin-stat-card" style="display: flex; align-items: center; justify-content: space-between; border-color: rgba(239, 68, 68, 0.4);">
-              <div>
-                <strong style="color: #ef4444;">🔥 Purge Global Chat History</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Wipe all chat messages permanently</span>
-              </div>
-              <button class="btn-small danger" onclick="window.ownerPurgeChat()" style="font-weight: 800;">🗑️ Purge Chat</button>
-            </div>
-
-            <!-- Global Slowmode Control Card -->
-            <div class="admin-stat-card" style="display: flex; flex-direction: column; gap: 8px; border-color: rgba(251, 191, 36, 0.4);">
-              <div>
-                <strong style="color: #fbbf24;">⏳ Set Global Chat Slowmode</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted);">Enforce delay between student chat messages</span>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <button class="btn-small" onclick="window.ownerSetSlowmode(0)" style="background: rgba(255,255,255,0.1); color: #fff;">Off (0s)</button>
-                <button class="btn-small" onclick="window.ownerSetSlowmode(3)" style="background: rgba(255,255,255,0.1); color: #fff;">3s</button>
-                <button class="btn-small" onclick="window.ownerSetSlowmode(5)" style="background: rgba(255,255,255,0.1); color: #fff;">5s</button>
-                <button class="btn-small" onclick="window.ownerSetSlowmode(10)" style="background: rgba(255,255,255,0.1); color: #fff;">10s</button>
-                <button class="btn-small" onclick="window.ownerSetSlowmode(30)" style="background: rgba(255,255,255,0.1); color: #fff;">30s</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Admin Tab: IP Tracker -->
-        <div class="admin-tab-content" id="tab-iptracker" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <!-- Admin Tab: Soundboard Manager -->
+        <div class="admin-tab-content" id="tab-soundboard" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
             <div>
-              <h3>🌐 Admin IP Tracker & Geolocation Security</h3>
-              <p style="color: var(--text-muted); font-size: 0.85rem;">Live tracking of incoming client IP addresses, user association, and IP ban management.</p>
+              <h3 style="color: #ec4899; margin: 0;">🔊 Soundboard Catalog & Audio Management</h3>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Upload, configure, test play, and delete global community soundboards or user custom sounds.</p>
             </div>
-            <button class="btn-pill primary" onclick="window.adminFetchIpLogs()">🔄 Refresh IP Logs</button>
+            <button class="btn-pill primary" onclick="document.getElementById('open-sound-upload-btn')?.click()" style="font-weight: 800;">➕ Upload Soundboard Sound</button>
           </div>
-          <table class="admin-table">
+
+          <table class="admin-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr>
-                <th>IP Address</th>
-                <th>Username</th>
-                <th>User Agent</th>
-                <th>Location / ISP</th>
-                <th>Last Seen</th>
-                <th>Actions</th>
+              <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                <th style="padding: 10px 12px;">Sound Title & Icon</th>
+                <th style="padding: 10px 12px;">Type</th>
+                <th style="padding: 10px 12px;">Uploaded By</th>
+                <th style="padding: 10px 12px;">Actions</th>
               </tr>
             </thead>
-            <tbody id="admin-ip-logs-tbody"></tbody>
+            <tbody id="admin-soundboard-tbody"></tbody>
           </table>
-        </div>
-
-        <!-- Admin Tab: Bulk Catalog Importer -->
-        <div class="admin-tab-content" id="tab-bulk" style="display: none;">
-          <div style="margin-bottom: 14px;">
-            <h3>📥 Bulk Catalog Importer (JSON / CSV)</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">Upload a JSON or CSV file to import games and web tools instantly.</p>
-          </div>
-
-          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 20px; border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 14px;">
-            <div class="form-group">
-              <label>Upload JSON or CSV File</label>
-              <input type="file" id="admin-bulk-file-input" accept=".json,.csv" style="padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 6px; color: #fff;">
-            </div>
-
-            <div class="form-group">
-              <label>Or Paste Raw JSON Array</label>
-              <textarea id="admin-bulk-json-input" placeholder='[{"title":"Game Name","author":"Lab","category":"Action","embed_type":"iframe_url","embed_content":"https://...","thumbnail_url":"https://..."}]' style="min-height: 120px; font-family: monospace; font-size: 0.8rem;"></textarea>
-            </div>
-
-            <button class="btn-pill primary" id="admin-bulk-import-btn" style="align-self: flex-start;">🚀 Run Bulk Catalog Import</button>
-          </div>
         </div>
 
         <!-- Admin Tab: Users & Moderation -->
         <div class="admin-tab-content" id="tab-users" style="display: none;">
-          <!-- Account Creation Form Card -->
-          <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); padding: 18px 22px; border-radius: var(--radius-md); margin-bottom: 20px;">
-            <h4 style="color: #38bdf8; margin: 0 0 8px; font-size: 1.05rem;">➕ Create New User Account</h4>
-            <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 14px;">Directly provision new student, PRO, admin, or owner accounts with custom roles and credentials.</p>
-
-            <form id="admin-create-user-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
-              <div>
-                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Username</label>
-                <input type="text" id="admin-new-username" placeholder="e.g. alex2026" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" required>
-              </div>
-
-              <div>
-                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Display Name</label>
-                <input type="text" id="admin-new-displayname" placeholder="e.g. Alex ⚡" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
-              </div>
-
-              <div>
-                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Initial Password</label>
-                <input type="password" id="admin-new-password" placeholder="Password..." style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" required>
-              </div>
-
-              <div>
-                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">User Role</label>
-                <select id="admin-new-role" class="proxy-select-dropdown" style="width: 100%; padding: 7px 10px; font-size: 0.85rem;">
-                  <option value="member">Student Member</option>
-                  <option value="pro">⚡ PRO Lounge</option>
-                  <option value="student_plus">🎓 Student Plus</option>
-                  <option value="vip">⭐ VIP Rank</option>
-                  <option value="moderator">🛡️ Moderator</option>
-                  <option value="admin">🛡️ Admin</option>
-                  <option value="owner">👑 Owner</option>
-                </select>
-              </div>
-
-              <button type="submit" class="btn-pill primary" style="justify-content: center; height: 36px; padding: 0 16px;">Create Account</button>
-            </form>
-          </div>
-
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3>Registered Users & Active Moderation</h3>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 0.85rem; color: var(--text-muted);">⏳ Chat Slowmode:</span>
-              <select id="admin-slowmode-select" class="proxy-select-dropdown" style="padding: 4px 8px; font-size: 0.8rem;">
-                <option value="0">Off (0s)</option>
-                <option value="3">3 Seconds</option>
-                <option value="5">5 Seconds</option>
-                <option value="10">10 Seconds</option>
-                <option value="30">30 Seconds</option>
-              </select>
-              <button class="btn-small primary" id="admin-slowmode-apply-btn">Apply</button>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="color: #38bdf8; margin: 0;">👥 Registered Users & Moderation</h3>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="admin-user-search" placeholder="Search users by name or role..." style="padding: 6px 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
             </div>
           </div>
 
-          <table class="admin-table">
+          <table class="admin-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>User / Display</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
+              <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                <th style="padding: 10px 12px;">Username</th>
+                <th style="padding: 10px 12px;">Display Name</th>
+                <th style="padding: 10px 12px;">Role</th>
+                <th style="padding: 10px 12px;">Status / Muted</th>
+                <th style="padding: 10px 12px;">XP / Coins</th>
+                <th style="padding: 10px 12px;">Actions</th>
               </tr>
             </thead>
             <tbody id="admin-users-tbody"></tbody>
@@ -1573,17 +1409,17 @@
         <!-- Admin Tab: Live Connections -->
         <div class="admin-tab-content" id="tab-connections" style="display: none;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3>⚡ Live Active Sockets</h3>
-            <span class="chat-badge" id="admin-live-conn-count">0 Active</span>
+            <h3 style="color: #10b981;">⚡ Live Active Socket Connections</h3>
+            <button class="btn-small primary" onclick="window.adminFetchConnections()" style="font-weight: 700;">🔄 Refresh Connections</button>
           </div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Real-time listing of all active WebSocket client connections connected to chat and voice rooms.</p>
           <table class="admin-table">
             <thead>
               <tr>
                 <th>Socket ID</th>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Current Activity</th>
-                <th>IP</th>
+                <th>Connected User</th>
+                <th>IP Address</th>
+                <th>Active Channel</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -1591,99 +1427,115 @@
           </table>
         </div>
 
-        <!-- Admin Tab: Polls -->
-        <div class="admin-tab-content" id="tab-polls" style="display: none;">
-          <h3>📊 Create Community Poll</h3>
-          <form id="admin-poll-form" class="game-form-grid" style="margin: 14px 0 24px;">
-            <div class="form-group full">
-              <label>Poll Question</label>
-              <input type="text" id="poll-question-input" required placeholder="e.g. Which new arcade game should we add next?">
-            </div>
-            <div class="form-group full">
-              <label>Poll Options (comma separated)</label>
-              <input type="text" id="poll-options-input" required placeholder="e.g. Retro Space Runner, 3D Chess, Flappy Deluxe">
-            </div>
-            <div class="form-group full">
-              <button type="submit" class="btn-pill primary">Publish Community Poll</button>
-            </div>
-          </form>
-          <h3>Active Polls</h3>
-          <div id="admin-polls-list"></div>
+        <!-- Admin Tab: IP Tracker Logs -->
+        <div class="admin-tab-content" id="tab-iptracker" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="color: #a855f7;">🌐 IP Address & Device Session Tracker</h3>
+            <button class="btn-small primary" onclick="window.adminFetchIpLogs()" style="font-weight: 700;">🔄 Refresh IP Logs</button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Detailed log of IP addresses, user agents, and login timestamps recorded across accounts.</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>IP Address</th>
+                <th>User Agent Device</th>
+                <th>Last Login Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="admin-iplogs-tbody"></tbody>
+          </table>
         </div>
 
-        <!-- Admin Tab: Updates -->
-        <div class="admin-tab-content" id="tab-updates" style="display: none;">
-          <h3>🚀 Publish Platform Update & Patch Notes</h3>
-          <form id="admin-update-form" class="game-form-grid" style="margin: 14px 0 24px;">
+        <!-- Admin Tab: Bulk Importer -->
+        <div class="admin-tab-content" id="tab-bulk" style="display: none;">
+          <h3 style="color: #fbbf24;">📥 Bulk Item Importer</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Paste a JSON array of games/apps to import multiple catalog items into the database at once.</p>
+          <textarea id="bulk-import-json" placeholder='[{"title": "Sample Game", "url": "https://...", "category": "Action", "type": "html5", "thumb": "https://..."}]' style="width: 100%; height: 160px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; color: #fff; font-family: monospace; font-size: 0.85rem; margin-bottom: 14px;"></textarea>
+          <button class="btn-pill primary" id="bulk-import-submit-btn">Execute Bulk Import</button>
+        </div>
+
+        <!-- Admin Tab: Poll Builder -->
+        <div class="admin-tab-content" id="tab-polls" style="display: none;">
+          <h3 style="color: #38bdf8;">📊 Community Poll Builder</h3>
+          <form id="admin-poll-form" style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px; max-width: 500px;">
             <div class="form-group">
-              <label>Version Tag</label>
-              <input type="text" id="update-version" placeholder="e.g. v2.8" required>
+              <label>Poll Question</label>
+              <input type="text" id="poll-question-input" required placeholder="e.g. Which game should we add next week?">
             </div>
             <div class="form-group">
-              <label>Update Title</label>
-              <input type="text" id="update-title" placeholder="e.g. Mega Upgrade Released" required>
+              <label>Option 1</label>
+              <input type="text" id="poll-opt1-input" required placeholder="Option 1 text">
             </div>
-            <div class="form-group full">
-              <label>Patch Notes Content</label>
-              <textarea id="update-content" placeholder="• List bullet points of changes..." required style="min-height: 100px;"></textarea>
+            <div class="form-group">
+              <label>Option 2</label>
+              <input type="text" id="poll-opt2-input" required placeholder="Option 2 text">
             </div>
-            <div class="form-group full">
-              <button type="submit" class="btn-pill primary">Publish Update & Notify Visitors</button>
+            <div class="form-group">
+              <label>Option 3 (Optional)</label>
+              <input type="text" id="poll-opt3-input" placeholder="Option 3 text">
             </div>
+            <div class="form-group">
+              <label>Option 4 (Optional)</label>
+              <input type="text" id="poll-opt4-input" placeholder="Option 4 text">
+            </div>
+            <button type="submit" class="btn-pill primary">Publish Poll to Community</button>
           </form>
-          <h3>Previous Update Logs</h3>
-          <div id="admin-updates-list"></div>
+        </div>
+
+        <!-- Admin Tab: Update Logs & Patch Notes -->
+        <div class="admin-tab-content" id="tab-updates" style="display: none;">
+          <h3 style="color: #fbbf24;">📋 Manage Platform Update Logs & Version Notes</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+            Post patch notes and version announcements. When updated, users will see the update popup modal upon visiting the platform.
+          </p>
+          <form id="admin-update-log-form" style="display: flex; flex-direction: column; gap: 14px; max-width: 600px;">
+            <div style="display: flex; gap: 12px;">
+              <div class="form-group" style="flex: 1;">
+                <label>Version Tag</label>
+                <input type="text" id="admin-update-version" required placeholder="e.g. v2.9">
+              </div>
+              <div class="form-group" style="flex: 2;">
+                <label>Update Title</label>
+                <input type="text" id="admin-update-title" required placeholder="e.g. Summer Gaming & UI Upgrade Release">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Release Notes Content (Bullet points supported)</label>
+              <textarea id="admin-update-notes" required placeholder="• Added 10 new unblocked arcade titles&#10;• Improved WebRTC voice room quality&#10;• Fixed chat GIF keyboard lag" style="width: 100%; height: 140px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; color: #fff; font-size: 0.9rem;"></textarea>
+            </div>
+            <button type="submit" class="btn-pill primary" style="align-self: flex-start;">Broadcast Patch Notes</button>
+          </form>
         </div>
 
         <!-- Admin Tab: Announcements -->
         <div class="admin-tab-content" id="tab-announcements" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3>Global Announcements</h3>
-            <button class="btn-small danger" id="admin-disable-ann-btn">🚫 Disable & Clear Active Announcement</button>
-          </div>
-          <form id="admin-announcement-form" class="game-form-grid" style="margin-top: 10px;">
+          <h3 style="color: #ef4444;">📢 Broadcast Global Announcement</h3>
+          <form id="admin-announcement-form" style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px; max-width: 500px;">
             <div class="form-group">
               <label>Announcement Title</label>
-              <input type="text" id="ann-title" placeholder="e.g. System Update Released" required>
+              <input type="text" id="ann-title-input" required placeholder="e.g. Scheduled System Maintenance">
             </div>
             <div class="form-group">
-              <label>Style Type</label>
-              <select id="ann-type" class="proxy-select-dropdown">
-                <option value="info">Info (Blue)</option>
-                <option value="warning">Alert / Warning (Red)</option>
-                <option value="pro">PRO Exclusive (Gold)</option>
-              </select>
-            </div>
-            <div class="form-group full">
               <label>Message Content</label>
-              <textarea id="ann-message" placeholder="Type banner message for all visitors..." required style="min-height: 80px;"></textarea>
+              <textarea id="ann-msg-input" required placeholder="e.g. The proxy servers will be upgrading tonight at 11:00 PM EST." style="width: 100%; height: 90px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; color: #fff;"></textarea>
             </div>
-            <div class="form-group full">
-              <label style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="ann-active" checked>
-                <span>Active on site</span>
-              </label>
-            </div>
-            <div class="form-group full">
-              <button type="submit" class="btn-pill primary">Publish Announcement</button>
-            </div>
+            <button type="submit" class="btn-pill primary">Publish Announcement Banner</button>
           </form>
         </div>
 
-        <!-- Admin Tab: Blocked Domains -->
+        <!-- Admin Tab: Domain Filters -->
         <div class="admin-tab-content" id="tab-domains" style="display: none;">
-          <h3>Restricted Domains for Standard Users</h3>
-          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Standard users who attempt to access these domains receive an automatic 30-minute timeout. PRO & Admin bypass this list.</p>
-          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
-            <input type="text" id="new-blocked-domain" placeholder="Domain (e.g. tiktok.com)..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
-            <input type="text" id="new-domain-reason" placeholder="Reason..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+          <h3 style="color: #a855f7;">🚫 Proxy Domain Filter Rules</h3>
+          <div style="display: flex; gap: 10px; margin: 16px 0;">
+            <input type="text" id="new-domain-rule" placeholder="domain.com (or wildcard *.domain.com)" style="flex: 1; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
             <button class="btn-pill primary" id="add-domain-btn">Block Domain</button>
           </div>
           <table class="admin-table">
             <thead>
               <tr>
-                <th>Blocked Domain</th>
-                <th>Reason</th>
+                <th>Domain Pattern</th>
+                <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -1691,73 +1543,34 @@
           </table>
         </div>
 
-        <!-- Admin Tab: Games Manager Studio -->
+        <!-- Admin Tab: Catalog Games -->
         <div class="admin-tab-content" id="tab-games" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-            <div>
-              <h3 style="color: #38bdf8; font-size: 1.25rem;">🎮 Easy Game Manager Studio</h3>
-              <p style="color: var(--text-muted); font-size: 0.83rem;">Manage cover art, categories, embed sources, and live stats across all catalog games.</p>
-            </div>
-            <button class="btn-pill primary" onclick="window.adminOpenAddGameModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 800;">
-              ➕ Add New Game
-            </button>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="color: #38bdf8;">🎮 Catalog Items Management</h3>
+            <button class="btn-pill primary" onclick="document.querySelector('.nav-btn[data-view=\'games\']')?.click()">➕ Add Single Item</button>
           </div>
-
-          <!-- Controls & Search Toolbar -->
-          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border: 1px solid var(--card-border);">
-            <div style="flex: 1; min-width: 200px;">
-              <input type="text" id="admin-game-search" placeholder="🔍 Instant search by title or author..." style="width: 100%; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" oninput="window.adminFilterGames()">
-            </div>
-            <div>
-              <select id="admin-game-category-select" class="proxy-select-dropdown" style="font-size: 0.85rem; padding: 8px 12px;" onchange="window.adminFilterGames()">
-                <option value="ALL">All Categories</option>
-                <option value="Action">Action</option>
-                <option value="Sports">Sports</option>
-                <option value="Puzzle">Puzzle</option>
-                <option value="Simulation">Simulation</option>
-                <option value="Skill">Skill</option>
-                <option value="RPG">RPG</option>
-                <option value="Sandbox">Sandbox</option>
-                <option value="Retro">Retro</option>
-                <option value="Horror">Horror</option>
-                <option value="Apps">Apps</option>
-              </select>
-            </div>
-            <div style="display: flex; border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden;">
-              <button id="admin-game-view-grid-btn" onclick="window.adminSetGameView('grid')" style="padding: 6px 12px; background: var(--accent-gradient); color: #fff; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer;">🔲 Cards Grid</button>
-              <button id="admin-game-view-table-btn" onclick="window.adminSetGameView('table')" style="padding: 6px 12px; background: #141724; color: var(--text-muted); border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer;">📋 Table List</button>
-            </div>
-          </div>
-
-          <!-- Cards Grid View -->
-          <div id="admin-games-grid-view" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;"></div>
-
-          <!-- Table View -->
-          <div id="admin-games-table-view" style="display: none;">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Cover</th>
-                  <th>Title & Author</th>
-                  <th>Category</th>
-                  <th>Type</th>
-                  <th>Clicks</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="admin-games-tbody"></tbody>
-            </table>
-          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Title & Author</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Clicks</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-games-tbody"></tbody>
+          </table>
         </div>
 
         <!-- Admin Tab: Suggestions -->
         <div class="admin-tab-content" id="tab-suggestions" style="display: none;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3>💡 User Game & App Suggestions</h3>
+            <h3 style="color: #10b981;">💡 User Game & App Suggestions</h3>
             <button class="btn-small primary" onclick="window.adminFetchSuggestions()" style="font-weight: 700;">🔄 Refresh Suggestions</button>
           </div>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
-            Review submissions sent by community members. Click Approve to publish directly into the catalog (defaults to Action category, editable afterward) or Deny to discard.
+            Review submissions sent by community members. Click Approve to publish directly into the catalog or Deny to discard.
           </p>
           <table class="admin-table">
             <thead>
@@ -1773,32 +1586,13 @@
           </table>
         </div>
 
-        <!-- Admin Tab: Filters -->
-        <div class="admin-tab-content" id="tab-filters" style="display: none;">
-          <h3>Content & Name Filter Rules</h3>
-          <div style="display: flex; gap: 10px; margin: 16px 0;">
-            <input type="text" id="new-filter-word" placeholder="Word or term to block..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
-            <button class="btn-pill primary" id="add-filter-btn">Add Filter Rule</button>
-          </div>
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Prohibited Word</th>
-                <th>Type</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="admin-filters-tbody"></tbody>
-          </table>
-        </div>
-
         <!-- Admin Tab: Searchable Logs -->
         <div class="admin-tab-content" id="tab-logs" style="display: none;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3>Server Activity & Audit Logs</h3>
+            <h3 style="color: #cbd5e1;">📜 Server Activity & Audit Logs</h3>
           </div>
           <div style="display: flex; gap: 10px; margin-bottom: 14px;">
-            <input type="text" id="admin-log-search-user" placeholder="Filter by user / admin..." style="flex: 1; padding: 8px 14px; background: #141724; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+            <input type="text" id="admin-log-search-user" placeholder="Filter by user / admin..." style="flex: 1; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
             <select id="admin-log-search-action" class="proxy-select-dropdown" style="width: 220px; font-size: 0.85rem;">
               <option value="">All Actions</option>
               <option value="USER_LOGIN">User Logins</option>
@@ -1811,6 +1605,20 @@
             </select>
           </div>
           <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>User / Admin</th>
+                <th>Target</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="admin-logs-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
             <thead>
               <tr>
                 <th>Action</th>
@@ -2315,6 +2123,51 @@
         <button class="btn-pill primary" id="pub-profile-dm-btn" style="flex: 1; justify-content: center;">💬 Send Direct Message</button>
         <button class="btn-pill secondary" id="pub-profile-add-friend-btn" style="flex: 1; justify-content: center; background: #10b981; color: #000; font-weight: 700; border: none;">➕ Add Friend</button>
       </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD CUSTOM SOUNDBOARD MODAL -->
+  <div class="modal-overlay" id="soundboard-upload-modal">
+    <div class="modal-card" style="max-width: 500px;">
+      <button class="modal-close" id="soundboard-upload-modal-close">✕</button>
+      <h2 style="color: #38bdf8; margin-bottom: 6px; font-size: 1.35rem;">➕ Add Custom Soundboard Sound</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Upload your own audio file or audio URL link to play live in voice & chat rooms.</p>
+
+      <form id="soundboard-upload-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.85rem;">Sound Title</label>
+          <input type="text" id="sound-upload-title" required placeholder="e.g. Airhorn Deluxe 2000" maxlength="50">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.85rem;">Icon Emoji</label>
+            <input type="text" id="sound-upload-icon" value="🎵" maxlength="4" style="text-align: center; font-size: 1.2rem;">
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.85rem;">Audio URL / Link (MP3/WAV)</label>
+            <input type="url" id="sound-upload-url-input" placeholder="https://... sound file link">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.85rem;">Or Choose Local Audio File</label>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="file" id="sound-upload-file-input" accept="audio/*" style="display: none;">
+            <button type="button" class="btn-pill" id="sound-choose-file-btn" style="padding: 8px 14px; font-size: 0.82rem; background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #38bdf8;">📁 Choose Local Audio...</button>
+            <span id="sound-file-name-label" style="font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;">No file selected</span>
+          </div>
+        </div>
+
+        <div id="sound-admin-global-check" style="display: none; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 10px 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #fbbf24; cursor: pointer; font-weight: 700;">
+            <input type="checkbox" id="sound-upload-is-global" style="accent-color: #fbbf24; width: 16px; height: 16px;">
+            <span>👑 Make Global Soundboard Sound (Visible to Everyone)</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 11px; margin-top: 6px; font-weight: 800;" id="sound-upload-submit-btn">Upload Soundboard Sound</button>
+      </form>
     </div>
   </div>
 

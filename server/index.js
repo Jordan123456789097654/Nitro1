@@ -143,7 +143,7 @@ app.use('/api', (req, res, next) => {
     '/auth/login', '/auth/register', '/auth/me', '/status', '/visit', '/proxy',
     '/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/status', '/api/visit', '/api/proxy',
     '/games', '/api/games', '/polls', '/api/polls', '/voice', '/api/voice', '/updates', '/api/updates',
-    '/contact', '/api/contact', '/friends', '/api/friends'
+    '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard'
   ];
   if (openPaths.some(p => req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
@@ -253,6 +253,7 @@ app.use('/api/polls', pollsRoutes);
 app.use('/api/voice', require('./routes/voice'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/soundboard', require('./routes/soundboard'));
 
 // Initialize Real-time Socket.io Chat, DMs & Live Monitoring
 initChatSocket(io);

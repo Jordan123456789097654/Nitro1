@@ -822,26 +822,37 @@ function initKonamiCode() {
   }
 }
 
+const MASTER_BADGES = [
+  { id: 'owner_badge', title: '👑 Supreme Owner', desc: 'Platform creator & supreme administrator (+10,000 XP)', icon: '👑', isUnlocked: (u) => u && (u.role === 'owner' || u.role === 'admin') },
+  { id: 'konami', title: '🎮 Konami Code Master', desc: 'Entered the legendary retro cheat code (↑ ↑ ↓ ↓ ← → ← → B A)', icon: '🎮', isUnlocked: (u) => (u && u.role === 'owner') || isAchievementUnlocked('konami') },
+  { id: 'night_owl', title: '🦉 Night Owl Gamer', desc: 'Logged in and played games late at night past midnight', icon: '🦉', isUnlocked: () => true },
+  { id: 'speed_demon', title: '⚡ Speed Demon', desc: 'Recorded over 10 active gaming sessions in the catalog', icon: '⚡', isUnlocked: () => true },
+  { id: 'chatterbox', title: '💬 Chatterbox Legend', desc: 'Active participant in live community study chat', icon: '💬', isUnlocked: () => true },
+  { id: 'high_score', title: '🏆 High Score King', desc: 'Submitted top scores on global arcade leaderboards', icon: '🏆', isUnlocked: (u) => u && (u.role === 'owner' || u.role === 'admin') },
+  { id: 'playlist_arch', title: '📁 Playlist Architect', desc: 'Organized custom game folders & study break playlists', icon: '📁', isUnlocked: () => true },
+  { id: 'stealth_master', title: '🎭 Stealth Master', desc: 'Applied custom academic tab cloaking disguises', icon: '🎭', isUnlocked: () => true },
+  { id: 'voice_mav', title: '🎙️ Voice Maverick', desc: 'Joined live WebRTC audio channels for group comms', icon: '🎙️', isUnlocked: () => true },
+  { id: 'soundboard_dj', title: '🔊 Soundboard DJ', desc: 'Triggered Vine Boom & Airhorn sound effects live in room', icon: '🔊', isUnlocked: () => true },
+  { id: 'picasso_artist', title: '🎨 Picasso Painter', desc: 'Created and downloaded custom artwork in Paint Studio', icon: '🎨', isUnlocked: () => true },
+  { id: 'pomodoro_master', title: '⏱️ Focus Master', desc: 'Completed a 25-minute Pomodoro study focus session', icon: '⏱️', isUnlocked: () => true },
+  { id: 'snake_champ', title: '🐍 Snake Champion', desc: 'Scored over 50 points in Mini Arcade Snake', icon: '🐍', isUnlocked: () => true },
+  { id: 'tictactoe_pro', title: '❌ Tic-Tac-Toe Pro', desc: 'Won 5 rounds in Mini Arcade Tic-Tac-Toe', icon: '❌', isUnlocked: () => true },
+  { id: 'social_butterfly', title: '👥 Social Butterfly', desc: 'Connected with classmates & sent friend requests', icon: '👥', isUnlocked: () => true },
+  { id: 'vip_lounge', title: '⭐ VIP Lounge Elite', desc: 'Unlocked PRO & VIP Lounge unblocked games catalog', icon: '⭐', isUnlocked: (u) => u && ['owner', 'admin', 'vip', 'pro', 'elite_patron'].includes(u.role) },
+  { id: 'lofi_listener', title: '🎧 Lofi Listener', desc: 'Enchanted study breaks with ambient lofi music streams', icon: '🎧', isUnlocked: () => true },
+  { id: 'nitro_og', title: '🚀 Nitro OG Founder', desc: 'Early access platform beta tester badge', icon: '🚀', isUnlocked: () => true },
+  { id: 'proxy_nav', title: '🌐 Proxy Navigator', desc: 'Explored web games via sandboxed proxy relay engine', icon: '🌐', isUnlocked: () => true },
+  { id: 'diamond_supporter', title: '💎 Diamond Supporter', desc: 'Recognized active platform community member', icon: '💎', isUnlocked: () => true }
+];
+
 export function openBadgesModal() {
   const modal = document.getElementById('badges-modal');
   const grid = document.getElementById('badges-showcase-grid');
   if (!modal || !grid) return;
 
-  const ALL_BADGES = [
-    { id: 'owner_badge', title: '👑 Supreme Owner', desc: 'Platform creator & supreme administrator (+10,000 XP)', icon: '👑', isUnlocked: (u) => u && (u.role === 'owner' || u.role === 'admin') },
-    { id: 'konami', title: '🎮 Konami Code Master', desc: 'Entered the legendary retro cheat code (↑ ↑ ↓ ↓ ← → ← → B A)', icon: '🎮', isUnlocked: () => isAchievementUnlocked('konami') },
-    { id: 'night_owl', title: '🦉 Night Owl Gamer', desc: 'Logged in and played games late at night after 10:00 PM', icon: '🦉', isUnlocked: () => isAchievementUnlocked('night_owl') },
-    { id: 'speed_demon', title: '⚡ Speed Demon', desc: 'Recorded over 10 active gaming sessions in the catalog', icon: '⚡', isUnlocked: () => isAchievementUnlocked('speed_demon') },
-    { id: 'chatterbox', title: '💬 Chatterbox Legend', desc: 'Active participant in live community study chat', icon: '💬', isUnlocked: () => isAchievementUnlocked('chatterbox') },
-    { id: 'high_score', title: '🏆 High Score King', desc: 'Submitted top scores on global arcade leaderboards', icon: '🏆', isUnlocked: () => isAchievementUnlocked('high_score') },
-    { id: 'playlist_arch', title: '📁 Playlist Architect', desc: 'Organized custom game folders & study break playlists', icon: '📁', isUnlocked: () => isAchievementUnlocked('playlist_arch') },
-    { id: 'stealth_master', title: '🎭 Stealth Master', desc: 'Applied custom academic tab cloaking disguises', icon: '🎭', isUnlocked: () => isAchievementUnlocked('stealth_master') }
-  ];
-
-  const { getCurrentUser } = require ? { getCurrentUser: () => window.currentUser || null } : {};
   const user = window.currentUser || (window.getCurrentUser ? window.getCurrentUser() : null);
 
-  grid.innerHTML = ALL_BADGES.map(b => {
+  grid.innerHTML = MASTER_BADGES.map(b => {
     const unlocked = b.isUnlocked(user);
     return `
       <div style="background: ${unlocked ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(139, 92, 246, 0.15))' : 'rgba(0,0,0,0.4)'}; border: 1px solid ${unlocked ? 'rgba(251, 191, 36, 0.6)' : 'rgba(255,255,255,0.08)'}; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; opacity: ${unlocked ? '1' : '0.65'}; transition: transform 0.2s ease;">
@@ -922,23 +933,13 @@ export async function openPublicProfile(username) {
     avatarEl.innerHTML = isOwnerOrAdmin ? '👑' : '👤';
   }
 
-  const ALL_BADGES = [
-    { id: 'owner_badge', title: '👑 Supreme Owner', desc: 'Platform creator & supreme administrator', icon: '👑', isUnlocked: () => isOwnerOrAdmin },
-    { id: 'konami', title: '🎮 Konami Code Master', desc: 'Entered retro cheat code (↑ ↑ ↓ ↓ ← → ← → B A)', icon: '🎮', isUnlocked: () => isOwnerOrAdmin || isAchievementUnlocked('konami') },
-    { id: 'night_owl', title: '🦉 Night Owl Gamer', desc: 'Played games late at night', icon: '🦉', isUnlocked: () => true },
-    { id: 'speed_demon', title: '⚡ Speed Demon', desc: 'Over 10 active gaming sessions', icon: '⚡', isUnlocked: () => true },
-    { id: 'chatterbox', title: '💬 Chatterbox Legend', desc: 'Active community chat member', icon: '💬', isUnlocked: () => true },
-    { id: 'high_score', title: '🏆 High Score King', desc: 'Arcade leaderboard champion', icon: '🏆', isUnlocked: () => isOwnerOrAdmin },
-    { id: 'playlist_arch', title: '📁 Playlist Architect', desc: 'Custom game folder creator', icon: '📁', isUnlocked: () => true },
-    { id: 'stealth_master', title: '🎭 Stealth Master', desc: 'Tab cloaking master', icon: '🎭', isUnlocked: () => true }
-  ];
-
-  const unlockedBadges = ALL_BADGES.filter(b => b.isUnlocked());
+  const targetUser = { username, role: isOwnerOrAdmin ? 'owner' : 'member' };
+  const unlockedBadges = MASTER_BADGES.filter(b => b.isUnlocked(targetUser));
   if (badgeCountEl) badgeCountEl.textContent = `${unlockedBadges.length} Unlocked Badges`;
 
   if (badgesListEl) {
-    badgesListEl.innerHTML = ALL_BADGES.map(b => {
-      const unlocked = b.isUnlocked();
+    badgesListEl.innerHTML = MASTER_BADGES.map(b => {
+      const unlocked = b.isUnlocked(targetUser);
       return `
         <div style="background:${unlocked ? 'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(139,92,246,0.12))' : 'rgba(0,0,0,0.3)'}; border:1px solid ${unlocked ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.06)'}; border-radius:8px; padding:10px 12px; display:flex; align-items:center; gap:10px;">
           <span style="font-size:1.5rem; filter:${unlocked ? 'none' : 'grayscale(100%)'}">${b.icon}</span>
@@ -983,39 +984,81 @@ export async function openPublicProfile(username) {
 }
 
 function initDevToolsProtection() {
-  // Disable right-click inspect menu
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-  });
+  function isOwner() {
+    const user = getCurrentUser();
+    if (user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'))) {
+      return true;
+    }
+    try {
+      const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload && (payload.role === 'owner' || (payload.username && payload.username.toLowerCase() === 'jordandaniels'))) {
+          return true;
+        }
+      }
+    } catch(e) {}
+    return false;
+  }
 
-  // Block DevTools shortcuts
+  function purgeAndLockdown() {
+    if (isOwner()) return; // Owner Bypass
+
+    console.clear();
+    // Wipe all script tags to prevent script stealing
+    document.querySelectorAll('script').forEach(s => s.remove());
+
+    document.body.innerHTML = `
+      <div style="background: #090a0f; color: #ef4444; height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 20px; box-sizing: border-box;">
+        <div style="font-size: 4rem; margin-bottom: 12px;">🛡️</div>
+        <h2 style="font-size: 2.2rem; background: linear-gradient(90deg, #ef4444, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 12px; font-weight: 900;">DevTools Inspection Denied</h2>
+        <p style="color: #94a3b8; max-width: 520px; line-height: 1.6; font-size: 1rem; margin-bottom: 20px;">Platform scripts and custom assets are protected against unauthorized inspection. Developer tools access is restricted to the platform owner.</p>
+        <button onclick="window.location.reload()" style="padding: 10px 24px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 99px; font-weight: 800; cursor: pointer;">🔄 Reload Site</button>
+      </div>
+    `;
+
+    setInterval(() => {
+      try {
+        (function() {}.constructor('debugger')());
+      } catch (e) {}
+    }, 50);
+  }
+
+  // Block DevTools shortcuts for non-owners
   document.addEventListener('keydown', (e) => {
+    if (isOwner()) return;
+
     if (
       e.key === 'F12' ||
       (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) ||
-      (e.ctrlKey && ['U', 'u'].includes(e.key))
+      (e.ctrlKey && ['U', 'u', 'S', 's'].includes(e.key))
     ) {
       e.preventDefault();
       e.stopPropagation();
+      purgeAndLockdown();
     }
-  });
+  }, true);
 
-  // Anti-Debugging Trap Loop
+  // DevTools Dimension & Timing Detection Trap Loop
   setInterval(() => {
+    if (isOwner()) return;
+
+    const threshold = 160;
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+    if (widthThreshold || heightThreshold) {
+      purgeAndLockdown();
+      return;
+    }
+
     const startTime = performance.now();
     try {
       (function() {}.constructor('debugger')());
     } catch (e) {}
     const endTime = performance.now();
     if (endTime - startTime > 100) {
-      document.body.innerHTML = `
-        <div style="background: #000; color: #ef4444; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; text-align: center; padding: 20px;">
-          <div style="font-size: 4rem; margin-bottom: 12px;">🛡️</div>
-          <h2 style="font-size: 2rem; color: #fbbf24; margin: 0 0 12px;">Source Code Protection Active</h2>
-          <p style="color: #94a3b8; max-width: 480px; line-height: 1.6;">Developer tools or inspect mode is disabled on this platform to protect intellectual property and custom scripts.</p>
-          <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 24px; background: #38bdf8; color: #000; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Reload Site</button>
-        </div>
-      `;
+      purgeAndLockdown();
     }
   }, 1000);
 }
