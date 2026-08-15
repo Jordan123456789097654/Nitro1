@@ -382,31 +382,44 @@ function setupUploadModal() {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const title = document.getElementById('sound-upload-title').value;
-      const icon = document.getElementById('sound-upload-icon').value || '🎵';
-      const urlInput = document.getElementById('sound-upload-url-input').value;
-      const isGlobal = document.getElementById('sound-upload-is-global')?.checked || false;
-
-      let audioUrl = urlInput;
-
-      if (!audioUrl && fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        if (file.size > 5 * 1024 * 1024) {
-          return alert('Audio file must be smaller than 5MB.');
-        }
-        audioUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (evt) => resolve(evt.target.result);
-          reader.readAsDataURL(file);
-        });
+      const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+      if (!token) {
+        return alert('Please log in to upload custom soundboard sounds.');
       }
 
-      if (!audioUrl) {
-        return alert('Please enter an Audio URL or choose a local audio file.');
+      const submitBtn = document.getElementById('sound-upload-submit-btn');
+      const originalBtnText = submitBtn ? submitBtn.textContent : 'Upload Soundboard Sound';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Processing Audio Upload...';
       }
 
       try {
-        const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+        const title = document.getElementById('sound-upload-title').value.trim();
+        const icon = document.getElementById('sound-upload-icon').value.trim() || '🎵';
+        const urlInput = document.getElementById('sound-upload-url-input').value.trim();
+        const isGlobal = document.getElementById('sound-upload-is-global')?.checked || false;
+
+        let audioUrl = urlInput;
+
+        if (!audioUrl && fileInput && fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          if (file.size > 5 * 1024 * 1024) {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalBtnText; }
+            return alert('Audio file must be smaller than 5MB.');
+          }
+          audioUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => resolve(evt.target.result);
+            reader.readAsDataURL(file);
+          });
+        }
+
+        if (!audioUrl) {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalBtnText; }
+          return alert('Please enter an Audio URL or choose a local audio file.');
+        }
+
         const res = await fetch('/api/soundboard/upload', {
           method: 'POST',
           headers: {
@@ -421,11 +434,17 @@ function setupUploadModal() {
           form.reset();
           if (fileNameLabel) fileNameLabel.textContent = 'No file selected';
           loadSoundboards();
+          if (window.adminFetchSoundboard) window.adminFetchSoundboard();
         } else {
           alert(data.error || 'Upload failed.');
         }
       } catch (err) {
         alert('Upload error: ' + err.message);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalBtnText;
+        }
       }
     });
   }
