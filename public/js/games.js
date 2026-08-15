@@ -296,8 +296,9 @@ export function renderGames(games, targetGridId) {
   grid.innerHTML = games.map(game => {
     const isFav = favorites.includes(game.id);
     const clickCount = parseInt(game.clicks || 0, 10);
+    const itemSlug = game.slug || game.id;
     return `
-      <div class="game-card" data-slug="${game.slug}" data-game-id="${game.id}">
+      <div class="game-card" data-slug="${itemSlug}" data-game-id="${game.id}">
         <div class="game-thumb-wrap">
           <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
           ${game.is_vip ? `<span class="game-badge-vip" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:800;">👑 PRO</span>` : ''}
@@ -317,7 +318,7 @@ export function renderGames(games, targetGridId) {
   grid.querySelectorAll('.game-card').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('.game-fav-btn')) return;
-      const slug = card.dataset.slug;
+      const slug = card.dataset.slug || card.dataset.gameId;
       openGame(slug);
     });
   });
@@ -1512,17 +1513,17 @@ export function setupBugReportModal() {
 }
 
 const DEFAULT_APPS = [
-  { id: 'app-tiktok', title: 'TikTok Trending Videos', author: 'TikTok', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed' },
-  { id: 'app-youtube', title: 'YouTube Unblocked Player', author: 'Google', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube.com/embed/' },
-  { id: 'app-desmos', title: 'Desmos Graphing Calculator', author: 'Desmos', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator' },
-  { id: 'app-geogebra', title: 'GeoGebra Math Suite', author: 'GeoGebra', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator' },
-  { id: 'app-wolfram', title: 'WolframAlpha Computational Engine', author: 'Wolfram', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/' },
-  { id: 'app-wikipedia', title: 'Wikipedia Encyclopedia', author: 'Wikimedia', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/' },
-  { id: 'app-scratch', title: 'Scratch 3.0 Creative Studio', author: 'MIT', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/' },
-  { id: 'app-canva', title: 'Canva Design Studio', author: 'Canva', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/' },
-  { id: 'app-duckduckgo', title: 'DuckDuckGo Academic Search', author: 'DuckDuckGo', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/' },
-  { id: 'app-chess', title: 'Chess.com Multiplayer', author: 'Chess.com', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=500', embed_type: 'iframe_url', embed_content: 'https://www.chess.com/' },
-  { id: 'app-spotify', title: 'Spotify Web Player', author: 'Spotify', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1614680376593-902f749f7cfc?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M' }
+  { id: 'app-tiktok', slug: 'app-tiktok', title: 'TikTok Trending Videos', author: 'TikTok', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed' },
+  { id: 'app-youtube', slug: 'app-youtube', title: 'YouTube Unblocked Player', author: 'Google', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube.com/embed/' },
+  { id: 'app-desmos', slug: 'app-desmos', title: 'Desmos Graphing Calculator', author: 'Desmos', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator' },
+  { id: 'app-geogebra', slug: 'app-geogebra', title: 'GeoGebra Math Suite', author: 'GeoGebra', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator' },
+  { id: 'app-wolfram', slug: 'app-wolfram', title: 'WolframAlpha Computational Engine', author: 'Wolfram', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/' },
+  { id: 'app-wikipedia', slug: 'app-wikipedia', title: 'Wikipedia Encyclopedia', author: 'Wikimedia', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/' },
+  { id: 'app-scratch', slug: 'app-scratch', title: 'Scratch 3.0 Creative Studio', author: 'MIT', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/' },
+  { id: 'app-canva', slug: 'app-canva', title: 'Canva Design Studio', author: 'Canva', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/' },
+  { id: 'app-duckduckgo', slug: 'app-duckduckgo', title: 'DuckDuckGo Academic Search', author: 'DuckDuckGo', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/' },
+  { id: 'app-chess', slug: 'app-chess', title: 'Chess.com Multiplayer', author: 'Chess.com', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=500', embed_type: 'iframe_url', embed_content: 'https://www.chess.com/' },
+  { id: 'app-spotify', slug: 'app-spotify', title: 'Spotify Web Player', author: 'Spotify', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1614680376593-902f749f7cfc?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M' }
 ];
 
 export async function loadApps() {
