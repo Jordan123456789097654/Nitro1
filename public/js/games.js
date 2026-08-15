@@ -957,7 +957,8 @@ export async function openGame(slug) {
   const vipBadge = document.getElementById('player-vip-badge');
   const frameWrapper = document.getElementById('player-frame-wrapper');
 
-  let gameData = null;
+  try {
+    let gameData = null;
 
   // Check built-in default apps first
   const defaultApp = DEFAULT_APPS.find(a => a.id === slug || a.slug === slug || a.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === slug);
