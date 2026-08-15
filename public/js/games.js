@@ -996,7 +996,7 @@ export async function openGame(slug) {
 
     const iframe = document.createElement('iframe');
     iframe.className = 'player-iframe';
-    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture; accelerometer; gyroscope; magnetometer; devicemotion; web-share;');
+    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture; accelerometer; gyroscope; magnetometer; web-share;');
     if (activeGame.embed_type === 'html_code') {
       iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals');
     }
@@ -1514,7 +1514,7 @@ export function setupBugReportModal() {
 
 const DEFAULT_APPS = [
   { id: 'app-tiktok', slug: 'app-tiktok', title: 'TikTok Trending Videos', author: 'TikTok', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed' },
-  { id: 'app-youtube', slug: 'app-youtube', title: 'YouTube Unblocked Player', author: 'Google', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube.com/embed/' },
+  { id: 'app-youtube', slug: 'app-youtube', title: 'YouTube Unblocked Player', author: 'Google', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube-nocookie.com/embed/videoseries?list=PL4fGSI1pDJn6jXS_OtU6X286j25_-HJge' },
   { id: 'app-desmos', slug: 'app-desmos', title: 'Desmos Graphing Calculator', author: 'Desmos', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator' },
   { id: 'app-geogebra', slug: 'app-geogebra', title: 'GeoGebra Math Suite', author: 'GeoGebra', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator' },
   { id: 'app-wolfram', slug: 'app-wolfram', title: 'WolframAlpha Computational Engine', author: 'Wolfram', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/' },
