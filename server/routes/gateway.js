@@ -312,6 +312,28 @@ router.all('/', async (req, res) => {
 
   const hostname = parsedUrl.hostname.toLowerCase();
 
+  // Built-in Ad & Tracker Suppressor Filter (Prevents 404 & Strict MIME type errors)
+  const isAdDomain = [
+    'adsinnov.com',
+    'doubleclick.net',
+    'googlesyndication.com',
+    'google-analytics.com',
+    'googletagservices.com',
+    'pagead2.googlesyndication.com',
+    'pubads.g.doubleclick.net'
+  ].some(domain => hostname.includes(domain));
+
+  const isAdFile = /\/(ads|ad|gpt|pop|tracker)\.(js|css)/i.test(parsedUrl.pathname);
+
+  if (isAdDomain || isAdFile) {
+    if (parsedUrl.pathname.endsWith('.css') || req.query.url?.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+      return res.send('/* gateway ad blocked */');
+    }
+    res.setHeader('Content-Type', 'application/javascript');
+    return res.send('/* gateway ad blocked */');
+  }
+
   // SSRF Protection Check
   if (isInternalOrPrivateHost(hostname)) {
     return res.status(403).send(`
@@ -459,13 +481,18 @@ router.all('/', async (req, res) => {
     res.removeHeader('X-Frame-Options');
 
     if (contentType.includes('text/html')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
       const htmlText = buffer.toString('utf8');
       const rewrittenHtml = rewriteHtml(htmlText, finalUrl, gatewayPrefix);
       return res.send(rewrittenHtml);
-    } else if (contentType.includes('text/css')) {
+    } else if (contentType.includes('text/css') || finalUrl.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
       const cssText = buffer.toString('utf8');
       const rewrittenCss = rewriteCssUrls(cssText, finalUrl, gatewayPrefix);
       return res.send(rewrittenCss);
+    } else if (contentType.includes('javascript') || finalUrl.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      return res.send(buffer);
     } else {
       return res.send(buffer);
     }
