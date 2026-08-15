@@ -1265,26 +1265,21 @@
       </div>
     </section>
 
-    <!-- SECTION 6.5: INTERACTIVE SOUNDBOARD -->
+    <!-- SECTION 6.5: UNBLOCKED PROXIED SOUNDBOARD HUB -->
     <section class="page-view" id="view-soundboard">
       <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h1>INTERACTIVE SOUNDBOARD</h1>
-          <p>Web Audio sound effects, user-uploaded custom sounds, and global community soundboards.</p>
+          <h1 style="background: linear-gradient(90deg, #ec4899, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">UNBLOCKED SOUNDBOARD HUB</h1>
+          <p>Thousands of instant sound effects and memes, proxied live so school network filters cannot block them.</p>
         </div>
-        <button class="btn-pill primary" id="open-sound-upload-btn" onclick="window.openSoundUploadModal?.()" style="font-weight: 800; padding: 10px 18px;">➕ Upload Custom Sound</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-pill secondary" onclick="window.reloadSoundboardProxy()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700;">🔄 Reload</button>
+          <button class="btn-pill primary" onclick="window.fullscreenSoundboardProxy()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 800;">⤢ Fullscreen</button>
+        </div>
       </div>
 
-      <div class="view-content-wrapper" style="margin-top: 20px;">
-        <h3 style="color: #fbbf24; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <span>🌐</span> Global Community Soundboard
-        </h3>
-        <div id="soundboard-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px;"></div>
-
-        <h3 style="color: #38bdf8; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-          <span>👤</span> Custom Uploaded Soundboards
-        </h3>
-        <div id="soundboard-grid-custom" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;"></div>
+      <div class="view-content-wrapper" style="margin-top: 16px; height: calc(100vh - 170px); min-height: 620px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; position: relative;">
+        <iframe id="soundboard-proxy-iframe" src="/api/proxy?url=https://www.myinstants.com/en/categories/sound%20effects/us/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
     </section>
 

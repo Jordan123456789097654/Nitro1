@@ -180,8 +180,21 @@ function playAudioUrl(url) {
   }
 }
 
+window.reloadSoundboardProxy = function() {
+  const iframe = document.getElementById('soundboard-proxy-iframe');
+  if (iframe) iframe.src = '/api/proxy?url=' + encodeURIComponent('https://www.myinstants.com/en/categories/sound%20effects/us/');
+};
+
+window.fullscreenSoundboardProxy = function() {
+  const iframe = document.getElementById('soundboard-proxy-iframe');
+  if (iframe) {
+    if (iframe.requestFullscreen) iframe.requestFullscreen();
+    else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+  }
+};
+
 export function initSoundboard() {
-  const containerGlobal = document.getElementById('soundboard-grid');
+  const socket = getSharedSocket();
   const containerCustom = document.getElementById('soundboard-grid-custom');
   if (!containerGlobal) return;
 
