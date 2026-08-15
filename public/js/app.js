@@ -654,42 +654,40 @@ function initCloakMode() {
   });
 }
 
-function initNavigation() {
+window.switchView = function(targetView) {
   const navBtns = document.querySelectorAll('.nav-btn[data-view]');
   const views = document.querySelectorAll('.page-view');
 
+  navBtns.forEach(b => {
+    if (b.dataset.view === targetView) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+
+  views.forEach(v => v.classList.remove('active'));
+  const targetEl = document.getElementById(`view-${targetView}`);
+  if (targetEl) {
+    targetEl.classList.add('active');
+  }
+
+  updateSocketActivity(`Browsing ${targetView.toUpperCase()}`);
+
+  if (targetView === 'pro') loadProGames();
+  if (targetView === 'apps') {
+    import('./apps.js').then(m => m.loadApps?.());
+  }
+  if (targetView === 'admin') {
+    loadAdminData();
+    fetchUsers();
+  }
+  if (targetView === 'paint') initPaintCanvas();
+};
+
+function initNavigation() {
+  const navBtns = document.querySelectorAll('.nav-btn[data-view]');
+
   navBtns.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const targetView = btn.dataset.view;
-
-      navBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      views.forEach(v => v.classList.remove('active'));
-      const targetEl = document.getElementById(`view-${targetView}`);
-      if (targetEl) {
-        targetEl.classList.add('active');
-      }
-
-      updateSocketActivity(`Browsing ${targetView.toUpperCase()}`);
-
-      if (targetView === 'pro') {
-        loadProGames();
-      }
-
-      if (targetView === 'apps') {
-        const { loadApps } = await import('./apps.js');
-        loadApps();
-      }
-
-      if (targetView === 'admin') {
-        loadAdminData();
-        fetchUsers();
-      }
-
-      if (targetView === 'paint') {
-        initPaintCanvas();
-      }
+    btn.addEventListener('click', () => {
+      window.switchView(btn.dataset.view);
     });
   });
 }
