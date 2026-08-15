@@ -319,10 +319,34 @@ const db = {
         );
       `);
 
+      // Seed / Synchronize Prebuilt Web Applications into `games` table in Database
+      const defaultAppsSeed = [
+        { title: 'TikTok Trending Videos', slug: 'app-tiktok', author: 'TikTok', thumbnail_url: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed', category: 'Apps' },
+        { title: 'YouTube Unblocked Player', slug: 'app-youtube', author: 'Google', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube.com/embed/', category: 'Apps' },
+        { title: 'Desmos Graphing Calculator', slug: 'app-desmos', author: 'Desmos', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator', category: 'Apps' },
+        { title: 'GeoGebra Math Suite', slug: 'app-geogebra', author: 'GeoGebra', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator', category: 'Apps' },
+        { title: 'WolframAlpha Computational Engine', slug: 'app-wolfram', author: 'Wolfram', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/', category: 'Apps' },
+        { title: 'Wikipedia Encyclopedia', slug: 'app-wikipedia', author: 'Wikimedia', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/', category: 'Apps' },
+        { title: 'Scratch 3.0 Creative Studio', slug: 'app-scratch', author: 'MIT', thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/', category: 'Apps' },
+        { title: 'Canva Design Studio', slug: 'app-canva', author: 'Canva', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/', category: 'Apps' },
+        { title: 'DuckDuckGo Academic Search', slug: 'app-duckduckgo', author: 'DuckDuckGo', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/', category: 'Apps' },
+        { title: 'Chess.com Multiplayer', slug: 'app-chess', author: 'Chess.com', thumbnail_url: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=500', embed_type: 'iframe_url', embed_content: 'https://www.chess.com/', category: 'Apps' },
+        { title: 'Spotify Web Player', slug: 'app-spotify', author: 'Spotify', thumbnail_url: 'https://images.unsplash.com/photo-1614680376593-902f749f7cfc?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M', category: 'Apps' }
+      ];
 
-
-
-
+      for (const app of defaultAppsSeed) {
+        try {
+          await pool.query(`
+            INSERT INTO games (title, slug, author, thumbnail_url, embed_type, embed_content, is_vip, category, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6, false, $7, 'System')
+            ON CONFLICT (slug) DO UPDATE SET
+              title = EXCLUDED.title,
+              thumbnail_url = EXCLUDED.thumbnail_url,
+              embed_content = EXCLUDED.embed_content,
+              category = EXCLUDED.category
+          `, [app.title, app.slug, app.author, app.thumbnail_url, app.embed_type, app.embed_content, app.category]);
+        } catch (e) {}
+      }
 
       console.log('✅ [DB] Supabase tables, Base64 passwords, force-reset flags, PRO games, and Classic collection synchronized successfully.');
     } catch (err) {
