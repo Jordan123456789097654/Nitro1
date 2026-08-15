@@ -529,7 +529,8 @@ router.all('/', async (req, res) => {
       'cross-origin-resource-policy',
       'strict-transport-security',
       'transfer-encoding',
-      'content-encoding'
+      'content-encoding',
+      'set-cookie'
     ];
 
     const forwardedProto = req.headers['x-forwarded-proto'];
@@ -553,6 +554,19 @@ router.all('/', async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
     res.removeHeader('X-Frame-Options');
+    res.removeHeader('x-frame-options');
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('content-security-policy');
+    res.removeHeader('Content-Security-Policy-Report-Only');
+    res.removeHeader('content-security-policy-report-only');
+    res.removeHeader('Cross-Origin-Opener-Policy');
+    res.removeHeader('cross-origin-opener-policy');
+    res.removeHeader('Cross-Origin-Embedder-Policy');
+    res.removeHeader('cross-origin-embedder-policy');
+    res.removeHeader('Cross-Origin-Resource-Policy');
+    res.removeHeader('cross-origin-resource-policy');
+    res.removeHeader('Set-Cookie');
+    res.removeHeader('set-cookie');
 
     if (contentType.includes('text/html')) {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');

@@ -995,7 +995,7 @@ export async function openGame(slug) {
 
     const iframe = document.createElement('iframe');
     iframe.className = 'player-iframe';
-    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture;');
+    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture; accelerometer; gyroscope; magnetometer; devicemotion; web-share;');
     if (activeGame.embed_type === 'html_code') {
       iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals');
     }
