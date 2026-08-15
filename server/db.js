@@ -810,7 +810,7 @@ const db = {
 
   async ungatewayBanUser(userId) {
     try {
-      await pool.query('UPDATE users SET gateway_timeout_until = NULL, gateway_violations_count = 0, is_banned = false, banned_until = NULL WHERE id = $1', [userId]);
+      await pool.query('UPDATE users SET is_gateway_banned = false, gateway_timeout_until = NULL, gateway_violations_count = 0 WHERE id = $1', [userId]);
       return true;
     } catch (e) {
       console.error('ungatewayBanUser error:', e.message);

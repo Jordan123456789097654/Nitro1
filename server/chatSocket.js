@@ -1,5 +1,6 @@
 const db = require('./db');
 const { sendDiscordLog } = require('./discordLogger');
+const { checkMessageWithGroqModeration } = require('./aiModeration');
 
 // Active Connection Registry & State
 const activeConnections = new Map(); // socket.id -> connection details
@@ -245,6 +246,21 @@ function initChatSocket(io) {
         const cleanText = await sanitizeContent(messageContent.slice(0, 400));
         const audioUrl = data.audioUrl || '';
 
+        // Run Groq AI Moderation Check
+        if (cleanText && cleanText.trim() && role !== 'admin' && role !== 'owner') {
+          const aiCheck = await checkMessageWithGroqModeration(cleanText);
+          if (aiCheck && aiCheck.flagged) {
+            sendDiscordLog({
+              category: 'moderation',
+              action: 'AI_CHAT_MODERATION_BLOCKED',
+              admin: 'GROQ_AI_SHIELD',
+              target: user.username,
+              details: `Blocked message: "${cleanText}" (Reason: ${aiCheck.reason})`
+            });
+            return socket.emit('error_message', `🛡️ [Groq AI Moderation] Message blocked: ${aiCheck.reason}`);
+          }
+        }
+
         const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, audioUrl);
         io.emit('new_message', newMsg);
       } catch (err) {
@@ -273,6 +289,20 @@ function initChatSocket(io) {
         }
 
         const cleanText = await sanitizeContent(text.trim().slice(0, 300));
+
+        // Run Groq AI Moderation Check
+        const aiCheck = await checkMessageWithGroqModeration(cleanText);
+        if (aiCheck && aiCheck.flagged) {
+          sendDiscordLog({
+            category: 'moderation',
+            action: 'AI_DM_MODERATION_BLOCKED',
+            admin: 'GROQ_AI_SHIELD',
+            target: sender.username,
+            details: `Blocked DM to @${recipientUsername}: "${cleanText}" (Reason: ${aiCheck.reason})`
+          });
+          return socket.emit('error_message', `🛡️ [Groq AI Moderation] Direct Message blocked: ${aiCheck.reason}`);
+        }
+
         const newDm = await db.createDM(sender.id, receiverUser.id, sender.username, receiverUser.username, cleanText);
 
         for (const [sId, c] of activeConnections.entries()) {
@@ -326,6 +356,12 @@ function initChatSocket(io) {
       if (!roomCode || !user || !text) return;
       const cleanText = await sanitizeContent(text.trim().slice(0, 300));
       const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
+
+      // Run Groq AI Moderation Check
+      const aiCheck = await checkMessageWithGroqModeration(cleanText);
+      if (aiCheck && aiCheck.flagged) {
+        return socket.emit('error_message', `🛡️ [Groq AI Moderation] Private Room message blocked: ${aiCheck.reason}`);
+      }
 
       io.to(cleanRoom).emit('private_room_message', {
         roomCode,
