@@ -994,19 +994,9 @@ export async function openGame(slug) {
 
     const iframe = document.createElement('iframe');
     iframe.className = 'player-iframe';
-    // Remove allowfullscreen attribute to avoid precedence warning
-    // Refined allow attribute to include fullscreen permission
-    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad;');
-    // Adjust sandbox based on embed type for security & functionality
+    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture;');
     if (activeGame.embed_type === 'html_code') {
-      // HTML code embed – scripts allowed, no same‑origin needed
       iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals');
-    } else if (activeGame.embed_type === 'iframe_url') {
-      // iframe_url – allow same-origin and pointer-lock for Unity/WebGL etc.
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-modals');
-    } else {
-      // External URLs, emulators, etc.
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-modals');
     }
 
     const runnerHtml = getGameRunnerHtml(activeGame);
