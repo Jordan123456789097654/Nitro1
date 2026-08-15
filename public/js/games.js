@@ -9,6 +9,54 @@ let playtimeInterval = null;
 
 let activeCatalogFilter = 'all'; // 'all', 'favorites', 'playlists'
 
+window.openAddGameModal = function() {
+  const modal = document.getElementById('add-game-modal');
+  if (modal) {
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+  }
+};
+
+window.closeAddGameModal = function() {
+  const modal = document.getElementById('add-game-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
+};
+
+window.openSuggestModal = function() {
+  const modal = document.getElementById('suggestion-modal');
+  if (modal) {
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+  }
+};
+
+window.closeSuggestModal = function() {
+  const modal = document.getElementById('suggestion-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
+};
+
+window.openBugModal = function() {
+  const modal = document.getElementById('bug-report-modal');
+  if (modal) {
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+  }
+};
+
+window.closeBugModal = function() {
+  const modal = document.getElementById('bug-report-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
+};
+
 export function initGames() {
   loadGames();
   loadProGames();
@@ -1403,16 +1451,11 @@ let setupFilterAndSearch = function() {
 
 function setupAddGameForm() {
   const form = document.getElementById('add-game-form');
+  const modal = document.getElementById('add-game-modal');
   if (!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const user = getCurrentUser();
-    if (!user || !['owner', 'admin'].includes(user.role)) {
-      alert('Only owners and administrators can publish games to the catalog.');
-      return;
-    }
-
     const title = document.getElementById('add-game-title').value;
     const author = document.getElementById('add-game-author').value;
     const category = document.getElementById('add-game-category').value;
@@ -1420,7 +1463,7 @@ function setupAddGameForm() {
     const thumbnail_url = document.getElementById('add-game-thumb').value;
     const embed_content = document.getElementById('add-game-code').value;
     const is_vip = document.getElementById('add-game-vip')?.checked ? 1 : 0;
-    const token = localStorage.getItem('nitro_jwt_token');
+    const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
 
     try {
       const headers = { 'Content-Type': 'application/json' };
@@ -1446,19 +1489,90 @@ function setupAddGameForm() {
         return;
       }
 
-      alert('Published successfully to the catalog!');
+      alert('🎉 Published successfully to the catalog!');
       form.reset();
+      if (modal) modal.classList.remove('active');
       loadGames();
       loadProGames();
       
       const categoryVal = document.getElementById('add-game-category').value;
       if (categoryVal === 'Apps') {
-        document.querySelector('.nav-btn[data-view="apps"]').click();
+        const btn = document.querySelector('.nav-btn[data-view="apps"]');
+        if (btn) btn.click();
       } else {
-        document.querySelector('.nav-btn[data-view="library"]').click();
+        const btn = document.querySelector('.nav-btn[data-view="library"]');
+        if (btn) btn.click();
       }
     } catch (err) {
-      alert('Error publishing item.');
+      alert('Error publishing item: ' + err.message);
+    }
+  });
+}
+
+export function setupSuggestionModal() {
+  const form = document.getElementById('suggest-form');
+  const modal = document.getElementById('suggestion-modal');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('suggest-title')?.value || '';
+    const details = document.getElementById('suggest-details')?.value || '';
+    const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/games/suggestions', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ title, details })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('🎉 Suggestion submitted successfully! Thank you for improving Nitro.');
+        form.reset();
+        if (modal) modal.classList.remove('active');
+      } else {
+        alert(data.error || 'Failed to submit suggestion.');
+      }
+    } catch (err) {
+      alert('Submission error: ' + err.message);
+    }
+  });
+}
+
+export function setupBugReportModal() {
+  const form = document.getElementById('bug-form');
+  const modal = document.getElementById('bug-report-modal');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('bug-title')?.value || '';
+    const details = document.getElementById('bug-details')?.value || '';
+    const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/games/bugs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ title, details })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('🐞 Bug report submitted! Our dev team will investigate.');
+        form.reset();
+        if (modal) modal.classList.remove('active');
+      } else {
+        alert(data.error || 'Failed to submit bug report.');
+      }
+    } catch (err) {
+      alert('Submission error: ' + err.message);
     }
   });
 }

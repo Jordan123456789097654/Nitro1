@@ -318,9 +318,9 @@ router.get('/:slug', async (req, res) => {
 
 // 9. Add Custom Game
 router.post('/add', async (req, res) => {
-  const user = await getAuthUser(req);
-  if (!user || !['owner', 'admin'].includes(user.role)) {
-    return res.status(403).json({ error: 'Only owners and administrators can publish custom games to the catalog.' });
+  let user = await getAuthUser(req);
+  if (!user) {
+    user = { username: 'Guest', role: 'member' };
   }
 
   const { title, author, thumbnail_url, embed_type, embed_content, category, is_vip } = req.body;
