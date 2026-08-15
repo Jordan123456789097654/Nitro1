@@ -1335,78 +1335,7 @@ function setupLeaderboardsModal() {
   }
 }
 
-function setupSuggestionModal() {
-  const openBtn = document.getElementById('open-suggest-modal-btn');
-  const modal = document.getElementById('suggest-modal');
-  const closeBtn = document.getElementById('suggest-modal-close');
-  const form = document.getElementById('suggest-form');
 
-  if (openBtn && modal) openBtn.addEventListener('click', () => modal.classList.add('active'));
-  if (closeBtn && modal) closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const title = document.getElementById('suggest-title').value.trim();
-      const details = document.getElementById('suggest-details').value.trim();
-
-      try {
-        const res = await fetch('/api/games/suggest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, details })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          alert('💡 ' + (data.message || 'Suggestion submitted to administrators!'));
-          form.reset();
-          if (modal) modal.classList.remove('active');
-        } else {
-          alert(data.error || 'Failed to submit suggestion.');
-        }
-      } catch (err) {
-        alert('Network error submitting suggestion.');
-      }
-    });
-  }
-}
-
-function setupBugReportModal() {
-  const openBtn = document.getElementById('open-bug-modal-btn');
-  const modal = document.getElementById('bug-modal');
-  const closeBtn = document.getElementById('bug-modal-close');
-  const form = document.getElementById('bug-form');
-
-  if (openBtn && modal) openBtn.addEventListener('click', () => modal.classList.add('active'));
-  if (closeBtn && modal) closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const title = document.getElementById('bug-title').value.trim();
-      const category = document.getElementById('bug-category').value;
-      const description = document.getElementById('bug-desc').value.trim();
-
-      try {
-        const res = await fetch('/api/games/bug-report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, category, description })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          alert('🐛 ' + (data.message || 'Bug report sent to administrators!'));
-          form.reset();
-          if (modal) modal.classList.remove('active');
-        } else {
-          alert(data.error || 'Failed to submit bug report.');
-        }
-      } catch (err) {
-        alert('Network error submitting bug report.');
-      }
-    });
-  }
-}
 
 let setupFilterAndSearch = function() {
   const searchInput = document.getElementById('game-search-input');
