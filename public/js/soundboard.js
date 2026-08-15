@@ -405,15 +405,16 @@ function setupUploadModal() {
 
         let audioUrl = urlInput;
 
-        if (!audioUrl && fileInput && fileInput.files.length > 0) {
+        if (fileInput && fileInput.files.length > 0) {
           const file = fileInput.files[0];
-          if (file.size > 5 * 1024 * 1024) {
+          if (file.size > 15 * 1024 * 1024) {
             if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalBtnText; }
-            return alert('Audio file must be smaller than 5MB.');
+            return alert('Audio file must be smaller than 15MB.');
           }
-          audioUrl = await new Promise((resolve) => {
+          audioUrl = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (evt) => resolve(evt.target.result);
+            reader.onerror = (err) => reject(err);
             reader.readAsDataURL(file);
           });
         }
