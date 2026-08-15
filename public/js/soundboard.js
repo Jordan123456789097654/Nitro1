@@ -348,6 +348,15 @@ window.openSoundUploadModal = function() {
   const isOwnerOrAdmin = user && (user.role === 'owner' || user.role === 'admin');
   if (globalCheckDiv) globalCheckDiv.style.display = isOwnerOrAdmin ? 'block' : 'none';
   modal.classList.add('active');
+  modal.style.display = 'flex';
+};
+
+window.closeSoundUploadModal = function() {
+  const modal = document.getElementById('soundboard-upload-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
 };
 
 function setupUploadModal() {
@@ -361,19 +370,23 @@ function setupUploadModal() {
   const fileNameLabel = document.getElementById('sound-file-name-label');
 
   if (openBtn) {
-    openBtn.addEventListener('click', () => {
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       window.openSoundUploadModal();
     });
   }
 
   if (modal) {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('active');
+      if (e.target === modal) window.closeSoundUploadModal();
     });
   }
 
   if (closeBtn && modal) {
-    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.closeSoundUploadModal();
+    });
   }
 
   if (chooseFileBtn && fileInput) {
@@ -434,6 +447,7 @@ function setupUploadModal() {
         });
         const data = await res.json();
         if (data.success) {
+          alert('🎉 Soundboard sound uploaded successfully!');
           modal.classList.remove('active');
           form.reset();
           if (fileNameLabel) fileNameLabel.textContent = 'No file selected';
