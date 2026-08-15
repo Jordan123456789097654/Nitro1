@@ -96,6 +96,12 @@ function initChatSocket(io) {
       console.error('Socket init error:', e);
     }
 
+    socket.on('play_sound_effect', ({ soundKey, username }) => {
+      if (soundKey) {
+        io.emit('sound_effect_broadcast', { soundKey, username });
+      }
+    });
+
     // User Identity & Activity
     socket.on('user_connected', (data) => {
       if (!data) return;

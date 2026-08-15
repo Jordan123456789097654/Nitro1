@@ -10,7 +10,7 @@ import { initStudyTimer, initPaintCanvas } from './widgets.js';
 import { initAiHelper } from './ai.js';
 import { initSoundboard } from './soundboard.js';
 import { initVoiceRooms } from './voice.js';
-import { initFriends, fetchFriends } from './friends.js';
+import { initFriends, fetchFriends, sendFriendRequest } from './friends.js';
 
 export const FAVICON_MAP = {
   default: '/favicon.svg',
@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCookieConsent();
   initKonamiCode();
   setupBadgesModal();
+  window.openPublicProfile = openPublicProfile;
 
 function initContactForm() {
   const form = document.getElementById('contact-us-form');
@@ -950,13 +951,25 @@ export async function openPublicProfile(username) {
     }).join('');
   }
 
+  const addFriendBtn = document.getElementById('pub-profile-add-friend-btn');
+  if (addFriendBtn) {
+    addFriendBtn.onclick = async () => {
+      try {
+        await sendFriendRequest(username);
+        alert(`✅ Friend request sent to @${username}!`);
+      } catch (err) {
+        alert(err.message || 'Failed to send friend request.');
+      }
+    };
+  }
+
   if (dmBtn) {
     dmBtn.onclick = () => {
       modal.classList.remove('active');
       const chatTab = document.getElementById('nav-chat-tab');
       if (chatTab) chatTab.click();
       setTimeout(() => {
-        const dmInput = document.getElementById('chat-dm-recipient');
+        const dmInput = document.getElementById('chat-dm-target-user');
         if (dmInput) {
           dmInput.value = username;
           const dmSubmit = document.getElementById('chat-start-dm-btn');

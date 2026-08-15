@@ -25,6 +25,7 @@ const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 // Crash protection for cloud deployments (Render, Railway, Koyeb, Replit, nitromath.org)
 process.on('uncaughtException', (err) => {
   console.error('🛡️ [Safety] Uncaught Exception caught:', err.message);
+  console.error(err.stack);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
