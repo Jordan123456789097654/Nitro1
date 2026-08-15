@@ -515,8 +515,8 @@ router.post('/users/:id/force-reset', async (req, res) => {
   }
 });
 
-// Unproxy Ban / Clear Proxy Timeout & Strikes
-router.post('/users/:id/unproxy-ban', async (req, res) => {
+// Ungateway Ban / Clear Gateway Timeout & Strikes
+router.post('/users/:id/ungateway-ban', async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -524,20 +524,20 @@ router.post('/users/:id/unproxy-ban', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
-    await db.unproxyBanUser(targetId);
-    await db.createModerationLog('UNPROXY_BAN', admin, targetUser.username, 'Proxy timeout and violation strikes cleared');
+    await db.ungatewayBanUser(targetId);
+    await db.createModerationLog('UNRESTRICT_USER', admin, targetUser.username, 'Gateway timeout and violation strikes cleared');
 
     sendDiscordLog({
       category: 'moderation',
-      action: 'UNPROXY_BAN',
+      action: 'UNRESTRICT_USER',
       admin: admin,
       target: targetUser.username,
-      details: 'Proxy ban and violation strikes successfully lifted.'
+      details: 'Gateway ban and violation strikes successfully lifted.'
     });
 
-    res.json({ success: true, message: `Proxy ban lifted for ${targetUser.username}.` });
+    res.json({ success: true, message: `Gateway ban lifted for ${targetUser.username}.` });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to lift proxy ban.' });
+    res.status(500).json({ error: 'Failed to lift gateway ban.' });
   }
 });
 
@@ -623,9 +623,9 @@ router.post('/users/:id/ban', async (req, res) => {
   }
 });
 
-// Proxy Ban / Restrict Proxy Access Only (with Duration Support)
-router.post('/users/:id/proxy-ban', async (req, res) => {
-  const { is_proxy_banned, reason, durationHours } = req.body;
+// Gateway Ban / Restrict Gateway Access Only (with Duration Support)
+router.post('/users/:id/gateway-ban', async (req, res) => {
+  const { is_gateway_banned, reason, durationHours } = req.body;
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -633,23 +633,23 @@ router.post('/users/:id/proxy-ban', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
-    const proxyReason = reason || 'Proxy browsing restricted by administrator';
-    const result = await db.updateUserProxyBan(targetId, is_proxy_banned, proxyReason, durationHours);
-    const actionName = is_proxy_banned ? 'PROXY_BAN_USER' : 'UNPROXY_BAN_USER';
-    const durLabel = (is_proxy_banned && durationHours > 0) ? ` for ${durationHours} hours` : '';
-    await db.createModerationLog(actionName, admin, targetUser.username, `${proxyReason}${durLabel}`);
+    const gatewayReason = reason || 'Gateway browsing restricted by administrator';
+    const result = await db.updateUserGatewayBan(targetId, is_gateway_banned, gatewayReason, durationHours);
+    const actionName = is_gateway_banned ? 'GATEWAY_RESTRICT_USER' : 'UNRESTRICT_USER_USER';
+    const durLabel = (is_gateway_banned && durationHours > 0) ? ` for ${durationHours} hours` : '';
+    await db.createModerationLog(actionName, admin, targetUser.username, `${gatewayReason}${durLabel}`);
 
     sendDiscordLog({
       category: 'moderation',
       action: actionName,
       admin: admin,
       target: targetUser.username,
-      details: `${proxyReason}${durLabel}`
+      details: `${gatewayReason}${durLabel}`
     });
 
-    res.json({ success: true, is_proxy_banned: Boolean(is_proxy_banned), reason: proxyReason, timeoutUntil: result?.timeoutUntil });
+    res.json({ success: true, is_gateway_banned: Boolean(is_gateway_banned), reason: gatewayReason, timeoutUntil: result?.timeoutUntil });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update proxy ban status.' });
+    res.status(500).json({ error: 'Failed to update gateway ban status.' });
   }
 });
 
@@ -693,27 +693,27 @@ router.delete('/games/:id', async (req, res) => {
   }
 });
 
-// Clear Proxy Timeout for a user (admin)
-router.post('/users/:id/clear-proxy', async (req, res) => {
+// Clear Gateway Timeout for a user (admin)
+router.post('/users/:id/clear-gateway', async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   try {
-    const success = await db.clearProxyTimeout(targetId);
+    const success = await db.clearGatewayTimeout(targetId);
     if (success) {
-      await db.createModerationLog('CLEAR_PROXY_TIMEOUT', admin, targetId, 'Proxy timeout cleared by admin');
+      await db.createModerationLog('CLEAR_GATEWAY_TIMEOUT', admin, targetId, 'Gateway timeout cleared by admin');
       sendDiscordLog({
         category: 'moderation',
-        action: 'CLEAR_PROXY_TIMEOUT',
+        action: 'CLEAR_GATEWAY_TIMEOUT',
         admin,
         target: `User ID ${targetId}`,
-        details: 'Proxy timeout removed by administrator.'
+        details: 'Gateway timeout removed by administrator.'
       });
-      res.json({ success: true, message: 'Proxy timeout cleared.' });
+      res.json({ success: true, message: 'Gateway timeout cleared.' });
     } else {
-      res.status(500).json({ error: 'Failed to clear proxy timeout.' });
+      res.status(500).json({ error: 'Failed to clear gateway timeout.' });
     }
   } catch (err) {
-    res.status(500).json({ error: 'Error clearing proxy timeout.' });
+    res.status(500).json({ error: 'Error clearing gateway timeout.' });
   }
 });
 

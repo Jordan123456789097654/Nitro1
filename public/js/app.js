@@ -841,7 +841,7 @@ const MASTER_BADGES = [
   { id: 'vip_lounge', title: '⭐ VIP Lounge Elite', desc: 'Unlocked PRO & VIP Lounge unblocked games catalog', icon: '⭐', isUnlocked: (u) => u && ['owner', 'admin', 'vip', 'pro', 'elite_patron'].includes(u.role) },
   { id: 'lofi_listener', title: '🎧 Lofi Listener', desc: 'Enchanted study breaks with ambient lofi music streams', icon: '🎧', isUnlocked: () => true },
   { id: 'nitro_og', title: '🚀 Nitro OG Founder', desc: 'Early access platform beta tester badge', icon: '🚀', isUnlocked: () => true },
-  { id: 'proxy_nav', title: '🌐 Proxy Navigator', desc: 'Explored web games via sandboxed proxy relay engine', icon: '🌐', isUnlocked: () => true },
+  { id: 'gateway_nav', title: '🌐 Gateway Navigator', desc: 'Explored web games via sandboxed gateway relay engine', icon: '🌐', isUnlocked: () => true },
   { id: 'diamond_supporter', title: '💎 Diamond Supporter', desc: 'Recognized active platform community member', icon: '💎', isUnlocked: () => true }
 ];
 

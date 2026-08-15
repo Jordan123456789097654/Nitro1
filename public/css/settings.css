@@ -231,7 +231,7 @@
 }
 
 /* Dropdown styling */
-.proxy-select-dropdown {
+.custom-select-dropdown {
   width: 100%;
   background: #141724 !important;
   border: 1px solid var(--card-border);
@@ -242,7 +242,7 @@
   font-size: 0.9rem;
 }
 
-.proxy-select-dropdown option {
+.custom-select-dropdown option {
   background: #141724 !important;
   color: #f8fafc !important;
 }

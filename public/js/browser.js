@@ -105,11 +105,11 @@ function renderActiveTab() {
       iframe.style.display = 'block';
       const token = localStorage.getItem('nitro_jwt_token');
       const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-      const engineSelect = document.getElementById('browser-proxy-engine-select');
-      const engine = engineSelect ? engineSelect.value : (localStorage.getItem('nitro_proxy_engine') || 'chrome');
+      const engineSelect = document.getElementById('browser-gateway-engine-select');
+      const engine = engineSelect ? engineSelect.value : (localStorage.getItem('nitro_gateway_engine') || 'chrome');
       const engineParam = `&engine=${encodeURIComponent(engine)}`;
 
-      const targetSrc = `/api/proxy?url=${encodeURIComponent(activeTab.url)}${tokenParam}${engineParam}`;
+      const targetSrc = `/api/gateway?url=${encodeURIComponent(activeTab.url)}${tokenParam}${engineParam}`;
       if (iframe.src !== `${window.location.origin}${targetSrc}`) {
         iframe.src = targetSrc;
       }
@@ -184,20 +184,20 @@ function setupBrowserControls() {
   const refreshBtn = document.getElementById('browser-refresh');
   const homeBtn = document.getElementById('browser-home');
   const openBlankBtn = document.getElementById('browser-open-blank-btn');
-  const proxyEngineSelect = document.getElementById('browser-proxy-engine-select');
+  const gatewayEngineSelect = document.getElementById('browser-gateway-engine-select');
 
-  if (proxyEngineSelect) {
-    const savedEngine = localStorage.getItem('nitro_proxy_engine');
-    if (savedEngine) proxyEngineSelect.value = savedEngine;
+  if (gatewayEngineSelect) {
+    const savedEngine = localStorage.getItem('nitro_gateway_engine');
+    if (savedEngine) gatewayEngineSelect.value = savedEngine;
 
-    proxyEngineSelect.addEventListener('change', (e) => {
+    gatewayEngineSelect.addEventListener('change', (e) => {
       const selected = e.target.value;
-      localStorage.setItem('nitro_proxy_engine', selected);
+      localStorage.setItem('nitro_gateway_engine', selected);
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && activeTab.url) {
         const token = localStorage.getItem('nitro_jwt_token');
         const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-        iframe.src = `/api/proxy?url=${encodeURIComponent(activeTab.url)}${tokenParam}&engine=${encodeURIComponent(selected)}`;
+        iframe.src = `/api/gateway?url=${encodeURIComponent(activeTab.url)}${tokenParam}&engine=${encodeURIComponent(selected)}`;
       }
     });
   }
@@ -215,8 +215,8 @@ function setupBrowserControls() {
       if (activeTab && activeTab.url) {
         const token = localStorage.getItem('nitro_jwt_token');
         const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-        const engine = proxyEngineSelect ? proxyEngineSelect.value : (localStorage.getItem('nitro_proxy_engine') || 'chrome');
-        iframe.src = `/api/proxy?url=${encodeURIComponent(activeTab.url)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
+        const engine = gatewayEngineSelect ? gatewayEngineSelect.value : (localStorage.getItem('nitro_gateway_engine') || 'chrome');
+        iframe.src = `/api/gateway?url=${encodeURIComponent(activeTab.url)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
       }
     });
   }
@@ -264,7 +264,7 @@ function setupBrowserControls() {
 
       const token = localStorage.getItem('nitro_jwt_token');
       const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-      const fullUrl = `${window.location.origin}/api/proxy?url=${encodeURIComponent(targetUrl)}${tokenParam}`;
+      const fullUrl = `${window.location.origin}/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}`;
 
       const win = window.open('about:blank', '_blank');
       if (!win) {

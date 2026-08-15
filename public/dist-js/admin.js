@@ -1,1 +1,1562 @@
-(function(_0x4a615b,_0x1752dc){const _0x4417f2=_0x1518,_0x2d089f=_0x393b,_0x5695db=_0x4a615b();while(!![]){try{const _0x535980=parseInt(_0x2d089f(0x37a,']wJE'))/(-0x22b3+-0x2435+0x46e9)*(-parseInt(_0x2d089f(0x341,'P@q6'))/(0x5a1+0x20c7+0x7ae*-0x5))+-parseInt(_0x2d089f(0x390,']HPT'))/(-0x1931+0x19b2+-0x7e)*(-parseInt(_0x2d089f(0x32e,'l%Yf'))/(-0x869*0x3+-0x383*0x7+0x31d4))+-parseInt(_0x4417f2(0x3e4))/(0x1eb3+0x961+-0x280f)*(-parseInt(_0x4417f2(0x2ed))/(0xa7*0x18+-0x1*-0x371+-0x1313))+parseInt(_0x4417f2(0x27c))/(-0x63*0x37+-0x113b+0x2687)+-parseInt(_0x4417f2(0x270))/(-0x2*-0xecb+-0xd*0x175+-0xa9d)+-parseInt(_0x4417f2(0x272))/(0x1fb2+-0x2563+0x5ba)+parseInt(_0x2d089f(0x1de,'heEg'))/(-0x4cc*0x1+0xc7*0x28+0x1a42*-0x1)*(parseInt(_0x4417f2(0x3e3))/(-0x101*0x5+-0x21*0xc9+0x1ef9));if(_0x535980===_0x1752dc)break;else _0x5695db['push'](_0x5695db['shift']());}catch(_0x5ad96b){_0x5695db['push'](_0x5695db['shift']());}}}(_0xb1fe,-0xeb*0x8ea+-0x161*-0x757+-0x18e05*-0x3));function _0x393b(_0xc01438,_0x2a8aa0){_0xc01438=_0xc01438-(0xb6f+-0x2053+0x16af*0x1);const _0x100cff=_0xb1fe();let _0x31668d=_0x100cff[_0xc01438];if(_0x393b['bRJQwT']===undefined){var _0x2647ac=function(_0x45cf1a){const _0x34750c='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x1faf47='',_0x1c5618='';for(let _0x9b4086=0x15d*-0x1c+0x16fd+0xf2f,_0x819104,_0x114ce7,_0x15f6cc=0x2000+0xeb8+-0x2eb8;_0x114ce7=_0x45cf1a['charAt'](_0x15f6cc++);~_0x114ce7&&(_0x819104=_0x9b4086%(-0x1732+0x1c91+-0x55b)?_0x819104*(-0x1dc2+0xbb7*0x3+0x523*-0x1)+_0x114ce7:_0x114ce7,_0x9b4086++%(0x1cb9+-0x263b*-0x1+-0x264*0x1c))?_0x1faf47+=String['fromCharCode'](-0x1ef3+-0x1d80+0x3d72&_0x819104>>(-(0x75f+-0x151+-0x60c)*_0x9b4086&0x2bb+-0xf*0x1c2+-0x1*-0x17a9)):0x1*0x1fbf+0x301*0x2+-0x25c1){_0x114ce7=_0x34750c['indexOf'](_0x114ce7);}for(let _0x2480fd=0x19c1*-0x1+-0x5a7*0x4+0x1*0x305d,_0x92595f=_0x1faf47['length'];_0x2480fd<_0x92595f;_0x2480fd++){_0x1c5618+='%'+('00'+_0x1faf47['charCodeAt'](_0x2480fd)['toString'](0x1f50+0x1*-0x1c81+-0x2bf))['slice'](-(0x1525+0x1*0x38c+-0x18af));}return decodeURIComponent(_0x1c5618);};const _0x14e026=function(_0x26b0d5,_0x5dd4e7){let _0x32747f=[],_0x2ae9b7=-0x2386+-0x9b9+0x2d3f,_0x5b2d96,_0x5bc8d7='';_0x26b0d5=_0x2647ac(_0x26b0d5);let _0x577f13;for(_0x577f13=-0x14b+0x1*0x727+-0x5dc;_0x577f13<-0x5*0x359+-0xf36+-0xf1*-0x23;_0x577f13++){_0x32747f[_0x577f13]=_0x577f13;}for(_0x577f13=-0x23ce+-0x543+0x2911;_0x577f13<0x1*-0x16ba+-0x1d*-0x9a+-0x324*-0x2;_0x577f13++){_0x2ae9b7=(_0x2ae9b7+_0x32747f[_0x577f13]+_0x5dd4e7['charCodeAt'](_0x577f13%_0x5dd4e7['length']))%(-0x21bd+0x10*-0x36+0x261d*0x1),_0x5b2d96=_0x32747f[_0x577f13],_0x32747f[_0x577f13]=_0x32747f[_0x2ae9b7],_0x32747f[_0x2ae9b7]=_0x5b2d96;}_0x577f13=-0xe7*0x1a+-0x199f+0x3115,_0x2ae9b7=-0x6e5*-0x3+0x8*-0x407+0xb89;for(let _0x50581c=0x23*-0x69+-0xf85*-0x1+0x95*-0x2;_0x50581c<_0x26b0d5['length'];_0x50581c++){_0x577f13=(_0x577f13+(-0x1*0xe1d+-0x29*0xb7+-0x1*-0x2b6d))%(0x3*0x9db+0x39*0x26+0x2507*-0x1),_0x2ae9b7=(_0x2ae9b7+_0x32747f[_0x577f13])%(-0x168b+0x11b4+-0x5*-0x12b),_0x5b2d96=_0x32747f[_0x577f13],_0x32747f[_0x577f13]=_0x32747f[_0x2ae9b7],_0x32747f[_0x2ae9b7]=_0x5b2d96,_0x5bc8d7+=String['fromCharCode'](_0x26b0d5['charCodeAt'](_0x50581c)^_0x32747f[(_0x32747f[_0x577f13]+_0x32747f[_0x2ae9b7])%(-0x1bf+0x1f8c*-0x1+0x1*0x224b)]);}return _0x5bc8d7;};_0x393b['lRpwuf']=_0x14e026,_0x393b['zYRTmd']={},_0x393b['bRJQwT']=!![];}const _0x1cd828=_0x100cff[-0x1c0b*-0x1+0x1c*-0x98+-0x25*0x4f],_0x47d4a7=_0xc01438+_0x1cd828,_0x4cf005=_0x393b['zYRTmd'][_0x47d4a7];return!_0x4cf005?(_0x393b['AEDpUr']===undefined&&(_0x393b['AEDpUr']=!![]),_0x31668d=_0x393b['lRpwuf'](_0x31668d,_0x2a8aa0),_0x393b['zYRTmd'][_0x47d4a7]=_0x31668d):_0x31668d=_0x4cf005,_0x31668d;}import{getCurrentUser}from'./auth.js';import{loadGames}from'./games.js';import{checkStatusAndAnnouncements,checkUpdateLogs}from'./app.js';import{loadPolls}from'./polls.js';let adminSocket=null;function authFetch(_0x21b58e,_0x54cbcd={}){const _0x5f3d72=_0x393b,_0x11b6a1=_0x1518,_0x412660=localStorage[_0x11b6a1(0x3e8)]('nitro_jwt_'+'token'),_0x16a085={..._0x54cbcd['headers']||{}},_0x52dfe9=_0x16a085;_0x412660&&(_0x52dfe9[_0x11b6a1(0x426)+_0x5f3d72(0x3f1,'Q)YQ')]=_0x5f3d72(0x1e2,']CDP')+_0x412660);const _0x2c34dc={..._0x54cbcd};return _0x2c34dc['headers']=_0x52dfe9,_0x2c34dc['credential'+'s']=_0x5f3d72(0x446,']HPT')+'n',fetch(_0x21b58e,_0x2c34dc);}export function initAdmin(){const _0x1f636d=_0x393b,_0x456eb8=_0x1518,_0x30d006={'PlBFU':_0x456eb8(0x2b9)+_0x456eb8(0x2c9)+'|6','ChUDd':function(_0x279306){return _0x279306();},'wEJwo':function(_0x3a2a3f){return _0x3a2a3f();},'TkiHi':function(_0x3b354a){return _0x3b354a();},'eQdFJ':function(_0x4fcd74){return _0x4fcd74();}},_0x441c5c=_0x30d006[_0x1f636d(0x263,'1ds4')][_0x1f636d(0x3f6,'RXg3')]('|');let _0x382492=0xba7+0x1951*0x1+-0x4*0x93e;while(!![]){switch(_0x441c5c[_0x382492++]){case'0':_0x30d006[_0x456eb8(0x33c)](setupDomainBlockForm);continue;case'1':_0x30d006[_0x456eb8(0x33c)](setupMaintenanceToggle);continue;case'2':_0x30d006[_0x1f636d(0x2dd,'WCtu')](setupAnnouncementForm);continue;case'3':_0x30d006[_0x456eb8(0x33c)](setupSlowmodeControls);continue;case'4':_0x30d006[_0x1f636d(0x424,'x9r(')](setupUpdateLogForm);continue;case'5':_0x30d006[_0x1f636d(0x41c,'7Qvh')](setupAnnouncementDisableControls);continue;case'6':initAdminSocket();continue;case'7':_0x30d006['wEJwo'](setupAdminActions);continue;case'8':_0x30d006[_0x456eb8(0x33c)](setupPollCreateForm);continue;case'9':_0x30d006[_0x456eb8(0x488)](setupAdminTabs);continue;case'10':_0x30d006[_0x456eb8(0x372)](setupUpdateDisableControls);continue;}break;}}function initAdminSocket(){const _0x5c4edc=_0x1518,_0x6ee471=_0x393b,_0x4b5298={'OqCqU':function(_0x46ca9d,_0x4263a8,_0x10b2f6){return _0x46ca9d(_0x4263a8,_0x10b2f6);},'kLbgW':function(_0x1a364c,_0x415dab){return _0x1a364c!==_0x415dab;},'fpKYQ':_0x6ee471(0x47a,'rx^^'),'oXbII':function(_0x3713d1,_0x43effd){return _0x3713d1(_0x43effd);},'gxiAu':_0x5c4edc(0x485),'PaMCr':'polling','ltevZ':function(_0x2f0eb6){return _0x2f0eb6();},'YVRZm':function(_0xebe82b,_0x15c3be){return _0xebe82b===_0x15c3be;},'EQIgS':_0x6ee471(0x4a9,'WCtu'),'NsDQP':_0x6ee471(0x30e,'8*kl')+_0x6ee471(0x359,'pQgu'),'mBXMh':'In\x20Admin\x20P'+_0x5c4edc(0x3ba),'pyqAR':_0x6ee471(0x39d,'P@q6')+_0x5c4edc(0x443)+_0x5c4edc(0x2cb)};if(_0x4b5298['kLbgW'](typeof io,_0x4b5298[_0x5c4edc(0x4f2)])){adminSocket=_0x4b5298[_0x5c4edc(0x4c6)](io,{'transports':[_0x4b5298[_0x5c4edc(0x526)],_0x4b5298[_0x6ee471(0x51f,'8a0x')]],'reconnectionAttempts':0x5,'timeout':0x2710});const _0x15e92a=_0x4b5298[_0x6ee471(0x353,'GFnI')](getCurrentUser);_0x15e92a&&_0x4b5298[_0x5c4edc(0x4d3)](_0x15e92a[_0x6ee471(0x218,'U)US')],_0x4b5298[_0x6ee471(0x413,'WCtu')])&&adminSocket['emit'](_0x4b5298[_0x5c4edc(0x1d5)],{'user':_0x15e92a,'activity':_0x4b5298[_0x5c4edc(0x4b1)]}),adminSocket['on'](_0x4b5298['pyqAR'],({count:_0x29fba8,connections:_0x349535,slowmode:_0x222193})=>{const _0x4a5adf=_0x6ee471,_0x213f5e=_0x5c4edc;_0x4b5298[_0x213f5e(0x536)](renderLiveConnections,_0x29fba8,_0x349535);const _0x18356b=document[_0x213f5e(0x4ce)+_0x4a5adf(0x2ab,'pk]O')](_0x4a5adf(0x3b3,'heEg')+'mode-selec'+'t');if(_0x18356b&&_0x222193!==undefined)_0x18356b[_0x4a5adf(0x1e1,'heEg')]=_0x222193[_0x4a5adf(0x325,'7Qvh')]();});}}export async function loadAdminData(){const _0x4f37d2=_0x1518,_0x37112c=_0x393b,_0x1ac03a={'Lhubv':function(_0xd2acee,_0x3c9da0){return _0xd2acee!==_0x3c9da0;},'OdNHU':function(_0x49c2f6){return _0x49c2f6();},'mkWAP':function(_0x5d304f){return _0x5d304f();},'dIstX':function(_0x292f48){return _0x292f48();},'MHQIj':function(_0xaebd91){return _0xaebd91();}},_0x436778=getCurrentUser();if(!_0x436778||_0x1ac03a[_0x37112c(0x234,'bWOk')](_0x436778[_0x4f37d2(0x506)],_0x4f37d2(0x3c8)))return;await Promise['allSettled']([_0x1ac03a[_0x37112c(0x43c,')AQ0')](fetchMaintenance),_0x1ac03a[_0x4f37d2(0x293)](fetchStats),fetchUsers(),_0x1ac03a[_0x37112c(0x534,'sV3f')](fetchAdminGames),_0x1ac03a[_0x4f37d2(0x409)](fetchBlockedDomains),_0x1ac03a[_0x4f37d2(0x409)](fetchFilters),_0x1ac03a[_0x4f37d2(0x4ae)](fetchLogs),_0x1ac03a[_0x4f37d2(0x3bc)](fetchAdminWebhooks)]);}function renderLiveConnections(_0x561be1,_0x20b6f9){const _0x15ec4d=_0x393b,_0x368b2e=_0x1518,_0x1c69b5={};_0x1c69b5['oUNBd']=_0x368b2e(0x2a9)+_0x15ec4d(0x213,'sV3f')+_0x368b2e(0x42f),_0x1c69b5[_0x15ec4d(0x4a7,'GFnI')]='<tr><td\x20co'+'lspan=\x226\x22\x20'+_0x368b2e(0x2b4)+_0x15ec4d(0x2db,'1ds4')+_0x15ec4d(0x3b5,'2T]g')+'or:\x20var(--'+_0x15ec4d(0x4ab,'ox5$')+_0x15ec4d(0x389,'pQgu')+':\x2018px;\x22>N'+_0x368b2e(0x3dd)+_0x15ec4d(0x3d7,'6(6n')+_0x15ec4d(0x43d,'sV3f');const _0x56806f=_0x1c69b5,_0x368304=document[_0x15ec4d(0x36c,'8*kl')+'ById'](_0x15ec4d(0x35a,'pk]O')+_0x15ec4d(0x40d,'7cMn')+'t'),_0xc35ca4=document[_0x15ec4d(0x2aa,']CDP')+_0x368b2e(0x4e2)](_0x56806f[_0x15ec4d(0x2c6,'U)US')]);if(_0x368304)_0x368304[_0x15ec4d(0x3ee,'b5Pp')+'t']=_0x561be1+_0x368b2e(0x4a5);if(!_0xc35ca4)return;if(!_0x20b6f9||_0x20b6f9[_0x15ec4d(0x465,'gRJH')]===0x1*-0xc52+-0x289*0xf+0x3259){_0xc35ca4[_0x368b2e(0x378)]=_0x56806f[_0x15ec4d(0x332,'Q8n3')];return;}_0xc35ca4[_0x15ec4d(0x4d7,'t2NM')]=_0x20b6f9['map'](_0x3e62b8=>_0x15ec4d(0x344,'x9r(')+_0x368b2e(0x447)+'<code>'+(_0x3e62b8['socketId']?_0x3e62b8[_0x368b2e(0x336)]['slice'](0x11cc*-0x2+0x76d+-0x1*-0x1c2b,-0x4*0x7dc+0x270+0x1d08):'')+(_0x368b2e(0x1e6)+_0x368b2e(0x21b)+_0x368b2e(0x4e7)+'ong>')+(_0x3e62b8['username']||_0x15ec4d(0x4bc,'rx^^'))+(_0x368b2e(0x2b3)+_0x15ec4d(0x2fb,'7cMn')+_0x368b2e(0x339)+_0x15ec4d(0x3b9,'x9r(')+_0x15ec4d(0x3b1,'7cMn'))+(_0x3e62b8[_0x15ec4d(0x218,'U)US')]||_0x368b2e(0x24d))+'\x22>'+(_0x3e62b8['role']||_0x15ec4d(0x22c,'1(OB'))[_0x15ec4d(0x365,'^wy@')+'e']()+('</span></t'+_0x368b2e(0x3c1)+'td><span\x20s'+'tyle=\x22colo'+'r:\x20#38bdf8'+_0x368b2e(0x345))+(_0x3e62b8[_0x368b2e(0x250)+_0x368b2e(0x4d2)]||_0x15ec4d(0x2eb,'1ds4'))+(_0x368b2e(0x45f)+_0x15ec4d(0x4b4,'gRJH')+'td><span\x20s'+_0x368b2e(0x2a4)+_0x15ec4d(0x1fb,'hAi@')+_0x15ec4d(0x490,']CDP')+_0x368b2e(0x42a)+'\x22>')+new Date(_0x3e62b8[_0x15ec4d(0x253,'hAi@')+'t']||Date[_0x368b2e(0x277)]())[_0x15ec4d(0x34f,'l%Yf')+_0x368b2e(0x4bf)]()+(_0x15ec4d(0x3d2,'2T]g')+'d>\x0a\x20\x20\x20\x20\x20\x20<'+'td>\x0a\x20\x20\x20\x20\x20\x20'+_0x368b2e(0x4b7)+_0x15ec4d(0x288,'u$!u')+_0x15ec4d(0x3e9,'pQgu')+_0x15ec4d(0x3fb,'BlH3')+_0x15ec4d(0x25c,'Q[za')+_0x368b2e(0x40a)+'Connection'+'(\x27')+_0x3e62b8['socketId']+(_0x368b2e(0x24a)+_0x368b2e(0x450)+_0x368b2e(0x2fe)+_0x15ec4d(0x1d3,'t2NM')+'\x20\x20'))['join']('');}function setupSlowmodeControls(){const _0x168422=_0x1518,_0x105a18=_0x393b,_0x1ebdd3={'kwruE':function(_0x3886f3,_0x15bde7,_0x3f2be0){return _0x3886f3(_0x15bde7,_0x3f2be0);},'dwDvr':function(_0x825852){return _0x825852();},'ZcwTA':function(_0x5d5531,_0x27b56d){return _0x5d5531&&_0x27b56d;},'UwiOy':_0x105a18(0x231,'8a0x')+_0x168422(0x522),'YOpxv':function(_0x579b7f,_0x3880a0){return _0x579b7f(_0x3880a0);},'hmQHM':_0x168422(0x351)+'mode-selec'+'t','QwwzS':'admin-slow'+'mode-apply'+_0x168422(0x50c),'fNawy':_0x168422(0x267)},_0x187ee3=document[_0x168422(0x4ce)+'ById'](_0x1ebdd3[_0x105a18(0x422,'JOnn')]),_0x17cbfd=document['getElement'+_0x168422(0x4e2)](_0x1ebdd3[_0x168422(0x2ba)]);_0x1ebdd3[_0x105a18(0x21e,'u$!u')](_0x17cbfd,_0x187ee3)&&_0x17cbfd[_0x168422(0x466)+_0x168422(0x311)](_0x1ebdd3['fNawy'],()=>{const _0x3bb70e=_0x105a18,_0x52ee92=_0x168422,_0x3e9baa=_0x1ebdd3['kwruE'](parseInt,_0x187ee3[_0x52ee92(0x4dc)],0x1*-0x1b94+-0x48*0x4a+0x306e),_0x4cb24d=_0x1ebdd3['dwDvr'](getCurrentUser);if(_0x1ebdd3[_0x3bb70e(0x3e0,'8a0x')](adminSocket,_0x4cb24d)){const _0x36fc6b={};_0x36fc6b['seconds']=_0x3e9baa,_0x36fc6b['adminUser']=_0x4cb24d,adminSocket[_0x3bb70e(0x3c4,'JOnn')](_0x1ebdd3['UwiOy'],_0x36fc6b),_0x1ebdd3[_0x52ee92(0x230)](alert,_0x52ee92(0x394)+_0x3bb70e(0x46e,'BlH3')+'to\x20'+_0x3e9baa+'s.');}});}function setupPollCreateForm(){const _0x185264=_0x1518,_0x15e7b3=_0x393b,_0x4c13df={'huxYx':_0x15e7b3(0x1f8,'zGb(')+_0x185264(0x204),'UVWpd':_0x15e7b3(0x2d6,'GFnI')+_0x185264(0x3df),'PSgHW':_0x185264(0x3f7)+_0x185264(0x4ba),'QaLIa':'new-poll-o'+_0x15e7b3(0x1e9,'hAi@'),'WDKaO':function(_0x392ee7,_0x3c0ffd){return _0x392ee7(_0x3c0ffd);},'Objgy':function(_0x455906,_0x2febf6,_0xa65fe1){return _0x455906(_0x2febf6,_0xa65fe1);},'POwoN':_0x15e7b3(0x484,'u$!u')+_0x185264(0x347),'XchHe':_0x15e7b3(0x255,')AQ0'),'bxBFC':'applicatio'+_0x15e7b3(0x30f,'bWOk'),'uTBBh':function(_0x6c124d,_0x472a60){return _0x6c124d(_0x472a60);},'ONQZf':_0x185264(0x1cd)+_0x185264(0x4d1)+'l.','evOJv':function(_0x33405f,_0x4b030f){return _0x33405f(_0x4b030f);},'khGpU':function(_0x4f3884,_0x244f3a){return _0x4f3884(_0x244f3a);},'qwmxL':_0x15e7b3(0x3a3,'dJht')+_0x185264(0x4e0),'UIPBf':_0x185264(0x2ce)+_0x185264(0x26f)+'rm','rkDJI':_0x185264(0x259)},_0x1f34f2=document['getElement'+_0x185264(0x4e2)](_0x4c13df[_0x15e7b3(0x4b3,'RXg3')]);if(!_0x1f34f2)return;_0x1f34f2[_0x185264(0x466)+_0x15e7b3(0x3de,'GFnI')](_0x4c13df[_0x185264(0x4df)],async _0x2e3500=>{const _0x25a0c7=_0x15e7b3,_0x1fe866=_0x185264;_0x2e3500['preventDef'+_0x1fe866(0x369)]();const _0x1b8554=document['getElement'+_0x25a0c7(0x48d,'rx^^')](_0x4c13df[_0x1fe866(0x44f)])['value'][_0x1fe866(0x3d4)](),_0x1a4158=document['getElement'+_0x1fe866(0x4e2)](_0x4c13df[_0x25a0c7(0x480,'WCtu')])[_0x1fe866(0x4dc)][_0x1fe866(0x3d4)](),_0x14d8d0=document[_0x25a0c7(0x437,'8a0x')+_0x1fe866(0x4e2)](_0x4c13df[_0x25a0c7(0x538,'IL2e')])[_0x1fe866(0x4dc)][_0x25a0c7(0x340,'zGb(')](),_0x50e1de=document['getElement'+_0x1fe866(0x4e2)](_0x4c13df['QaLIa'])[_0x1fe866(0x4dc)][_0x1fe866(0x3d4)](),_0x479108=document[_0x1fe866(0x4ce)+_0x1fe866(0x4e2)](_0x1fe866(0x3f7)+_0x1fe866(0x280))['value'][_0x1fe866(0x3d4)](),_0x15e1b8=[_0x1a4158,_0x14d8d0,_0x50e1de,_0x479108][_0x25a0c7(0x1dd,'2T]g')](Boolean);if(!_0x1b8554||_0x15e1b8['length']<0x1ed7+-0x250+-0x1c85){_0x4c13df[_0x25a0c7(0x3af,'RXg3')](alert,_0x1fe866(0x3d1)+_0x25a0c7(0x2f3,'dJht')+_0x1fe866(0x261)+'s\x20are\x20requ'+_0x25a0c7(0x28c,'pk]O'));return;}try{const _0x5978a5={};_0x5978a5[_0x25a0c7(0x399,']HPT')]=_0x1b8554,_0x5978a5[_0x1fe866(0x530)]=_0x15e1b8;const _0x2c643f=await _0x4c13df[_0x25a0c7(0x489,']HPT')](authFetch,_0x4c13df[_0x25a0c7(0x40f,'dJht')],{'method':_0x4c13df[_0x25a0c7(0x43b,'9l2#')],'headers':{'Content-Type':_0x4c13df[_0x25a0c7(0x355,'JOnn')]},'body':JSON[_0x25a0c7(0x2c1,'l%Yf')](_0x5978a5)});if(!_0x2c643f['ok']){_0x4c13df[_0x25a0c7(0x3f4,'Q[za')](alert,_0x4c13df[_0x1fe866(0x202)]);return;}const _0x26cb54=await _0x2c643f[_0x1fe866(0x352)]();_0x4c13df[_0x1fe866(0x1e5)](alert,_0x1fe866(0x4fb)+_0x25a0c7(0x3cb,'heEg')+_0x25a0c7(0x374,'pQgu')+'!'),_0x1f34f2[_0x25a0c7(0x4f3,'Q[za')](),loadPolls();}catch(_0x510e0a){_0x4c13df[_0x1fe866(0x20d)](alert,_0x4c13df[_0x1fe866(0x435)]);}});}async function fetchAdminWebhooks(){const _0x1c9bb4=_0x393b,_0x493680=_0x1518,_0x1a061f={'jVgdh':function(_0x9d412b,_0x345bf1){return _0x9d412b(_0x345bf1);},'arzpd':_0x493680(0x37b)+_0x1c9bb4(0x50d,'rx^^'),'iGHyo':_0x1c9bb4(0x451,'fjx@')+_0x493680(0x327),'sRqge':_0x493680(0x3d6),'mZhBV':_0x493680(0x52c),'uPwnm':'proxy','MTmIZ':_0x493680(0x296)+'s'};try{const _0x57cf58=await _0x1a061f[_0x493680(0x48a)](authFetch,_0x1a061f[_0x1c9bb4(0x2ff,'I^zb')]);if(!_0x57cf58['ok'])return;const _0x456d97=_0x57cf58['headers'][_0x493680(0x496)](_0x493680(0x33e)+'pe');if(!_0x456d97||!_0x456d97[_0x1c9bb4(0x381,'c@Qg')](_0x1a061f[_0x1c9bb4(0x300,'GFnI')]))return;const _0x58bcb9=await _0x57cf58[_0x1c9bb4(0x1db,']CDP')]();_0x58bcb9['webhooks']&&[_0x1a061f[_0x1c9bb4(0x2fd,'GFnI')],_0x1a061f[_0x493680(0x4c2)],_0x1a061f[_0x493680(0x32a)],_0x1a061f[_0x1c9bb4(0x27d,'U0ZR')],_0x493680(0x20f),_0x1c9bb4(0x523,'^wy@')][_0x493680(0x357)](_0x405755=>{const _0x34fa24=_0x493680,_0x4d50b1=_0x1c9bb4,_0x1fd45d=document['getElement'+_0x4d50b1(0x1e4,'7cMn')](_0x4d50b1(0x37f,'fjx@')+_0x4d50b1(0x414,'rx^^')+_0x405755);_0x1fd45d&&_0x58bcb9[_0x34fa24(0x34b)][_0x405755]&&(_0x1fd45d[_0x4d50b1(0x3ab,'c@Qg')]=_0x58bcb9[_0x34fa24(0x34b)][_0x405755]);});}catch(_0x576af7){}}function _0xb1fe(){const _0xd18495=['t2vRr3q','WRaaW6C1WQfvkG','DguGCg9WDxbZia','WRddGw5YySk+WROMemkC','zgLZCgXHEq','W5evtCoJxM3cHqe','cIaGicaGicaGpa','lYZcKxrF','W7aqDCo9WP3dU8klCwK','W4lcKstcJG','gXpcINnPW7yQlCk+gW','C3rHDhm','bmoZhg4','WQHigCocWOJdMCkDuCohqG','jqlcLmkSaMDFmW','WO57W7v4ma','WQSAbmkIcJlcRmkjW7uB','WR1CwSoDWO3dMmohbmkguq','DgtdIG3dICo4WQOqvMy','pSoUWQGygW','W7vtWQ11W7SlmgTGg8o5mq','Dgq+cIaGicaGia','W6uAsSocWOxdNmkaz8ohra','qSkQbrK','4O+ZienOyxqGC2XV','W5RdOrbAWRi','W6/cLSkCW7fTFSkmkmk+WPZcSG','DvreD1q','ywrNzsa','WRCqW7a1WRXtk0i','dWpdR8oNhCkr','l2rVBwfPBNmV','sCoxjSouxqVcOSkid2G','jG5TmMGkW7BdRs1j','phnWyw4GC3r5Ba','W4VdJIJcOSkJ','CMLUzW','W6bfFSoRbxpdQmoeWRXv','oIlcK3vFWQShW5XGW5C','bSomiCojW4qOjc3cMmkc','WQxdHSooWRu3qa','ECkECmofWOyWCZNcNSoy','q8k3W40','B2nRAw5NigrVBq','W5FdKmo0Cmo1wG','l3rYpGOGicaG','psj3Aw5KB3CUCW','W44AqSo6tG','W6SBW7/dQKfeWR3dLmkADa','Dc1HBgLNBJOGyW','AxnPDg9YCYbmBW','W6BcLCkrWOmO','WPfwWRtcNai','bSkfEmoqWQRcKmogA8k4','bCkDpmoCWQZdLmouFSo8Cq','gmoRWQLBbLfPW4z/WRm','W6OAgCkU','o24/WPywevKsWPKy','qM9sAey','q8okW7mbxmouW63cHeT7','WOWhn1inWQmwEZCi','b8oaz8ogrWldUSkqxc4','yw5LBa','rw5wt3K','tuHrswO','zMLSDgvYx3r5Ca','BNqTD2vPz2H0oG','eSoGWPewaG','wM7cJSozemkbtfvKW6e','zd4kicaGicaGpa','twHREuO','nJ/cKa','us7cHCoz','AxnFyMfUBMvK','icaGidXIDxr0BW','CMvZzxq','ywrTAw4','shrsCwW','W446W5bqgCkAW5HNga','dmoHWQ1gevXkW4v8WQG','DMLWvxnLCNm','WRimW6eQWQ0','wsbusu1ft1vuia','W58yBalcPmkBqKb4wa','v8kXiCofWPxdJSo1hehcRW','uxvLC3rPB24Gyq','yI84WOmfreDnW5Ka','kYJcJMro','DhjPBq','BCk3hHiSWPn7W44XWPC','Bw9KzxjHDgLVBG','eGJdOmoXeCklsNzjWPy','EM1ZzNq','rcaOvw50AwWG','W5ZdQ8oTjWZcPgJdIs3cKq','W4FdTLDfWOZdPCkAW4lcGCoA','WQRdMCk+repdSaeXF1u','BYbHy3rPDMuGyW','W4RcI8o7BCo/rG','ChqTmq','tSk9rSoqW6S','FSkTxSoQ','uSoqBSovwHdcQSox','mta5mtKWotvXt25Ps3e','oduZnZvqBwvjq2q','Bxv0zwrFDw50Aq','hmo5WOWqdCkqa1NdRSkY','Aw5JBhvKzxm','z2v0sxrLBq','WQWavmotWOxdKCozxmoisW','Dgv4DenVBNrLBG','l3n0yxrZ','icaGphrKpG','icaGpc9KAxy+cG','W5rco1q7WQLrlwWK','FWxcMSolha','qMvvExC','WR7dJmob','W6ywW7qWWQ1Ezq','ySk/xCoXW48','WQVdNw7dOsu','igzVCIbOB3CGBq','W4lcOCk2WOSt','BMv3lxbVBgWTBW','cuxdMLq6WRTRyCoYgq','rgXyBvm','ueXOv0q','W6jAWPRdRCovFr5uWOldVq','WQ8rW7yU','WRRdHSoBWQ43sG','phrYpJX0zcbJBW','W7iFDmk0W5NdM8ktzcNdJa','Dg9YqwXS','pSocWR1fiG','BfHPy0i','W6CugSk/qd3cVmojW6Gm','W50Kq8oGt2W','zJu5ztbIoYbMBW','l2j1DhrVBJ4kia','WQOaW4tdI2bd','CNvSzq','BwTxqva','lMfKBwLUs2LJAW','bSkfEmoqWQRcKmogA8k6lG','lcaNChjVjYKIpG','sSksoSoCWQxdMCocyCoTFG','BgvUz3rO','e8oXjmojW7G','WOr7nKfZkNzleGi','8j+AQYbbBgWGC2L0zq','DwnWswW','WQxcLCoqjge','WObRla0','vw5Iyw48l2j1Da','eMBdJWddN8oVWRDgwI4','WO3dQCoNguNdKWuZja','l3rKpGOGicaGia','WR/dUvZdJYqzWOtdO8olxW','EM9AEuS','cmocE8oogXdcO8oFvIG','q2xdRSkUEq','yxrLigXVzY4','WQBdGgHFE8k0WR9/nCkB','W7mDW4pdMcXlbSo8W68Z','l2NdLmkhFgLMdGddKG','W4mkCmow','xc7cVCoLmW','AxnFywn0AxzL','zmolxSoJua','c8ozj8oPELvKW4xcPmoq','qxv0Ag9YAxPHDa','ywDHDxy','l3vWzgf0zxmVza','wCkVW6qohbGK','oIaJotrHm2i4oW','l3vZzxjZ','l2fWAs9Nyw1LCW','W6pcMCo3fGJcL1nXoGy','tmkJW4KLzJZcVmoqBu0','B2r5','zMzMoYiGB25JBa','DgLUzYbWyxnZDW','rxjYB3iGDw5IBa','W5bsiuWrWRvxExW6','x2tdJW3cJmo4W6SkxIm','CxDTEeW','WPGNW4Hgg8op','C8k7rCobW4zVW5xdMvGJ','iNDPBMrVDY5Kzq','aYhcLNrX','ruqGkdmGrgf5CW','WPBdM8k2WQldUW','W57dKmo/s8kX','WOdcLtJcVmo7WOhdOqxdMSk0','W4eFDHuEW7eeEYKL','WOjXneu','C2f2zsb3zwjOBW','W6bldmkhWO/cISocgmopsG','C3rYAw5NAwz5','BMvJDgLVBNnFDq','s8o7ySoeDG','Dg8GuhvIBgLJkq','WRueW7GJW6vvnKvTbq','icaGicaGphrKpG','ldiidSk8z8oiyaje','W6nilvqDWQHlDf0Z','WPZcHJJcVmo7WRFdRLhcImkQ','lHL6mW','WQJcLSo7','W4Ljj08pW6Hmph0y','csJdUCoeoa','Ahv4wxG','yNv0Dg9UpGOGia','WQBdLhX2zmkYWRb/emkD','W4NcLJ7cKW','zCoAqSod','rxjYB3iGzgvSzq','A2LUzYbKB21HAq','WQnzmKLs','mMvBtc1CW7JcTCkLW5C','dCk6WPXLzq','sKfgEgG','B24GzM9YigjHBG','W5PjaCo/DG','brrqpW','r8oniCowW7xdImosFSo5FG','yxnZpsjIDg4TCW','pc9ZCgfUpJWVDa','W7fEWORdOG','W6aoCSo0W5tdGa','neDjtvHMDa','AKTnBKq','WOhcSCo1nW','WO1EWRhcRrum','ywrKrxzLBNrmAq','D8kYwmoNW4e','W4VcGddcMComWPn7','nmk5WOnUra','DMZdL8kFEa','DcbWDwjSAxnOzq','AaX3nxeAW4FdRsDk','W4fljLimWPLlihKV','W7jsWOFcQ8kqmGnsWPRcTa','aCo6WPqGgW','zc1KB21HAw4','W7aet8kgW5SdW4hdRSou','D0BcRSk0uSoFaYvtWPC','DY5YzxnLDfvZzq','z0TTs04','jmoBj8oJW5PTkJRcK8kx','yuD2ANO','kJNcHg1F','BwfW','FJaDrx4','WOvWpev7ih0dbq','Dgv4Dc1TDxrLza','W43cGt7cISkhWObStWnL','W4CkFmoRW5O','CIiGB25JBgLJAW','W7tdImk0w1VdIGOU','WRxcKSoom1y','8j+uHYa','W4fdlKKwW6TtnM45','BM9Uzq','WOBdSaDkW4RdUCkbW4VcN8kj','D2vIC29JA2v0','rxjYB3iGywrKAq','WPpdOSoJWPyt','vgTPsgK','WOKhW78HWRe','ALzNzgG','icaGidWVDhi+cG','W6SyFCkuW44','WRjNeuq','t8k8hJiYW5zKW44+WPa','DgfYz2v0u29JAW','WOrTW48ovmocWPu1x8ko','WRtdKCokWQCSs8kfeSkwWQS','AwpdLCkpB0HCmgm','W6axvmoBWOC','qqtdU8oGbSkqttLeWOK','nmo+WOOAg8oVbvBdRmkY','z2v0','DxjS','WPBcNCo/Bq','zw50CW','C3DVCMq','BwvSt2m','W7OwW6uNWQyAn1HZaa','yeJdHHJdNW','icaGidX0zd4','zgvSzxrLrg9Tyq','B3i6ihzHCIGTlq','W6arW5K','fZZcImkPjG','pdNcTgu','n8oBk8osW7vNksVcMmkn','iefJDgL2zq','Dg9vChbLCKnHCW','W6VcMCosESoZ','WQRdReldGImzWOdcUSorrW','WOhcOmo0kLW','W5uEwSoNrg0','W60sAmkqWPCaW5RdV8ovWOa','sKfpzwW','W57cKXTzy8kY','zeLZDfG','WOCoyr7WOzExhWLOoCk3','cmo5sKS6W5P/WOSZWOG','BujytwG','lJiPoYbJB2XVCG','W6tcMmkkWQab','WOufW5xdQKfeWR3dLmkAAa','WQNdIMnVy8kYWRrMhmkC','z2fTzxm','ica8yNv0Dg9Uia','zg9TywLU','C1WOBsPEW4JdQaHGkSk+','ChqTmG','ymk7sCoWW6LLW5BdIfm5','WQz3k0LPjMe','pJXZCgfUignSyq','W4ddPmk5yXlcJMJdLsldHq','BwvtDhjPBMC','t8kYW5KuFZFdSSohtuu','Dw5Jzw1LBNrZlG','BvPOqLy','wCkVW7GDha4KWQaWW6q','wgRdIG8','WQ3dLmk/WPNdRCkusKZdGq','B1HIsuK','W5LPW5jCw8oaWP40wCks','W6mDW57dJ2bhhSokW68M','DgvKihrVigfSBa','rwddGqNdG8oZW6fjucG','yNv0Dg9UignSyq','W45ZeNao','iIbVBMnSAwnRpq','z2v0rwXLBwvUDa','W7/dL8oDASkhnmoEhmotWOy','l2zPBhrLCNmV','y3jLyxrLihbVBa','AxzPDhK','wvzswM0','CfhdKCo+uhjwApgnH5ya','BwvZC2fNzq','DgfYz2v0vxnLCG','qCk3bbiSW7TDW6yC','mmk9pSo4WPW','zxrsB2XLka','zxjYB3i','lMfKBwLUlxrHyG','DMfSDwu','rxjYB3iGC2f2Aq','mtbVq2Lcy0S','CMTesKK','DgLUzYbWB2XSlG','W4vkkLq','qNLjza','W5Hjc8oYymoLW6u','WPpdPSoJWOmmAW','W55of8oQg2VdM1ldUCk1','C0RdJq3dLa','ica8Dgq+phn0CG','m8oFimovW4fNntVdNCkf','WPr3k1bXkgO','zd4kicaGicaGia','W7hcQdtcHmoA','W7WOWOivvmkbW5P5emoC','mmoonmoFW6e','d8oumSocCvu','yvvcsLq','ywn0Aw9U','rKziq0q','zNblwve','WQZdRf/dHJK','W6KSmmkTyq','W4mxlLFdSmott1SYjG','rNjLzq','u2hdJGJdGSkXW6SkvYK','AxzsvhO','FZGFCIqeWR7cTCk0W5q','x2nVBM5Ly3rPBW','8j+tIIbozxCGq29TBq','l3vZzxjZlW','BJmylW','WQJdMmk+wf/dKq','uCkqCmogW6zpW7ZcNb4b','W6iCv8ogWOZdK8knfCoDxa','thfgrMi','vw5eC2G','W6G3rSoyBW','WPjEgSowF8oVW6zmomkV','lwu5WObB','CM9Szq','zMTXAMi','sCoaz8oovXRdUSkqsc8','ESo5jwVdUSkZW4/dLSo4bG','DgfI','DxnLCM5HBwu','lwj0BG','W59Ppuj1jNWneG','W7PkW7CZWRXok0i0zG','pHvVnuq','W5hcPXTzsG','vgddMmkeuG','icaGicaGidX0za','yrhcLfLPW7yQlCk+gW','ksi+vw5IBg9JAW','W4CUAbS/D1iLnt8','gGpdUSorhSkAtNXjWPe','W7aeECkqW5uFW5ZcQ8o8WOS','gHtcGmkynq','yMXVy2S','yxbWBgLJyxrPBW','W5ZcSmo9Fq7dNtZcM2ldNW','W7zlWPhcO8kql1jvWO/dTW','sCohzmoqgHxcOSoEwJi','CMuGEw91ihDHBG','rmk/FmohW5G','q3vWufe','BvDOsxG','C2XVD21Vzgu','WQ7dNmk/v07dHHC','A3Hxq1q','CxvLCNLtzwXLyW','z3HPqxu','Fmkhy8owW5S','ywXSigrHBMDLCG','W6iFumorWOi','pGOGicaGicaGia','nqpcG8kXhG','Bg9NAw5Z','yw4O','yxnZpsjHy3rPBW','nsWYntuSmc4Xkq','B3b0Aw9UCW','Dg9UpG','WQddGxHFyCk0WRXUf8kg','t3n6AeG','W5hdKrVcMCkv','WQpdJmoJWQK7t8knkmkKWQS','t3fdCvu','zLj5y0G','aclcLSkwoW','u8okzCoafbFcRSoEsYm','ChxcM8kzCMXHgq/cKa','W7RcJrnuFmoHW7hcOmoLqW','W7hdPe3dIImoWOddUCodxG','WO/dRf/dQHO','W7rOWO7cNmkJ','umoEjSoyyL9NWOdcQCoi','W6WXFSkZW4a','WP5wiG/dQCocu0zTsW','WPnxmmoeWPPnWO/cT8oeWPy','uhH4uuu','rMfPBgvKihrVia','WRjil2f0','Bg9NCW','A2DYB3vUzdOGCG','WR3dKmoaWQG','thPVvhe','cmo5sLDIWPX9W5LUW64','cI3cM8okpsaOqvVdGq','tNneuva','dK8yWQC','DxbKyxrLlwXVzW','BuT6zK8','WQ/dLSoIW4xdVmkTv0VdMHK','W7JdHmooWQS9xCoo','WPX7W41B','W7fwWPZcO8kq','ogKNWOCbwa','smk/WQTXat55W6e','W4STrmoGW7S','W64yW5NdMN4gjCo5W64K','d8oUWQHhdq','WRrTW4nheCotW5O','hKldKqS6','jCkihmow','zxzpsNy','lI4Upc9JB2rLpG','WPbwb8oN','hhKcWPC','ktNdKdi','refmueS','C2v0uM9Szq','W6FdMmk/caBdGaS5FWG','W60BW4tdKq','Ds8mhmo9i8oszXPk','W7CyFSkb','CLbHC3n3B3jKka','WPhdKgldJmkAW5i5CqDKWRpcOSkW','WRlcNSknWQu3qSkop8onW7W','xcC5th0','BMJdJmohE2LKcuRdGq','W7lcL8kQWO7cOmosaX/cLvC','rxjYB3iGDxbKyq','W6FcHcW6mCkLWRu1C8os','bvtdG1q5WRLMyCkZsG','eGJcRSo3hSkEugOAW4C','uufYBuy','Dd7cLhTFW79tW4e6WPy','W4nmWRBcPaulW6RdMSojmq','W6PfWQrZW6qACHWJvG','wxvlC1K','W4bnWPRcOmkhmHjwWOddUG','WRZdTCkjWPRdNW','WQBdKhLP','t05rwMy','ywrTAw5nDxrLua','DwvZDgLVBG','D8kSgriS','kr16kLa','W7fwWOBcQmovDrfAWOS','ywNdLSkdCY1SeKldKG','C3r5Bgu','WOncjrrmW7il','W4fkjH8','wNDgC0S','A2HhCfu','ktWVC3bHBJ4','yNvNCW','gaJdUSoXamoea3PiWOK','y2XHC3nmAxn0','BMv3lwjSB2nRzq','W5NdMtJcSCkQW5pcVvZdNmoO','lcaN','CMf0Aw9U','W6RdVHLxWOddP8kAWORcP8kd','vmoxASotgrBcPSoFwJu','nmoLow8','BwfPBNrLBMfUyW','c8kPpmorWOK','pc90zd4kicaGia','DxnLCNm','CZ8GkguUzY4Gnq','W7pdSGb3WQq','hbldP8o7hmkmFhPiWPa','WPfWnG1Pmgmd','idiBxCoMCmoeyq','WRNcJmofWRu3qa','oCo7ESksWQ8','ywrTAw5vC2vY','pc9ZDhjVBMC+ia','j8oYhxVdPa','W7tcO8kOWO0vWOn/W71khq','gmoRWQLBbLf8W4n8WRa','Dg4TC21HBgWIia','yxrLihbVChvWCW','CNLqu1C','DZmgy2es','zcbKAxnHyMXLza','W4GhW7dcUrefW7pdIG','oJ5bW5necLLrW5zu','wu9WEhy','DCk6xmoTW4rvW4VdMuii','q29UDgvUDc1uEq','i2vMndq0na','pCoKWO0xhW','C2f2zvDLyMHVBW','bJ1jiK0','y29SB3i','BwHfu3m','heGdWPe2','tfzzuKC','mwWUW5S','DSkYwmoQW40QW5NdKLG4','icaGicaGicaGpa','WP5doCoqrW','CMvHC29U','W5ZcKSo7BCoU','W6fwWPVcV8kzCWK','u3ffv0m','sCkXW4OutW','zgvSzxrLrMLSDa','WQ9uy8oTW4/dM8kqyN7cNG','q3rYAKu','Dw5Kpc90zd48lW','jb7cHCk/aevAn8k9WOa','WOhcOmo0kLZcGZ3cMwNdKa','jYKIpKTPy2S8lW','xSoUWO0bhCkGgaNcKmo7','ywrTAw4TBwfPBG','BwvTyMvY','BMv3lxvWzgf0zq','icaG','y3vYCMvUDefJDa','W67cMmo+W4RcVSo4aX8','iZeWyJK4mq','oIlcK29FWQyhWPrWW68','WO8FW4JdR8ovmLaxW47cTa','W4hdU8oIvW','WOvkhfDj','W6yxeCoMucpcRmkfW6Gq','eGJcUmk6','C3vIBwL0','BgvKigfUzcbJBa','uMrYBhK','WR3dOHhcGtOtWOVdS8onrW','WOtdRmkyWO/dPW','z0jOuvy','lGn6n2SlW4ZdVq','WO8uWRxcUq4k','DcaYig9WDgLVBG','amkuiq','W4mxuSoFW6G','Cf0PydXrW7NdNa1/','y2HLy2TLza','BYb1C2vYCYbMBW','y2XPy2S','W5PuW4/dJwnha8o2W6a0','ChjVEhLFDMLVBa','ywrmzvq','fgu6WRu9','BmolimodW4r7Aa','ywrTAw5lAwnRqW','WOfjb8o+','DguTCg9SBc1MBW','ntG0mtm2me1fALjrrW','vmoxECoowHBcRSourG','mJuZmtmZmvnTB2nTrW','vsFcIa','auldMXC','W7fJfKOD','AKjzrvq','BM93','CxPfvxC','idX0zd4','gIxcMwTQ','a8oPWOSqhCkAbvldQmkl','mZG2nZyZm253sKP6DW','WRHVa8oAsq','zgfougi','ue9kCey','ChqTna','fqpdR8oWf8knua','qCk3crSRW5DSW5G','W6eFWPZcOmovvHLeWO3dUW','WRZdICkVC1BdHGK4Dei','cmk8WPDDBa','vfDirfu','vNzWtfu','W4RdVrzqWPBcTmomW4xcH8ku','W6ywtCo3WOxdMmkuxCohuq','s29Prhi','ExH2BLO','W5tcJrDEjG','ChjVEhLFDgLTzq','WRhcLmkri8oeF8oFsSoaW5e','nb7cNmk/bwHb','WO/dM8kvF24','BwfSBcb2AxaIia','cIaGicaGicaGia','t2rosfu','nZvYzw07igrPCW','yxrPB25Zx2nVDq','C3vNz2vZDgLVBG','DgvUyw5Jzs1ZDa','W7ddKmoCASkkamkwtCobWP0','Bfzowu8','rxjYB3iGChvIBa','yMvlu1i','Aw5ZlxrIB2r5','gCkmWQbayCo/W7tcHen1','y2f0zwDVCNK','WQSeW7WOWRXFkK1KdW','W47dNM0','zxrLihrOAxmGzW','D29Yza','kmkLp3NdU8o9','DhLSzt0IzM9UDa','AgLVCxi','ibKXjmog','Dhi+','w8oEn8ohWR/cGmooymkMgG','ywrTAw4Ty29UBG','WPfTW5zWgmoeWPC8xSki','W7/cHJTE','BgnxzuO','WOvWo0vWlh0stba','W4ddSHWEW4FdVSkhW4NcL8kv','icaGidX0zd4J','aCoLWPrTjIhdRmosBXi','WRpdJwj9lCkKWQjUc8os','W7DwamkPsJFcSq','pc9ZDhjVBMC+pa','C3r5Bgu9iNrLEa','zIKmgCoYD8oeya','DMLW','lxrIB2r5','phrKpJXZDhjVBG','oxW3Fdf8mNWWFa','uxD3ELm','umkZW6Tbgb10WPq','AxnHyMXL','idWVDgq+cIaGia','gJFcLfb+','BMCGyw5UB3vUyW','z2D3ruy','h8oiiCofEfDGW4BcSW','C3rHDc1JAgf0CW','WPBcNSoUASk1vt3cOu8J','oYbJB2XVCJOGiW','phrKpJXJB2rLpG','kCoFg0JdSa','uK5nBei','oJCfB2SvWRNcPCkWW5S','nhW4Fdn8nxWXma','oexdLrCTWRD4ACk+Fq','CgrHDgu','W7jAWORcP8kAFrTe','W6fno3K7','ywrTAw4Ty3jLyq','DgL0Bgu','igjVCMrLCJOGmq','lSoOkSonW4i','C3bNEvC','d1ddGbXN','nbH7nNCB','AgvHzgvYCW','W5FcMSoPlSoQwZxcOaSI','zt0Iy29SB3i6iW','rdhcGW','BhnWyw49iJuIia','DhjyrKC','W6DwCCo1W5tdK8kqp2ddGq','B3jK','WPFcGCotnf0','jYKIpVcFLiCGtxv0zq','W7ilymo1W5tdL8kFCsNdJq','zw5HBMnLig1Vza','mqX1lNS','iSogo3VdGa','WQlcVCoqjW','fmoOpmolW78','Cwe7WPPlsX0CWP8A','DgfYz2v0','WQuFW4JdR8ovmLaxW47cTa','x8oxwSkMWOldLCkm','r8k3crS3W5bIWPzYWPm','W7xdLmogWQG8qCkwy8ktWRO','W5iyzmoWW4VdKq','D1fireK','nJzhAKXXt2y','W4dcIJ/cIComWO98dX5Y','WQBdOSktWRddLq','sSk2hH8','W6GDwSoEWPZdMCkCsW','lwnVBNrLBNq','lCoAC8ohW4iOkZRcNmkq','DCk6xmoTW4rvW5xdIuiY','pZ3cTejX','W6yqW4ddLMileSoMW6q1','C2v0qMfU','vMxdISkhsW','WQTRWPZcNc0','W4xcVSo6WRisW4f3W71Avq','smkfmCkmW4hdLmkblSk4ma','wwD3BeK','W4RcRCoVzmo/','icaGidWVDgq+cG','W6ygW5FdJ2G','W5dcUmowESo1','W4lcVaVcUmo6','W6tdL8oszSkxlmkfs8oiWOm','W7JdGJrvWOW','WRWAymoWWPldLCkAAcNdJa','WPPMW41wdG','rmkkWRHDE8opW7hdJunY','eSo5W44LEZ3dSSoupXa','aCoKrmkXWRq','W77dPexdJtGoWOddPmkm','ywrKlwzPBhrLCG','vZSMuvC','WOXdgmo9sq','W4ZdLI3cOCo/W5/cOH7dI8oH','w8kLW5GJvJhdS8oDB0K','h8kJWPigbSkH','sw52ywXPzcbKDq','C3rLBMvY','8lUGQJddICoVW7S','zgLZCgXHEv9Uyq','Dg9UignSyxnZpq','AxXCxCkVD8oflq','yw55ig1PBNv0zq','WOnQkKLZlNOaga','jqlcLmkShW','Dcb0BYbWzxjTyq','W6pcLSouA8od','WPfnoeFdTW','W5uBtSkZm8kQWQSvECkV','W4FcIJZcNmoaWO97','WQGaW6jRWQXvku1JaG','n3muWOunwG','W7pdMmoulSkfmCkne8ogWPS','W6iszmoNCG','CY10yM9KEq','zv9TB2rL','pwWUWPiwtX1rWPCA','DgldQmkEB2LMgG','zhfHrMK','BI9QC29U','WQntvSoCWORdKCkqw8ocga','BIbJBgfZCZ0IyG','Dvb3BM0','eMhdGG/dI8o5W7HggsK','kan3pN0BW4ddOsW','WQGdW4JdNwrjcmo+W7i','wmo7gSoHtLz9','AKrrCNK','fSoPWOWWbCkQg1ldTmkV','WRLxmmoeWOyzW4VcTCk6W4q','WQ1EafVdRq','n2lcL3jvWQS','W7lcOqtcL8om','tMHlExC','C29JA2v0swq','W6KjW7OHWRS','ue9tva','idX0zd48C3bHBG','W6jcfLKp','zxXB','q2Hvrgq','Dg90ywXvC2vYCW','y29UDgvUDc10Eq','uthcN8kacSoorenY','h0pdNrq','DsTqchKmW6S','iWhcLSkNoW','ksi+uMvTB3zLia','lCkdk8khfe3cS8oaauW','oYi+','W7ixr8ofxa','l2nYzwf0zq','tMj2uM4','wc8Izq','Bwv0Ag9K','D2vIAg9VA3m','sLD6rMK','g0pdKq8SWRH+sCo7xq','Esb1CgrHDgvKiq','gmoth8odDvfLW4xcNSon','Dg9mB2nHBgvuAq','ywrTAw4TC2XVDW','ANnVBG','W5xcI8o7DCoa','wgjbzMW','vJVcRSoRpq','WPhdSCo6W4jhWOm','zM9YrwfJAa','rw50zxiGBMv3ia','W6ihxmow','W5ZcMX9tzSoSW43cM8oCbG','C3rHDc11C2vYCW','zMLSDgvYCW','srhdMXCQWRPJBSo1bG','aCoIsGC/W5DTW4i+WOm','C3m9iMnOyxqTyG','C37cHSoiF3rMufZdNG','DuzUAKm','lZmoomoYymoj','WRbjhmo8yCkQW6LfoCk4','BMv3x3bHC3n3BW','WQ/dG8korKRdHHyEE0u','y29UDgvUDa','ze9qCuW','WOXmWOBcKaK','yxvSDa','umkBFCobW75p','W73dKCkrySkko8odxCoiWOO','sCkZW4KuztFdSCowB1G','Chv0lq','lxzLCNnPB24','CY1IDg4','WQ/dNmkZWOpdSmknufRdHW','W5FcPZdcK8kb','zvfKrKO','bCoPWOabkSkGgepdV8k1','WQedtmoqWOxdLmkkumomqq','ywLU','icaGicaGicaGia','qxjLihLVDsbZDq','Aw5Uzxjive1m','jmoBjW','WPFdLgddI8kDW5bPrcbmWQNcOW','l2fWAs9Hzg1PBG'];_0xb1fe=function(){return _0xd18495;};return _0xb1fe();}function setupUpdateLogForm(){const _0x345e23=_0x393b,_0x43c6b9=_0x1518,_0x331e73={'OszhH':_0x43c6b9(0x24e)+_0x43c6b9(0x36e),'JAOel':function(_0x3932d6,_0xa7db6e,_0x59e232){return _0x3932d6(_0xa7db6e,_0x59e232);},'JTFey':_0x345e23(0x2e5,'2T]g')+_0x345e23(0x2b5,'wR2e'),'zrDTF':_0x43c6b9(0x338),'TjigJ':function(_0x19b6ca,_0x32b617){return _0x19b6ca(_0x32b617);},'jKMnD':'Failed\x20to\x20'+_0x345e23(0x433,'b5Pp')+_0x345e23(0x2d3,'zGb('),'qzEUw':function(_0xf1236a,_0x90dc95){return _0xf1236a(_0x90dc95);},'wtdzf':function(_0x3fb113,_0x148a6b){return _0x3fb113(_0x148a6b);},'fRycH':_0x345e23(0x249,'WCtu')+'te-log-for'+'m','saUIh':_0x345e23(0x461,'1ds4')},_0x54389f=document['getElement'+_0x43c6b9(0x4e2)](_0x331e73[_0x43c6b9(0x537)]);if(!_0x54389f)return;_0x54389f[_0x43c6b9(0x466)+_0x345e23(0x4fe,'^wy@')](_0x331e73['saUIh'],async _0x11493a=>{const _0x1e1fea=_0x345e23,_0x2ad231=_0x43c6b9;_0x11493a['preventDef'+_0x2ad231(0x369)]();const _0x3f21cd=document[_0x1e1fea(0x475,'dJht')+'ById'](_0x331e73[_0x2ad231(0x533)])[_0x2ad231(0x4dc)][_0x1e1fea(0x26e,'U0ZR')](),_0x182adf=document['getElement'+_0x1e1fea(0x45c,'P@q6')]('new-update'+_0x1e1fea(0x407,'I^zb'))['value'][_0x2ad231(0x3d4)](),_0x1e784b=document[_0x2ad231(0x4ce)+'ById'](_0x2ad231(0x24e)+_0x2ad231(0x2f2))['value']['trim']();if(!_0x3f21cd||!_0x182adf||!_0x1e784b)return;try{const _0x26f5d1={};_0x26f5d1['Content-Ty'+'pe']='applicatio'+_0x1e1fea(0x3a8,'GFnI');const _0xbc3309={};_0xbc3309[_0x1e1fea(0x37d,']HPT')]=_0x3f21cd,_0xbc3309[_0x1e1fea(0x1dc,'BlH3')]=_0x182adf,_0xbc3309[_0x2ad231(0x366)]=_0x1e784b;const _0x2501ed=await _0x331e73[_0x2ad231(0x4ac)](authFetch,_0x331e73[_0x1e1fea(0x25d,'9l2#')],{'method':_0x331e73['zrDTF'],'headers':_0x26f5d1,'body':JSON[_0x1e1fea(0x271,'x9r(')](_0xbc3309)});if(!_0x2501ed['ok']){_0x331e73[_0x1e1fea(0x223,'8R[(')](alert,_0x331e73[_0x2ad231(0x463)]);return;}const _0x366a02=await _0x2501ed[_0x2ad231(0x352)]();_0x331e73[_0x2ad231(0x278)](alert,'🚀\x20Update\x20['+_0x3f21cd+(_0x1e1fea(0x268,'I^zb')+_0x2ad231(0x4c9)+'\x20users\x20and'+'\x20dispatche'+_0x1e1fea(0x283,'BlH3')+_0x1e1fea(0x2a0,'sV3f'))),_0x54389f[_0x2ad231(0x3c7)](),checkUpdateLogs(!![]);}catch(_0x59aa0a){_0x331e73[_0x1e1fea(0x39f,'sV3f')](alert,_0x2ad231(0x29a)+'ishing\x20upd'+_0x2ad231(0x41d));}});}function setupUpdateDisableControls(){const _0x3a264f=_0x1518,_0x236666=_0x393b,_0x51faa5={'JWzFi':function(_0x5df112,_0x67d67e){return _0x5df112(_0x67d67e);},'uppkH':function(_0x103434,_0x449986,_0x34ade7){return _0x103434(_0x449986,_0x34ade7);},'OekGt':_0x236666(0x2c3,'GFnI')+_0x3a264f(0x428)+_0x3a264f(0x2bc),'iEMYU':_0x236666(0x1d6,'2T]g'),'xsWMD':'🚫\x20All\x20upda'+_0x3a264f(0x37e)+_0x236666(0x324,'2T]g')+_0x3a264f(0x22d)+'.','zoZyK':_0x3a264f(0x1d7)+'-popup','JliJw':_0x3a264f(0x483),'EnVOy':'admin-disa'+_0x236666(0x257,'v$Fl')+_0x3a264f(0x36f),'wQHDI':_0x236666(0x529,'pQgu')},_0x513858=document[_0x3a264f(0x4ce)+_0x236666(0x349,'1(OB')](_0x51faa5[_0x3a264f(0x3bb)]);_0x513858&&_0x513858['addEventLi'+_0x3a264f(0x311)](_0x51faa5[_0x3a264f(0x2ec)],async()=>{const _0x5d7526=_0x236666,_0xacca70=_0x3a264f;if(!_0x51faa5[_0xacca70(0x34c)](confirm,_0xacca70(0x377)+_0xacca70(0x51e)+'t\x20to\x20disab'+_0x5d7526(0x36b,')AQ0')+'ar\x20all\x20upd'+_0xacca70(0x22a)+'\x20for\x20all\x20u'+_0x5d7526(0x505,'2T]g')))return;try{const _0x17d15b=await _0x51faa5['uppkH'](authFetch,_0x51faa5[_0xacca70(0x37c)],{'method':_0x51faa5[_0x5d7526(0x2a6,'wR2e')]});if(_0x17d15b['ok']){alert(_0x51faa5[_0x5d7526(0x38b,']CDP')]);const _0x180739=document[_0xacca70(0x4ce)+_0xacca70(0x4e2)](_0x51faa5[_0xacca70(0x41a)]);if(_0x180739)_0x180739[_0xacca70(0x209)][_0x5d7526(0x4e9,'rx^^')]=_0x51faa5[_0x5d7526(0x346,'c@Qg')];}}catch(_0x5daac2){_0x51faa5[_0xacca70(0x34c)](alert,'Error\x20disa'+_0x5d7526(0x3b2,'7cMn')+_0x5d7526(0x4fd,'1(OB'));}});}async function fetchMaintenance(){const _0x547e09=_0x393b,_0x3fc843=_0x1518,_0x576400={'Rdrly':function(_0xf8351b,_0x35bf63){return _0xf8351b(_0x35bf63);},'mVykt':_0x3fc843(0x33e)+'pe','RNMlB':_0x3fc843(0x51a)+_0x3fc843(0x327),'CziQD':_0x3fc843(0x24c)+'tenance-sw'+_0x547e09(0x3fc,']HPT'),'hZMZK':'ENABLED\x20(V'+_0x547e09(0x517,'ox5$')+'cked\x20Out)','POJpF':'OFF\x20(Live\x20'+_0x3fc843(0x445),'nTQPv':_0x3fc843(0x233)};try{const _0x338a45=await _0x576400[_0x3fc843(0x25b)](authFetch,_0x3fc843(0x37b)+_0x547e09(0x53c,'Q[za')+'ce');if(!_0x338a45['ok'])return;const _0x218825=_0x338a45[_0x3fc843(0x2d5)][_0x547e09(0x379,'dJht')](_0x576400[_0x547e09(0x2d1,'dJht')]);if(!_0x218825||!_0x218825['includes'](_0x576400[_0x3fc843(0x2c7)]))return;const _0x44de20=await _0x338a45[_0x3fc843(0x352)](),_0x3f9074=document['getElement'+_0x547e09(0x388,'U)US')](_0x576400[_0x547e09(0x2be,'hAi@')]),_0x35d788=document[_0x547e09(0x425,'l%Yf')+_0x3fc843(0x4e2)]('admin-main'+_0x547e09(0x410,'rx^^')+_0x547e09(0x385,']wJE'));if(_0x3f9074)_0x3f9074[_0x3fc843(0x265)]=_0x44de20['maintenanc'+'e_mode'];_0x35d788&&(_0x35d788[_0x547e09(0x4bb,'8a0x')+'t']=_0x44de20[_0x547e09(0x29f,']HPT')+_0x3fc843(0x323)]?_0x576400[_0x547e09(0x2ef,'9l2#')]:_0x576400[_0x3fc843(0x27f)],_0x35d788[_0x3fc843(0x209)]['color']=_0x44de20[_0x3fc843(0x219)+'e_mode']?_0x576400[_0x547e09(0x4cc,'b5Pp')]:_0x3fc843(0x252));}catch(_0x31b5a2){}}function setupMaintenanceToggle(){const _0x1ed252=_0x393b,_0x2452bc=_0x1518,_0x2361c2={};_0x2361c2[_0x2452bc(0x1fa)]=_0x2452bc(0x37b)+'/maintenan'+'ce',_0x2361c2[_0x1ed252(0x334,']wJE')]=_0x2452bc(0x51a)+_0x2452bc(0x327),_0x2361c2[_0x2452bc(0x1ea)]=_0x2452bc(0x24c)+_0x2452bc(0x297)+_0x1ed252(0x201,'fjx@'),_0x2361c2[_0x1ed252(0x27a,'hAi@')]=_0x1ed252(0x4ff,'8a0x')+_0x2452bc(0x3ae)+_0x1ed252(0x384,'1ds4'),_0x2361c2[_0x2452bc(0x501)]=_0x1ed252(0x20a,'b5Pp'),_0x2361c2['TWHDU']=_0x2452bc(0x252),_0x2361c2[_0x1ed252(0x31a,'GFnI')]=_0x2452bc(0x1f6)+_0x1ed252(0x41f,'I^zb')+_0x2452bc(0x2e0)+'e.',_0x2361c2['NbvRn']=_0x2452bc(0x24c)+_0x1ed252(0x4a8,'Q[za')+_0x1ed252(0x44b,'P@q6');const _0x109547=_0x2361c2,_0x2f5179=document[_0x2452bc(0x4ce)+_0x2452bc(0x4e2)](_0x109547[_0x2452bc(0x348)]);if(!_0x2f5179)return;_0x2f5179[_0x1ed252(0x4c0,'8*kl')+'stener'](_0x1ed252(0x4ee,'l%Yf'),async _0xe33721=>{const _0x38b1c8=_0x1ed252,_0x273f61=_0x2452bc,_0x22b0c0=_0xe33721[_0x273f61(0x2e6)][_0x273f61(0x265)];try{const _0x1a2cdf={};_0x1a2cdf['enabled']=_0x22b0c0;const _0x3cff53=await authFetch(_0x109547[_0x273f61(0x1fa)],{'method':_0x273f61(0x338),'headers':{'Content-Type':_0x109547[_0x38b1c8(0x275,'b5Pp')]},'body':JSON[_0x273f61(0x442)](_0x1a2cdf)});if(!_0x3cff53['ok'])return;const _0x47f042=await _0x3cff53[_0x38b1c8(0x1d1,'Q)YQ')](),_0x415b98=document[_0x273f61(0x4ce)+_0x38b1c8(0x453,'x9r(')](_0x109547[_0x38b1c8(0x487,'Q)YQ')]);_0x415b98&&(_0x415b98[_0x38b1c8(0x373,'bWOk')+'t']=_0x47f042[_0x273f61(0x219)+_0x38b1c8(0x404,'c@Qg')]?_0x109547['ChdjP']:'OFF\x20(Live\x20'+_0x38b1c8(0x2fa,'RXg3'),_0x415b98[_0x273f61(0x209)][_0x273f61(0x237)]=_0x47f042[_0x273f61(0x219)+'e_mode']?_0x109547['LqFFb']:_0x109547[_0x273f61(0x286)]),checkStatusAndAnnouncements();}catch(_0x1d0173){alert(_0x109547[_0x38b1c8(0x321,'c@Qg')]);}});}function setupAnnouncementForm(){const _0x3de97c=_0x1518,_0x22b522=_0x393b,_0x59937e={'wIfLV':_0x22b522(0x541,'Q8n3')+'e','SsUAu':_0x22b522(0x220,'rx^^'),'qWfSV':function(_0x4672ba,_0x1ac4d4,_0x5c03d0){return _0x4672ba(_0x1ac4d4,_0x5c03d0);},'rEkRh':_0x3de97c(0x37b)+'/announcem'+_0x3de97c(0x499),'gKmKN':_0x3de97c(0x338),'bsfWj':'applicatio'+_0x22b522(0x222,'Q)YQ'),'QywsL':function(_0x39fc6a,_0x5102aa){return _0x39fc6a(_0x5102aa);},'OcSoN':'📢\x20Global\x20a'+_0x22b522(0x4b5,'fjx@')+_0x3de97c(0x46b)+'d!','dfvDz':function(_0x3ebcae){return _0x3ebcae();},'ObPmr':function(_0x3fe434,_0x175e1f){return _0x3fe434(_0x175e1f);},'ivRTz':_0x22b522(0x495,'bWOk')+_0x3de97c(0x2bf)+_0x22b522(0x240,'GFnI'),'kpPTh':_0x22b522(0x2d4,'P@q6')},_0x22c4c2=document[_0x22b522(0x516,'6(6n')+_0x3de97c(0x4e2)](_0x22b522(0x4f7,'R7n3')+_0x22b522(0x2ad,'rx^^')+_0x22b522(0x3c3,'hAi@'));if(!_0x22c4c2)return;_0x22c4c2['addEventLi'+'stener'](_0x59937e['kpPTh'],async _0x5461fb=>{const _0x31b636=_0x3de97c,_0x183720=_0x22b522;_0x5461fb[_0x183720(0x34d,'zGb(')+_0x183720(0x464,'WCtu')]();const _0x35f211=document[_0x31b636(0x4ce)+_0x31b636(0x4e2)]('ann-title')['value'],_0x3a4f84=document[_0x183720(0x48e,'t2NM')+_0x183720(0x421,'pQgu')](_0x59937e['wIfLV'])[_0x31b636(0x4dc)],_0x49a1a0=document[_0x31b636(0x4ce)+_0x183720(0x453,'x9r(')](_0x59937e['SsUAu'])[_0x183720(0x3f3,'8a0x')],_0x3e1630=document[_0x31b636(0x4ce)+_0x183720(0x2e3,'WCtu')]('ann-active')[_0x31b636(0x265)];try{const _0x50977d={};_0x50977d[_0x31b636(0x2cf)]=_0x35f211,_0x50977d['message']=_0x3a4f84,_0x50977d[_0x183720(0x46d,'b5Pp')]=_0x49a1a0,_0x50977d[_0x31b636(0x423)]=_0x3e1630;const _0x1d0c47=await _0x59937e[_0x183720(0x53e,'BlH3')](authFetch,_0x59937e['rEkRh'],{'method':_0x59937e[_0x31b636(0x474)],'headers':{'Content-Type':_0x59937e['bsfWj']},'body':JSON[_0x183720(0x317,'rx^^')](_0x50977d)});_0x1d0c47['ok']&&(_0x59937e['QywsL'](alert,_0x59937e['OcSoN']),_0x22c4c2[_0x183720(0x3d3,'hAi@')](),_0x59937e[_0x183720(0x479,'1(OB')](checkStatusAndAnnouncements));}catch(_0x39b50c){_0x59937e[_0x183720(0x38f,'bWOk')](alert,_0x59937e[_0x31b636(0x4f8)]);}});}function setupAnnouncementDisableControls(){const _0x1b7ba0=_0x393b,_0x246998=_0x1518,_0x432ae7={'ZlkuK':function(_0x42a31a,_0x2532b7,_0x3bc97b){return _0x42a31a(_0x2532b7,_0x3bc97b);},'axHqp':_0x246998(0x37b)+_0x1b7ba0(0x46c,'P@q6')+_0x1b7ba0(0x448,'wR2e')+'le','kxWCT':function(_0x513e9b,_0x10db9c){return _0x513e9b(_0x10db9c);},'SLlyp':_0x246998(0x411)+_0x1b7ba0(0x2c8,'1(OB')+_0x1b7ba0(0x4f9,'1(OB')+_0x246998(0x25a)+'eared.','TmcnO':function(_0x2bcce8){return _0x2bcce8();},'UnDsh':_0x1b7ba0(0x227,'RXg3')+_0x1b7ba0(0x23c,'8a0x')+_0x246998(0x4c1),'BVwAi':'admin-disa'+_0x1b7ba0(0x320,')AQ0')+'n','mKzfO':_0x246998(0x267)},_0x45c950=document['getElement'+_0x246998(0x4e2)](_0x432ae7[_0x1b7ba0(0x1ce,'rx^^')]);_0x45c950&&_0x45c950[_0x246998(0x466)+_0x246998(0x311)](_0x432ae7[_0x246998(0x1d8)],async()=>{const _0x479281=_0x246998,_0x3651c8=_0x1b7ba0;try{const _0x2fbdce={};_0x2fbdce[_0x3651c8(0x4aa,'c@Qg')]=_0x479281(0x338);const _0x535ed2=await _0x432ae7[_0x3651c8(0x439,'hAi@')](authFetch,_0x432ae7[_0x3651c8(0x226,'U)US')],_0x2fbdce);_0x535ed2['ok']&&(_0x432ae7[_0x3651c8(0x23e,'U0ZR')](alert,_0x432ae7['SLlyp']),_0x432ae7[_0x3651c8(0x511,'7Qvh')](checkStatusAndAnnouncements));}catch(_0x30ecb7){_0x432ae7[_0x479281(0x524)](alert,_0x432ae7[_0x479281(0x502)]);}});}async function fetchBlockedDomains(){const _0x5ddbda=_0x1518,_0x1135a5=_0x393b,_0x199741={'iFHiy':function(_0x17fd46,_0x28d9d7){return _0x17fd46(_0x28d9d7);},'pmkVc':_0x1135a5(0x304,'1ds4')+_0x1135a5(0x47f,'^wy@'),'QesIW':_0x1135a5(0x403,'v$Fl')+'pe','mhESs':_0x1135a5(0x419,'Q[za')+_0x1135a5(0x2a3,'U)US')};try{const _0x3f526f=await _0x199741['iFHiy'](authFetch,_0x199741[_0x1135a5(0x3b0,'gRJH')]);if(!_0x3f526f['ok'])return;const _0x4f5f61=_0x3f526f[_0x5ddbda(0x2d5)][_0x5ddbda(0x496)](_0x199741[_0x1135a5(0x53d,'Q[za')]);if(!_0x4f5f61||!_0x4f5f61[_0x5ddbda(0x3e7)](_0x199741[_0x5ddbda(0x238)]))return;const _0x11fef3=await _0x3f526f[_0x5ddbda(0x352)](),_0x1529aa=document['getElement'+_0x1135a5(0x388,'U)US')](_0x1135a5(0x208,'7Qvh')+_0x5ddbda(0x29c));if(!_0x1529aa)return;_0x1529aa['innerHTML']=(_0x11fef3[_0x1135a5(0x31d,']wJE')]||[])[_0x5ddbda(0x478)](_0xac43cb=>_0x1135a5(0x1cb,'ox5$')+_0x5ddbda(0x52a)+_0x1135a5(0x1ec,'^wy@')+_0xac43cb['domain']+('</code></t'+_0x1135a5(0x22f,'2T]g')+_0x5ddbda(0x279))+_0xac43cb[_0x1135a5(0x39a,'6(6n')]+(_0x5ddbda(0x21b)+_0x1135a5(0x1f7,'fjx@')+'\x20\x20\x20\x20\x20\x20\x20\x20\x20<'+_0x5ddbda(0x4cb)+_0x1135a5(0x360,'7Qvh')+_0x5ddbda(0x528)+_0x1135a5(0x328,'pQgu')+_0x5ddbda(0x438)+'leteDomain'+'(')+_0xac43cb['id']+(_0x5ddbda(0x514)+_0x1135a5(0x50e,']HPT')+'\x20\x20\x20\x20\x20\x20\x20\x20</'+_0x5ddbda(0x391)+'</tr>\x0a\x20\x20\x20\x20'))['join']('');}catch(_0x592f3e){}}function setupDomainBlockForm(){const _0x37837a=_0x393b,_0x4c052c=_0x1518,_0x5ded9e={'SqEWC':_0x4c052c(0x212)+_0x4c052c(0x470),'fpICK':_0x37837a(0x31e,']HPT')+_0x37837a(0x4e3,'U0ZR'),'uFnjC':_0x37837a(0x2ca,'zGb(')+_0x37837a(0x1e0,'I^zb')+'k','rMWpA':function(_0x3738dc,_0xfe5be2,_0xba6d54){return _0x3738dc(_0xfe5be2,_0xba6d54);},'WVomI':_0x37837a(0x38c,'v$Fl')+_0x37837a(0x420,'7Qvh')+'dd','uRQLj':function(_0x52b287){return _0x52b287();},'qiTbz':function(_0x443fdc,_0x827a55){return _0x443fdc(_0x827a55);},'zmsft':_0x37837a(0x363,'U0ZR')+_0x4c052c(0x455)+'n','STzEY':_0x37837a(0x3ff,'1ds4')+_0x4c052c(0x50c),'OZHvp':_0x37837a(0x467,'8a0x')},_0x162bee=document[_0x4c052c(0x4ce)+'ById'](_0x5ded9e['STzEY']);if(!_0x162bee)return;_0x162bee[_0x37837a(0x41e,'fjx@')+_0x4c052c(0x311)](_0x5ded9e['OZHvp'],async()=>{const _0x4519a8=_0x4c052c,_0x49bc69=_0x37837a,_0x2d3df1=document[_0x49bc69(0x284,'^wy@')+_0x49bc69(0x258,'IL2e')](_0x5ded9e[_0x4519a8(0x242)]),_0xca7bc6=document[_0x49bc69(0x504,'U0ZR')+_0x4519a8(0x4e2)](_0x5ded9e[_0x49bc69(0x2f5,'hAi@')]),_0x19c3bb=_0x2d3df1[_0x49bc69(0x46a,'7Qvh')]['trim'](),_0x39841b=_0xca7bc6[_0x49bc69(0x2e1,'P@q6')][_0x4519a8(0x3d4)]()||_0x5ded9e[_0x4519a8(0x361)];if(!_0x19c3bb)return;try{const _0xe963d={};_0xe963d[_0x4519a8(0x232)+'pe']=_0x4519a8(0x51a)+_0x4519a8(0x327);const _0x4a2d66={};_0x4a2d66[_0x4519a8(0x4b8)]=_0x19c3bb,_0x4a2d66[_0x49bc69(0x3a4,'Q)YQ')]=_0x39841b;const _0x894d41=await _0x5ded9e[_0x49bc69(0x200,'9l2#')](authFetch,_0x5ded9e[_0x49bc69(0x2e4,'dJht')],{'method':_0x4519a8(0x338),'headers':_0xe963d,'body':JSON[_0x4519a8(0x442)](_0x4a2d66)});_0x894d41['ok']&&(_0x2d3df1['value']='',_0xca7bc6[_0x4519a8(0x4dc)]='',_0x5ded9e[_0x49bc69(0x458,'IrhW')](fetchBlockedDomains));}catch(_0xd662c2){_0x5ded9e['qiTbz'](alert,_0x5ded9e[_0x4519a8(0x3d8)]);}});}async function fetchStats(){const _0x2ddf23=_0x1518,_0x3ffe5b=_0x393b,_0x324c27={'ucpIl':function(_0x5d3c31,_0x4988e2){return _0x5d3c31(_0x4988e2);},'WLkJW':_0x3ffe5b(0x41b,'x9r(')+_0x2ddf23(0x3eb),'luWDQ':_0x3ffe5b(0x3a2,'hAi@')+'pe','TwNIT':'applicatio'+'n/json','VvpLU':_0x2ddf23(0x35b),'pTZtc':_0x3ffe5b(0x217,'x9r('),'CupPQ':'stat-vips'};try{const _0x67367b=await _0x324c27[_0x2ddf23(0x412)](authFetch,_0x324c27[_0x3ffe5b(0x4d8,'7cMn')]);if(!_0x67367b['ok'])return;const _0x592397=_0x67367b[_0x3ffe5b(0x468,']wJE')][_0x2ddf23(0x496)](_0x324c27[_0x3ffe5b(0x308,'8R[(')]);if(!_0x592397||!_0x592397[_0x2ddf23(0x3e7)](_0x324c27[_0x3ffe5b(0x290,'^wy@')]))return;const _0x1cde8f=await _0x67367b[_0x3ffe5b(0x274,'zGb(')]();_0x1cde8f['stats']&&(document[_0x3ffe5b(0x532,'fjx@')+'ById'](_0x324c27[_0x2ddf23(0x287)])[_0x3ffe5b(0x4a4,'dJht')+'t']=_0x1cde8f['stats'][_0x2ddf23(0x33d)],document[_0x2ddf23(0x4ce)+'ById'](_0x324c27[_0x3ffe5b(0x285,'IrhW')])['textConten'+'t']=_0x1cde8f[_0x2ddf23(0x387)]['totalGames'],document[_0x3ffe5b(0x289,'pQgu')+'ById'](_0x324c27[_0x2ddf23(0x520)])['textConten'+'t']=_0x1cde8f[_0x2ddf23(0x387)][_0x2ddf23(0x3cc)],document[_0x2ddf23(0x4ce)+_0x2ddf23(0x4e2)](_0x2ddf23(0x2c2))[_0x2ddf23(0x3ea)+'t']=_0x1cde8f['stats'][_0x3ffe5b(0x248,'IL2e')]);}catch(_0xdc1aee){}}export async function fetchUsers(){const _0x4ac8f4=_0x1518,_0x7cab7a=_0x393b,_0x272481={'fkqjb':_0x7cab7a(0x509,'U)US')+_0x4ac8f4(0x2d7)+'10b981;\x20fo'+_0x4ac8f4(0x3be)+_0x7cab7a(0x515,'rx^^')+_0x7cab7a(0x417,'^wy@'),'YuKsY':_0x7cab7a(0x1ee,'wR2e')+_0x7cab7a(0x1f2,'Q)YQ')+'ef4444;\x20fo'+'nt-weight:'+'700;\x22>BANN'+_0x4ac8f4(0x43a)+_0x7cab7a(0x22e,'gRJH'),'JPCVL':function(_0xb6440d,_0x7bf8e9){return _0xb6440d>_0x7bf8e9;},'aGvjz':function(_0x4c4a46,_0xc0caad){return _0x4c4a46!==_0xc0caad;},'PLhWD':function(_0x3f7125,_0x248ba1){return _0x3f7125===_0x248ba1;},'aUBJT':_0x4ac8f4(0x2b6),'lcWeJ':function(_0x4d5f9b,_0x483e0e){return _0x4d5f9b!==_0x483e0e;},'FFLqG':function(_0x30bd0f,_0x2a2f01){return _0x30bd0f(_0x2a2f01);},'VhqmV':_0x4ac8f4(0x37b)+_0x4ac8f4(0x42b),'DSKjX':_0x7cab7a(0x2ee,']wJE')+'pe','uyBbY':_0x7cab7a(0x2f6,'I^zb')+_0x7cab7a(0x2b2,'v$Fl'),'dLnqT':function(_0x10cbd8,_0xa21ed){return _0x10cbd8===_0xa21ed;},'LzoTq':_0x4ac8f4(0x3fe)+_0x4ac8f4(0x2d9)+_0x4ac8f4(0x2b4)+_0x4ac8f4(0x3ad)+_0x7cab7a(0x210,'6(6n')+_0x4ac8f4(0x4a0)+_0x4ac8f4(0x47b)+_0x7cab7a(0x35e,'t2NM')+_0x7cab7a(0x3d0,'8R[(')+_0x4ac8f4(0x266)+_0x4ac8f4(0x247)+_0x4ac8f4(0x2a7)};try{const _0x167827=await _0x272481['FFLqG'](authFetch,_0x272481[_0x7cab7a(0x2f8,'7Qvh')]);if(!_0x167827['ok'])return;const _0xb3d67b=_0x167827[_0x4ac8f4(0x2d5)]['get'](_0x272481['DSKjX']);if(!_0xb3d67b||!_0xb3d67b[_0x7cab7a(0x25f,'P@q6')](_0x4ac8f4(0x51a)+_0x7cab7a(0x3a8,'GFnI')))return;const _0x22a0b7=await _0x167827[_0x7cab7a(0x452,']wJE')](),_0xc029fe=document[_0x4ac8f4(0x4ce)+'ById'](_0x272481['uyBbY']);if(!_0xc029fe)return;if(!_0x22a0b7['users']||_0x272481[_0x7cab7a(0x2e2,'U)US')](_0x22a0b7[_0x4ac8f4(0x21c)][_0x4ac8f4(0x40e)],-0xf57+0x1dcb+-0xe74)){_0xc029fe[_0x7cab7a(0x492,'7Qvh')]=_0x272481[_0x4ac8f4(0x1d2)];return;}_0xc029fe[_0x4ac8f4(0x378)]=_0x22a0b7[_0x7cab7a(0x1e3,'zGb(')]['map'](_0x668c34=>{const _0x1cc0aa=_0x7cab7a,_0x3a9fc7=_0x4ac8f4;let _0x4989bc=_0x272481[_0x3a9fc7(0x507)];if(_0x668c34[_0x3a9fc7(0x3c5)])_0x4989bc=_0x272481[_0x3a9fc7(0x1fe)];else{if(_0x668c34[_0x3a9fc7(0x3e5)+'l']&&new Date(_0x668c34[_0x1cc0aa(0x3e6,'bWOk')+'l'])>new Date())_0x4989bc=_0x3a9fc7(0x39e)+_0x3a9fc7(0x2d7)+_0x1cc0aa(0x441,'pQgu')+_0x3a9fc7(0x3be)+'700;\x22>MUTE'+_0x3a9fc7(0x3d9)+new Date(_0x668c34['muted_unti'+'l'])[_0x3a9fc7(0x350)+_0x3a9fc7(0x4bf)]()+_0x1cc0aa(0x2bb,'heEg');else _0x668c34['proxy_time'+'out_until']&&_0x272481[_0x1cc0aa(0x2f9,'gRJH')](new Date(_0x668c34[_0x3a9fc7(0x28d)+'out_until']),new Date())&&(_0x4989bc=_0x3a9fc7(0x39e)+_0x3a9fc7(0x2d7)+_0x3a9fc7(0x405)+_0x3a9fc7(0x3be)+_0x1cc0aa(0x264,'P@q6')+_0x3a9fc7(0x3ce)+_0x1cc0aa(0x457,'1(OB')+'n>');}const _0x455ebb=_0x668c34[_0x3a9fc7(0x313)+'me']&&_0x272481[_0x3a9fc7(0x476)](_0x668c34[_0x1cc0aa(0x392,'pQgu')+'me'],_0x668c34['username'])?_0x1cc0aa(0x49c,']HPT')+_0x3a9fc7(0x2d7)+'38bdf8;\x20fo'+_0x1cc0aa(0x39c,'x9r(')+_0x1cc0aa(0x3ca,']CDP')+_0x668c34[_0x1cc0aa(0x4c8,'I^zb')+'me']+_0x3a9fc7(0x20e):'';return _0x3a9fc7(0x382)+'tr>\x0a\x20\x20\x20\x20\x20\x20'+_0x3a9fc7(0x2af)+_0x668c34['id']+(_0x1cc0aa(0x1f5,'9l2#')+_0x1cc0aa(0x28e,')AQ0')+_0x3a9fc7(0x292)+'\x20\x20\x20<strong'+'>')+_0x668c34[_0x1cc0aa(0x3e2,'x9r(')]+_0x3a9fc7(0x225)+_0x455ebb+(_0x1cc0aa(0x4ec,']CDP')+_0x3a9fc7(0x24f))+(_0x668c34['proxy_viol'+_0x3a9fc7(0x295)+'nt']?_0x1cc0aa(0x1ee,'wR2e')+_0x3a9fc7(0x2d7)+_0x1cc0aa(0x4e5,'c@Qg')+'nt-size:0.'+_0x3a9fc7(0x294)+_0x1cc0aa(0x30d,'sV3f')+_0x1cc0aa(0x3b7,'IrhW')+_0x1cc0aa(0x44c,'^wy@')+_0x668c34[_0x3a9fc7(0x269)+_0x1cc0aa(0x21f,'6(6n')+'nt']+_0x1cc0aa(0x2b0,'8*kl'):'')+(_0x1cc0aa(0x513,'zGb(')+_0x3a9fc7(0x2bd)+_0x3a9fc7(0x512)+_0x3a9fc7(0x4bd)+_0x3a9fc7(0x35f)+_0x3a9fc7(0x398))+_0x668c34['role']+'\x22>'+_0x668c34[_0x3a9fc7(0x506)][_0x3a9fc7(0x4a6)+'e']()+(_0x3a9fc7(0x45f)+'d>\x0a\x20\x20\x20\x20\x20\x20\x20'+_0x1cc0aa(0x429,'heEg'))+_0x4989bc+(_0x3a9fc7(0x21b)+_0x3a9fc7(0x447)+_0x3a9fc7(0x292)+_0x1cc0aa(0x4b0,'t2NM')+_0x3a9fc7(0x52e)+_0x1cc0aa(0x3c0,'JOnn')+_0x1cc0aa(0x386,'zGb(')+_0x1cc0aa(0x251,'9l2#'))+(_0x272481[_0x3a9fc7(0x3fa)](_0x668c34[_0x3a9fc7(0x506)],_0x1cc0aa(0x2d8,'JOnn'))||_0x272481[_0x1cc0aa(0x503,'c@Qg')](_0x668c34[_0x1cc0aa(0x43f,'rx^^')],_0x272481[_0x3a9fc7(0x4ef)])?'<button\x20cl'+'ass=\x22btn-s'+_0x1cc0aa(0x434,'R7n3')+_0x3a9fc7(0x47e)+_0x3a9fc7(0x3aa)+_0x3a9fc7(0x4d9)+_0x668c34['id']+(',\x20\x27member\x27'+_0x3a9fc7(0x343)+'PRO</butto'+'n>'):_0x1cc0aa(0x306,'IrhW')+_0x3a9fc7(0x45e)+_0x3a9fc7(0x291)+_0x1cc0aa(0x2e9,'t2NM')+_0x1cc0aa(0x44d,'b5Pp')+_0x1cc0aa(0x23b,'2T]g')+_0x668c34['id']+(_0x3a9fc7(0x40c)+_0x1cc0aa(0x53b,'pk]O')+'👑</button>'))+(_0x1cc0aa(0x254,'BlH3')+_0x1cc0aa(0x3cf,'Q8n3')+_0x1cc0aa(0x1f9,'6(6n')+_0x1cc0aa(0x3f8,'zGb(')+'\x20style=\x22ba'+'ckground:\x20'+'rgba(168,\x20'+_0x1cc0aa(0x42d,'^wy@')+_0x3a9fc7(0x4b2)+_0x1cc0aa(0x3a5,'dJht')+_0x3a9fc7(0x2d0)+_0x1cc0aa(0x53a,'7Qvh')+_0x1cc0aa(0x43e,'b5Pp')+_0x1cc0aa(0x4cf,')AQ0')+_0x1cc0aa(0x47c,']wJE')+'MutePrompt'+'(')+_0x668c34['id']+_0x1cc0aa(0x33b,'wR2e')+_0x668c34[_0x1cc0aa(0x38a,'IL2e')]+(_0x3a9fc7(0x2de)+_0x1cc0aa(0x2a8,'7cMn')+_0x3a9fc7(0x376)+_0x3a9fc7(0x3c6)+_0x3a9fc7(0x329)+_0x3a9fc7(0x229)+_0x1cc0aa(0x51c,'BlH3')+_0x3a9fc7(0x1d0)+'gba(255,25'+_0x3a9fc7(0x52f)+_0x3a9fc7(0x2c4)+_0x3a9fc7(0x430)+_0x1cc0aa(0x2ae,'u$!u')+_0x3a9fc7(0x473)+_0x3a9fc7(0x1f0))+_0x668c34['id']+_0x3a9fc7(0x214)+_0x668c34[_0x3a9fc7(0x50b)]+(_0x1cc0aa(0x4af,'b5Pp')+_0x1cc0aa(0x4f5,'Q8n3')+_0x1cc0aa(0x2e7,'BlH3')+'\x20\x20\x20\x20')+(_0x272481[_0x3a9fc7(0x2ac)](_0x668c34[_0x3a9fc7(0x506)],_0x1cc0aa(0x493,'pQgu'))?_0x668c34[_0x1cc0aa(0x471,'ox5$')]?_0x1cc0aa(0x53f,'l%Yf')+_0x3a9fc7(0x45e)+'mall\x20unban'+_0x1cc0aa(0x35d,'zGb(')+_0x1cc0aa(0x1fc,'gRJH')+_0x1cc0aa(0x371,']wJE')+_0x668c34['id']+(',\x20false)\x22>'+_0x3a9fc7(0x415)+_0x3a9fc7(0x531)):_0x1cc0aa(0x494,'6(6n')+'ass=\x22btn-s'+'mall\x20ban\x22\x20'+'onclick=\x22w'+'indow.setB'+_0x3a9fc7(0x52d)+_0x668c34['id']+(_0x1cc0aa(0x3b8,'b5Pp')+_0x1cc0aa(0x1d9,'9l2#')+'>'):'')+(_0x1cc0aa(0x3ac,'gRJH')+_0x3a9fc7(0x3ed)+_0x3a9fc7(0x376)+_0x3a9fc7(0x21b)+_0x3a9fc7(0x48b)+_0x1cc0aa(0x356,'RXg3'));})[_0x7cab7a(0x1ed,'I^zb')]('');}catch(_0x5c6dfc){}}async function fetchAdminGames(){const _0x56ff86=_0x393b,_0x12c3e1=_0x1518,_0x1e1846={'MQYWY':function(_0x3a914c,_0x54ad84){return _0x3a914c(_0x54ad84);},'LQNGK':_0x12c3e1(0x42c),'YgwlI':_0x12c3e1(0x33e)+'pe'};try{const _0x11410e=await _0x1e1846['MQYWY'](authFetch,_0x1e1846[_0x56ff86(0x469,'IrhW')]);if(!_0x11410e['ok'])return;const _0x29fddf=_0x11410e[_0x12c3e1(0x2d5)][_0x12c3e1(0x496)](_0x1e1846[_0x12c3e1(0x2fc)]);if(!_0x29fddf||!_0x29fddf['includes']('applicatio'+_0x12c3e1(0x327)))return;const _0x4dc8e4=await _0x11410e['json'](),_0x40ddb6=document[_0x12c3e1(0x4ce)+_0x12c3e1(0x4e2)]('admin-game'+_0x12c3e1(0x322));if(!_0x40ddb6)return;_0x40ddb6[_0x12c3e1(0x378)]=(_0x4dc8e4[_0x12c3e1(0x4b6)]||[])['map'](_0x3cbd8a=>_0x56ff86(0x472,'6(6n')+_0x12c3e1(0x52a)+_0x56ff86(0x51b,'WCtu')+'g>'+_0x3cbd8a[_0x56ff86(0x3cd,']HPT')]+(_0x56ff86(0x245,'1ds4')+_0x12c3e1(0x418)+'\x20\x20\x20<td>')+_0x3cbd8a[_0x12c3e1(0x29e)]+(_0x12c3e1(0x21b)+_0x12c3e1(0x49e))+(_0x3cbd8a[_0x56ff86(0x31f,'2T]g')]?_0x56ff86(0x312,'1ds4'):_0x12c3e1(0x4f6))+(_0x12c3e1(0x21b)+_0x56ff86(0x4d4,'IL2e'))+_0x3cbd8a[_0x56ff86(0x4ad,'pk]O')]+(_0x56ff86(0x1f5,'9l2#')+_0x56ff86(0x331,'ox5$')+_0x12c3e1(0x23d)+_0x56ff86(0x42e,'8*kl')+'ss=\x22btn-sm'+_0x12c3e1(0x528)+_0x12c3e1(0x4cd)+_0x56ff86(0x2ea,'Q)YQ')+'leteGame(')+_0x3cbd8a['id']+(')\x22>Delete<'+_0x56ff86(0x24b,'bWOk')+_0x56ff86(0x4be,'WCtu')+_0x12c3e1(0x3c1)+_0x12c3e1(0x3a9)))[_0x56ff86(0x4c4,'R7n3')]('');}catch(_0x2e2af4){}}async function fetchFilters(){const _0x367f04=_0x393b,_0x2da4c4=_0x1518,_0x2a9e97={'XVTyF':function(_0x43fce0,_0x5718e2){return _0x43fce0(_0x5718e2);},'NhKyw':_0x2da4c4(0x37b)+'/filters','aYZES':_0x2da4c4(0x51a)+'n/json','lVNYO':_0x367f04(0x228,'heEg')+_0x367f04(0x33f,'JOnn')};try{const _0x20acfa=await _0x2a9e97[_0x367f04(0x1df,'1ds4')](authFetch,_0x2a9e97[_0x2da4c4(0x335)]);if(!_0x20acfa['ok'])return;const _0x24c20b=_0x20acfa[_0x367f04(0x281,'6(6n')][_0x367f04(0x262,'7cMn')]('content-ty'+'pe');if(!_0x24c20b||!_0x24c20b[_0x367f04(0x282,'t2NM')](_0x2a9e97[_0x367f04(0x301,']wJE')]))return;const _0xc4954b=await _0x20acfa[_0x2da4c4(0x352)](),_0x8b742e=document[_0x367f04(0x330,'bWOk')+_0x2da4c4(0x4e2)](_0x2a9e97[_0x2da4c4(0x299)]);if(!_0x8b742e)return;_0x8b742e[_0x2da4c4(0x378)]=(_0xc4954b[_0x2da4c4(0x35c)]||[])['map'](_0x2c3c09=>'\x0a\x20\x20\x20\x20\x20\x20<tr'+'>\x0a\x20\x20\x20\x20\x20\x20\x20\x20'+_0x2da4c4(0x2c5)+_0x2c3c09['word']+(_0x367f04(0x38d,'pQgu')+_0x367f04(0x3a1,'v$Fl')+_0x367f04(0x45d,'7cMn')+_0x367f04(0x416,'R7n3')+_0x367f04(0x40b,'7cMn'))+_0x2c3c09[_0x2da4c4(0x3bd)+'e']+('</span></t'+_0x2da4c4(0x4ea)+_0x367f04(0x44a,'sV3f')+'\x20\x20\x20\x20\x20\x20<but'+_0x2da4c4(0x314)+'\x22btn-small'+_0x367f04(0x32b,'R7n3')+_0x367f04(0x508,'x9r(')+_0x367f04(0x51d,'x9r(')+'eFilter(')+_0x2c3c09['id']+(')\x22>Remove<'+_0x2da4c4(0x406)+_0x367f04(0x31c,'U0ZR')+'d>\x0a\x20\x20\x20\x20\x20\x20<'+_0x2da4c4(0x3a9)))['join']('');}catch(_0x3e23b1){}}function _0x1518(_0x2e1c7c,_0x386b58){_0x2e1c7c=_0x2e1c7c-(0xb6f+-0x2053+0x16af*0x1);const _0x29d167=_0xb1fe();let _0x37b57e=_0x29d167[_0x2e1c7c];if(_0x1518['BslONB']===undefined){var _0x4073b4=function(_0x401901){const _0x207e3d='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0xc009e3='',_0x5559cb='';for(let _0x133624=0x15d*-0x1c+0x16fd+0xf2f,_0x3fc861,_0x29444e,_0x93d043=0x2000+0xeb8+-0x2eb8;_0x29444e=_0x401901['charAt'](_0x93d043++);~_0x29444e&&(_0x3fc861=_0x133624%(-0x1732+0x1c91+-0x55b)?_0x3fc861*(-0x1dc2+0xbb7*0x3+0x523*-0x1)+_0x29444e:_0x29444e,_0x133624++%(0x1cb9+-0x263b*-0x1+-0x264*0x1c))?_0xc009e3+=String['fromCharCode'](-0x1ef3+-0x1d80+0x3d72&_0x3fc861>>(-(0x75f+-0x151+-0x60c)*_0x133624&0x2bb+-0xf*0x1c2+-0x1*-0x17a9)):0x1*0x1fbf+0x301*0x2+-0x25c1){_0x29444e=_0x207e3d['indexOf'](_0x29444e);}for(let _0xc07bb=0x19c1*-0x1+-0x5a7*0x4+0x1*0x305d,_0x2237e9=_0xc009e3['length'];_0xc07bb<_0x2237e9;_0xc07bb++){_0x5559cb+='%'+('00'+_0xc009e3['charCodeAt'](_0xc07bb)['toString'](0x1f50+0x1*-0x1c81+-0x2bf))['slice'](-(0x1525+0x1*0x38c+-0x18af));}return decodeURIComponent(_0x5559cb);};_0x1518['eWgrRc']=_0x4073b4,_0x1518['tqeSLd']={},_0x1518['BslONB']=!![];}const _0x29ae52=_0x29d167[-0x2386+-0x9b9+0x2d3f],_0x1b4256=_0x2e1c7c+_0x29ae52,_0x1d1f01=_0x1518['tqeSLd'][_0x1b4256];return!_0x1d1f01?(_0x37b57e=_0x1518['eWgrRc'](_0x37b57e),_0x1518['tqeSLd'][_0x1b4256]=_0x37b57e):_0x37b57e=_0x1d1f01,_0x37b57e;}async function fetchLogs(){const _0x507a7c=_0x1518,_0x1546d9=_0x393b,_0x140144={};_0x140144['ZlnwB']='/api/admin'+_0x1546d9(0x337,']HPT'),_0x140144[_0x507a7c(0x367)]=_0x1546d9(0x500,'pQgu')+'pe',_0x140144['uZkxi']=_0x1546d9(0x2df,'1ds4')+_0x507a7c(0x327),_0x140144[_0x1546d9(0x4eb,']wJE')]=_0x1546d9(0x482,'b5Pp')+_0x507a7c(0x2b7);const _0x133d68=_0x140144;try{const _0x18a7c7=await authFetch(_0x133d68['ZlnwB']);if(!_0x18a7c7['ok'])return;const _0x35bb04=_0x18a7c7[_0x507a7c(0x2d5)][_0x1546d9(0x4a1,'I^zb')](_0x133d68['dOPqL']);if(!_0x35bb04||!_0x35bb04[_0x1546d9(0x2f1,'pQgu')](_0x133d68['uZkxi']))return;const _0x15dcb5=await _0x18a7c7[_0x1546d9(0x393,'t2NM')](),_0x5acb9a=document[_0x507a7c(0x4ce)+_0x1546d9(0x1e8,'2T]g')](_0x133d68[_0x1546d9(0x49d,'R7n3')]);if(!_0x5acb9a)return;_0x5acb9a[_0x507a7c(0x378)]=(_0x15dcb5[_0x507a7c(0x1cf)]||[])[_0x1546d9(0x3a6,'8*kl')](_0x39b41a=>_0x1546d9(0x1d4,'7Qvh')+'>\x0a\x20\x20\x20\x20\x20\x20\x20\x20'+_0x507a7c(0x2b8)+'g>'+_0x39b41a[_0x507a7c(0x4f0)]+(_0x1546d9(0x307,'8*kl')+_0x507a7c(0x418)+_0x507a7c(0x3ec))+_0x39b41a[_0x1546d9(0x298,')AQ0')+_0x1546d9(0x3b4,'v$Fl')]+(_0x1546d9(0x3da,'WCtu')+_0x1546d9(0x315,'wR2e'))+_0x39b41a[_0x507a7c(0x2e6)]+('</td>\x0a\x20\x20\x20\x20'+_0x507a7c(0x49e))+new Date(_0x39b41a[_0x1546d9(0x491,'Q)YQ')])[_0x1546d9(0x535,'Q)YQ')+_0x507a7c(0x3a0)]()+('</td>\x0a\x20\x20\x20\x20'+_0x1546d9(0x4c3,'heEg')+'\x20\x20'))['join']('');}catch(_0x1d4b7d){}}function setupAdminTabs(){const _0x4858f9=_0x393b,_0x6c6451=_0x1518,_0x4b90a0={'cSgDl':_0x6c6451(0x4db)+_0x6c6451(0x2f2),'ryPSW':_0x6c6451(0x519),'melOc':function(_0x4ed2cf,_0x268a84){return _0x4ed2cf===_0x268a84;},'agauv':_0x4858f9(0x318,'IL2e'),'jBYET':function(_0x7051a7){return _0x7051a7();},'SGjiO':_0x6c6451(0x4b6),'JAFxh':function(_0x4cfdc2,_0x2c019b){return _0x4cfdc2===_0x2c019b;},'FFHCD':_0x4858f9(0x28f,'IL2e'),'HtRql':_0x6c6451(0x35c),'pvlUr':_0x6c6451(0x1cf),'ZwFsK':_0x4858f9(0x2cc,'BlH3'),'PxxQE':'click','npcqN':'.admin-tab'+_0x6c6451(0x50c)},_0x239ee4=document[_0x6c6451(0x525)+'torAll'](_0x4b90a0[_0x4858f9(0x206,'P@q6')]);_0x239ee4['forEach'](_0x1cd559=>{const _0x50faf1=_0x4858f9,_0x1c903d=_0x6c6451,_0xbbc6d6={'HExMD':_0x4b90a0['cSgDl'],'YnDyl':_0x4b90a0[_0x1c903d(0x22b)],'BHHbR':function(_0x53524c,_0x3657e7){const _0x1b08f0=_0x1c903d;return _0x4b90a0[_0x1b08f0(0x49b)](_0x53524c,_0x3657e7);},'iIYaX':_0x4b90a0[_0x1c903d(0x427)],'yxvnZ':function(_0x701259){const _0x34ae1d=_0x1c903d;return _0x4b90a0[_0x34ae1d(0x276)](_0x701259);},'gBhQV':_0x4b90a0[_0x50faf1(0x456,'rx^^')],'DlXmS':function(_0x47c93f,_0x29d921){const _0x3dcb93=_0x1c903d;return _0x4b90a0[_0x3dcb93(0x459)](_0x47c93f,_0x29d921);},'lnocz':_0x4b90a0[_0x1c903d(0x4f1)],'hYRRq':function(_0x3cdc64){return _0x3cdc64();},'mWhIx':_0x4b90a0[_0x1c903d(0x3c9)],'daNPb':_0x4b90a0[_0x50faf1(0x46f,'bWOk')],'YVoDZ':_0x4b90a0[_0x1c903d(0x20c)]};_0x1cd559[_0x1c903d(0x466)+'stener'](_0x4b90a0[_0x1c903d(0x1cc)],()=>{const _0x21767a=_0x1c903d,_0x270cfb=_0x50faf1;_0x239ee4[_0x270cfb(0x362,'wR2e')](_0x2d837a=>_0x2d837a[_0x21767a(0x211)]['remove']('active')),_0x1cd559[_0x270cfb(0x4c5,'9l2#')][_0x270cfb(0x273,'JOnn')]('active');const _0x4ffd0a=_0x1cd559['dataset'][_0x21767a(0x50a)];document[_0x270cfb(0x3dc,'^wy@')+_0x21767a(0x400)](_0xbbc6d6['HExMD'])['forEach'](_0xf4ddd4=>_0xf4ddd4[_0x21767a(0x209)][_0x270cfb(0x241,'BlH3')]=_0x270cfb(0x1ef,'ox5$'));const _0x3ec98e=document[_0x21767a(0x4ce)+_0x21767a(0x4e2)](_0x270cfb(0x460,'BlH3')+_0x4ffd0a);if(_0x3ec98e)_0x3ec98e[_0x270cfb(0x477,'hAi@')][_0x21767a(0x380)]=_0xbbc6d6['YnDyl'];if(_0xbbc6d6['BHHbR'](_0x4ffd0a,_0xbbc6d6['iIYaX']))_0xbbc6d6[_0x21767a(0x28b)](fetchUsers);if(_0x4ffd0a===_0xbbc6d6[_0x21767a(0x25e)])_0xbbc6d6[_0x270cfb(0x50f,'P@q6')](fetchAdminGames);if(_0xbbc6d6[_0x21767a(0x3f9)](_0x4ffd0a,_0xbbc6d6[_0x270cfb(0x305,']CDP')]))_0xbbc6d6[_0x270cfb(0x527,'8a0x')](fetchBlockedDomains);if(_0xbbc6d6[_0x21767a(0x3f9)](_0x4ffd0a,_0xbbc6d6[_0x21767a(0x521)]))_0xbbc6d6[_0x270cfb(0x30c,'U0ZR')](fetchFilters);if(_0xbbc6d6[_0x270cfb(0x239,'2T]g')](_0x4ffd0a,_0xbbc6d6[_0x21767a(0x27e)]))fetchLogs();if(_0xbbc6d6[_0x21767a(0x3f9)](_0x4ffd0a,_0xbbc6d6['YVoDZ']))fetchAdminWebhooks();});});}function setupAdminActions(){const _0x5504c8=_0x1518,_0x36df23=_0x393b,_0x451d54={'AjxYC':function(_0x325ed2,_0xd65d4c){return _0x325ed2&&_0xd65d4c;},'BoRhF':_0x36df23(0x29d,'IrhW')+_0x5504c8(0x4fa)+'n','ggwEF':function(_0x26bccc,_0x11f0d0,_0x3e8d61){return _0x26bccc(_0x11f0d0,_0x3e8d61);},'Tqlrg':function(_0x1d1b48,_0x721cb){return _0x1d1b48(_0x721cb);},'LrqNo':function(_0x339733,_0x437516){return _0x339733<=_0x437516;},'JeqFY':function(_0x58c509,_0x562bb2){return _0x58c509(_0x562bb2);},'KoiDr':function(_0x439d19,_0x22d044){return _0x439d19&&_0x22d044;},'CtrjE':_0x36df23(0x2f4,'8a0x')+_0x36df23(0x205,'t2NM'),'FqRMy':function(_0x283c1e,_0x557979,_0x5e34ed){return _0x283c1e(_0x557979,_0x5e34ed);},'spgyW':_0x5504c8(0x338),'lXicB':function(_0x5f51b3,_0x2e67ef){return _0x5f51b3(_0x2e67ef);},'QSCvi':_0x5504c8(0x1cd)+_0x5504c8(0x440)+'ok.','trXFG':function(_0x58c88b,_0x482fc2){return _0x58c88b(_0x482fc2);},'hioqr':_0x5504c8(0x4dd)+'ng\x20webhook'+'.','MhkyJ':function(_0x5c863a){return _0x5c863a();},'uFnWz':function(_0x4d96cd){return _0x4d96cd();},'dqaFi':_0x5504c8(0x1f6)+_0x36df23(0x2b1,'fjx@')+'role','GMywJ':function(_0x583c43,_0x2ba23e,_0x247e63){return _0x583c43(_0x2ba23e,_0x247e63);},'uTDwT':function(_0x24712a){return _0x24712a();},'AOnlx':function(_0x5e94b8,_0x5c87f9){return _0x5e94b8(_0x5c87f9);},'APPyS':_0x5504c8(0x1f6)+_0x5504c8(0x431)+_0x5504c8(0x2dc),'HDdoX':function(_0x307f3e,_0x57d3d9,_0x464d62){return _0x307f3e(_0x57d3d9,_0x464d62);},'beKSR':_0x5504c8(0x51a)+_0x36df23(0x333,'hAi@'),'MmMPS':function(_0x460b65){return _0x460b65();},'adLeT':_0x36df23(0x1ff,'BlH3')+_0x36df23(0x221,'wR2e'),'KxVNB':function(_0xf04dda,_0x4f5bf8){return _0xf04dda(_0x4f5bf8);},'LVYRG':_0x5504c8(0x377)+'re\x20you\x20wan'+_0x5504c8(0x319)+'nently\x20del'+_0x5504c8(0x2a1)+_0x36df23(0x20b,'b5Pp'),'BeUyw':_0x36df23(0x4e4,'Q)YQ'),'mwYZh':function(_0x5742c0){return _0x5742c0();},'jDQry':function(_0x5410b6){return _0x5410b6();},'mWDfD':function(_0x4463e4,_0x9fa655){return _0x4463e4(_0x9fa655);},'XbAfl':_0x36df23(0x1f4,'7Qvh')+'-word','KFvfb':'/api/admin'+'/filters/a'+'dd','tNwPJ':_0x5504c8(0x486)+_0x36df23(0x3db,'u$!u')+_0x5504c8(0x408),'LcIzL':_0x36df23(0x3bf,'bWOk')};window[_0x5504c8(0x26d)+_0x36df23(0x32c,'P@q6')]=_0x1778ea=>{const _0x31753e=_0x5504c8,_0x26ccc7=_0x36df23,_0x208bf7=getCurrentUser();if(_0x451d54[_0x26ccc7(0x2cd,'b5Pp')](adminSocket,_0x208bf7)){const _0x342de5={};_0x342de5[_0x31753e(0x48f)+_0x26ccc7(0x4a3,'hAi@')]=_0x1778ea,_0x342de5[_0x31753e(0x224)]=_0x208bf7,adminSocket[_0x26ccc7(0x1e7,'U0ZR')](_0x451d54[_0x31753e(0x3b6)],_0x342de5);}},window[_0x5504c8(0x203)+_0x36df23(0x48c,'ox5$')]=(_0x543d62,_0x2c6352)=>{const _0x108fd1=_0x36df23,_0x188313=_0x5504c8,_0x5c49f7=_0x451d54[_0x188313(0x2c0)](prompt,'Mute\x20'+_0x2c6352+(_0x188313(0x3f5)+_0x188313(0x316)+_0x188313(0x21d)+_0x108fd1(0x1fd,']HPT')),'15');if(!_0x5c49f7)return;const _0x4cd246=_0x451d54[_0x108fd1(0x243,'8*kl')](parseInt,_0x5c49f7,-0x1d*-0xad+0xf92+0x11*-0x211);if(_0x451d54['Tqlrg'](isNaN,_0x4cd246)||_0x451d54['LrqNo'](_0x4cd246,0x3*-0x63d+0x6f9*-0x3+0x27a2))return _0x451d54[_0x108fd1(0x26b,'2T]g')](alert,_0x188313(0x310)+_0x188313(0x215));const _0xfe64a2=getCurrentUser();if(_0x451d54[_0x188313(0x28a)](adminSocket,_0xfe64a2)){const _0x2c0d65={};_0x2c0d65[_0x188313(0x4d6)+'Id']=_0x543d62,_0x2c0d65['durationMi'+_0x108fd1(0x31b,'Q8n3')]=_0x4cd246,_0x2c0d65[_0x108fd1(0x370,'9l2#')]=_0xfe64a2,adminSocket[_0x108fd1(0x4e1,'b5Pp')](_0x451d54[_0x188313(0x246)],_0x2c0d65),alert(_0x188313(0x481)+_0x2c6352+('\x20muted\x20for'+'\x20')+_0x4cd246+_0x108fd1(0x309,'Q[za')),_0x451d54['ggwEF'](setTimeout,fetchUsers,-0xb2*-0x1f+0x147d+-0x2817);}},window[_0x5504c8(0x235)+'k']=async _0xc99684=>{const _0x3a59a7=_0x5504c8,_0x2e4eb2=_0x36df23,_0x3e81da=document[_0x2e4eb2(0x437,'8a0x')+'ById'](_0x2e4eb2(0x4ca,'R7n3')+_0x3a59a7(0x36d)+_0xc99684);if(!_0x3e81da)return;const _0x3cdaa9=_0x3e81da[_0x3a59a7(0x4dc)][_0x3a59a7(0x3d4)]();try{const _0x2903fc={};_0x2903fc[_0x3a59a7(0x232)+'pe']=_0x3a59a7(0x51a)+_0x2e4eb2(0x260,'gRJH');const _0x545038={};_0x545038[_0x3a59a7(0x29e)]=_0xc99684,_0x545038[_0x3a59a7(0x497)]=_0x3cdaa9;const _0x283523=await _0x451d54[_0x2e4eb2(0x1f3,'1(OB')](authFetch,_0x3a59a7(0x37b)+_0x2e4eb2(0x32d,'I^zb'),{'method':_0x451d54['spgyW'],'headers':_0x2903fc,'body':JSON[_0x3a59a7(0x442)](_0x545038)}),_0x4576ad=await _0x283523['json']();_0x283523['ok']?_0x451d54[_0x2e4eb2(0x21a,'7cMn')](alert,'✅\x20Webhook\x20'+'URL\x20for\x20'+_0xc99684[_0x3a59a7(0x4a6)+'e']()+_0x2e4eb2(0x3f2,']HPT')):_0x451d54['lXicB'](alert,_0x4576ad[_0x3a59a7(0x4da)]||_0x451d54[_0x2e4eb2(0x303,'u$!u')]);}catch(_0x5c2cb8){_0x451d54[_0x3a59a7(0x2da)](alert,_0x451d54[_0x3a59a7(0x2a5)]);}},window[_0x5504c8(0x1eb)]=async(_0x55eabc,_0x22ef55)=>{const _0x24510f=_0x36df23,_0x3b5c75=_0x5504c8;try{const _0x140f33={};_0x140f33[_0x3b5c75(0x232)+'pe']=_0x3b5c75(0x51a)+_0x24510f(0x436,']CDP');const _0x3f4c98={};_0x3f4c98[_0x3b5c75(0x506)]=_0x22ef55;const _0x4beb23=await authFetch(_0x3b5c75(0x37b)+_0x3b5c75(0x4fc)+_0x55eabc+_0x24510f(0x45b,'U0ZR'),{'method':_0x451d54[_0x24510f(0x342,'IL2e')],'headers':_0x140f33,'body':JSON['stringify'](_0x3f4c98)});_0x4beb23['ok']&&(_0x451d54[_0x3b5c75(0x3c2)](fetchUsers),_0x451d54[_0x24510f(0x540,'ox5$')](fetchStats));}catch(_0x88b4d2){_0x451d54[_0x24510f(0x510,'pk]O')](alert,_0x451d54[_0x3b5c75(0x326)]);}},window[_0x36df23(0x27b,'bWOk')+'assword']=async(_0x4f8b16,_0x4c8659)=>{const _0x16bd8b=_0x5504c8,_0x1a2806=_0x36df23,_0x57ddc5=_0x451d54[_0x1a2806(0x444,'x9r(')](prompt,_0x16bd8b(0x358)+_0x1a2806(0x4e8,'dJht')+'or\x20'+_0x4c8659+':');if(!_0x57ddc5)return;try{const _0x3e02e8={};_0x3e02e8[_0x1a2806(0x449,'b5Pp')+'pe']=_0x16bd8b(0x51a)+_0x16bd8b(0x327);const _0xe16d85={};_0xe16d85[_0x16bd8b(0x364)+'rd']=_0x57ddc5;const _0x5ea418=await _0x451d54[_0x1a2806(0x401,'heEg')](authFetch,_0x16bd8b(0x37b)+'/users/'+_0x4f8b16+'/password',{'method':_0x451d54[_0x16bd8b(0x2d2)],'headers':_0x3e02e8,'body':JSON[_0x16bd8b(0x442)](_0xe16d85)}),_0x541e2f=await _0x5ea418[_0x1a2806(0x3e1,'8a0x')]();_0x5ea418['ok']?(_0x451d54[_0x1a2806(0x21a,'7cMn')](alert,_0x541e2f[_0x16bd8b(0x4d5)]||'Password\x20s'+_0x1a2806(0x302,')AQ0')+_0x16bd8b(0x34e)),_0x451d54[_0x1a2806(0x256,'rx^^')](fetchLogs)):_0x451d54[_0x1a2806(0x4e6,'R7n3')](alert,_0x541e2f[_0x1a2806(0x52b,'IL2e')]||_0x1a2806(0x38e,'R7n3')+'update\x20pas'+_0x16bd8b(0x49a));}catch(_0x26acce){alert(_0x451d54[_0x1a2806(0x236,'P@q6')]);}},window[_0x5504c8(0x2f7)]=async(_0x900df5,_0x33cf73)=>{const _0x1d13d4=_0x5504c8,_0x10bf5d=_0x36df23,_0x1cc845=_0x33cf73?_0x451d54['Tqlrg'](prompt,_0x10bf5d(0x3d5,'t2NM')+_0x1d13d4(0x45a)+':'):'';try{const _0x102860={};_0x102860['is_banned']=_0x33cf73,_0x102860[_0x1d13d4(0x23f)]=_0x1cc845;const _0x143007=await _0x451d54['HDdoX'](authFetch,_0x1d13d4(0x37b)+_0x10bf5d(0x26c,'dJht')+_0x900df5+_0x10bf5d(0x498,'GFnI'),{'method':_0x451d54[_0x10bf5d(0x4ed,'dJht')],'headers':{'Content-Type':_0x451d54[_0x1d13d4(0x29b)]},'body':JSON[_0x1d13d4(0x442)](_0x102860)});_0x143007['ok']&&(_0x451d54[_0x1d13d4(0x397)](fetchUsers),_0x451d54[_0x10bf5d(0x30b,'1(OB')](fetchLogs));}catch(_0x2f9849){_0x451d54[_0x1d13d4(0x402)](alert,_0x451d54[_0x1d13d4(0x26a)]);}},window['deleteGame']=async _0x2f3aa6=>{const _0x3ab89c=_0x36df23,_0xf429e4=_0x5504c8;if(!_0x451d54['KxVNB'](confirm,_0x451d54[_0xf429e4(0x23a)]))return;try{const _0x1f043e=await _0x451d54[_0xf429e4(0x2c0)](authFetch,_0xf429e4(0x37b)+_0x3ab89c(0x1da,'Q)YQ')+_0x2f3aa6,{'method':_0x451d54[_0xf429e4(0x3f0)]});_0x1f043e['ok']&&(_0x451d54['MhkyJ'](fetchAdminGames),_0x451d54[_0x3ab89c(0x368,'gRJH')](fetchStats),loadGames());}catch(_0x7d3535){_0x451d54[_0x3ab89c(0x47d,'1ds4')](alert,_0xf429e4(0x454)+_0x3ab89c(0x207,'BlH3'));}},window[_0x5504c8(0x49f)+'in']=async _0x25193b=>{const _0x48dcb5=_0x36df23,_0x25b335=_0x5504c8;try{const _0x14046f={};_0x14046f[_0x25b335(0x34a)]=_0x451d54[_0x48dcb5(0x33a,'b5Pp')];const _0x2378b5=await authFetch(_0x48dcb5(0x4c7,']CDP')+_0x25b335(0x39b)+_0x25193b,_0x14046f);if(_0x2378b5['ok'])_0x451d54[_0x25b335(0x32f)](fetchBlockedDomains);}catch(_0x227791){_0x451d54[_0x48dcb5(0x4f4,'v$Fl')](alert,_0x25b335(0x432)+_0x25b335(0x3a7)+_0x25b335(0x375));}},window[_0x5504c8(0x244)+'er']=async _0x169399=>{const _0x58ce33=_0x5504c8,_0x79dfa1=_0x36df23;try{const _0x594101={};_0x594101[_0x79dfa1(0x3fd,'Q)YQ')]=_0x79dfa1(0x36a,'8a0x');const _0x139676=await _0x451d54[_0x79dfa1(0x4a2,'IL2e')](authFetch,'/api/admin'+_0x58ce33(0x4d0)+_0x169399,_0x594101);if(_0x139676['ok'])_0x451d54[_0x58ce33(0x32f)](fetchFilters);}catch(_0x338bb2){alert(_0x58ce33(0x454)+_0x79dfa1(0x539,'x9r(')+'r');}};const _0x769cd9=document['getElement'+_0x5504c8(0x4e2)](_0x5504c8(0x30a)+_0x5504c8(0x50c));_0x769cd9&&_0x769cd9[_0x5504c8(0x466)+_0x5504c8(0x311)](_0x451d54['LcIzL'],async()=>{const _0x2c313c=_0x36df23,_0x52ce63=_0x5504c8,_0x45548a=document['getElement'+_0x52ce63(0x4e2)](_0x451d54[_0x52ce63(0x354)]),_0x192e92=_0x45548a[_0x2c313c(0x383,'hAi@')][_0x52ce63(0x3d4)]();if(!_0x192e92)return;try{const _0x532596={};_0x532596[_0x2c313c(0x216,'u$!u')+'pe']='applicatio'+'n/json';const _0x1ec509={};_0x1ec509[_0x52ce63(0x2a2)]=_0x192e92,_0x1ec509[_0x52ce63(0x3bd)+'e']=_0x2c313c(0x2f0,'t2NM');const _0x16d167=await authFetch(_0x451d54[_0x2c313c(0x3ef,'JOnn')],{'method':_0x451d54[_0x2c313c(0x395,'u$!u')],'headers':_0x532596,'body':JSON[_0x52ce63(0x442)](_0x1ec509)});_0x16d167['ok']&&(_0x45548a[_0x52ce63(0x4dc)]='',fetchFilters());}catch(_0x30e560){_0x451d54[_0x2c313c(0x518,'IL2e')](alert,_0x451d54[_0x2c313c(0x44e,'6(6n')]);}});}
+// Admin Dashboard, Live Connections Monitor, Slowmode & Moderation
+import { getCurrentUser } from './auth.js';
+import { loadGames } from './games.js';
+import { checkStatusAndAnnouncements, checkUpdateLogs } from './app.js';
+import { loadPolls } from './polls.js';
+import { getSharedSocket } from './socket.js';
+
+let adminSocket = null;
+
+function authFetch(url, options = {}) {
+  const token = localStorage.getItem('nitro_jwt_token');
+  const headers = { ...(options.headers || {}) };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return fetch(url, { ...options, headers, credentials: 'same-origin' });
+}
+
+export function initAdmin() {
+  setupAdminTabs();
+  setupAdminActions();
+  setupMaintenanceToggle();
+  setupAnnouncementForm();
+  setupDomainBlockForm();
+  setupUpdateLogForm();
+  setupPollCreateForm();
+  setupSlowmodeControls();
+  setupAnnouncementDisableControls();
+  setupUpdateDisableControls();
+  setupBulkImporter();
+  setupCreateUserForm();
+  connectAdminSocket();
+}
+
+function setupCreateUserForm() {
+  const form = document.getElementById('admin-create-user-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('admin-new-username').value.trim();
+    const display_name = document.getElementById('admin-new-displayname').value.trim();
+    const password = document.getElementById('admin-new-password').value.trim();
+    const role = document.getElementById('admin-new-role').value;
+
+    if (!username || !password) return alert('Username and Password are required.');
+
+    try {
+      const res = await authFetch('/api/admin/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, display_name, password, role })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Account @${username} created successfully!`);
+        form.reset();
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to create user account.');
+      }
+    } catch (err) {
+      alert('Error creating user account.');
+    }
+  });
+}
+
+// Global Admin Kick Handler
+window.adminKickConnection = (socketId) => {
+  const user = getCurrentUser();
+  if (adminSocket && user) {
+    adminSocket.emit('admin_kick_connection', { targetSocketId: socketId, adminUser: user });
+    alert('⚡ Connection kick command sent!');
+    setTimeout(() => { fetchLiveConnections(); }, 500);
+  } else {
+    alert('Socket connection offline. Could not send kick command.');
+  }
+};
+
+window.adminFetchIpLogs = async () => {
+  const tbody = document.getElementById('admin-ip-logs-tbody');
+  if (!tbody) return;
+
+  try {
+    const res = await authFetch('/api/admin/ip-tracker');
+    if (!res.ok) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Error fetching IP tracker logs.</td></tr>';
+      return;
+    }
+    const data = await res.json();
+    const logs = data.logs || [];
+
+    if (logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No user IP traffic recorded yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = logs.map(l => `
+      <tr>
+        <td><code>${l.ip_address}</code> ${l.is_banned ? '<span class="chat-badge owner" style="background:#ef4444;color:#fff;">BANNED</span>' : ''}</td>
+        <td><strong>${l.username}</strong></td>
+        <td><span style="font-size:0.8rem; color:#94a3b8;">${(l.user_agent || '').slice(0, 40)}...</span></td>
+        <td><span style="color:#38bdf8;">${l.location_info || 'Unknown'}</span></td>
+        <td><span style="font-size:0.8rem; color:#94a3b8;">${new Date(l.created_at).toLocaleString()}</span></td>
+        <td>
+          ${l.is_banned 
+            ? `<button class="btn-small primary" onclick="window.adminUnbanIp('${l.ip_address}')">Unban IP</button>` 
+            : `<button class="btn-small danger" onclick="window.adminBanIp('${l.ip_address}')">Ban IP</button>`}
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;">Network error loading IP tracker.</td></tr>';
+  }
+};
+
+window.adminBanIp = async (ip) => {
+  const reason = prompt(`Enter ban reason for IP ${ip}:`, 'Violation of platform terms');
+  if (reason === null) return;
+
+  try {
+    const res = await authFetch('/api/admin/ip-tracker/ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip_address: ip, reason })
+    });
+    if (res.ok) {
+      alert(`🚫 IP ${ip} banned globally!`);
+      window.adminFetchIpLogs();
+    } else {
+      alert('Failed to ban IP.');
+    }
+  } catch (e) {
+    alert('Error banning IP address.');
+  }
+};
+
+window.adminUnbanIp = async (ip) => {
+  if (!confirm(`Unban IP address ${ip}?`)) return;
+
+  try {
+    const res = await authFetch('/api/admin/ip-tracker/unban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip_address: ip })
+    });
+    if (res.ok) {
+      alert(`✅ IP ${ip} unbanned!`);
+      window.adminFetchIpLogs();
+    } else {
+      alert('Failed to unban IP.');
+    }
+  } catch (e) {
+    alert('Error unbanning IP address.');
+  }
+};
+
+export function connectAdminSocket() {
+  adminSocket = getSharedSocket();
+  if (adminSocket) {
+    adminSocket.off('active_connections_update');
+    adminSocket.on('active_connections_update', ({ count, connections, slowmode }) => {
+      renderLiveConnections(count, connections);
+      const slowmodeSelect = document.getElementById('admin-slowmode-select');
+      if (slowmodeSelect && slowmode !== undefined) slowmodeSelect.value = slowmode.toString();
+    });
+
+    const user = getCurrentUser();
+    if (user && ['admin', 'owner', 'moderator'].includes(user.role)) {
+      adminSocket.emit('user_connected', { user, activity: 'In Admin Panel' });
+      adminSocket.emit('request_live_connections');
+    }
+  }
+}
+
+export async function fetchLiveConnections() {
+  try {
+    if (adminSocket) {
+      const user = getCurrentUser();
+      if (user && user.role === 'admin') {
+        adminSocket.emit('user_connected', { user, activity: 'In Admin Panel' });
+      }
+      adminSocket.emit('request_live_connections');
+    }
+
+    const res = await authFetch('/api/admin/connections');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    if (data && data.connections) {
+      renderLiveConnections(data.count, data.connections);
+    }
+  } catch (e) {
+    // Suppress network drops
+  }
+}
+
+export async function loadAdminData() {
+  const user = getCurrentUser();
+  if (!user || !['owner', 'admin'].includes(user.role)) return;
+
+  connectAdminSocket();
+
+  await Promise.allSettled([
+    fetchMaintenance(),
+    fetchStats(),
+    fetchUsers(),
+    fetchLiveConnections(),
+    fetchAdminGames(),
+    fetchBlockedDomains(),
+    fetchFilters(),
+    fetchLogs(),
+    fetchAdminWebhooks(),
+    fetchActivityRadar()
+  ]);
+}
+
+function renderLiveConnections(count, connections) {
+  const countEl = document.getElementById('admin-live-conn-count');
+  const tbody = document.getElementById('admin-connections-tbody');
+  if (countEl) countEl.textContent = `${count} Active`;
+  if (!tbody) return;
+
+  if (!connections || connections.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 18px;">No active connections</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = connections.map(c => `
+    <tr>
+      <td><code>${c.socketId ? c.socketId.slice(0, 8) : ''}...</code></td>
+      <td><strong>${c.username || 'Visitor'}</strong></td>
+      <td><span class="chat-badge ${c.role || 'member'}">${(c.role || 'member').toUpperCase()}</span></td>
+      <td><span style="color: #38bdf8;">${c.currentActivity || 'Active'}</span></td>
+      <td><span style="font-size: 0.8rem; color: #94a3b8;">${new Date(c.connectedAt || Date.now()).toLocaleTimeString()}</span></td>
+      <td>
+        <button class="btn-small danger" onclick="window.adminKickConnection('${c.socketId}')">Kick</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.ownerPurgeChat = async () => {
+  if (!confirm('🔥 Are you sure you want to PERMANENTLY PURGE all global chat history?')) return;
+  try {
+    const res = await authFetch('/api/admin/clear-chat', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok) {
+      alert('🗑️ Global chat history purged!');
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) chatMessages.innerHTML = '';
+    } else {
+      alert(data.error || 'Failed to clear chat.');
+    }
+  } catch (e) {
+    alert('Error purging chat.');
+  }
+};
+
+window.ownerSetSlowmode = (seconds) => {
+  const user = getCurrentUser();
+  if (adminSocket && user) {
+    adminSocket.emit('admin_set_slowmode', { seconds, adminUser: user });
+    alert(`⏳ Chat slowmode set to ${seconds}s.`);
+  } else {
+    alert('Failed to connect to socket to update slowmode.');
+  }
+};
+
+function setupSlowmodeControls() {
+  const select = document.getElementById('admin-slowmode-select');
+  const applyBtn = document.getElementById('admin-slowmode-apply-btn');
+
+  if (applyBtn && select) {
+    applyBtn.addEventListener('click', () => {
+      const seconds = parseInt(select.value, 10);
+      const user = getCurrentUser();
+      if (adminSocket && user) {
+        adminSocket.emit('admin_set_slowmode', { seconds, adminUser: user });
+        alert(`⏳ Chat slowmode set to ${seconds}s.`);
+      }
+    });
+  }
+}
+
+function setupPollCreateForm() {
+  const form = document.getElementById('admin-create-poll-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const question = document.getElementById('new-poll-question').value.trim();
+    const opt1 = document.getElementById('new-poll-opt-1').value.trim();
+    const opt2 = document.getElementById('new-poll-opt-2').value.trim();
+    const opt3 = document.getElementById('new-poll-opt-3').value.trim();
+    const opt4 = document.getElementById('new-poll-opt-4').value.trim();
+
+    const options = [opt1, opt2, opt3, opt4].filter(Boolean);
+    if (!question || options.length < 2) {
+      alert('Question and at least 2 options are required.');
+      return;
+    }
+
+    try {
+      const res = await authFetch('/api/polls/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, options })
+      });
+      if (!res.ok) {
+        alert('Failed to create poll.');
+        return;
+      }
+      const data = await res.json();
+      alert('📊 New Community Poll published!');
+      form.reset();
+      if (window.loadPolls) window.loadPolls();
+    } catch (err) {
+      alert('Error creating poll.');
+    }
+  });
+}
+
+async function fetchAdminWebhooks() {
+  try {
+    const res = await authFetch('/api/admin/webhooks');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    if (data.webhooks) {
+      ['moderation', 'logins', 'gateway', 'suggestions', 'bugs', 'updates'].forEach(cat => {
+        const input = document.getElementById(`webhook-input-${cat}`);
+        if (input && data.webhooks[cat]) {
+          input.value = data.webhooks[cat];
+        }
+      });
+    }
+  } catch (e) {
+    // Suppress network errors
+  }
+}
+
+function setupUpdateLogForm() {
+  const form = document.getElementById('admin-update-log-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const version = document.getElementById('new-update-version').value.trim();
+    const title = document.getElementById('new-update-title').value.trim();
+    const content = document.getElementById('new-update-content').value.trim();
+
+    if (!version || !title || !content) return;
+
+    try {
+      const res = await authFetch('/api/admin/updates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version, title, content })
+      });
+      if (!res.ok) {
+        alert('Failed to publish update.');
+        return;
+      }
+      const data = await res.json();
+      alert(`🚀 Update [${version}] broadcasted to all users and dispatched to Discord!`);
+      form.reset();
+      if (window.checkUpdateLogs) window.checkUpdateLogs(true);
+    } catch (err) {
+      alert('Error publishing update log.');
+    }
+  });
+}
+
+function setupUpdateDisableControls() {
+  const disableBtn = document.getElementById('admin-disable-updates-btn');
+  if (disableBtn) {
+    disableBtn.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to disable and clear all update popups for all users?')) return;
+      try {
+        const res = await authFetch('/api/admin/updates/disable', { method: 'POST' });
+        if (res.ok) {
+          alert('🚫 All update popups cleared and disabled.');
+          const popup = document.getElementById('update-log-popup');
+          if (popup) popup.style.display = 'none';
+        }
+      } catch (e) {
+        alert('Error disabling updates.');
+      }
+    });
+  }
+}
+
+async function fetchMaintenance() {
+  try {
+    const res = await authFetch('/api/admin/maintenance');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    const toggle = document.getElementById('admin-maintenance-switch');
+    const statusText = document.getElementById('admin-maintenance-status');
+    if (toggle) toggle.checked = data.maintenance_mode;
+    if (statusText) {
+      statusText.textContent = data.maintenance_mode ? 'ENABLED (Visitors Locked Out)' : 'OFF (Live to Public)';
+      statusText.style.color = data.maintenance_mode ? '#ef4444' : '#10b981';
+    }
+  } catch (e) {
+    // Suppress network errors
+  }
+}
+
+function setupMaintenanceToggle() {
+  const toggle = document.getElementById('admin-maintenance-switch');
+  if (!toggle) return;
+
+  toggle.addEventListener('change', async (e) => {
+    const user = getCurrentUser();
+    if (!user || user.role !== 'owner') {
+      alert('🔒 Toggling platform maintenance mode is restricted to Supreme Owner rank (👑 OWNER ONLY).');
+      toggle.checked = !e.target.checked;
+      return;
+    }
+
+    const enabled = e.target.checked;
+    try {
+      const res = await authFetch('/api/admin/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const statusText = document.getElementById('admin-maintenance-status');
+      if (statusText) {
+        statusText.textContent = data.maintenance_mode ? 'ENABLED (Visitors & Admins Locked Out)' : 'OFF (Live to Public)';
+        statusText.style.color = data.maintenance_mode ? '#ef4444' : '#10b981';
+      }
+      // Show custom maintenance message to users
+      const overlay = document.getElementById('maintenance-overlay');
+      if (overlay) {
+        if (data.maintenance_mode) {
+          const msg = prompt('Enter maintenance message to display to visitors:', '');
+          const reason = prompt('Enter reason for maintenance (optional):', '');
+          const p = overlay.querySelector('p');
+          if (p) {
+            let combined = '';
+            if (msg) combined += msg;
+            if (reason) combined += (msg ? '<br>' : '') + 'Reason: ' + reason;
+            p.innerHTML = combined || p.innerHTML;
+          }
+          overlay.style.display = 'flex';
+        } else {
+          overlay.style.display = 'none';
+        }
+      }
+
+      if (adminSocket && user) {
+        adminSocket.emit('admin_toggle_maintenance', { enabled: data.maintenance_mode, adminUser: user });
+      }
+
+      checkStatusAndAnnouncements();
+    } catch (err) {
+      alert('Error updating maintenance mode.');
+    }
+  });
+}
+
+function setupAnnouncementForm() {
+  const form = document.getElementById('admin-announcement-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('ann-title').value;
+    const message = document.getElementById('ann-message').value;
+    const alert_type = document.getElementById('ann-type').value;
+    const is_active = document.getElementById('ann-active').checked;
+
+    try {
+      const res = await authFetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, message, alert_type, is_active })
+      });
+      if (res.ok) {
+        alert('📢 Global announcement published!');
+        form.reset();
+        checkStatusAndAnnouncements();
+      }
+    } catch (e) {
+      alert('Error saving announcement');
+    }
+  });
+}
+
+function setupAnnouncementDisableControls() {
+  const disableBtn = document.getElementById('admin-disable-ann-btn');
+  if (disableBtn) {
+    disableBtn.addEventListener('click', async () => {
+      try {
+        const res = await authFetch('/api/admin/announcements/disable', { method: 'POST' });
+        if (res.ok) {
+          alert('🚫 All site announcements disabled and cleared.');
+          checkStatusAndAnnouncements();
+        }
+      } catch (e) {
+        alert('Error disabling announcements.');
+      }
+    });
+  }
+}
+
+async function fetchBlockedDomains() {
+  try {
+    const res = await authFetch('/api/admin/domains');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    const tbody = document.getElementById('admin-domains-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = (data.domains || []).map(d => `
+      <tr>
+        <td><code>${d.domain}</code></td>
+        <td>${d.reason}</td>
+        <td>
+          <button class="btn-small danger" onclick="window.deleteDomain(${d.id})">Unblock</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    // Suppress
+  }
+}
+
+window.toggleFeatureControl = async (featureKey, enabled) => {
+  const user = getCurrentUser();
+  if (!user || (user.role !== 'owner' && user.username.toLowerCase() !== 'jordandaniels')) {
+    return alert('👑 Owner privileges required to toggle platform features.');
+  }
+
+  try {
+    const res = await authFetch('/api/admin/features', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: featureKey, enabled })
+    });
+    if (res.ok) {
+      alert(`⚡ Feature [${featureKey}] ${enabled ? 'ENABLED' : 'DISABLED'} successfully!`);
+      checkStatusAndAnnouncements();
+    } else {
+      alert('Failed to update feature state.');
+    }
+  } catch (e) {
+    alert('Error toggling feature state.');
+  }
+};
+
+function setupDomainBlockForm() {
+  const addBtn = document.getElementById('add-domain-btn');
+  if (!addBtn) return;
+
+  addBtn.addEventListener('click', async () => {
+    const domainInput = document.getElementById('new-blocked-domain');
+    const reasonInput = document.getElementById('new-domain-reason');
+    const domain = domainInput.value.trim();
+    const reason = reasonInput.value.trim() || 'Standard Filter Block';
+
+    if (!domain) return;
+
+    try {
+      const res = await authFetch('/api/admin/domains/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain, reason })
+      });
+      if (res.ok) {
+        domainInput.value = '';
+        reasonInput.value = '';
+        fetchBlockedDomains();
+      }
+    } catch (e) {
+      alert('Error blocking domain');
+    }
+  });
+}
+
+async function fetchStats() {
+  try {
+    const res = await authFetch('/api/admin/stats');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    if (data.stats) {
+      document.getElementById('stat-users').textContent = data.stats.totalUsers;
+      document.getElementById('stat-games').textContent = data.stats.totalGames;
+      document.getElementById('stat-vips').textContent = data.stats.vipUsers;
+      document.getElementById('stat-chats').textContent = data.stats.totalChats;
+    }
+  } catch (err) {
+    // Suppress
+  }
+}
+
+export async function fetchUsers() {
+  try {
+    const res = await authFetch('/api/admin/users');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    const tbody = document.getElementById('admin-users-tbody');
+    if (!tbody) return;
+
+    if (!data.users || data.users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No users found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.users.map(u => {
+      let statusHtml = '<span style="color:#10b981; font-weight:700;">ACTIVE</span>';
+      if (u.is_banned) {
+        statusHtml = '<span style="color:#ef4444; font-weight:700;">⛔ BANNED</span>';
+      } else if (u.is_gateway_banned) {
+        statusHtml = '<span style="color:#f59e0b; font-weight:700;">🌐 GATEWAY RESTRICTED</span>';
+      } else if (u.muted_until && new Date(u.muted_until) > new Date()) {
+        statusHtml = `<span style="color:#a855f7; font-weight:700;">MUTED (Until ${new Date(u.muted_until).toLocaleTimeString()})</span>`;
+      } else if (u.gateway_timeout_until && new Date(u.gateway_timeout_until) > new Date()) {
+        statusHtml = '<span style="color:#f59e0b; font-weight:700;">GATEWAY TIMEOUT</span>';
+      }
+
+      if (u.force_password_reset) {
+        statusHtml += ' <span style="color:#38bdf8; font-size:0.75rem; display:block;">(Force Reset Pending)</span>';
+      }
+
+      const displayName = u.display_name && u.display_name !== u.username ? `<span style="color:#38bdf8; font-size:0.82rem;">(${u.display_name})</span>` : '';
+
+      return `
+        <tr>
+          <td>#${u.id}</td>
+          <td>
+            <strong>${u.username}</strong> ${displayName}
+            ${u.gateway_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block;">(Strikes: ${u.gateway_violations_count}/3)</span>` : ''}
+          </td>
+          <td>
+            <select class="custom-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 4px 8px; font-size: 0.8rem; font-weight: 800; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; cursor: pointer;">
+              <option value="member" ${u.role === 'member' ? 'selected' : ''}>👤 Student (Member)</option>
+              <option value="student_plus" ${u.role === 'student_plus' ? 'selected' : ''}>🎓 Student Plus</option>
+              <option value="pro" ${u.role === 'pro' ? 'selected' : ''}>⚡ PRO Member</option>
+              <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ VIP Member</option>
+              <option value="premium_vip" ${u.role === 'premium_vip' ? 'selected' : ''}>🌟 Premium VIP</option>
+              <option value="elite_patron" ${u.role === 'elite_patron' ? 'selected' : ''}>💎 Elite Patron</option>
+              <option value="moderator" ${u.role === 'moderator' ? 'selected' : ''}>⚔️ Moderator</option>
+              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>🛡️ Administrator</option>
+              <option value="owner" ${u.role === 'owner' ? 'selected' : ''}>👑 Owner / Creator</option>
+            </select>
+          </td>
+          <td>${statusHtml}</td>
+          <td>
+            <div class="action-btn-group" style="display: flex; flex-wrap: wrap; gap: 4px;">
+              <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
+              <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
+              <button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')">🔇 Mute</button>
+              <button class="btn-small" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="window.resetUserPassword(${u.id}, '${u.username}')">🔑 Pass</button>
+              <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
+              ${u.is_banned ? 
+                `<button class="btn-small unban" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
+                `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
+              }
+              ${u.is_gateway_banned ? 
+                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;" onclick="window.setGatewayBan(${u.id}, false)">🔓 Ungateway</button>` : 
+                `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b;" onclick="window.setGatewayBan(${u.id}, true)">🌐 Gateway Ban</button>`
+              }
+              ${u.role !== 'admin' || u.username.toLowerCase() !== 'jordandaniels' ?
+                `<button class="btn-small danger" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
+              }
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('fetchUsers error:', err);
+  }
+}
+
+let allAdminGamesList = [];
+
+async function fetchAdminGames() {
+  try {
+    const res = await authFetch('/api/games');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    allAdminGamesList = data.games || [];
+    window.adminRenderGames(allAdminGamesList);
+  } catch (err) {
+    console.error('fetchAdminGames error:', err);
+  }
+}
+
+window.adminFilterGames = () => {
+  const query = (document.getElementById('admin-game-search')?.value || '').toLowerCase().trim();
+  const category = document.getElementById('admin-game-category-select')?.value || 'ALL';
+
+  const filtered = allAdminGamesList.filter(g => {
+    const matchesSearch = !query || (g.title || '').toLowerCase().includes(query) || (g.author || '').toLowerCase().includes(query) || (g.category || '').toLowerCase().includes(query);
+    const matchesCategory = category === 'ALL' || (g.category || '').toLowerCase() === category.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
+
+  window.adminRenderGames(filtered);
+};
+
+window.adminSetGameView = (mode) => {
+  const gridView = document.getElementById('admin-games-grid-view');
+  const tableView = document.getElementById('admin-games-table-view');
+  const gridBtn = document.getElementById('admin-game-view-grid-btn');
+  const tableBtn = document.getElementById('admin-game-view-table-btn');
+
+  if (mode === 'grid') {
+    if (gridView) gridView.style.display = 'grid';
+    if (tableView) tableView.style.display = 'none';
+    if (gridBtn) { gridBtn.style.background = 'var(--accent-gradient)'; gridBtn.style.color = '#fff'; }
+    if (tableBtn) { tableBtn.style.background = '#141724'; tableBtn.style.color = 'var(--text-muted)'; }
+  } else {
+    if (gridView) gridView.style.display = 'none';
+    if (tableView) tableView.style.display = 'block';
+    if (gridBtn) { gridBtn.style.background = '#141724'; gridBtn.style.color = 'var(--text-muted)'; }
+    if (tableBtn) { tableBtn.style.background = 'var(--accent-gradient)'; tableBtn.style.color = '#fff'; }
+  }
+};
+
+window.adminRenderGames = (games) => {
+  const gridView = document.getElementById('admin-games-grid-view');
+  const tbody = document.getElementById('admin-games-tbody');
+
+  if (gridView) {
+    if (!games.length) {
+      gridView.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 30px;">No games match your search criteria.</div>`;
+    } else {
+      gridView.innerHTML = games.map(g => {
+        const thumb = g.thumbnail_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400';
+        return `
+          <div style="background: rgba(20,23,36,0.8); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s ease, border-color 0.2s ease;">
+            <div style="position: relative; width: 100%; height: 130px; background: #000; overflow: hidden;">
+              <img src="${thumb}" alt="${g.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'">
+              <span style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.75); border: 1px solid var(--card-border); color: #38bdf8; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 12px;">${g.category || 'Action'}</span>
+            </div>
+            <div style="padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
+              <div>
+                <strong style="font-size: 0.95rem; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${g.title}">${g.title}</strong>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">By ${g.author || 'Studio'} • 🔥 ${g.clicks || 0} plays</span>
+              </div>
+              <div style="display: flex; gap: 6px; margin-top: 4px;">
+                <button class="btn-small" style="flex: 1; background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 700;" onclick="window.adminEditGame(${g.id})">✏️ Edit</button>
+                <button class="btn-small danger" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444; font-weight: 700;" onclick="window.deleteGame(${g.id})">🗑️ Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (tbody) {
+    if (!games.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No games found</td></tr>`;
+    } else {
+      tbody.innerHTML = games.map(g => {
+        const thumb = g.thumbnail_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400';
+        return `
+          <tr>
+            <td style="width: 48px;">
+              <img src="${thumb}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'">
+            </td>
+            <td>
+              <strong>${g.title}</strong>
+              <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">By ${g.author || 'Studio'}</span>
+            </td>
+            <td><span class="chat-badge">${g.category || 'Action'}</span></td>
+            <td><code>${g.embed_type || 'iframe_url'}</code></td>
+            <td>🔥 ${g.clicks || 0}</td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-small" style="background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.adminEditGame(${g.id})">✏️ Edit</button>
+                <button class="btn-small danger" onclick="window.deleteGame(${g.id})">🗑️ Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+};
+
+window.adminOpenAddGameModal = () => {
+  const modal = document.getElementById('admin-edit-game-modal');
+  const titleHeader = document.getElementById('admin-game-modal-title');
+  const idInput = document.getElementById('admin-edit-game-id');
+  const titleInput = document.getElementById('admin-edit-game-title');
+  const catSelect = document.getElementById('admin-edit-game-category');
+  const thumbInput = document.getElementById('admin-edit-game-thumbnail');
+  const previewImg = document.getElementById('admin-edit-game-preview-img');
+  const authorInput = document.getElementById('admin-edit-game-author');
+  const typeSelect = document.getElementById('admin-edit-game-embed-type');
+  const contentInput = document.getElementById('admin-edit-game-embed-content');
+  const clicksInput = document.getElementById('admin-edit-game-clicks');
+
+  if (!modal) return;
+  if (titleHeader) titleHeader.textContent = '➕ Add New Game to Catalog';
+  if (idInput) idInput.value = '';
+  if (titleInput) titleInput.value = '';
+  if (catSelect) catSelect.value = 'Action';
+  if (thumbInput) thumbInput.value = '';
+  if (previewImg) previewImg.src = 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400';
+  if (authorInput) authorInput.value = '';
+  if (typeSelect) typeSelect.value = 'iframe_url';
+  if (contentInput) contentInput.value = '';
+  if (clicksInput) clicksInput.value = '0';
+
+  modal.classList.add('active');
+};
+
+window.adminEditGame = (gameId) => {
+  const game = allAdminGamesList.find(g => g.id == gameId);
+  if (!game) return;
+
+  const modal = document.getElementById('admin-edit-game-modal');
+  const titleHeader = document.getElementById('admin-game-modal-title');
+  const idInput = document.getElementById('admin-edit-game-id');
+  const titleInput = document.getElementById('admin-edit-game-title');
+  const catSelect = document.getElementById('admin-edit-game-category');
+  const thumbInput = document.getElementById('admin-edit-game-thumbnail');
+  const previewImg = document.getElementById('admin-edit-game-preview-img');
+  const authorInput = document.getElementById('admin-edit-game-author');
+  const typeSelect = document.getElementById('admin-edit-game-embed-type');
+  const contentInput = document.getElementById('admin-edit-game-embed-content');
+  const clicksInput = document.getElementById('admin-edit-game-clicks');
+
+  if (!modal) return;
+  if (titleHeader) titleHeader.textContent = `✏️ Edit Game #${game.id}: ${game.title}`;
+  if (idInput) idInput.value = game.id;
+  if (titleInput) titleInput.value = game.title || '';
+  if (catSelect) catSelect.value = game.category || 'Action';
+  if (thumbInput) thumbInput.value = game.thumbnail_url || '';
+  if (previewImg) previewImg.src = game.thumbnail_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400';
+  if (authorInput) authorInput.value = game.author || '';
+  if (typeSelect) typeSelect.value = game.embed_type || 'iframe_url';
+  if (contentInput) contentInput.value = game.embed_content || '';
+  if (clicksInput) clicksInput.value = game.clicks || 0;
+
+  modal.classList.add('active');
+};
+
+async function fetchFilters() {
+  try {
+    const res = await authFetch('/api/admin/filters');
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    const tbody = document.getElementById('admin-filters-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = (data.filters || []).map(f => `
+      <tr>
+        <td><code>${f.word}</code></td>
+        <td><span class="chat-badge">${f.filter_type}</span></td>
+        <td>
+          <button class="btn-small danger" onclick="window.deleteFilter(${f.id})">Remove</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    // Suppress
+  }
+}
+
+async function fetchLogs() {
+  try {
+    const userFilter = document.getElementById('admin-log-search-user')?.value || '';
+    const actionFilter = document.getElementById('admin-log-search-action')?.value || '';
+    const params = new URLSearchParams();
+    if (userFilter.trim()) params.append('username', userFilter.trim());
+    if (actionFilter.trim()) params.append('action', actionFilter.trim());
+
+    const res = await authFetch(`/api/admin/logs?${params.toString()}`);
+    if (!res.ok) return;
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) return;
+
+    const data = await res.json();
+    const tbody = document.getElementById('admin-logs-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = (data.logs || []).map(l => `
+      <tr>
+        <td><strong>${l.action}</strong></td>
+        <td>${l.admin_username}</td>
+        <td>${l.target}</td>
+        <td>${new Date(l.created_at).toLocaleString()}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    // Suppress
+  }
+}
+
+export async function fetchActivityRadar() {
+  const container = document.getElementById('admin-radar-content');
+  if (!container) return;
+
+  try {
+    const res = await authFetch('/api/admin/radar-stats');
+    if (!res.ok) return;
+    const data = await res.json();
+    const radar = data.radar || {};
+
+    const topGamesHtml = (radar.topGames || []).map(g => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem;">
+        <span>🎮 ${g.title} (${g.category})</span>
+        <strong style="color:#38bdf8;">${g.clicks} clicks</strong>
+      </div>
+    `).join('') || '<div style="color:#94a3b8;">No traffic recorded yet</div>';
+
+    const actionsHtml = (radar.actionsDistribution || []).map(a => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem;">
+        <span>⚡ ${a.action}</span>
+        <strong style="color:#10b981;">${a.count} events</strong>
+      </div>
+    `).join('') || '<div style="color:#94a3b8;">No moderation events</div>';
+
+    const rolesHtml = (radar.userRolesDistribution || []).map(r => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem;">
+        <span>👤 Role: ${(r.role || 'member').toUpperCase()}</span>
+        <strong style="color:#f59e0b;">${r.count} users</strong>
+      </div>
+    `).join('');
+
+    container.innerHTML = `
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+        <div class="admin-stat-card" style="text-align:left;">
+          <h4 style="color:#38bdf8; margin:0 0 12px;">🔥 Top Played Games</h4>
+          ${topGamesHtml}
+        </div>
+        <div class="admin-stat-card" style="text-align:left;">
+          <h4 style="color:#10b981; margin:0 0 12px;">🛡️ Moderation Activity</h4>
+          ${actionsHtml}
+        </div>
+        <div class="admin-stat-card" style="text-align:left;">
+          <h4 style="color:#f59e0b; margin:0 0 12px;">👥 User Demographics</h4>
+          ${rolesHtml}
+          <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:8px;">
+            <span>Total Site Visits: </span><strong style="color:#38bdf8;">${radar.totalVisits || 0}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    container.innerHTML = '<div style="color:#ef4444;">Error fetching radar stats</div>';
+  }
+}
+
+function setupBulkImporter() {
+  const fileInput = document.getElementById('admin-bulk-file-input');
+  const importBtn = document.getElementById('admin-bulk-import-btn');
+  const jsonTextArea = document.getElementById('admin-bulk-json-input');
+
+  if (importBtn) {
+    importBtn.addEventListener('click', async () => {
+      let gamesArray = [];
+      const textVal = jsonTextArea ? jsonTextArea.value.trim() : '';
+
+      if (textVal) {
+        try {
+          gamesArray = JSON.parse(textVal);
+        } catch (e) {
+          return alert('Invalid JSON in text area. Please provide valid JSON array of game objects.');
+        }
+      } else if (fileInput && fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const content = await file.text();
+        try {
+          if (file.name.endsWith('.json')) {
+            gamesArray = JSON.parse(content);
+          } else {
+            // Simple CSV parsing: title,author,category,embed_type,embed_content,thumbnail_url
+            const lines = content.split('\n').filter(l => l.trim());
+            gamesArray = lines.slice(1).map(l => {
+              const parts = l.split(',');
+              return {
+                title: parts[0]?.trim(),
+                author: parts[1]?.trim() || 'Catalog',
+                category: parts[2]?.trim() || 'Arcade',
+                embed_type: parts[3]?.trim() || 'iframe_url',
+                embed_content: parts[4]?.trim() || '',
+                thumbnail_url: parts[5]?.trim() || ''
+              };
+            });
+          }
+        } catch (err) {
+          return alert('Error parsing uploaded file.');
+        }
+      } else {
+        return alert('Please select a JSON/CSV file or paste JSON games array.');
+      }
+
+      if (!Array.isArray(gamesArray) || gamesArray.length === 0) {
+        return alert('No games found in upload payload.');
+      }
+
+      try {
+        const res = await authFetch('/api/admin/games/bulk-import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ games: gamesArray })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`🎉 ${data.message}`);
+          if (jsonTextArea) jsonTextArea.value = '';
+          if (fileInput) fileInput.value = '';
+          fetchGames();
+        } else {
+          alert(data.error || 'Bulk import failed.');
+        }
+      } catch (e) {
+        alert('Network error during bulk import.');
+      }
+    });
+  }
+}
+
+function setupAdminTabs() {
+  const tabs = document.querySelectorAll('.admin-tab-btn');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      const targetTab = btn.dataset.tab;
+      document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+      const targetContent = document.getElementById(`tab-${targetTab}`);
+      if (targetContent) targetContent.style.display = 'block';
+
+      if (targetTab === 'connections') fetchLiveConnections();
+      if (targetTab === 'users') fetchUsers();
+      if (targetTab === 'games') fetchAdminGames();
+      if (targetTab === 'domains') fetchBlockedDomains();
+      if (targetTab === 'filters') fetchFilters();
+      if (targetTab === 'suggestions') window.adminFetchSuggestions();
+      if (targetTab === 'logs') fetchLogs();
+      if (targetTab === 'webhooks') fetchAdminWebhooks();
+      if (targetTab === 'radar') fetchActivityRadar();
+    });
+  });
+
+  const logUserSearch = document.getElementById('admin-log-search-user');
+  const logActionSearch = document.getElementById('admin-log-search-action');
+  if (logUserSearch) logUserSearch.addEventListener('input', () => fetchLogs());
+  if (logActionSearch) logActionSearch.addEventListener('change', () => fetchLogs());
+}
+
+function setupAdminActions() {
+  window.adminKickConnection = (socketId) => {
+    const user = getCurrentUser();
+    if (adminSocket && user) {
+      adminSocket.emit('admin_kick_connection', { targetSocketId: socketId, adminUser: user });
+    }
+  };
+
+  window.adminMutePrompt = (userId, username) => {
+    const duration = prompt(`Mute ${username} for how many minutes? (e.g. 5, 15, 60):`, '15');
+    if (!duration) return;
+    const mins = parseInt(duration, 10);
+    if (isNaN(mins) || mins <= 0) return alert('Invalid duration');
+
+    const user = getCurrentUser();
+    if (adminSocket && user) {
+      adminSocket.emit('admin_mute_user', { targetUserId: userId, durationMinutes: mins, adminUser: user });
+      alert(`🔇 ${username} muted for ${mins} minutes.`);
+      setTimeout(fetchUsers, 500);
+    }
+  };
+
+  window.saveWebhook = async (category) => {
+    const user = getCurrentUser();
+    if (!user || user.role !== 'owner') {
+      alert('🔒 Discord Multi-Webhook configuration is restricted to Supreme Owner rank (👑 OWNER ONLY).');
+      return;
+    }
+
+    const input = document.getElementById(`webhook-input-${category}`);
+    if (!input) return;
+    const url = input.value.trim();
+
+    try {
+      const res = await authFetch('/api/admin/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, url })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`✅ Webhook URL for ${category.toUpperCase()} saved!`);
+      } else {
+        alert(data.error || 'Failed to save webhook.');
+      }
+    } catch (e) {
+      alert('Error saving webhook.');
+    }
+  };
+
+  window.setRole = async (userId, role) => {
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      if (res.ok) {
+        fetchUsers();
+        fetchStats();
+      }
+    } catch (e) {
+      alert('Error updating user role');
+    }
+  };
+
+  window.resetUserPassword = async (userId, username) => {
+    const newPass = prompt(`Enter new password for ${username}:`);
+    if (!newPass) return;
+
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_password: newPass })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'Password successfully updated!');
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to update password');
+      }
+    } catch (e) {
+      alert('Error updating password');
+    }
+  };
+
+  window.forceResetPassword = async (userId, username) => {
+    if (!confirm(`Require ${username} to reset their password on next sign-in?`)) return;
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/force-reset`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Forced password reset set for ${username}.`);
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to set force password reset.');
+      }
+    } catch (e) {
+      alert('Error setting force password reset.');
+    }
+  };
+
+  window.ungatewayBanUser = async (userId, username) => {
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/ungateway-ban`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Gateway ban lifted for ${username}.`);
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to lift gateway ban.');
+      }
+    } catch (e) {
+      alert('Error lifting gateway ban.');
+    }
+  };
+
+  window.deleteUser = async (userId, username) => {
+    if (!confirm(`Are you sure you want to PERMANENTLY delete user "${username}" (ID: #${userId})? This cannot be undone.`)) return;
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `User ${username} deleted.`);
+        fetchUsers();
+        fetchStats();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to delete user.');
+      }
+    } catch (e) {
+      alert('Error deleting user.');
+    }
+  };
+
+  window.setBan = async (userId, isBanned) => {
+    let reason = '';
+    let durationHours = 0;
+
+    if (isBanned) {
+      reason = prompt('Enter reason for account ban:', 'Violation of platform rules');
+      if (reason === null) return;
+
+      const durChoice = prompt(
+        'Select Ban Duration (enter hours):\n\n' +
+        '• 1 = 1 Hour\n' +
+        '• 12 = 12 Hours\n' +
+        '• 24 = 24 Hours (1 Day)\n' +
+        '• 72 = 3 Days\n' +
+        '• 168 = 7 Days (1 Week)\n' +
+        '• 720 = 30 Days (1 Month)\n' +
+        '• 0 = Permanent Ban\n\n' +
+        'Enter hours (or 0 for Permanent):',
+        '24'
+      );
+      if (durChoice === null) return;
+      durationHours = parseInt(durChoice, 10) || 0;
+    }
+
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/ban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_banned: isBanned, reason, durationHours })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const timeMsg = data.bannedUntil ? ` (banned until ${new Date(data.bannedUntil).toLocaleString()})` : '';
+        alert(isBanned ? `⛔ User account banned${timeMsg}!` : '🔓 User account unbanned.');
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to update ban status');
+      }
+    } catch (e) {
+      alert('Error updating ban status');
+    }
+  };
+
+  window.setGatewayBan = async (userId, isGatewayBanned) => {
+    let reason = '';
+    let durationHours = 0;
+
+    if (isGatewayBanned) {
+      reason = prompt('Enter reason for gateway ban:', 'Gateway access revoked');
+      if (reason === null) return;
+
+      const durChoice = prompt(
+        'Select Gateway Ban Duration (enter hours):\n\n' +
+        '• 1 = 1 Hour\n' +
+        '• 12 = 12 Hours\n' +
+        '• 24 = 24 Hours (1 Day)\n' +
+        '• 72 = 3 Days\n' +
+        '• 168 = 7 Days (1 Week)\n' +
+        '• 720 = 30 Days (1 Month)\n' +
+        '• 0 = Permanent Gateway Ban\n\n' +
+        'Enter hours (or 0 for Permanent):',
+        '24'
+      );
+      if (durChoice === null) return;
+      durationHours = parseInt(durChoice, 10) || 0;
+    }
+
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/gateway-ban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_gateway_banned: isGatewayBanned, reason, durationHours })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const timeMsg = data.timeoutUntil ? ` (gateway restricted until ${new Date(data.timeoutUntil).toLocaleString()})` : '';
+        alert(isGatewayBanned ? `🌐 User gateway access restricted${timeMsg}!` : '🔓 User gateway access restored.');
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to update gateway ban status');
+      }
+    } catch (e) {
+      alert('Error updating gateway ban status');
+    }
+  };
+
+  window.deleteGame = async (gameId) => {
+    if (!confirm('Are you sure you want to permanently delete this game?')) return;
+    try {
+      const res = await authFetch(`/api/admin/games/${gameId}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchAdminGames();
+        fetchStats();
+        loadGames();
+      }
+    } catch (e) {
+      alert('Error deleting game');
+    }
+  };
+
+  window.deleteDomain = async (domainId) => {
+    try {
+      const res = await authFetch(`/api/admin/domains/${domainId}`, { method: 'DELETE' });
+      if (res.ok) fetchBlockedDomains();
+    } catch (e) {
+      alert('Error unblocking domain');
+    }
+  };
+
+  window.deleteFilter = async (filterId) => {
+    try {
+      const res = await authFetch(`/api/admin/filters/${filterId}`, { method: 'DELETE' });
+      if (res.ok) fetchFilters();
+    } catch (e) {
+      alert('Error deleting filter');
+    }
+  };
+
+  window.viewUserPassword = (username, plainPassword) => {
+    alert(`🔑 Account Password for ${username}:\n\n${plainPassword || '[No password set or encrypted]'}`);
+  };
+
+  window.adminConfigProfile = (userId, user) => {
+    const modal = document.getElementById('admin-user-profile-modal');
+    if (!modal) return;
+
+    document.getElementById('admin-edit-user-id').value = userId;
+    document.getElementById('admin-edit-target-username').textContent = user.username;
+    document.getElementById('admin-edit-user-role').value = user.role || 'member';
+    document.getElementById('admin-edit-user-display-name').value = user.display_name || user.username;
+    document.getElementById('admin-edit-user-avatar-url').value = user.avatar_url || '';
+    document.getElementById('admin-edit-user-bio').value = user.bio || '';
+    document.getElementById('admin-edit-user-glow').value = user.pro_chat_glow || 'gold';
+    document.getElementById('admin-edit-user-flair').value = user.pro_custom_flair || '';
+    document.getElementById('admin-edit-user-new-password').value = '';
+
+    modal.classList.add('active');
+  };
+
+  const adminProfileModalClose = document.getElementById('admin-user-profile-modal-close');
+  if (adminProfileModalClose) {
+    adminProfileModalClose.addEventListener('click', () => {
+      document.getElementById('admin-user-profile-modal')?.classList.remove('active');
+    });
+  }
+
+  const adminProfileForm = document.getElementById('admin-user-profile-form');
+  if (adminProfileForm) {
+    adminProfileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('admin-edit-user-id').value;
+      const targetUsername = document.getElementById('admin-edit-target-username').textContent;
+      const role = document.getElementById('admin-edit-user-role').value;
+      const display_name = document.getElementById('admin-edit-user-display-name').value.trim();
+      const avatar_url = document.getElementById('admin-edit-user-avatar-url').value.trim();
+      const bio = document.getElementById('admin-edit-user-bio').value.trim();
+      const pro_chat_glow = document.getElementById('admin-edit-user-glow').value;
+      const pro_custom_flair = document.getElementById('admin-edit-user-flair').value.trim();
+      const new_password = document.getElementById('admin-edit-user-new-password').value;
+
+      try {
+        const res = await authFetch(`/api/admin/users/${userId}/profile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            role,
+            display_name,
+            avatar_url,
+            bio,
+            pro_chat_glow,
+            pro_custom_flair,
+            new_password
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`✅ Profile for ${targetUsername} configured successfully!`);
+          document.getElementById('admin-user-profile-modal')?.classList.remove('active');
+          fetchUsers();
+          fetchLogs();
+        } else {
+          alert(data.error || 'Failed to update user profile');
+        }
+      } catch (err) {
+        alert('Network error updating user profile');
+      }
+    });
+  }
+
+  const addFilterBtn = document.getElementById('add-filter-btn');
+  if (addFilterBtn) {
+    addFilterBtn.addEventListener('click', async () => {
+      const wordInput = document.getElementById('new-filter-word');
+      const word = wordInput.value.trim();
+      if (!word) return;
+
+      try {
+        const res = await authFetch('/api/admin/filters/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word, filter_type: 'both' })
+        });
+        if (res.ok) {
+          wordInput.value = '';
+          fetchFilters();
+        }
+      } catch (e) {
+        alert('Error adding filter rule');
+      }
+    });
+  }
+
+  const editGameModalClose = document.getElementById('admin-edit-game-modal-close');
+  if (editGameModalClose) {
+    editGameModalClose.addEventListener('click', () => {
+      document.getElementById('admin-edit-game-modal')?.classList.remove('active');
+    });
+  }
+
+  const editGameForm = document.getElementById('admin-edit-game-form');
+  if (editGameForm) {
+    editGameForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const gameId = document.getElementById('admin-edit-game-id')?.value;
+      const title = document.getElementById('admin-edit-game-title')?.value;
+      const category = document.getElementById('admin-edit-game-category')?.value;
+      const thumbnail_url = document.getElementById('admin-edit-game-thumbnail')?.value;
+      const author = document.getElementById('admin-edit-game-author')?.value;
+      const embed_type = document.getElementById('admin-edit-game-embed-type')?.value;
+      const embed_content = document.getElementById('admin-edit-game-embed-content')?.value;
+      const clicks = document.getElementById('admin-edit-game-clicks')?.value;
+
+      try {
+        if (gameId) {
+          const res = await authFetch(`/api/admin/games/${gameId}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, category, thumbnail_url, author, embed_type, embed_content, clicks })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert('✅ Game details updated successfully!');
+            document.getElementById('admin-edit-game-modal')?.classList.remove('active');
+            fetchAdminGames();
+          } else {
+            alert(data.error || 'Failed to update game.');
+          }
+        } else {
+          const res = await authFetch('/api/admin/games/bulk-import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              games: [{ title, category, thumbnail_url, author, embed_type, embed_content }]
+            })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert('🎉 New game added to catalog!');
+            document.getElementById('admin-edit-game-modal')?.classList.remove('active');
+            fetchAdminGames();
+          } else {
+            alert(data.error || 'Failed to add new game.');
+          }
+        }
+      } catch (err) {
+        alert('Error saving game changes.');
+      }
+    });
+  }
+
+  // Suggestions Manager Methods
+  window.adminFetchSuggestions = async () => {
+    const tbody = document.getElementById('admin-suggestions-tbody');
+    if (!tbody) return;
+
+    try {
+      const res = await authFetch('/api/admin/suggestions');
+      if (!res.ok) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading suggestions list.</td></tr>';
+        return;
+      }
+      const data = await res.json();
+      const list = data.suggestions || [];
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px;">No user suggestions currently in queue.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(s => {
+        const details = s.game_url || s.details || s.description || '[No Link/Details Provided]';
+        const author = s.username || 'Guest';
+        return `
+          <tr>
+            <td><strong>${s.title}</strong></td>
+            <td><code>${details}</code></td>
+            <td>👤 ${author}</td>
+            <td>⭐ ${s.upvotes || 1}</td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <button class="btn-small" style="background:rgba(16,185,129,0.2);color:#10b981;border:1px solid #10b981;font-weight:700;" onclick="window.adminApproveSuggestion(${s.id})">✔️ Approve</button>
+                <button class="btn-small danger" style="background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid #ef4444;font-weight:700;" onclick="window.adminDenySuggestion(${s.id})">❌ Deny</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Connection error loading suggestions.</td></tr>';
+    }
+  };
+
+  window.adminApproveSuggestion = async (id) => {
+    try {
+      const res = await authFetch(`/api/admin/suggestions/${id}/approve`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'Suggestion approved and published!');
+        window.adminFetchSuggestions();
+      } else {
+        alert(data.error || 'Failed to approve suggestion.');
+      }
+    } catch (err) {
+      alert('Error approving suggestion.');
+    }
+  };
+
+  window.adminDenySuggestion = async (id) => {
+    if (!confirm('Are you sure you want to deny and permanently delete this suggestion?')) return;
+    try {
+      const res = await authFetch(`/api/admin/suggestions/${id}/deny`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'Suggestion denied and removed.');
+        window.adminFetchSuggestions();
+      } else {
+        alert(data.error || 'Failed to deny suggestion.');
+      }
+    } catch (err) {
+      alert('Error denying suggestion.');
+    }
+  };
+}

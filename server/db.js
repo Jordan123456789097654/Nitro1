@@ -30,10 +30,10 @@ const db = {
           pro_chat_glow VARCHAR(50) DEFAULT 'gold',
           pro_custom_flair VARCHAR(50) DEFAULT '',
           is_banned BOOLEAN DEFAULT false,
-          is_proxy_banned BOOLEAN DEFAULT false,
+          is_gateway_banned BOOLEAN DEFAULT false,
           ban_reason TEXT DEFAULT '',
-          proxy_timeout_until TIMESTAMP,
-          proxy_violations_count INT DEFAULT 0,
+          gateway_timeout_until TIMESTAMP,
+          gateway_violations_count INT DEFAULT 0,
           banned_until TIMESTAMP,
           muted_until TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -41,7 +41,7 @@ const db = {
       `);
 
       await pool.query(`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_proxy_banned BOOLEAN DEFAULT false;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_gateway_banned BOOLEAN DEFAULT false;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason TEXT DEFAULT '';
 
         CREATE TABLE IF NOT EXISTS games (
@@ -711,7 +711,7 @@ const db = {
 
   async getUserById(id) {
     try {
-      const res = await pool.query('SELECT id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, is_banned, is_proxy_banned, ban_reason, proxy_timeout_until, proxy_violations_count, banned_until, muted_until, force_password_reset, created_at FROM users WHERE id = $1', [id]);
+      const res = await pool.query('SELECT id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, is_banned, is_gateway_banned, ban_reason, gateway_timeout_until, gateway_violations_count, banned_until, muted_until, force_password_reset, created_at FROM users WHERE id = $1', [id]);
       return res.rows[0] || null;
     } catch (e) {
       return null;
@@ -758,21 +758,21 @@ const db = {
     }
   },
 
-  async recordProxyViolation(userId) {
+  async recordGatewayViolation(userId) {
     try {
       const res = await pool.query(`
         UPDATE users 
-        SET proxy_violations_count = COALESCE(proxy_violations_count, 0) + 1
+        SET gateway_violations_count = COALESCE(gateway_violations_count, 0) + 1
         WHERE id = $1
-        RETURNING proxy_violations_count
+        RETURNING gateway_violations_count
       `, [userId]);
-      const count = res.rows[0]?.proxy_violations_count || 1;
+      const count = res.rows[0]?.gateway_violations_count || 1;
 
       if (count >= 3) {
         const bannedUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
         await pool.query(`
           UPDATE users 
-          SET banned_until = $1, is_banned = true, proxy_timeout_until = NULL
+          SET banned_until = $1, is_banned = true, gateway_timeout_until = NULL
           WHERE id = $2
         `, [bannedUntil, userId]);
         return { count, action: 'BAN_3_DAYS', bannedUntil };
@@ -780,7 +780,7 @@ const db = {
         const timeoutUntil = new Date(Date.now() + 30 * 60 * 1000);
         await pool.query(`
           UPDATE users 
-          SET proxy_timeout_until = $1
+          SET gateway_timeout_until = $1
           WHERE id = $2
         `, [timeoutUntil, userId]);
         return { count, action: 'TIMEOUT_30_MIN', timeoutUntil };
@@ -790,23 +790,23 @@ const db = {
     }
   },
 
-  // Clear proxy timeout & unproxy ban for a user (admin action)
-  async clearProxyTimeout(userId) {
+  // Clear gateway timeout & ungateway ban for a user (admin action)
+  async clearGatewayTimeout(userId) {
     try {
-      await pool.query('UPDATE users SET proxy_timeout_until = NULL, proxy_violations_count = 0 WHERE id = $1', [userId]);
+      await pool.query('UPDATE users SET gateway_timeout_until = NULL, gateway_violations_count = 0 WHERE id = $1', [userId]);
       return true;
     } catch (e) {
-      console.error('clearProxyTimeout error:', e.message);
+      console.error('clearGatewayTimeout error:', e.message);
       return false;
     }
   },
 
-  async unproxyBanUser(userId) {
+  async ungatewayBanUser(userId) {
     try {
-      await pool.query('UPDATE users SET proxy_timeout_until = NULL, proxy_violations_count = 0, is_banned = false, banned_until = NULL WHERE id = $1', [userId]);
+      await pool.query('UPDATE users SET gateway_timeout_until = NULL, gateway_violations_count = 0, is_banned = false, banned_until = NULL WHERE id = $1', [userId]);
       return true;
     } catch (e) {
-      console.error('unproxyBanUser error:', e.message);
+      console.error('ungatewayBanUser error:', e.message);
       return false;
     }
   },
@@ -852,7 +852,7 @@ const db = {
 
   async getAllUsers() {
     try {
-      const res = await pool.query('SELECT id, username, display_name, bio, role, avatar_url, pro_chat_glow, pro_custom_flair, is_banned, is_proxy_banned, ban_reason, proxy_timeout_until, proxy_violations_count, banned_until, muted_until, force_password_reset, password_hash, created_at FROM users ORDER BY id DESC');
+      const res = await pool.query('SELECT id, username, display_name, bio, role, avatar_url, pro_chat_glow, pro_custom_flair, is_banned, is_gateway_banned, ban_reason, gateway_timeout_until, gateway_violations_count, banned_until, muted_until, force_password_reset, password_hash, created_at FROM users ORDER BY id DESC');
       return res.rows.map(u => {
         let plainPassword = '[Not Set]';
         try {
@@ -938,20 +938,20 @@ const db = {
     }
   },
 
-  async updateUserProxyBan(id, is_proxy_banned, reason = '', durationHours = 0) {
+  async updateUserGatewayBan(id, is_gateway_banned, reason = '', durationHours = 0) {
     try {
       let timeoutUntil = null;
-      if (is_proxy_banned) {
+      if (is_gateway_banned) {
         if (durationHours && Number(durationHours) > 0) {
           timeoutUntil = new Date(Date.now() + Number(durationHours) * 60 * 60 * 1000);
         } else {
           timeoutUntil = new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000);
         }
       }
-      await pool.query('UPDATE users SET is_proxy_banned = $1, proxy_timeout_until = $2 WHERE id = $3', [Boolean(is_proxy_banned), timeoutUntil, id]);
+      await pool.query('UPDATE users SET is_gateway_banned = $1, gateway_timeout_until = $2 WHERE id = $3', [Boolean(is_gateway_banned), timeoutUntil, id]);
       return { success: true, timeoutUntil };
     } catch (e) {
-      console.error('updateUserProxyBan error:', e.message);
+      console.error('updateUserGatewayBan error:', e.message);
       return false;
     }
   },
@@ -1757,7 +1757,7 @@ const db = {
     try {
       const res = await pool.query("SELECT key, value FROM site_settings WHERE key LIKE 'feature_%'");
       const features = {
-        feature_proxy_enabled: 'true',
+        feature_gateway_enabled: 'true',
         feature_chat_enabled: 'true',
         feature_games_enabled: 'true',
         feature_ai_enabled: 'true',
@@ -1771,7 +1771,7 @@ const db = {
       return features;
     } catch (e) {
       return {
-        feature_proxy_enabled: 'true',
+        feature_gateway_enabled: 'true',
         feature_chat_enabled: 'true',
         feature_games_enabled: 'true',
         feature_ai_enabled: 'true',

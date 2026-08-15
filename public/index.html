@@ -342,7 +342,7 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="form-group">
               <label style="color: #fbbf24; font-size: 0.78rem;">Chat Name Glow Effect</label>
-              <select id="profile-pro-chat-glow" class="proxy-select-dropdown">
+              <select id="profile-pro-chat-glow" class="custom-select-dropdown">
                 <option value="gold">⚡ Golden Aura</option>
                 <option value="rainbow">🌈 Rainbow Chroma</option>
                 <option value="cyan">💎 Cyberpunk Cyan</option>
@@ -714,9 +714,9 @@
               <span style="font-size: 1.4rem;">🌐</span>
             </div>
             <h3 style="font-size: 1.2rem; margin: 0 0 8px 0; color: #f97316;">Premium VIP</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">High-speed unblocked proxy browser access.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">High-speed unblocked gateway browser access.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 0.82rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px;">
-              <li>✓ Multi-Tab Turbo Proxy Browser Launcher</li>
+              <li>✓ Multi-Tab Turbo Gateway Browser Launcher</li>
               <li>✓ VIP Particle Background Effect Engine</li>
               <li>✓ Fast-Track Content CDN Loading</li>
             </ul>
@@ -1010,11 +1010,11 @@
             <button class="browser-btn" id="browser-forward" title="Forward">▶</button>
             <button class="browser-btn" id="browser-refresh" title="Reload">🔄</button>
             <button class="browser-btn" id="browser-home" title="Speed Dial Home">🏠</button>
-            <button class="browser-btn" id="browser-open-blank-btn" title="Open proxy in about:blank disguise" style="color: #fbbf24;">🚀</button>
+            <button class="browser-btn" id="browser-open-blank-btn" title="Open gateway in about:blank disguise" style="color: #fbbf24;">🚀</button>
           </div>
 
-          <!-- Proxy Emulation Engine Selector (Chrome, Firefox, Safari, Tor, Classroom) -->
-          <select id="browser-proxy-engine-select" class="browser-engine-select" title="Proxy Emulation Engine" style="background: #111420; border-color: #38bdf8; color: #38bdf8; font-weight: 700;">
+          <!-- Gateway Emulation Engine Selector (Chrome, Firefox, Safari, Tor, Classroom) -->
+          <select id="browser-gateway-engine-select" class="browser-engine-select" title="Gateway Emulation Engine" style="background: #111420; border-color: #38bdf8; color: #38bdf8; font-weight: 700;">
             <option value="chrome">🌐 Chrome 128 (Windows)</option>
             <option value="firefox">🦊 Firefox 129 (Quantum)</option>
             <option value="safari">🍎 Safari 17.5 (macOS)</option>
@@ -1084,7 +1084,7 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <p style="font-size: 0.85rem; color: var(--text-muted);">One-click instant tab and favicon disguises for academic platforms.</p>
-              <select id="preset-disguise-select" class="proxy-select-dropdown">
+              <select id="preset-disguise-select" class="custom-select-dropdown">
                 <option value="">Select Disguise Preset...</option>
                 <option value="desmos">📐 Desmos Graphing Calculator</option>
                 <option value="khan">📚 Khan Academy Learning</option>
@@ -1129,7 +1129,7 @@
                 </div>
                 <div class="form-group">
                   <label>Redirect Destination</label>
-                  <select id="panic-url-select" class="proxy-select-dropdown">
+                  <select id="panic-url-select" class="custom-select-dropdown">
                     <option value="https://classroom.google.com">Google Classroom</option>
                     <option value="https://drive.google.com">Google Drive</option>
                     <option value="https://docs.google.com">Google Docs</option>
@@ -1273,13 +1273,13 @@
           <p>Thousands of instant sound effects and memes, proxied live so school network filters cannot block them.</p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-pill secondary" onclick="window.reloadSoundboardProxy()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700;">🔄 Reload</button>
-          <button class="btn-pill primary" onclick="window.fullscreenSoundboardProxy()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 800;">⤢ Fullscreen</button>
+          <button class="btn-pill secondary" onclick="window.reloadSoundboardHub()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700;">🔄 Reload</button>
+          <button class="btn-pill primary" onclick="window.fullscreenSoundboardHub()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 800;">⤢ Fullscreen</button>
         </div>
       </div>
 
       <div class="view-content-wrapper" style="margin-top: 16px; height: calc(100vh - 170px); min-height: 620px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; position: relative;">
-        <iframe id="soundboard-proxy-iframe" src="/api/proxy?url=https://www.myinstants.com/en/categories/sound%20effects/us/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="soundboard-gateway-frame" src="/api/gateway?url=https://www.myinstants.com/en/categories/sound%20effects/us/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
     </section>
 
@@ -1513,7 +1513,7 @@
             </div>
             <div class="form-group">
               <label>Message Content</label>
-              <textarea id="ann-msg-input" required placeholder="e.g. The proxy servers will be upgrading tonight at 11:00 PM EST." style="width: 100%; height: 90px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; color: #fff;"></textarea>
+              <textarea id="ann-msg-input" required placeholder="e.g. The gateway servers will be upgrading tonight at 11:00 PM EST." style="width: 100%; height: 90px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; color: #fff;"></textarea>
             </div>
             <button type="submit" class="btn-pill primary">Publish Announcement Banner</button>
           </form>
@@ -1521,7 +1521,7 @@
 
         <!-- Admin Tab: Domain Filters -->
         <div class="admin-tab-content" id="tab-domains" style="display: none;">
-          <h3 style="color: #a855f7;">🚫 Proxy Domain Filter Rules</h3>
+          <h3 style="color: #a855f7;">🚫 Gateway Domain Filter Rules</h3>
           <div style="display: flex; gap: 10px; margin: 16px 0;">
             <input type="text" id="new-domain-rule" placeholder="domain.com (or wildcard *.domain.com)" style="flex: 1; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
             <button class="btn-pill primary" id="add-domain-btn">Block Domain</button>
@@ -1588,7 +1588,7 @@
           </div>
           <div style="display: flex; gap: 10px; margin-bottom: 14px;">
             <input type="text" id="admin-log-search-user" placeholder="Filter by user / admin..." style="flex: 1; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
-            <select id="admin-log-search-action" class="proxy-select-dropdown" style="width: 220px; font-size: 0.85rem;">
+            <select id="admin-log-search-action" class="custom-select-dropdown" style="width: 220px; font-size: 0.85rem;">
               <option value="">All Actions</option>
               <option value="USER_LOGIN">User Logins</option>
               <option value="BAN_USER">Bans & Suspensions</option>
@@ -1596,7 +1596,7 @@
               <option value="FORCE_PASSWORD_RESET">Forced Resets</option>
               <option value="DELETE_USER">Account Deletions</option>
               <option value="BULK_IMPORT_GAMES">Bulk Importer</option>
-              <option value="PROXY_ATTEMPT">Proxy Requests</option>
+              <option value="GATEWAY_ATTEMPT">Gateway Requests</option>
             </select>
           </div>
           <table class="admin-table">
@@ -1666,7 +1666,7 @@
             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px;">
               <div>
                 <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Department</label>
-                <select id="contact-dept-select" class="proxy-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.88rem;">
+                <select id="contact-dept-select" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.88rem;">
                   <option value="support">💬 General Support & Billing</option>
                   <option value="ownership">👑 Platform Ownership & Business</option>
                   <option value="legal">⚖️ Legal & DMCA Inquiries</option>
@@ -1704,7 +1704,7 @@
 
         <div class="form-group">
           <label style="font-size: 0.8rem; font-weight: 700;">Account Role / Tier</label>
-          <select id="admin-edit-user-role" class="proxy-select-dropdown" style="width: 100%;">
+          <select id="admin-edit-user-role" class="custom-select-dropdown" style="width: 100%;">
             <option value="member">👤 Student (Member)</option>
             <option value="student_plus">🎓 Student Plus</option>
             <option value="pro">⚡ PRO Member</option>
@@ -1734,7 +1734,7 @@
 
         <div class="form-group">
           <label style="font-size: 0.8rem; font-weight: 700;">Chat Name Glow</label>
-          <select id="admin-edit-user-glow" class="proxy-select-dropdown" style="width: 100%;">
+          <select id="admin-edit-user-glow" class="custom-select-dropdown" style="width: 100%;">
             <option value="gold">⚡ Golden Aura</option>
             <option value="rainbow">🌈 Rainbow Chroma</option>
             <option value="cyan">💎 Cyberpunk Cyan</option>
@@ -1780,7 +1780,7 @@
             </div>
             <div class="form-group">
               <label style="font-size: 0.8rem; font-weight: 700;">Category</label>
-              <select id="admin-edit-game-category" class="proxy-select-dropdown" style="width: 100%;">
+              <select id="admin-edit-game-category" class="custom-select-dropdown" style="width: 100%;">
                 <option value="Action">Action</option>
                 <option value="Sports">Sports</option>
                 <option value="Puzzle">Puzzle</option>
@@ -1808,7 +1808,7 @@
 
         <div class="form-group">
           <label style="font-size: 0.8rem; font-weight: 700;">Embed Integration Type</label>
-          <select id="admin-edit-game-embed-type" class="proxy-select-dropdown" style="width: 100%;">
+          <select id="admin-edit-game-embed-type" class="custom-select-dropdown" style="width: 100%;">
             <option value="iframe_url">🌐 Direct iFrame URL Link</option>
             <option value="builtin">📦 Built-In Nitro Arcade Engine</option>
             <option value="html_code">💻 Raw HTML / JS Embed Code</option>
@@ -1856,7 +1856,7 @@
     <div class="modal-card" style="max-width: 520px;">
       <button class="modal-close" id="bug-modal-close">✕</button>
       <h2 style="color: #f43f5e; margin-bottom: 8px; font-size: 1.3rem;">🐛 Report an Issue or Bug</h2>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Found a broken game, proxy glitch, or issue? Let administrators know immediately.</p>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Found a broken game, gateway glitch, or issue? Let administrators know immediately.</p>
       
       <form id="bug-form" style="display: flex; flex-direction: column; gap: 14px;">
         <div class="form-group">
@@ -1865,9 +1865,9 @@
         </div>
         <div class="form-group">
           <label>Category</label>
-          <select id="bug-category" class="proxy-select-dropdown">
+          <select id="bug-category" class="custom-select-dropdown">
             <option value="Game Broken">Game Broken / Not Loading</option>
-            <option value="Proxy Issue">Proxy / Search Issue</option>
+            <option value="Gateway Issue">Gateway / Search Issue</option>
             <option value="Chat Bug">Chat Issue</option>
             <option value="UI Glitch">UI / Styling Glitch</option>
             <option value="Other">Other</option>
@@ -1902,17 +1902,17 @@
         <h4 style="color: #fbbf24; margin: 14px 0 6px; font-size: 1rem;">4. Intellectual Property & Game Embeds</h4>
         <p style="margin-bottom: 14px;">All games, built-in canvas applications, and third-party embeds remain the intellectual property of their respective creators and publishers. NITRO provides sandboxed web embeds for educational and study break entertainment purposes only.</p>
 
-        <h4 style="color: #a855f7; margin: 14px 0 6px; font-size: 1rem;">5. Sandboxed Web Proxy Usage Disclaimer</h4>
-        <p style="margin-bottom: 14px;">The in-app web proxy relay is designed for testing web assets and discreet browsing. Utilizing the proxy to access illegal content, conduct cyber attacks, or breach network security policies is prohibited and subject to immediate IP and account bans.</p>
+        <h4 style="color: #a855f7; margin: 14px 0 6px; font-size: 1rem;">5. Sandboxed Web Gateway Usage Disclaimer</h4>
+        <p style="margin-bottom: 14px;">The in-app web gateway relay is designed for testing web assets and discreet browsing. Utilizing the gateway to access illegal content, conduct cyber attacks, or breach network security policies is prohibited and subject to immediate IP and account bans.</p>
 
         <h4 style="color: #10b981; margin: 14px 0 6px; font-size: 1rem;">6. Automated Content Moderation & Filter Logs</h4>
         <p style="margin-bottom: 14px;">Automated filters continuously monitor public chat messages and username registration for policy violations. Messages violating filter lists are sanitized automatically, and repeat violations trigger automated mutes via the Raid Shield system.</p>
 
         <h4 style="color: #f59e0b; margin: 14px 0 6px; font-size: 1rem;">7. IP Address Logging & Security Audits</h4>
-        <p style="margin-bottom: 14px;">To protect the platform against network abuse, DDoS attacks, and unauthorized proxy exploitation, client IP addresses, request headers, and user-agent metadata are logged automatically during session initialization and stored in administrative audit logs.</p>
+        <p style="margin-bottom: 14px;">To protect the platform against network abuse, DDoS attacks, and unauthorized gateway exploitation, client IP addresses, request headers, and user-agent metadata are logged automatically during session initialization and stored in administrative audit logs.</p>
 
         <h4 style="color: #ec4899; margin: 14px 0 6px; font-size: 1rem;">8. VIP / PRO Tier Access & Perks</h4>
-        <p style="margin-bottom: 14px;">VIP and PRO access tiers provide advanced customization features, custom chat glows, title flairs, and unfiltered proxy routing. PRO perks are granted or revoked at the platform owner's discretion.</p>
+        <p style="margin-bottom: 14px;">VIP and PRO access tiers provide advanced customization features, custom chat glows, title flairs, and unfiltered gateway routing. PRO perks are granted or revoked at the platform owner's discretion.</p>
 
         <h4 style="color: #ef4444; margin: 14px 0 6px; font-size: 1rem;">9. Maintenance Mode & Owner Exclusive Access</h4>
         <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be activated. When enabled, all non-owner connections (including standard admins, VIPs, and members) will be disconnected automatically, reserving exclusive system access to the platform Owner.</p>

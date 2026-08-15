@@ -180,13 +180,13 @@ function playAudioUrl(url) {
   }
 }
 
-window.reloadSoundboardProxy = function() {
-  const iframe = document.getElementById('soundboard-proxy-iframe');
-  if (iframe) iframe.src = '/api/proxy?url=' + encodeURIComponent('https://www.myinstants.com/en/categories/sound%20effects/us/');
+window.reloadSoundboardHub = function() {
+  const iframe = document.getElementById('soundboard-gateway-frame');
+  if (iframe) iframe.src = '/api/gateway?url=' + encodeURIComponent('https://www.myinstants.com/en/categories/sound%20effects/us/');
 };
 
-window.fullscreenSoundboardProxy = function() {
-  const iframe = document.getElementById('soundboard-proxy-iframe');
+window.fullscreenSoundboardHub = function() {
+  const iframe = document.getElementById('soundboard-gateway-frame');
   if (iframe) {
     if (iframe.requestFullscreen) iframe.requestFullscreen();
     else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();

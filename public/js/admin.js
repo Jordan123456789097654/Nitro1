@@ -332,7 +332,7 @@ async function fetchAdminWebhooks() {
 
     const data = await res.json();
     if (data.webhooks) {
-      ['moderation', 'logins', 'proxy', 'suggestions', 'bugs', 'updates'].forEach(cat => {
+      ['moderation', 'logins', 'gateway', 'suggestions', 'bugs', 'updates'].forEach(cat => {
         const input = document.getElementById(`webhook-input-${cat}`);
         if (input && data.webhooks[cat]) {
           input.value = data.webhooks[cat];
@@ -632,12 +632,12 @@ export async function fetchUsers() {
       let statusHtml = '<span style="color:#10b981; font-weight:700;">ACTIVE</span>';
       if (u.is_banned) {
         statusHtml = '<span style="color:#ef4444; font-weight:700;">⛔ BANNED</span>';
-      } else if (u.is_proxy_banned) {
-        statusHtml = '<span style="color:#f59e0b; font-weight:700;">🌐 PROXY BANNED</span>';
+      } else if (u.is_gateway_banned) {
+        statusHtml = '<span style="color:#f59e0b; font-weight:700;">🌐 GATEWAY RESTRICTED</span>';
       } else if (u.muted_until && new Date(u.muted_until) > new Date()) {
         statusHtml = `<span style="color:#a855f7; font-weight:700;">MUTED (Until ${new Date(u.muted_until).toLocaleTimeString()})</span>`;
-      } else if (u.proxy_timeout_until && new Date(u.proxy_timeout_until) > new Date()) {
-        statusHtml = '<span style="color:#f59e0b; font-weight:700;">PROXY TIMEOUT</span>';
+      } else if (u.gateway_timeout_until && new Date(u.gateway_timeout_until) > new Date()) {
+        statusHtml = '<span style="color:#f59e0b; font-weight:700;">GATEWAY TIMEOUT</span>';
       }
 
       if (u.force_password_reset) {
@@ -651,10 +651,10 @@ export async function fetchUsers() {
           <td>#${u.id}</td>
           <td>
             <strong>${u.username}</strong> ${displayName}
-            ${u.proxy_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block;">(Strikes: ${u.proxy_violations_count}/3)</span>` : ''}
+            ${u.gateway_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block;">(Strikes: ${u.gateway_violations_count}/3)</span>` : ''}
           </td>
           <td>
-            <select class="proxy-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 4px 8px; font-size: 0.8rem; font-weight: 800; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; cursor: pointer;">
+            <select class="custom-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 4px 8px; font-size: 0.8rem; font-weight: 800; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; cursor: pointer;">
               <option value="member" ${u.role === 'member' ? 'selected' : ''}>👤 Student (Member)</option>
               <option value="student_plus" ${u.role === 'student_plus' ? 'selected' : ''}>🎓 Student Plus</option>
               <option value="pro" ${u.role === 'pro' ? 'selected' : ''}>⚡ PRO Member</option>
@@ -678,9 +678,9 @@ export async function fetchUsers() {
                 `<button class="btn-small unban" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
                 `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
               }
-              ${u.is_proxy_banned ? 
-                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;" onclick="window.setProxyBan(${u.id}, false)">🔓 Unproxy</button>` : 
-                `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b;" onclick="window.setProxyBan(${u.id}, true)">🌐 Proxy Ban</button>`
+              ${u.is_gateway_banned ? 
+                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;" onclick="window.setGatewayBan(${u.id}, false)">🔓 Ungateway</button>` : 
+                `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b;" onclick="window.setGatewayBan(${u.id}, true)">🌐 Gateway Ban</button>`
               }
               ${u.role !== 'admin' || u.username.toLowerCase() !== 'jordandaniels' ?
                 `<button class="btn-small danger" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
@@ -1181,19 +1181,19 @@ function setupAdminActions() {
     }
   };
 
-  window.unproxyBanUser = async (userId, username) => {
+  window.ungatewayBanUser = async (userId, username) => {
     try {
-      const res = await authFetch(`/api/admin/users/${userId}/unproxy-ban`, { method: 'POST' });
+      const res = await authFetch(`/api/admin/users/${userId}/ungateway-ban`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message || `Proxy ban lifted for ${username}.`);
+        alert(data.message || `Gateway ban lifted for ${username}.`);
         fetchUsers();
         fetchLogs();
       } else {
-        alert(data.error || 'Failed to lift proxy ban.');
+        alert(data.error || 'Failed to lift gateway ban.');
       }
     } catch (e) {
-      alert('Error lifting proxy ban.');
+      alert('Error lifting gateway ban.');
     }
   };
 
@@ -1259,23 +1259,23 @@ function setupAdminActions() {
     }
   };
 
-  window.setProxyBan = async (userId, isProxyBanned) => {
+  window.setGatewayBan = async (userId, isGatewayBanned) => {
     let reason = '';
     let durationHours = 0;
 
-    if (isProxyBanned) {
-      reason = prompt('Enter reason for proxy ban:', 'Proxy access revoked');
+    if (isGatewayBanned) {
+      reason = prompt('Enter reason for gateway ban:', 'Gateway access revoked');
       if (reason === null) return;
 
       const durChoice = prompt(
-        'Select Proxy Ban Duration (enter hours):\n\n' +
+        'Select Gateway Ban Duration (enter hours):\n\n' +
         '• 1 = 1 Hour\n' +
         '• 12 = 12 Hours\n' +
         '• 24 = 24 Hours (1 Day)\n' +
         '• 72 = 3 Days\n' +
         '• 168 = 7 Days (1 Week)\n' +
         '• 720 = 30 Days (1 Month)\n' +
-        '• 0 = Permanent Proxy Ban\n\n' +
+        '• 0 = Permanent Gateway Ban\n\n' +
         'Enter hours (or 0 for Permanent):',
         '24'
       );
@@ -1284,22 +1284,22 @@ function setupAdminActions() {
     }
 
     try {
-      const res = await authFetch(`/api/admin/users/${userId}/proxy-ban`, {
+      const res = await authFetch(`/api/admin/users/${userId}/gateway-ban`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_proxy_banned: isProxyBanned, reason, durationHours })
+        body: JSON.stringify({ is_gateway_banned: isGatewayBanned, reason, durationHours })
       });
       const data = await res.json();
       if (res.ok) {
-        const timeMsg = data.timeoutUntil ? ` (proxy restricted until ${new Date(data.timeoutUntil).toLocaleString()})` : '';
-        alert(isProxyBanned ? `🌐 User proxy access restricted${timeMsg}!` : '🔓 User proxy access restored.');
+        const timeMsg = data.timeoutUntil ? ` (gateway restricted until ${new Date(data.timeoutUntil).toLocaleString()})` : '';
+        alert(isGatewayBanned ? `🌐 User gateway access restricted${timeMsg}!` : '🔓 User gateway access restored.');
         fetchUsers();
         fetchLogs();
       } else {
-        alert(data.error || 'Failed to update proxy ban status');
+        alert(data.error || 'Failed to update gateway ban status');
       }
     } catch (e) {
-      alert('Error updating proxy ban status');
+      alert('Error updating gateway ban status');
     }
   };
 

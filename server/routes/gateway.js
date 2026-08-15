@@ -9,7 +9,7 @@ const { sendDiscordLog } = require('../discordLogger');
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
 // Engine Spoofing Profiles
-const PROXY_ENGINES = {
+const GATEWAY_ENGINES = {
   chrome: {
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
     secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
@@ -61,7 +61,7 @@ function isInternalOrPrivateHost(hostname) {
   return false;
 }
 
-function resolveAndProxyUrl(rawUrl, baseUrl, proxyPrefix) {
+function resolveAndGatewayUrl(rawUrl, baseUrl, gatewayPrefix) {
   if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
   const trimmed = rawUrl.trim();
   if (
@@ -74,24 +74,24 @@ function resolveAndProxyUrl(rawUrl, baseUrl, proxyPrefix) {
   ) {
     return rawUrl;
   }
-  if (trimmed.includes('/api/proxy')) return rawUrl;
+  if (trimmed.includes('/api/gateway')) return rawUrl;
   try {
     const resolved = new URL(trimmed, baseUrl).href;
-    return `${proxyPrefix}${encodeURIComponent(resolved)}`;
+    return `${gatewayPrefix}${encodeURIComponent(resolved)}`;
   } catch (e) {
     return rawUrl;
   }
 }
 
-function rewriteCssUrls(cssContent, baseUrl, proxyPrefix) {
+function rewriteCssUrls(cssContent, baseUrl, gatewayPrefix) {
   if (!cssContent || typeof cssContent !== 'string') return cssContent;
   return cssContent.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi, (match, quote, urlVal) => {
-    const proxied = resolveAndProxyUrl(urlVal, baseUrl, proxyPrefix);
+    const proxied = resolveAndGatewayUrl(urlVal, baseUrl, gatewayPrefix);
     return `url("${proxied}")`;
   });
 }
 
-function rewriteHtml(htmlContent, baseUrl, proxyPrefix) {
+function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
   if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
 
   let rewritten = htmlContent;
@@ -106,13 +106,13 @@ function rewriteHtml(htmlContent, baseUrl, proxyPrefix) {
 
   // Rewrite href, src, action
   rewritten = rewritten.replace(/\b(href|src|action)\s*=\s*(['"])([^'"]+)\2/gi, (match, attr, quote, urlVal) => {
-    const proxied = resolveAndProxyUrl(urlVal, baseUrl, proxyPrefix);
+    const proxied = resolveAndGatewayUrl(urlVal, baseUrl, gatewayPrefix);
     return `${attr}=${quote}${proxied}${quote}`;
   });
 
   // Rewrite inline CSS style attributes
   rewritten = rewritten.replace(/\bstyle\s*=\s*(['"])([^'"]+)\1/gi, (match, quote, cssVal) => {
-    const rewrittenCss = rewriteCssUrls(cssVal, baseUrl, proxyPrefix);
+    const rewrittenCss = rewriteCssUrls(cssVal, baseUrl, gatewayPrefix);
     return `style=${quote}${rewrittenCss}${quote}`;
   });
 
@@ -121,8 +121,8 @@ function rewriteHtml(htmlContent, baseUrl, proxyPrefix) {
     <base href="${baseUrl}">
     <script>
       (function() {
-        window.__NITRO_PROXY_BASE__ = "${baseUrl}";
-        window.__NITRO_PROXY_PREFIX__ = "${proxyPrefix}";
+        window.__NITRO_GATEWAY_BASE__ = "${baseUrl}";
+        window.__NITRO_GATEWAY_PREFIX__ = "${gatewayPrefix}";
 
         // Frame Buster Shield: Lock window.top & window.parent to current window
         try {
@@ -130,26 +130,26 @@ function rewriteHtml(htmlContent, baseUrl, proxyPrefix) {
           Object.defineProperty(window, 'parent', { get: function() { return window; }, configurable: true });
         } catch(e) {}
 
-        // Disable Service Worker registration inside proxy iframe to avoid cross-origin registration errors
+        // Disable Service Worker registration inside gateway iframe to avoid cross-origin registration errors
         if (navigator.serviceWorker) {
           navigator.serviceWorker.register = function() {
-            return Promise.reject(new Error('ServiceWorker disabled in proxy.'));
+            return Promise.reject(new Error('ServiceWorker disabled in gateway.'));
           };
         }
 
         // Helper function to proxify URLs
         function proxifyUrl(raw) {
           if (!raw || typeof raw !== 'string') return raw;
-          if (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/api/proxy')) return raw;
+          if (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/api/gateway')) return raw;
           try {
-            var absolute = new URL(raw, window.__NITRO_PROXY_BASE__).href;
-            return window.__NITRO_PROXY_PREFIX__ + encodeURIComponent(absolute);
+            var absolute = new URL(raw, window.__NITRO_GATEWAY_BASE__).href;
+            return window.__NITRO_GATEWAY_PREFIX__ + encodeURIComponent(absolute);
           } catch(e) {
             return raw;
           }
         }
 
-        // Override fetch to route API requests through proxy
+        // Override fetch to route API requests through gateway
         var origFetch = window.fetch;
         if (origFetch) {
           window.fetch = function(input, init) {
@@ -166,7 +166,7 @@ function rewriteHtml(htmlContent, baseUrl, proxyPrefix) {
           };
         }
 
-        // Override XMLHttpRequest to route XHR requests through proxy
+        // Override XMLHttpRequest to route XHR requests through gateway
         var origXhrOpen = XMLHttpRequest.prototype.open;
         if (origXhrOpen) {
           XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
@@ -189,7 +189,7 @@ function rewriteHtml(htmlContent, baseUrl, proxyPrefix) {
   return rewritten;
 }
 
-// Remade High-Speed Unrestricted & Sandboxed Proxy Router
+// Remade High-Speed Unrestricted & Sandboxed Gateway Router
 router.all('/', async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -203,7 +203,7 @@ router.all('/', async (req, res) => {
   // Check Feature Toggle
   try {
     const features = await db.getFeatureSettings();
-    if (features.feature_proxy_enabled === 'false') {
+    if (features.feature_gateway_enabled === 'false') {
       const isOwner = req.user && (req.user.role === 'owner' || req.user.username.toLowerCase() === 'jordandaniels');
       if (!isOwner) {
         return res.status(503).send(`
@@ -211,7 +211,7 @@ router.all('/', async (req, res) => {
           <html>
           <head>
             <meta charset="UTF-8">
-            <title>Proxy Feature Offline</title>
+            <title>Gateway Feature Offline</title>
             <style>
               body { background: #090a0f; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
               .card { background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 500px; }
@@ -220,8 +220,8 @@ router.all('/', async (req, res) => {
           </head>
           <body>
             <div class="card">
-              <h2>🔒 Web Proxy Disabled</h2>
-              <p>The Web Proxy feature has been temporarily disabled by the platform owner.</p>
+              <h2>🔒 Web Gateway Disabled</h2>
+              <p>The Web Gateway feature has been temporarily disabled by the platform owner.</p>
             </div>
           </body>
           </html>
@@ -244,14 +244,14 @@ router.all('/', async (req, res) => {
     user = { id: null, username: 'Guest', role: 'member', is_banned: false };
   }
 
-  if (user.is_banned || user.is_proxy_banned || (user.proxy_timeout_until && new Date(user.proxy_timeout_until) > new Date())) {
-    const timeoutMsg = user.proxy_timeout_until ? ` (Timeout active until ${new Date(user.proxy_timeout_until).toLocaleString()})` : '';
+  if (user.is_banned || user.is_gateway_banned || (user.gateway_timeout_until && new Date(user.gateway_timeout_until) > new Date())) {
+    const timeoutMsg = user.gateway_timeout_until ? ` (Timeout active until ${new Date(user.gateway_timeout_until).toLocaleString()})` : '';
     return res.status(403).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
-        <title>Proxy Access Revoked</title>
+        <title>Gateway Access Revoked</title>
         <style>
           body { background: #090a0f; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
           .card { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 500px; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
@@ -261,8 +261,8 @@ router.all('/', async (req, res) => {
       </head>
       <body>
         <div class="card">
-          <h2>🚫 Proxy Access Revoked</h2>
-          <p>Your web proxy access has been restricted by an administrator or due to violation strikes.${timeoutMsg}</p>
+          <h2>🚫 Gateway Access Revoked</h2>
+          <p>Your web gateway access has been restricted by an administrator or due to violation strikes.${timeoutMsg}</p>
           <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 20px;">Contact platform support or owner if you believe this is an error.</p>
         </div>
       </body>
@@ -345,8 +345,8 @@ router.all('/', async (req, res) => {
 
   // Fetch Target Content
   try {
-    const selectedEngineKey = (req.query.engine || req.headers['x-proxy-engine'] || 'chrome').toLowerCase().trim();
-    const engineConfig = PROXY_ENGINES[selectedEngineKey] || PROXY_ENGINES.chrome;
+    const selectedEngineKey = (req.query.engine || req.headers['x-gateway-engine'] || 'chrome').toLowerCase().trim();
+    const engineConfig = GATEWAY_ENGINES[selectedEngineKey] || GATEWAY_ENGINES.chrome;
 
     const fetchHeaders = {
       'User-Agent': engineConfig.userAgent,
@@ -424,7 +424,7 @@ router.all('/', async (req, res) => {
       const lowerKey = key.toLowerCase();
       if (!restrictedHeaders.includes(lowerKey)) {
         if (lowerKey === 'location') {
-          const redirected = resolveAndProxyUrl(val, finalUrl, `/api/proxy?url=`);
+          const redirected = resolveAndGatewayUrl(val, finalUrl, `/api/gateway?url=`);
           res.setHeader('Location', redirected);
         } else {
           try { res.setHeader(key, val); } catch(e) {}
@@ -438,15 +438,15 @@ router.all('/', async (req, res) => {
     res.removeHeader('X-Frame-Options');
     const hostHeader = req.get('host') || 'localhost:3000';
     const reqProtocol = req.protocol || 'http';
-    const proxyPrefix = `${reqProtocol}://${hostHeader}/api/proxy?url=`;
+    const gatewayPrefix = `${reqProtocol}://${hostHeader}/api/gateway?url=`;
 
     if (contentType.includes('text/html')) {
       const htmlText = buffer.toString('utf8');
-      const rewrittenHtml = rewriteHtml(htmlText, finalUrl, proxyPrefix);
+      const rewrittenHtml = rewriteHtml(htmlText, finalUrl, gatewayPrefix);
       return res.send(rewrittenHtml);
     } else if (contentType.includes('text/css')) {
       const cssText = buffer.toString('utf8');
-      const rewrittenCss = rewriteCssUrls(cssText, finalUrl, proxyPrefix);
+      const rewrittenCss = rewriteCssUrls(cssText, finalUrl, gatewayPrefix);
       return res.send(rewrittenCss);
     } else {
       return res.send(buffer);
@@ -456,7 +456,7 @@ router.all('/', async (req, res) => {
       <!DOCTYPE html>
       <html>
       <head><meta charset="UTF-8"><style>body{background:#090a0f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}.card{background:rgba(239,68,68,0.15);border:1px solid #ef4444;padding:40px;border-radius:16px;text-align:center;}</style></head>
-      <body><div class="card"><h2 style="color:#ef4444;">Proxy Connection Failure</h2><p>Unable to connect to target URL: ${err.message}</p></div></body>
+      <body><div class="card"><h2 style="color:#ef4444;">Gateway Connection Failure</h2><p>Unable to connect to target URL: ${err.message}</p></div></body>
       </html>
     `);
   }

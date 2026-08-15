@@ -14,7 +14,7 @@ const authRoutes = require('./routes/auth');
 const gamesRoutes = require('./routes/games');
 const appsRoutes = require('./routes/apps');
 const adminRoutes = require('./routes/admin');
-const proxyRoutes = require('./routes/proxy');
+const gatewayRoutes = require('./routes/gateway');
 const updatesRoutes = require('./routes/updates');
 const pollsRoutes = require('./routes/polls');
 const { initChatSocket } = require('./chatSocket');
@@ -33,7 +33,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-app.set('trust proxy', 1);
+app.set('trust gateway', 1);
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -140,8 +140,8 @@ app.use(async (req, res, next) => {
 // Authentication Enforcement Middleware for API routes
 app.use('/api', (req, res, next) => {
   const openPaths = [
-    '/auth/login', '/auth/register', '/auth/me', '/status', '/visit', '/proxy',
-    '/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/status', '/api/visit', '/api/proxy',
+    '/auth/login', '/auth/register', '/auth/me', '/status', '/visit', '/gateway',
+    '/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/status', '/api/visit', '/api/gateway',
     '/games', '/api/games', '/polls', '/api/polls', '/voice', '/api/voice', '/updates', '/api/updates',
     '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard'
   ];
@@ -192,7 +192,7 @@ app.get('/health', (req, res) => {
 
 // Disable caching on client JS files during development to ensure instant updates
 app.use('/js', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, gateway-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   next();
@@ -242,12 +242,12 @@ app.post('/api/visit', async (req, res) => {
 app.use(express.static(path.join(__dirname, '../public')));
 
 // API Routes
-app.use('/proxy', proxyRoutes);
+app.use('/gateway', gatewayRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/games', gamesRoutes);
 app.use('/api/apps', appsRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/proxy', proxyRoutes);
+app.use('/api/gateway', gatewayRoutes);
 app.use('/api/updates', updatesRoutes);
 app.use('/api/polls', pollsRoutes);
 app.use('/api/voice', require('./routes/voice'));
@@ -260,10 +260,10 @@ initChatSocket(io);
 // Initialize Voice signaling namespace
 require('./voiceSocket')(io);
 
-// Referer-based proxy redirector for subresources and API calls inside proxied iframes
+// Referer-based gateway redirector for subresources and API calls inside proxied iframes
 app.use(async (req, res, next) => {
   const referer = req.headers.referer || req.headers.Referer;
-  if (referer && referer.includes('/api/proxy?url=')) {
+  if (referer && referer.includes('/api/gateway?url=')) {
     try {
       const parsedReferer = new URL(referer);
       const targetUrlStr = parsedReferer.searchParams.get('url');
@@ -277,7 +277,7 @@ app.use(async (req, res, next) => {
         const isSurf = parsedReferer.searchParams.get('surf') === 'true';
         const surfParam = isSurf ? '&surf=true' : '';
         
-        return res.redirect(307, `/api/proxy?url=${encodeURIComponent(resolvedTarget)}${tokenParam}${engineParam}${surfParam}`);
+        return res.redirect(307, `/api/gateway?url=${encodeURIComponent(resolvedTarget)}${tokenParam}${engineParam}${surfParam}`);
       }
     } catch (e) {}
   }

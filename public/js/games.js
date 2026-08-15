@@ -798,18 +798,18 @@ function getBuiltinGameHtml(type, title) {
 
 function getProxiedUrl(rawUrl, isApp = false) {
   if (!rawUrl) return '';
-  // If already a proxy call, return as is
-  if (rawUrl.startsWith('/api/proxy')) return rawUrl;
+  // If already a gateway call, return as is
+  if (rawUrl.startsWith('/api/gateway')) return rawUrl;
   // Relative paths (static files) – encode spaces but keep same origin
   if (rawUrl.startsWith('/')) return rawUrl.replace(/ /g, "%20");
   const token = localStorage.getItem('nitro_jwt_token');
   const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-  const engine = localStorage.getItem('nitro_proxy_engine') || 'chrome';
+  const engine = localStorage.getItem('nitro_gateway_engine') || 'chrome';
   const engineParam = `&engine=${encodeURIComponent(engine)}`;
   const surfParam = isApp ? '&surf=true' : '';
   // Encode the URL to handle spaces and special characters
   const encodedUrl = encodeURIComponent(rawUrl);
-  return `/api/proxy?url=${encodedUrl}${tokenParam}${engineParam}${surfParam}`;
+  return `/api/gateway?url=${encodedUrl}${tokenParam}${engineParam}${surfParam}`;
 }
 
 export function getGameRunnerHtml(game) {
@@ -955,7 +955,7 @@ export async function openGame(slug) {
       // Direct HTML embed – render the raw HTML via srcdoc
       iframe.srcdoc = activeGame.embed_content;
     } else if (activeGame.embed_type === 'iframe_url' && activeGame.embed_content) {
-      // Load the URL via proxy to correctly serve static files and handle spaces
+      // Load the URL via gateway to correctly serve static files and handle spaces
       iframe.src = getProxiedUrl(activeGame.embed_content, activeGame.category === 'Apps');
     }
 

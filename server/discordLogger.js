@@ -14,8 +14,8 @@ const CATEGORY_CONFIG = {
     defaultColor: 0x57F287,
     emoji: '👤'
   },
-  proxy: {
-    botName: 'NITRO Proxy Telemetry',
+  gateway: {
+    botName: 'NITRO Gateway Telemetry',
     avatarUrl: 'https://cdn-icons-png.flaticon.com/512/2088/2088617.png',
     defaultColor: 0x38BDF8,
     emoji: '🌐'
@@ -41,7 +41,7 @@ const CATEGORY_CONFIG = {
 };
 
 const CATEGORY_COOLDOWNS = {
-  proxy: 3000,       // 3 seconds minimum between proxy telemetry embeds
+  gateway: 3000,       // 3 seconds minimum between gateway telemetry embeds
   moderation: 500,
   logins: 1000,
   suggestions: 1000,
@@ -96,7 +96,7 @@ async function sendDiscordLog({ category = 'moderation', action, admin, target, 
     const act = (action || '').toUpperCase();
     if (act.includes('BAN') || act.includes('DELETE') || act.includes('BLOCK')) {
       color = 0xED4245; // Red
-    } else if (act.includes('UNBAN') || act.includes('SUCCESS') || act.includes('REGISTER') || act.includes('UNPROXY')) {
+    } else if (act.includes('UNBAN') || act.includes('SUCCESS') || act.includes('REGISTER') || act.includes('UNRESTRICT')) {
       color = 0x57F287; // Green
     } else if (act.includes('TIMEOUT') || act.includes('WARN') || act.includes('VIOLATION')) {
       color = 0xFEE75C; // Yellow
