@@ -184,7 +184,14 @@ function initChatSocket(io) {
       if (!messageContent) return;
 
       try {
-        const dbUser = await db.getUserById(user.id);
+        let dbUser = null;
+        if (user.id) {
+          try { dbUser = await db.getUserById(user.id); } catch(e) {}
+        }
+        if (!dbUser && user.username) {
+          try { dbUser = await db.getUserByUsername(user.username); } catch(e) {}
+        }
+
         if (dbUser && dbUser.is_banned) {
           return socket.emit('error_message', 'You are banned from sending messages.');
         }

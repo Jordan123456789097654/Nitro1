@@ -216,6 +216,7 @@ function setupGifPicker() {
 function setupSocketListeners() {
   const container = document.getElementById('chat-messages');
 
+  socket.off('connect');
   socket.off('initial_messages');
   socket.off('new_message');
   socket.off('new_dm');
@@ -226,6 +227,13 @@ function setupSocketListeners() {
 
   socket.off('open_dms_list');
   socket.off('open_dms_update');
+
+  socket.on('connect', () => {
+    const user = getCurrentUser();
+    if (user) {
+      socket.emit('user_connected', { user, activity: 'Global Chat' });
+    }
+  });
 
   socket.on('open_dms_list', (conversations) => {
     renderOpenDmsPills(conversations);
