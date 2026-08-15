@@ -295,8 +295,8 @@ const db = {
         await pool.query("UPDATE users SET password_hash = $1, role = 'owner' WHERE LOWER(username) = 'jordandaniels'", [b64AdminPass]);
       }
 
-      // Force reset all users passwords once (as requested)
-      await pool.query("UPDATE users SET force_password_reset = true WHERE LOWER(username) != 'jordandaniels'");
+      // Ensure all users have force_password_reset set to false by default on startup
+      await pool.query("UPDATE users SET force_password_reset = false WHERE force_password_reset = true");
 
       // Ensure ALL catalog games have is_vip = false while premium is paused
       await pool.query("UPDATE games SET is_vip = false");
