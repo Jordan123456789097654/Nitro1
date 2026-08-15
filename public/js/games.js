@@ -957,21 +957,35 @@ export async function openGame(slug) {
   const vipBadge = document.getElementById('player-vip-badge');
   const frameWrapper = document.getElementById('player-frame-wrapper');
 
-  try {
-    const res = await fetch(`/api/games/${slug}`);
-    const data = await res.json();
+  let gameData = null;
 
-    if (!res.ok) {
-      if (data.is_vip_locked) {
-        alert('👑 PRO Exclusive: This item is restricted to PRO and Administrator accounts. Unlock access in the PRO Lounge!');
-      } else {
-        alert(data.error || 'Failed to launch item.');
+  // Check built-in default apps first
+  const defaultApp = DEFAULT_APPS.find(a => a.id === slug || a.slug === slug || a.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === slug);
+  if (defaultApp) {
+    gameData = {
+      ...defaultApp,
+      slug: slug,
+      clicks: 1,
+      is_vip: false
+    };
+  } else {
+    try {
+      const res = await fetch(`/api/games/${slug}`);
+      const data = await res.json();
+      if (res.ok) {
+        gameData = data.game;
+      } else if (data.is_vip_locked) {
+        return alert('👑 PRO Exclusive: This item is restricted to PRO and Administrator accounts. Unlock access in the PRO Lounge!');
       }
-      return;
-    }
+    } catch (e) {}
+  }
 
-    activeGame = data.game;
-    titleEl.textContent = activeGame.title;
+  if (!gameData) {
+    return alert('Game or app item not found.');
+  }
+
+  activeGame = gameData;
+  titleEl.textContent = activeGame.title;
     vipBadge.style.display = activeGame.is_vip ? 'inline-flex' : 'none';
     vipBadge.textContent = 'PRO';
 
