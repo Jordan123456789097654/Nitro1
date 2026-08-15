@@ -40,12 +40,12 @@ const requireOwner = (req, res, next) => {
   next();
 };
 
-router.use(requireAdmin);
-
-// ADMIN TOGGLE NITRO AI MAINTENANCE MODE
+// PUBLIC NITRO AI STATUS CHECK ENDPOINT
 router.get('/ai-status', (req, res) => {
   res.json({ ai_enabled: systemState.isAiEnabled() });
 });
+
+router.use(requireAdmin);
 
 router.post('/toggle-ai', (req, res) => {
   const { enabled } = req.body;

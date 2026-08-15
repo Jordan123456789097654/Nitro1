@@ -10,7 +10,7 @@ function requireAuth(req, res, next) {
 }
 
 // List active channels (public)
-router.get('/list', requireAuth, (req, res) => {
+router.get('/list', (req, res) => {
   const channels = voiceManager.listChannels();
   res.json({ success: true, channels });
 });
