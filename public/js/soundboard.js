@@ -182,7 +182,7 @@ function playAudioUrl(url) {
 
 window.reloadSoundboardHub = function() {
   const iframe = document.getElementById('soundboard-gateway-frame');
-  if (iframe) iframe.src = '/api/gateway?url=' + encodeURIComponent('https://www.myinstants.com/en/categories/sound%20effects/us/');
+  if (iframe) iframe.src = '/api/gateway?url=' + encodeURIComponent('https://soundbuttons.net/');
 };
 
 window.fullscreenSoundboardHub = function() {
