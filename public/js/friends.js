@@ -63,21 +63,25 @@ export async function fetchFriends() {
     const friends = data.friends || [];
     const pending = data.pending || [];
 
-    if (pending.length > 0) {
-      if (pendingSection) pendingSection.style.display = 'block';
-      if (pendingList) {
+    if (pendingSection) pendingSection.style.display = 'block';
+
+    const pendingBadge = document.getElementById('friends-pending-count-badge');
+    if (pendingBadge) pendingBadge.textContent = `${pending.length} Pending`;
+
+    if (pendingList) {
+      if (pending.length > 0) {
         pendingList.innerHTML = pending.map(p => 
-          `<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 10px 14px; border-radius: 8px; margin-bottom: 6px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.2rem;">👤</span>
+          `<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; backdrop-filter: blur(10px);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.4rem;">👤</span>
               <div>
-                <strong style="color: #fbbf24;">${safeHtml(p.sender_display_name || p.sender_username)}</strong>
-                <span style="display: block; font-size: 0.78rem; color: #94a3b8;">@${safeHtml(p.sender_username)}</span>
+                <strong style="color: #fbbf24; font-size: 0.95rem;">${safeHtml(p.sender_display_name || p.sender_username)}</strong>
+                <span style="display: block; font-size: 0.78rem; color: #38bdf8; font-weight: 700;">@${safeHtml(p.sender_username)}</span>
               </div>
             </div>
-            <div style="display: flex; gap: 6px;">
-              <button class="btn-small primary btn-accept-req" data-req-id="${p.request_id}">Accept</button>
-              <button class="btn-small danger btn-decline-req" data-req-id="${p.request_id}">Decline</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-small primary btn-accept-req" data-req-id="${p.request_id}" style="background: #10b981; color: #000; font-weight: 800; padding: 6px 14px;">✓ Accept</button>
+              <button class="btn-small danger btn-decline-req" data-req-id="${p.request_id}" style="padding: 6px 14px;">✕ Decline</button>
             </div>
           </div>`
         ).join('');
@@ -88,9 +92,9 @@ export async function fetchFriends() {
         pendingList.querySelectorAll('.btn-decline-req').forEach(btn => {
           btn.addEventListener('click', () => window.respondFriendRequest(btn.dataset.reqId, 'declined'));
         });
+      } else {
+        pendingList.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 14px 18px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.12); border-radius: 8px; text-align: center;">No pending friend requests. When a classmate sends you a friend request, it will appear here!</div>';
       }
-    } else {
-      if (pendingSection) pendingSection.style.display = 'none';
     }
 
     window._cachedFriends = friends;

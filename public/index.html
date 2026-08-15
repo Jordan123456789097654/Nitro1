@@ -856,8 +856,11 @@
             </div>
           </div>
 
-          <div id="friends-pending-section" style="display: none;">
-            <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">Pending Friend Requests</h4>
+          <div id="friends-pending-section" style="display: block;">
+            <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
+              <span>📬 Pending Friend Requests</span>
+              <span id="friends-pending-count-badge" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; font-size: 0.75rem; padding: 2px 10px; border-radius: 99px; font-weight: 800;">0 Pending</span>
+            </h4>
             <div id="friends-pending-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
           </div>
 
