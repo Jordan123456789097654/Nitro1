@@ -436,11 +436,16 @@ router.all('/', async (req, res) => {
       'content-encoding'
     ];
 
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const reqProtocol = (forwardedProto && forwardedProto.split(',')[0].trim()) || req.protocol || 'https';
+    const hostHeader = req.get('host') || 'nitromath.site';
+    const gatewayPrefix = `${reqProtocol}://${hostHeader}/api/gateway?url=`;
+
     response.headers.forEach((val, key) => {
       const lowerKey = key.toLowerCase();
       if (!restrictedHeaders.includes(lowerKey)) {
         if (lowerKey === 'location') {
-          const redirected = resolveAndGatewayUrl(val, finalUrl, `/api/gateway?url=`);
+          const redirected = resolveAndGatewayUrl(val, finalUrl, gatewayPrefix);
           res.setHeader('Location', redirected);
         } else {
           try { res.setHeader(key, val); } catch(e) {}
@@ -452,9 +457,6 @@ router.all('/', async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
     res.removeHeader('X-Frame-Options');
-    const hostHeader = req.get('host') || 'localhost:3000';
-    const reqProtocol = req.protocol || 'http';
-    const gatewayPrefix = `${reqProtocol}://${hostHeader}/api/gateway?url=`;
 
     if (contentType.includes('text/html')) {
       const htmlText = buffer.toString('utf8');

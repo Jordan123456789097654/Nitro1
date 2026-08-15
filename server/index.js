@@ -49,6 +49,7 @@ const io = new Server(server, {
   cookie: false
 });
 app.set('io', io);
+app.set('trust proxy', 1);
 
 // Middleware & Security Headers
 app.use(cors());
