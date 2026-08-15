@@ -199,6 +199,44 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
           return origOpen.call(window, url, target, features);
         };
 
+        // Intercept dynamic DOM attribute setters (element.src, element.href, setAttribute)
+        var origSetAttribute = Element.prototype.setAttribute;
+        Element.prototype.setAttribute = function(name, value) {
+          if (typeof name === 'string' && typeof value === 'string') {
+            var lower = name.toLowerCase();
+            if ((lower === 'src' || lower === 'href' || lower === 'action') && !value.startsWith('data:') && !value.startsWith('blob:') && !value.includes('/api/gateway')) {
+              value = proxifyUrl(value);
+            }
+          }
+          return origSetAttribute.call(this, name, value);
+        };
+
+        try {
+          var scriptSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+          if (scriptSrcDescriptor && scriptSrcDescriptor.set) {
+            Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+              get: scriptSrcDescriptor.get,
+              set: function(val) {
+                return scriptSrcDescriptor.set.call(this, proxifyUrl(val));
+              },
+              configurable: true
+            });
+          }
+        } catch(e) {}
+
+        try {
+          var iframeSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+          if (iframeSrcDescriptor && iframeSrcDescriptor.set) {
+            Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+              get: iframeSrcDescriptor.get,
+              set: function(val) {
+                return iframeSrcDescriptor.set.call(this, proxifyUrl(val));
+              },
+              configurable: true
+            });
+          }
+        } catch(e) {}
+
         // Intercept link clicks to route subdomain & external links through gateway
         document.addEventListener('click', function(e) {
           var target = e.target;
