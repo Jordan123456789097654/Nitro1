@@ -660,6 +660,29 @@ function formatMessageText(text, gifUrl, audioUrl) {
   return html;
 }
 
+function formatChatTimestamp(rawTimestamp) {
+  if (!rawTimestamp) {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  let d;
+  if (rawTimestamp instanceof Date) {
+    d = rawTimestamp;
+  } else {
+    let str = String(rawTimestamp).trim();
+    if (!str.endsWith('Z') && !str.includes('+') && !str.includes('Z')) {
+      str = str.replace(' ', 'T') + 'Z';
+    }
+    d = new Date(str);
+  }
+
+  if (isNaN(d.getTime())) {
+    d = new Date();
+  }
+
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 function appendChatMessage(msg) {
   if (!msg) return;
   if (msg.id && document.getElementById(`msg-${msg.id}`)) return;
@@ -691,7 +714,7 @@ function appendChatMessage(msg) {
   const customFlair = msg.pro_custom_flair ? `<span class="custom-flair-badge">${escapeHtml(msg.pro_custom_flair)}</span>` : '';
   const glowClass = role === 'owner' ? 'glow-owner' : (msg.pro_chat_glow ? `glow-${msg.pro_chat_glow}` : '');
 
-  const time = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const time = formatChatTimestamp(msg.created_at);
   const displayName = msg.display_name || msg.username || 'Student';
   const deleteBtn = (isAdmin && msg.id) ? `<button class="chat-delete-btn" onclick="window.deleteChat(${msg.id})">✕</button>` : '';
 
@@ -733,7 +756,7 @@ function appendDmMessage(dm) {
   row.style.background = isMine ? 'rgba(56, 189, 248, 0.08)' : 'rgba(255, 255, 255, 0.04)';
   row.style.borderLeft = isMine ? '3px solid #38bdf8' : '3px solid #8b5cf6';
 
-  const time = new Date(dm.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const time = formatChatTimestamp(dm.created_at);
 
   row.innerHTML = `
     <div class="chat-msg-header">
@@ -751,7 +774,7 @@ function appendRoomMessage(msg) {
   const row = document.createElement('div');
   row.className = 'chat-message-row';
   const isPro = msg.role === 'pro' || msg.role === 'vip';
-  const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const time = formatChatTimestamp(msg.created_at);
 
   row.innerHTML = `
     <div class="chat-msg-header">
