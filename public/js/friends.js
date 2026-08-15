@@ -72,6 +72,31 @@ export async function fetchFriends() {
   } catch (e) {}
 }
 
+export async function sendFriendRequest(friendUsername) {
+  const uname = String(friendUsername || '').trim().replace(/^@/, '');
+  if (!uname) throw new Error('Please enter a student @username.');
+
+  const token = localStorage.getItem('nitro_jwt_token');
+  if (!token) throw new Error('Please sign in to send a friend request.');
+
+  const res = await fetch('/api/friends/request', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({ friendUsername: uname })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Friend request failed.');
+  }
+
+  fetchFriends();
+  return data;
+}
+
 function setupFriendsUI() {
   const addBtn = document.getElementById('send-friend-request-btn');
   const input = document.getElementById('friend-request-username-input');
@@ -82,25 +107,11 @@ function setupFriendsUI() {
       if (!uname) return alert('Please enter a student @username.');
 
       try {
-        const token = localStorage.getItem('nitro_jwt_token');
-        const res = await fetch('/api/friends/request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ friendUsername: uname })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          alert(data.message || 'Friend request sent!');
-          input.value = '';
-          fetchFriends();
-        } else {
-          alert(data.error || 'Friend request failed.');
-        }
+        await sendFriendRequest(uname);
+        alert('Friend request sent!');
+        input.value = '';
       } catch (e) {
-        alert('Error sending friend request.');
+        alert(e.message || 'Error sending friend request.');
       }
     });
   }

@@ -109,8 +109,7 @@ router.post('/submit', async (req, res) => {
 
     res.json({
       success: true,
-      message: `Your inquiry has been submitted and sent to ${targetEmail}!`,
-      targetEmail,
+      message: `Your inquiry has been submitted successfully to the selected department!`,
       emailSent,
       inquiry: newMail
     });
