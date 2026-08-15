@@ -106,7 +106,7 @@ export async function checkSession(onUserChange) {
     const res = await fetch('/api/auth/me', { headers });
     const data = await res.json();
 
-    if (data.is_banned || res.status === 403) {
+    if (data.is_banned && res.status === 403) {
       showBannedScreen(data.reason || 'Your account has been suspended by an administrator.');
       return;
     }

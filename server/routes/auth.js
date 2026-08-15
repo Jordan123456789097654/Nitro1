@@ -68,10 +68,16 @@ router.get('/me', async (req, res) => {
 
   try {
     const user = await db.getUserById(userId);
-    if (!user || user.is_banned) {
+    if (!user) {
       if (req.session) req.session.destroy();
       res.clearCookie('nitro_jwt_token');
-      return res.status(403).json({ loggedIn: false, is_banned: true, reason: user ? (user.ban_reason || 'Account suspended by administrator.') : 'Account suspended.', error: 'Account suspended.' });
+      return res.json({ loggedIn: false, user: null });
+    }
+
+    if (user.is_banned) {
+      if (req.session) req.session.destroy();
+      res.clearCookie('nitro_jwt_token');
+      return res.status(403).json({ loggedIn: false, is_banned: true, reason: user.ban_reason || 'Account suspended by administrator.', error: 'Account suspended.' });
     }
 
     res.json({
