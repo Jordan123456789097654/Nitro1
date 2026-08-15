@@ -1506,22 +1506,34 @@ export function setupBugReportModal() {
   });
 }
 
+const DEFAULT_APPS = [
+  { id: 'app-desmos', title: 'Desmos Graphing Calculator', author: 'Desmos', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator' },
+  { id: 'app-geogebra', title: 'GeoGebra Math Suite', author: 'GeoGebra', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator' },
+  { id: 'app-wolfram', title: 'WolframAlpha Computational Engine', author: 'Wolfram', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/' },
+  { id: 'app-wikipedia', title: 'Wikipedia Encyclopedia', author: 'Wikimedia', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/' },
+  { id: 'app-scratch', title: 'Scratch 3.0 Creative Studio', author: 'MIT', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/' },
+  { id: 'app-canva', title: 'Canva Design Studio', author: 'Canva', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/' },
+  { id: 'app-duckduckgo', title: 'DuckDuckGo Academic Search', author: 'DuckDuckGo', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/' }
+];
+
 export async function loadApps() {
   const appSearchInput = document.getElementById('app-search-input');
-  const search = appSearchInput ? appSearchInput.value : '';
+  const search = (appSearchInput ? appSearchInput.value : '').toLowerCase().trim();
 
+  let fetchedApps = [];
   try {
     const res = await fetch(`/api/games?search=${encodeURIComponent(search)}&category=Apps&sort=az`);
-    if (!res.ok) return;
-    const contentType = res.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) return;
-    const data = await res.json();
-    const apps = data.games || [];
+    if (res.ok) {
+      const data = await res.json();
+      fetchedApps = data.games || [];
+    }
+  } catch (err) {}
 
-    renderGames(apps, 'apps-grid');
-  } catch (err) {
-    // network fallback
-  }
+  const combined = [...fetchedApps, ...DEFAULT_APPS];
+  const uniqueApps = Array.from(new Map(combined.map(a => [a.title.toLowerCase(), a])).values());
+  const filtered = uniqueApps.filter(a => !search || a.title.toLowerCase().includes(search) || (a.author && a.author.toLowerCase().includes(search)));
+
+  renderGames(filtered, 'apps-grid');
 }
 
 // Add oninput listener for Apps search input

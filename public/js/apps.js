@@ -1,5 +1,1 @@
-import { loadGames } from './games.js';
-
-export function loadApps() {
-  loadGames();
-}
+export { loadApps } from './games.js';
