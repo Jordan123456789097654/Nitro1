@@ -175,7 +175,11 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
               if (typeof input === 'string') {
                 input = pUrl;
               } else if (input && input.url) {
-                input = new Request(pUrl, input);
+                try {
+                  input = new Request(pUrl, input);
+                } catch(e) {
+                  input = pUrl;
+                }
               }
             }
             return origFetch.call(this, input, init);
@@ -490,13 +494,20 @@ router.all('/', async (req, res) => {
     };
 
     if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
-      if (typeof req.body === 'object') {
-        const params = new URLSearchParams();
-        for (const [k, v] of Object.entries(req.body)) {
-          params.append(k, v);
+      if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
+        fetchOptions.body = req.body;
+      } else if (typeof req.body === 'object') {
+        if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+          fetchOptions.body = JSON.stringify(req.body);
+          fetchOptions.headers['Content-Type'] = 'application/json';
+        } else {
+          const params = new URLSearchParams();
+          for (const [k, v] of Object.entries(req.body)) {
+            params.append(k, v);
+          }
+          fetchOptions.body = params.toString();
+          fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
-        fetchOptions.body = params.toString();
-        fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
       }
     }
 
