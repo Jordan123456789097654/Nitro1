@@ -389,9 +389,6 @@ function setupUploadModal() {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
-      if (!token) {
-        return alert('Please log in to upload custom soundboard sounds.');
-      }
 
       const submitBtn = document.getElementById('sound-upload-submit-btn');
       const originalBtnText = submitBtn ? submitBtn.textContent : 'Upload Soundboard Sound';
@@ -426,12 +423,12 @@ function setupUploadModal() {
           return alert('Please enter an Audio URL or choose a local audio file.');
         }
 
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch('/api/soundboard/upload', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
+          headers: headers,
           body: JSON.stringify({ title, icon, audioUrl, isGlobal })
         });
         const data = await res.json();

@@ -47,16 +47,36 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/soundboard/upload - Upload custom or global sound
-router.post('/upload', authenticateToken, async (req, res) => {
+// POST /api/soundboard/upload - Upload custom or global sound (Guests & Logged in)
+router.post('/upload', async (req, res) => {
   try {
     const { title, icon, audioUrl, isGlobal } = req.body;
     if (!title || !audioUrl) {
       return res.status(400).json({ success: false, error: 'Title and audio URL/data are required.' });
     }
 
-    const dbUser = await db.getUserByUsername(req.user.username);
-    const isOwnerOrAdmin = dbUser && (dbUser.role === 'owner' || dbUser.role === 'admin');
+    let username = 'Guest';
+    let isOwnerOrAdmin = false;
+
+    let token = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else if (req.cookies && req.cookies.nitro_jwt_token) {
+      token = req.cookies.nitro_jwt_token;
+    }
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        username = decoded.username || 'Guest';
+        const dbUser = await db.getUserByUsername(username);
+        if (dbUser && (dbUser.role === 'owner' || dbUser.role === 'admin')) {
+          isOwnerOrAdmin = true;
+        }
+      } catch (e) {}
+    }
+
     const setGlobal = isOwnerOrAdmin ? (isGlobal === true || isGlobal === 'true') : false;
 
     const newSound = await db.createSoundboardSound({
@@ -64,7 +84,7 @@ router.post('/upload', authenticateToken, async (req, res) => {
       icon: (icon || '🎵').slice(0, 10),
       audioUrl: audioUrl.trim(),
       isGlobal: setGlobal,
-      uploadedBy: req.user.username
+      uploadedBy: username
     });
 
     res.json({ success: true, sound: newSound });
