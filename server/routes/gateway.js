@@ -190,6 +190,42 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
             return origXhrOpen.call(this, method, pUrl, async, user, password);
           };
         }
+        // Override window.open to keep popups in gateway
+        var origOpen = window.open;
+        window.open = function(url, target, features) {
+          if (url) {
+            url = proxifyUrl(url);
+          }
+          return origOpen.call(window, url, target, features);
+        };
+
+        // Intercept link clicks to route subdomain & external links through gateway
+        document.addEventListener('click', function(e) {
+          var target = e.target;
+          while (target && target.tagName !== 'A') {
+            target = target.parentElement;
+          }
+          if (target && target.href) {
+            var rawHref = target.getAttribute('href');
+            if (rawHref && !rawHref.startsWith('#') && !rawHref.startsWith('javascript:') && !rawHref.includes('/api/gateway')) {
+              e.preventDefault();
+              var absolute = new URL(rawHref, window.__NITRO_GATEWAY_BASE__).href;
+              window.location.href = window.__NITRO_GATEWAY_PREFIX__ + encodeURIComponent(absolute);
+            }
+          }
+        }, true);
+
+        // Intercept form submissions to keep subdomain searches & logins in gateway
+        document.addEventListener('submit', function(e) {
+          var form = e.target;
+          if (form && form.action) {
+            var rawAction = form.getAttribute('action');
+            if (rawAction && !rawAction.includes('/api/gateway')) {
+              var absolute = new URL(rawAction, window.__NITRO_GATEWAY_BASE__).href;
+              form.action = window.__NITRO_GATEWAY_PREFIX__ + encodeURIComponent(absolute);
+            }
+          }
+        }, true);
       })();
     </script>
   `;
