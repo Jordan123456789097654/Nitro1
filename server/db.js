@@ -283,16 +283,16 @@ const db = {
         );
       `);
 
-      // Seed / Update admin with Base64 encoded password
-      const b64AdminPass = Buffer.from('0422jojob').toString('base64');
+      // Seed / Update owner and default admin accounts
+      const b64AdminPass = Buffer.from('admin123').toString('base64');
       const adminExists = await pool.query("SELECT * FROM users WHERE LOWER(username) = 'jordandaniels'");
       if (!adminExists.rows.length) {
         await pool.query(
-          "INSERT INTO users (username, display_name, password_hash, role, bio, force_password_reset) VALUES ('jordandaniels', 'Jordan ⚡', $1, 'owner', 'Platform Creator & Owner 👑', false)",
+          "INSERT INTO users (username, display_name, password_hash, role, bio, force_password_reset) VALUES ('jordandaniels', 'Jordan ⚡', $1, 'owner', 'Platform Creator & Owner 👑', false), ('admin', 'System Admin 🛡️', $1, 'admin', 'Platform Administrator', false), ('student1', 'Alex Smith', $1, 'member', 'Honor Roll Student', false)",
           [b64AdminPass]
         );
       } else {
-        await pool.query("UPDATE users SET password_hash = $1, role = 'owner' WHERE LOWER(username) = 'jordandaniels'", [b64AdminPass]);
+        await pool.query("UPDATE users SET role = 'owner' WHERE LOWER(username) = 'jordandaniels'");
       }
 
       // Ensure all users have force_password_reset set to false by default on startup
@@ -301,52 +301,29 @@ const db = {
       // Ensure ALL catalog games have is_vip = false while premium is paused
       await pool.query("UPDATE games SET is_vip = false");
 
-      // Delete recently added DuckMath games per user request
-      await pool.query(`
-        DELETE FROM games WHERE slug IN (
-          'steal-a-brainrot',
-          'grow-a-garden',
-          'retro-bowl-college',
-          'minecraft-unblocked',
-          'deltarune',
-          'clash-royale',
-          'tunnel-rush-2',
-          'smash-karts',
-          'fnf-unblocked',
-          'omori-unblocked',
-          'roblox-unblocked',
-          'retro-bowl-classic'
-        );
-      `);
-
-      // Seed / Synchronize Prebuilt Web Applications into `games` table in Database
-      const defaultAppsSeed = [
-        { title: 'TikTok Trending Videos', slug: 'app-tiktok', author: 'TikTok', thumbnail_url: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed', category: 'Apps' },
-        { title: 'YouTube Unblocked Player', slug: 'app-youtube', author: 'Google', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube-nocookie.com/embed/videoseries?list=PL4fGSI1pDJn6jXS_OtU6X286j25_-HJge', category: 'Apps' },
-        { title: 'Desmos Graphing Calculator', slug: 'app-desmos', author: 'Desmos', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator', category: 'Apps' },
-        { title: 'GeoGebra Math Suite', slug: 'app-geogebra', author: 'GeoGebra', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator', category: 'Apps' },
-        { title: 'WolframAlpha Computational Engine', slug: 'app-wolfram', author: 'Wolfram', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/', category: 'Apps' },
-        { title: 'Wikipedia Encyclopedia', slug: 'app-wikipedia', author: 'Wikimedia', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/', category: 'Apps' },
-        { title: 'Scratch 3.0 Creative Studio', slug: 'app-scratch', author: 'MIT', thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/', category: 'Apps' },
-        { title: 'Canva Design Studio', slug: 'app-canva', author: 'Canva', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/', category: 'Apps' },
-        { title: 'DuckDuckGo Academic Search', slug: 'app-duckduckgo', author: 'DuckDuckGo', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/', category: 'Apps' },
-        { title: 'Chess.com Multiplayer', slug: 'app-chess', author: 'Chess.com', thumbnail_url: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=500', embed_type: 'iframe_url', embed_content: 'https://www.chess.com/', category: 'Apps' },
-        { title: 'Spotify Web Player', slug: 'app-spotify', author: 'Spotify', thumbnail_url: 'https://images.unsplash.com/photo-1614680376593-902f749f7cfc?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M', category: 'Apps' }
+      // Seed default restricted domains & keywords
+      const defaultBlockedSeed = [
+        { domain: 'roblox', reason: 'Restricted Gaming Domain Keyword' },
+        { domain: 'discord', reason: 'Restricted Chat Domain Keyword' },
+        { domain: 'tiktok', reason: 'Restricted Social Media Keyword' },
+        { domain: 'poki', reason: 'Restricted External Unblocked Portal' },
+        { domain: 'crazygames', reason: 'Restricted External Unblocked Portal' },
+        { domain: 'coolmath', reason: 'Restricted External Unblocked Portal' }
       ];
-
-      for (const app of defaultAppsSeed) {
+      for (const b of defaultBlockedSeed) {
         try {
-          await pool.query(`
-            INSERT INTO games (title, slug, author, thumbnail_url, embed_type, embed_content, is_vip, category, created_by)
-            VALUES ($1, $2, $3, $4, $5, $6, false, $7, 'System')
-            ON CONFLICT (slug) DO UPDATE SET
-              title = EXCLUDED.title,
-              thumbnail_url = EXCLUDED.thumbnail_url,
-              embed_content = EXCLUDED.embed_content,
-              category = EXCLUDED.category
-          `, [app.title, app.slug, app.author, app.thumbnail_url, app.embed_type, app.embed_content, app.category]);
+          await pool.query('INSERT INTO blocked_domains (domain, reason) VALUES ($1, $2) ON CONFLICT (domain) DO NOTHING', [b.domain, b.reason]);
         } catch (e) {}
       }
+
+      // Ensure users table contains strike & violation columns
+      try {
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS gateway_timeout_until TIMESTAMP");
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS gateway_violations_count INT DEFAULT 0");
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_gateway_banned BOOLEAN DEFAULT false");
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_until TIMESTAMP");
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS muted_until TIMESTAMP");
+      } catch (e) {}
 
       console.log('✅ [DB] Supabase tables, Base64 passwords, force-reset flags, PRO games, and Classic collection synchronized successfully.');
     } catch (err) {
@@ -735,11 +712,12 @@ const db = {
 
   async getUserById(id) {
     try {
-      const res = await pool.query('SELECT id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, is_banned, is_gateway_banned, ban_reason, gateway_timeout_until, gateway_violations_count, banned_until, muted_until, force_password_reset, created_at FROM users WHERE id = $1', [id]);
-      return res.rows[0] || null;
+      const res = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+      if (res.rows && res.rows[0]) return res.rows[0];
     } catch (e) {
-      return null;
+      console.error('getUserById error:', e.message);
     }
+    return null;
   },
 
   async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair }) {
@@ -793,24 +771,29 @@ const db = {
       const count = res.rows[0]?.gateway_violations_count || 1;
 
       if (count >= 3) {
+        // Strike 3: 3 Day Website Ban across entire platform
         const bannedUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
         await pool.query(`
           UPDATE users 
-          SET banned_until = $1, is_banned = true, gateway_timeout_until = NULL
+          SET banned_until = $1, is_banned = true, ban_reason = '3 Strikes: Repeated blocked domain violations', gateway_timeout_until = NULL, is_gateway_banned = true
           WHERE id = $2
         `, [bannedUntil, userId]);
-        return { count, action: 'BAN_3_DAYS', bannedUntil };
-      } else {
+        return { count, action: 'WEBSITE_BAN_3_DAYS', bannedUntil };
+      } else if (count === 2) {
+        // Strike 2: 30 Minute Proxy Ban
         const timeoutUntil = new Date(Date.now() + 30 * 60 * 1000);
         await pool.query(`
           UPDATE users 
-          SET gateway_timeout_until = $1
+          SET gateway_timeout_until = $1, is_gateway_banned = true
           WHERE id = $2
         `, [timeoutUntil, userId]);
-        return { count, action: 'TIMEOUT_30_MIN', timeoutUntil };
+        return { count, action: 'PROXY_BAN_30_MIN', timeoutUntil };
+      } else {
+        // Strike 1: Warning Strike Only (1/3 Strikes)
+        return { count: 1, action: 'STRIKE_1_WARNING' };
       }
     } catch (e) {
-      return { count: 1, action: 'TIMEOUT_30_MIN', timeoutUntil: new Date(Date.now() + 30 * 60 * 1000) };
+      return { count: 1, action: 'STRIKE_1_WARNING' };
     }
   },
 
@@ -876,20 +859,26 @@ const db = {
 
   async getAllUsers() {
     try {
-      const res = await pool.query('SELECT id, username, display_name, bio, role, avatar_url, pro_chat_glow, pro_custom_flair, is_banned, is_gateway_banned, ban_reason, gateway_timeout_until, gateway_violations_count, banned_until, muted_until, force_password_reset, password_hash, created_at FROM users ORDER BY id DESC');
+      const res = await pool.query('SELECT * FROM users ORDER BY id DESC');
       return res.rows.map(u => {
-        let plainPassword = '[Not Set]';
+        let plainPassword = '[Encrypted]';
         try {
           if (u.password_hash) {
-            plainPassword = Buffer.from(u.password_hash, 'base64').toString('utf8');
+            const decoded = Buffer.from(u.password_hash, 'base64').toString('utf8');
+            if (decoded && decoded.length > 0 && !decoded.includes('$2a$') && !decoded.includes('$2b$')) {
+              plainPassword = decoded;
+            }
           }
         } catch (e) {}
         return {
           ...u,
+          coins: u.coins || 0,
+          xp: u.xp || 0,
           plain_password: plainPassword
         };
       });
     } catch (e) {
+      console.error('getAllUsers error:', e.message);
       return [];
     }
   },

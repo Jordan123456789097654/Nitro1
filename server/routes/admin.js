@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const systemState = require('../systemState');
 const { sendDiscordLog } = require('../discordLogger');
 const { getActiveConnectionsList } = require('../chatSocket');
 
@@ -16,7 +17,8 @@ const requireAdmin = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      user = await db.getUserById(decoded.id);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
     } catch (e) {}
   }
 
@@ -39,6 +41,31 @@ const requireOwner = (req, res, next) => {
 };
 
 router.use(requireAdmin);
+
+// ADMIN TOGGLE NITRO AI MAINTENANCE MODE
+router.get('/ai-status', (req, res) => {
+  res.json({ ai_enabled: systemState.isAiEnabled() });
+});
+
+router.post('/toggle-ai', (req, res) => {
+  const { enabled } = req.body;
+  const newState = enabled !== undefined ? !!enabled : !systemState.isAiEnabled();
+  systemState.setAiEnabled(newState);
+
+  sendDiscordLog({
+    category: 'admin',
+    action: 'AI_MAINTENANCE_TOGGLE',
+    admin: req.adminUser.username,
+    details: `Nitro AI state toggled to ${newState ? 'ONLINE' : 'UNDER MAINTENANCE'}`
+  });
+
+  res.json({
+    success: true,
+    ai_enabled: newState,
+    message: `Nitro AI is now ${newState ? 'ONLINE' : 'UNDER MAINTENANCE'}`
+  });
+});
+
 
 // ADMIN/OWNER CREATE USER ACCOUNT
 router.post('/users/create', async (req, res) => {

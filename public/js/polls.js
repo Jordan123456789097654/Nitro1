@@ -66,25 +66,21 @@ export async function loadPolls() {
 }
 
 function renderPollCard(poll) {
-  const options = typeof poll.options === 'string' ? JSON.parse(poll.options) : poll.options;
-  const totalVotes = parseInt(poll.total_votes || 0, 10);
-  const voteCountsMap = {};
-
-  (poll.vote_counts || []).forEach(v => {
-    voteCountsMap[v.option_index] = parseInt(v.count, 10);
-  });
+  const options = Array.isArray(poll.options) ? poll.options : (typeof poll.options === 'string' ? JSON.parse(poll.options) : []);
+  const totalVotes = parseInt(poll.totalVotes !== undefined ? poll.totalVotes : (poll.total_votes || 0), 10);
 
   const optionsHtml = options.map((opt, idx) => {
-    const count = voteCountsMap[idx] || 0;
-    const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-    const isSelected = poll.user_voted_option === idx;
+    const optText = typeof opt === 'object' && opt !== null ? (opt.text || '') : String(opt);
+    const count = typeof opt === 'object' && opt !== null ? (opt.votes || 0) : 0;
+    const pct = typeof opt === 'object' && opt !== null ? (opt.percentage || 0) : (totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0);
+    const isSelected = poll.userVotedOption === idx || poll.user_voted_option === idx;
 
     return `
       <div class="poll-option-row">
         <button class="poll-option-btn ${isSelected ? 'voted' : ''}" data-poll-id="${poll.id}" data-opt-idx="${idx}">
           <div class="poll-bar-fill" style="width: ${pct}%;"></div>
           <div class="poll-option-content">
-            <span class="poll-option-text">${isSelected ? '✓ ' : ''}${opt}</span>
+            <span class="poll-option-text">${isSelected ? '✓ ' : ''}${escapeHtml(optText)}</span>
             <span class="poll-option-pct"><strong>${pct}%</strong> (${count})</span>
           </div>
         </button>
@@ -98,12 +94,12 @@ function renderPollCard(poll) {
         <span class="poll-badge">📊 COMMUNITY VOTE</span>
         <span class="poll-total-badge">${totalVotes} ${totalVotes === 1 ? 'Vote' : 'Votes'}</span>
       </div>
-      <h3 class="poll-question">${poll.question}</h3>
+      <h3 class="poll-question">${escapeHtml(poll.question)}</h3>
       <div class="poll-options-list">
         ${optionsHtml}
       </div>
       <div class="poll-footer">
-        <span>Created by <strong>${poll.created_by}</strong></span>
+        <span>Created by <strong>${escapeHtml(poll.created_by || 'System')}</strong></span>
       </div>
     </div>
   `;

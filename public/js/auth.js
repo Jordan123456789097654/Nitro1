@@ -99,9 +99,17 @@ export function showBannedScreen(reason = 'Violation of platform guidelines') {
 }
 
 export async function checkSession(onUserChange) {
+  const token = getCookie('nitro_jwt_token') || localStorage.getItem('nitro_jwt_token');
+
+  if (!token) {
+    currentUser = null;
+    toggleMandatoryGate(true);
+    updateNavAuthUI();
+    return;
+  }
+
   try {
-    const token = getCookie('nitro_jwt_token') || localStorage.getItem('nitro_jwt_token');
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const headers = { 'Authorization': `Bearer ${token}` };
 
     const res = await fetch('/api/auth/me', { headers });
     const data = await res.json();
@@ -114,7 +122,8 @@ export async function checkSession(onUserChange) {
     if (data.loggedIn && data.user) {
       currentUser = data.user;
       toggleMandatoryGate(false);
-      if (token) setCookie('nitro_jwt_token', token, 365);
+      setCookie('nitro_jwt_token', token, 365);
+      localStorage.setItem('nitro_jwt_token', token);
       if (data.must_reset_password) {
         setTimeout(handleMandatoryPasswordReset, 600);
       }
@@ -523,6 +532,14 @@ function setupMandatoryLoginGate(onUserChange) {
   if (savedUsername && usernameInput) {
     usernameInput.value = savedUsername;
     if (rememberCheckbox) rememberCheckbox.checked = true;
+  }
+
+  const guestBtn = document.getElementById('gate-guest-continue-btn');
+  if (guestBtn) {
+    guestBtn.addEventListener('click', () => {
+      sessionStorage.setItem('nitro_guest_dismissed', 'true');
+      toggleMandatoryGate(false);
+    });
   }
 
   let gateIsRegister = false;

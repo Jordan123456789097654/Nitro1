@@ -4,3 +4,7 @@ data/*.db-journal
 .env
 .DS_Store
 *.log
+temp_comic_relief/
+temp_games_repo/
+do_direct_restore.js
+restore_backup_script.js

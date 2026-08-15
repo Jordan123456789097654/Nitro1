@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initSoundboard();
   initVoiceRooms();
   initFriends();
-  initContactForm();
   initToolsDropdown();
   initCloakMode();
   initPersonalBranding();
@@ -57,41 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initKonamiCode();
   setupBadgesModal();
   window.openPublicProfile = openPublicProfile;
-
-function initContactForm() {
-  const form = document.getElementById('contact-us-form');
-  if (!form) return;
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('contact-name-input').value.trim();
-    const email = document.getElementById('contact-email-input').value.trim();
-    const department = document.getElementById('contact-dept-select').value;
-    const subject = document.getElementById('contact-subject-input').value.trim();
-    const message = document.getElementById('contact-message-input').value.trim();
-
-    if (!name || !email || !subject || !message) {
-      return alert('Please fill in all contact form fields.');
-    }
-
-    try {
-      const res = await fetch('/api/contact/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, department, subject, message })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert(`✉️ Inquiry Sent! ${data.message || `Message routed to ${data.targetEmail}`}`);
-        form.reset();
-      } else {
-        alert(data.error || 'Failed to submit inquiry.');
-      }
-    } catch (err) {
-      alert('Error submitting contact form.');
-    }
-  });
-}
 
   initAuth((user) => {
     checkStatusAndAnnouncements();
@@ -655,6 +619,14 @@ function initCloakMode() {
 }
 
 window.switchView = function(targetView) {
+  if (targetView === 'games') {
+    const user = getCurrentUser();
+    if (!user || !['admin', 'owner'].includes(user.role)) {
+      alert('🔒 Access Restricted: The Add Custom Item creator tool is reserved for Administrator accounts.');
+      return window.switchView('library');
+    }
+  }
+
   const navBtns = document.querySelectorAll('.nav-btn[data-view]');
   const views = document.querySelectorAll('.page-view');
 

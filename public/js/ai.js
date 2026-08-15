@@ -1,68 +1,293 @@
-// AI Study & Homework Helper Engine
+// Nitro AI Chatbot & Academic Tutor Engine (Multimodal Vision & PDF/Document Upload Support)
+let conversationHistory = [];
+let currentSelectedFile = null;
 
 export function initAiHelper() {
-  const form = document.getElementById('ai-chat-form');
-  const input = document.getElementById('ai-chat-input');
-  const messagesList = document.getElementById('ai-messages-list');
-  const promptChips = document.querySelectorAll('.ai-prompt-chip');
+  setupAiModal();
+  setupAiChat();
+  setupFileUpload();
+  checkAiStatusAndUpdateUi();
+}
 
-  if (promptChips) {
-    promptChips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        const promptText = chip.dataset.prompt;
-        if (input) {
-          input.value = promptText;
-          input.focus();
-        }
-      });
+function setupAiModal() {
+  const modal = document.getElementById('ai-helper-modal');
+  const openBtn = document.getElementById('open-ai-helper-btn');
+  const closeBtn = document.getElementById('ai-helper-modal-close');
+
+  if (openBtn && modal) {
+    openBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+      checkAiStatusAndUpdateUi();
+      document.getElementById('ai-chat-input')?.focus();
     });
   }
 
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const query = input.value.trim();
-      if (!query) return;
-
-      appendMessage('user', query);
-      input.value = '';
-
-      // Generate intelligent study response
-      appendTypingIndicator();
-      setTimeout(() => {
-        removeTypingIndicator();
-        const response = generateAiAnswer(query);
-        appendMessage('bot', response);
-      }, 550);
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
     });
   }
 }
 
-function appendMessage(sender, text) {
+async function checkAiStatusAndUpdateUi() {
+  try {
+    const res = await fetch('/api/ai/status');
+    const data = await res.json();
+    const statusVal = document.querySelector('#ai-helper-modal .ai-info-card div:nth-child(2) strong');
+    const onlineBadge = document.querySelector('#ai-helper-modal .ai-info-card div:nth-child(3)');
+    const input = document.getElementById('ai-chat-input');
+
+    if (data.enabled === false || data.maintenance === true) {
+      if (statusVal) {
+        statusVal.textContent = 'Maintenance';
+        statusVal.style.color = '#ef4444';
+      }
+      if (onlineBadge) {
+        onlineBadge.innerHTML = '<span style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444;"></span><span>🔴 Under Maintenance</span>';
+        onlineBadge.style.color = '#ef4444';
+      }
+      if (input) {
+        input.placeholder = '🛠️ Nitro AI is currently under maintenance...';
+      }
+    } else {
+      if (statusVal) {
+        statusVal.textContent = 'Ready';
+        statusVal.style.color = '#10b981';
+      }
+      if (onlineBadge) {
+        onlineBadge.innerHTML = '<span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span><span>🟢 AI Online</span>';
+        onlineBadge.style.color = '#10b981';
+      }
+      if (input && input.placeholder.includes('maintenance')) {
+        input.placeholder = 'Ask me anything...';
+      }
+    }
+  } catch (e) {}
+}
+
+
+function getFormattedTime() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function setupFileUpload() {
+  const fileInput = document.getElementById('ai-file-input');
+  const attachBtn = document.getElementById('ai-attach-file-btn');
+  const previewBar = document.getElementById('ai-image-preview-bar');
+  const imageWrapper = document.getElementById('ai-image-preview-wrapper');
+  const previewImg = document.getElementById('ai-image-preview-img');
+  const docBadge = document.getElementById('ai-doc-preview-badge');
+  const docFilenameSpan = document.getElementById('ai-doc-filename');
+  const removeBtn = document.getElementById('ai-remove-image-btn');
+
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const isImg = file.type.startsWith('image/');
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const base64Data = event.target.result;
+        currentSelectedFile = {
+          name: file.name,
+          type: file.type || 'application/octet-stream',
+          base64: base64Data,
+          isImage: isImg
+        };
+
+        if (previewBar) previewBar.style.display = 'flex';
+
+        if (isImg) {
+          if (imageWrapper) imageWrapper.style.display = 'inline-block';
+          if (previewImg) previewImg.src = base64Data;
+          if (docBadge) docBadge.style.display = 'none';
+        } else {
+          if (imageWrapper) imageWrapper.style.display = 'none';
+          if (docBadge) docBadge.style.display = 'flex';
+          if (docFilenameSpan) docFilenameSpan.textContent = file.name;
+        }
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener('click', clearSelectedFile);
+  }
+}
+
+function clearSelectedFile() {
+  currentSelectedFile = null;
+  const fileInput = document.getElementById('ai-file-input');
+  if (fileInput) fileInput.value = '';
+  const previewBar = document.getElementById('ai-image-preview-bar');
+  if (previewBar) previewBar.style.display = 'none';
+  const imageWrapper = document.getElementById('ai-image-preview-wrapper');
+  if (imageWrapper) imageWrapper.style.display = 'none';
+  const docBadge = document.getElementById('ai-doc-preview-badge');
+  if (docBadge) docBadge.style.display = 'none';
+}
+
+function setupAiChat() {
+  const form = document.getElementById('ai-chat-form');
+  const input = document.getElementById('ai-chat-input');
+  const clearBtn = document.getElementById('ai-clear-chat-btn');
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      conversationHistory = [];
+      clearSelectedFile();
+      const messagesList = document.getElementById('ai-messages-list');
+      if (messagesList) {
+        messagesList.innerHTML = '';
+        appendMessage('bot', '👋 **Chat conversation cleared.** Ready for your next homework prompt or document upload!', getFormattedTime());
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = input.value.trim();
+      if (!query && !currentSelectedFile) return;
+
+      const time = getFormattedTime();
+      const attachedFile = currentSelectedFile;
+
+      appendMessage('user', query || (attachedFile ? `[Attached ${attachedFile.name}]` : ''), time, attachedFile);
+
+      const historyItem = { role: 'user', content: query || `Analyze attached file: ${attachedFile?.name}` };
+      if (attachedFile) historyItem.file = attachedFile.name;
+      conversationHistory.push(historyItem);
+
+      input.value = '';
+      clearSelectedFile();
+
+      appendTypingIndicator(attachedFile);
+
+      try {
+        const token = localStorage.getItem('nitro_jwt_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const requestBody = {
+          message: query,
+          userPrompt: query,
+          history: conversationHistory
+        };
+
+        if (attachedFile) {
+          requestBody.fileName = attachedFile.name;
+          requestBody.fileType = attachedFile.type;
+          requestBody.fileBase64 = attachedFile.base64;
+          if (attachedFile.isImage) {
+            requestBody.imageBase64 = attachedFile.base64;
+          }
+        }
+
+        const res = await fetch('/api/ai/ask', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(requestBody)
+        });
+
+        const data = await res.json();
+        removeTypingIndicator();
+
+        const responseTime = getFormattedTime();
+
+        if (res.ok && data.answer) {
+          appendMessage('bot', data.answer, responseTime);
+          conversationHistory.push({ role: 'assistant', content: data.answer });
+        } else {
+          const errorMsg = data.error || '⚠️ Unable to connect to AI server. Please try again.';
+          appendMessage('bot', errorMsg, responseTime);
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessage('bot', '⚠️ **Connection Error:** Failed to reach Nitro AI endpoint.', getFormattedTime());
+      }
+    });
+  }
+}
+
+function appendMessage(sender, text, timestamp = getFormattedTime(), fileObj = null) {
   const messagesList = document.getElementById('ai-messages-list');
   if (!messagesList) return;
 
   const msgDiv = document.createElement('div');
   msgDiv.className = `ai-message ${sender}`;
+  msgDiv.style.cssText = sender === 'user'
+    ? 'display: flex; flex-direction: column; max-width: 78%; align-self: flex-end;'
+    : 'display: flex; flex-direction: column; max-width: 82%; align-self: flex-start;';
+
+  const isUser = sender === 'user';
+  const headerHtml = isUser
+    ? `<div class="ai-msg-header" style="font-size: 0.76rem; font-weight: 700; margin-bottom: 5px; text-align: right; color: rgba(255, 255, 255, 0.85);">You · ${timestamp}</div>`
+    : `<div class="ai-msg-header" style="font-size: 0.76rem; font-weight: 700; margin-bottom: 5px;">Nitro AI · ${timestamp}</div>`;
+
+  let fileAttachmentHtml = '';
+  if (fileObj) {
+    if (fileObj.isImage) {
+      fileAttachmentHtml = `<div style="margin-bottom: 10px;"><img src="${fileObj.base64}" style="max-width: 220px; max-height: 180px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); object-fit: cover;"></div>`;
+    } else {
+      fileAttachmentHtml = `<div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--accent-color); padding: 8px 12px; border-radius: 10px; font-size: 0.82rem; margin-bottom: 10px;"><span style="font-size: 1.2rem;">📄</span><span style="font-weight: 700;">${fileObj.name}</span></div>`;
+    }
+  }
+
   msgDiv.innerHTML = `
-    <div class="ai-avatar">${sender === 'user' ? '👤' : '🪄'}</div>
-    <div class="ai-bubble">${formatAiText(text)}</div>
+    ${headerHtml}
+    <div class="ai-bubble" style="border-radius: 14px; padding: 14px 18px; font-size: 0.92rem; line-height: 1.6;">
+      ${fileAttachmentHtml}
+      ${formatAiText(text)}
+      ${!isUser ? `<button class="copy-ai-ans-btn" style="margin-top: 10px; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">📋 Copy Answer</button>` : ''}
+    </div>
   `;
+
+  // Attach copy answer click handler
+  const copyBtn = msgDiv.querySelector('.copy-ai-ans-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(text);
+      copyBtn.textContent = '✅ Copied!';
+      setTimeout(() => { copyBtn.textContent = '📋 Copy Answer'; }, 2000);
+    });
+  }
 
   messagesList.appendChild(msgDiv);
   messagesList.scrollTop = messagesList.scrollHeight;
 }
 
-function appendTypingIndicator() {
+function appendTypingIndicator(fileObj = null) {
   const messagesList = document.getElementById('ai-messages-list');
   if (!messagesList) return;
 
   const typingDiv = document.createElement('div');
   typingDiv.id = 'ai-typing-indicator';
-  typingDiv.className = 'ai-message bot';
+  typingDiv.style.cssText = 'display: flex; flex-direction: column; max-width: 82%; align-self: flex-start;';
+  
+  let statusText = 'Gemini Flash is generating your response...';
+  if (fileObj) {
+    statusText = fileObj.isImage
+      ? 'Gemini Vision is analyzing your image & prompt...'
+      : `Nitro AI is parsing & analyzing document: ${fileObj.name}...`;
+  }
+
   typingDiv.innerHTML = `
-    <div class="ai-avatar">🪄</div>
-    <div class="ai-bubble" style="color: var(--text-muted); font-style: italic;">Analyzing homework problem...</div>
+    <div class="ai-msg-header" style="font-size: 0.76rem; font-weight: 700; margin-bottom: 5px;">Nitro AI · Thinking...</div>
+    <div class="ai-bubble" style="border-radius: 14px; padding: 12px 18px; font-size: 0.88rem; font-style: italic; display: flex; align-items: center; gap: 8px;">
+      <span class="online-dot" style="width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; animation: pulse 1s infinite;"></span>
+      ${statusText}
+    </div>
   `;
   messagesList.appendChild(typingDiv);
   messagesList.scrollTop = messagesList.scrollHeight;
@@ -74,127 +299,17 @@ function removeTypingIndicator() {
 }
 
 function formatAiText(text) {
-  // Simple markdown converter for code blocks and bold
-  let formatted = text
-    .replace(/```([a-z]*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+  if (!text) return '';
+  let formatted = escapeHtml(text)
+    .replace(/```([a-z]*)\n([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); overflow-x: auto; margin: 8px 0; font-family: monospace; font-size: 0.85rem; color: var(--accent-color);"><code>$2</code></pre>')
+    .replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: var(--accent-color); font-family: monospace;">$1</code>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/### (.*?)\n/g, '<h4 style="color: var(--accent-color); margin: 10px 0 6px; font-size: 0.95rem;">$1</h4>')
     .replace(/\n/g, '<br>');
   return formatted;
 }
 
-function generateAiAnswer(query) {
-  const q = query.toLowerCase();
-
-  // Math / Calculations
-  if (q.includes('solve') || q.includes('+') || q.includes('-') || q.includes('*') || q.includes('/') || q.includes('quadratic') || q.includes('x =') || q.includes('algebra')) {
-    return `### 📐 **Step-by-Step Math Solution**
-
-**Problem Statement:** ${query}
-
-**Step 1: Identify Key Variables & Formula**
-- Break down terms into standard algebraic notation.
-- Group constants on one side and variable terms on the opposite side.
-
-**Step 2: Execution & Algebraic Reduction**
-- Apply the inverse operations across both boundaries:
-\`\`\`math
-Simplified Result: x ≈ Verified and Calculated
-\`\`\`
-
-**Step 3: Verification & Final Answer**
-- Substitute solution back into original equation to confirm equality.
-**Result:** Complete and verified.`;
-  }
-
-  // Essay / Writing / English
-  if (q.includes('essay') || q.includes('thesis') || q.includes('write') || q.includes('paragraph') || q.includes('polish') || q.includes('grammar')) {
-    return `### 📝 **Academic Writing & Essay Polish**
-
-**Enhanced Thesis & Content Structure:**
-> *"Through a critical synthesis of empirical evidence and rhetorical clarity, this analysis demonstrates the underlying significance of the subject matter."*
-
-**Recommended Outline for High Marks:**
-1. **Introduction:** Hook, contextual background, and a concise 1-sentence thesis statement.
-2. **Body Paragraph 1 (Primary Evidence):** State point, cite text evidence, and explain direct relevance.
-3. **Body Paragraph 2 (Counter-Argument & Rebuttal):** Acknowledge alternative viewpoints and demonstrate why your thesis holds.
-4. **Conclusion:** Synthesize main takeaways without repeating verbatim, ending with broader implications.
-
-**Vocabulary Upgrade:**
-- Instead of *"shows"*, use **"illustrates"**, **"exemplifies"**, or **"delineates"**.
-- Instead of *"a lot of"*, use **"a multitude of"** or **"substantial"**.`;
-  }
-
-  // Science / Biology / Chemistry / Physics
-  if (q.includes('photosynthesis') || q.includes('cell') || q.includes('newton') || q.includes('physics') || q.includes('chemistry') || q.includes('atom') || q.includes('science')) {
-    return `### 🧪 **Scientific Explanation**
-
-**Concept Overview:**
-Scientific principles operate on verifiable physical laws and molecular interactions.
-
-**Key Formula / Biological Mechanism:**
-- **Chemical Equation:**
-\`\`\`text
-6CO2 + 6H2O + Light Energy ➔ C6H12O6 + 6O2
-\`\`\`
-- **Core Mechanism:** Reactants undergo state conversion through enzyme-catalyzed processes (or thermodynamic energy conservation).
-
-**Summary for Exams:**
-1. Energy cannot be created or destroyed; it transforms between kinetic, potential, and chemical states.
-2. Structure always determines function in biological and chemical systems.`;
-  }
-
-  // Coding / Programming
-  if (q.includes('code') || q.includes('python') || q.includes('javascript') || q.includes('bug') || q.includes('html') || q.includes('function') || q.includes('java')) {
-    return `### 💻 **Code Debugger & Solution**
-
-Here is the clean, optimized implementation:
-
-\`\`\`javascript
-// Clean algorithmic solution
-function solveProblem(inputData) {
-  if (!inputData) return null;
-  
-  // Efficient O(n) processing
-  return inputData
-    .filter(item => item.isValid !== false)
-    .map(item => ({ ...item, processed: true }));
-}
-
-console.log("Status: Executed Successfully with 0 errors");
-\`\`\`
-
-**Key Optimizations:**
-- Time Complexity: **O(n)** linear time.
-- Space Complexity: **O(1)** auxiliary memory.
-- Handled null/undefined edge cases to prevent runtime exceptions.`;
-  }
-
-  // History / Social Studies
-  if (q.includes('history') || q.includes('war') || q.includes('revolution') || q.includes('timeline') || q.includes('president') || q.includes('century')) {
-    return `### 🌍 **Historical Analysis & Timeline Summary**
-
-**Historical Context:**
-Major geopolitical shifts arise from economic incentives, socio-cultural movements, and technological revolutions.
-
-**Key Analytical Points:**
-1. **Underlying Causes:** Resource scarcity, trade route competition, and shifts in societal governance.
-2. **Turning Point:** Catalyst event leading to institutional and geopolitical reorganization.
-3. **Long-Term Impact:** Established modern international treaties, constitutional reforms, and economic standards.`;
-  }
-
-  // General Q&A
-  return `### 💡 **Academic Solution & Explanation**
-
-**Question:** ${query}
-
-**Detailed Answer:**
-Based on standard academic curricula, here is the clear breakdown:
-1. **Core Concept:** The key element to understand is how the foundational principles apply directly to this question.
-2. **Step-by-Step Breakdown:**
-   - Define the main terminology.
-   - Apply the governing rules or formulas.
-   - Draw direct conclusions supported by evidence.
-3. **Key Takeaway for Tests:** Remember the primary relationship between the cause and the resulting outcome.
-
-*Need more specific details or another practice problem? Ask away!*`;
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

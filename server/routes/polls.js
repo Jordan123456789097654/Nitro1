@@ -6,10 +6,20 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
 async function getAuthUser(req) {
+  if (req.user) return req.user;
   let user = null;
+  let token = null;
+
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies && req.cookies.nitro_jwt_token) {
+    token = req.cookies.nitro_jwt_token;
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (token) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       const targetId = decoded.id || (decoded.user && decoded.user.id) || decoded.userId;

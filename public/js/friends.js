@@ -1,8 +1,25 @@
 import { getCurrentUser } from './auth.js';
+import { getSharedSocket } from './socket.js';
+
+let liveFriendStatuses = {};
 
 export function initFriends() {
   setupFriendsUI();
+  setupFriendSocketListeners();
   fetchFriends();
+}
+
+function setupFriendSocketListeners() {
+  const socket = getSharedSocket();
+  if (!socket) {
+    setTimeout(setupFriendSocketListeners, 500);
+    return;
+  }
+
+  socket.on('friend_status_broadcast', (statusMap) => {
+    liveFriendStatuses = statusMap || {};
+    renderFriendStatuses();
+  });
 }
 
 export async function fetchFriends() {
@@ -30,46 +47,86 @@ export async function fetchFriends() {
       if (pendingSection) pendingSection.style.display = 'block';
       if (pendingList) {
         pendingList.innerHTML = pending.map(p => 
-          '<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 10px 14px; border-radius: 8px;">' +
-            '<div style="display: flex; align-items: center; gap: 10px;">' +
-              '<span style="font-size: 1.2rem;">👤</span>' +
-              '<div>' +
-                '<strong style="color: #fbbf24;">' + safeHtml(p.sender_display_name || p.sender_username) + '</strong>' +
-                '<span style="display: block; font-size: 0.78rem; color: #94a3b8;">@' + safeHtml(p.sender_username) + '</span>' +
-                '</div>' +
-            '</div>' +
-            '<div style="display: flex; gap: 6px;">' +
-              '<button class="btn-small primary" onclick="window.respondFriendRequest(' + p.request_id + ', \'accepted\')">Accept</button>' +
-              '<button class="btn-small danger" onclick="window.respondFriendRequest(' + p.request_id + ', \'declined\')">Decline</button>' +
-            '</div>' +
-          '</div>'
+          `<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(251, 191, 36, 0.12); border: 1px solid #fbbf24; padding: 10px 14px; border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.2rem;">👤</span>
+              <div>
+                <strong style="color: #fbbf24;">${safeHtml(p.sender_display_name || p.sender_username)}</strong>
+                <span style="display: block; font-size: 0.78rem; color: #94a3b8;">@${safeHtml(p.sender_username)}</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn-small primary" onclick="window.respondFriendRequest(${p.request_id}, 'accepted')">Accept</button>
+              <button class="btn-small danger" onclick="window.respondFriendRequest(${p.request_id}, 'declined')">Decline</button>
+            </div>
+          </div>`
         ).join('');
       }
     } else {
       if (pendingSection) pendingSection.style.display = 'none';
     }
 
-    if (friends.length === 0) {
-      acceptedList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px;">No friends added yet. Type a student @username above to send a friend request!</div>';
-      return;
+    window._cachedFriends = friends;
+    renderFriendStatuses();
+  } catch (e) {}
+}
+
+function renderFriendStatuses() {
+  const acceptedList = document.getElementById('friends-accepted-list');
+  const friends = window._cachedFriends || [];
+  if (!acceptedList) return;
+
+  if (friends.length === 0) {
+    acceptedList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px;">No friends added yet. Type a student @username above to send a friend request!</div>';
+    return;
+  }
+
+  acceptedList.innerHTML = friends.map(f => {
+    const unameLower = String(f.username || '').toLowerCase();
+    const liveObj = liveFriendStatuses[unameLower];
+    const isOnline = Boolean(liveObj);
+    const activityStr = liveObj ? (liveObj.activity || 'Online') : 'Offline';
+
+    let badgeClass = 'offline';
+    let badgeIcon = '⚪';
+    if (isOnline) {
+      if (activityStr.includes('Playing') || activityStr.includes('Game')) {
+        badgeClass = 'playing';
+        badgeIcon = '🎮';
+      } else if (activityStr.includes('Voice') || activityStr.includes('Room')) {
+        badgeClass = 'voice';
+        badgeIcon = '🎧';
+      } else if (activityStr.includes('Idle')) {
+        badgeClass = 'idle';
+        badgeIcon = '🌙';
+      } else {
+        badgeClass = 'online';
+        badgeIcon = '🟢';
+      }
     }
 
-    acceptedList.innerHTML = friends.map(f => 
-      '<div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 12px 16px; border-radius: 12px;">' +
-        '<div style="display: flex; align-items: center; gap: 12px;">' +
-          '<span style="font-size: 1.5rem;">🎓</span>' +
-          '<div>' +
-            '<strong style="color: #fff; font-size: 0.95rem;">' + safeHtml(f.display_name || f.username) + '</strong>' +
-            '<span style="display: block; font-size: 0.78rem; color: #38bdf8;">@' + safeHtml(f.username) + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display: flex; gap: 8px;">' +
-          '<button class="btn-small primary" onclick="window.quickDmUser(\'' + f.username + '\')">💬 DM</button>' +
-          '<button class="btn-small" style="background: #10b981; color: #000; font-weight: 800;" onclick="window.inviteFriendVoice(\'' + f.username + '\')">🎤 Voice</button>' +
-        '</div>' +
-      '</div>'
-    ).join('');
-  } catch (e) {}
+    return `
+      <div class="friend-card-row">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem; position: relative;">
+            🎓
+            <span style="position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: ${isOnline ? '#10b981' : '#64748b'}; border: 2px solid #000;"></span>
+          </span>
+          <div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <strong style="color: #fff; font-size: 0.95rem;">${safeHtml(f.display_name || f.username)}</strong>
+              <span class="friend-status-badge ${badgeClass}">${badgeIcon} ${safeHtml(activityStr)}</span>
+            </div>
+            <span style="display: block; font-size: 0.78rem; color: #38bdf8;">@${safeHtml(f.username)}</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-small primary" onclick="window.quickDmUser('${safeHtml(f.username)}')">💬 DM</button>
+          <button class="btn-small" style="background: #10b981; color: #000; font-weight: 800;" onclick="window.inviteFriendVoice('${safeHtml(f.username)}')">🎤 Voice</button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 export async function sendFriendRequest(friendUsername) {

@@ -36,7 +36,7 @@ async function restoreAllData() {
     const rows = backupData[table];
     if (!rows || rows.length === 0) continue;
 
-    console.log(?? Restoring  rows into table: ...);
+    console.log(`📦 Restoring ${rows.length} rows into table: ${table}...`);
 
     for (const row of rows) {
       const keys = Object.keys(row);
@@ -45,10 +45,8 @@ async function restoreAllData() {
       // Handle JSON values if needed
       const sanitizedValues = values.map(v => (typeof v === 'object' && v !== null) ? JSON.stringify(v) : v);
 
-      const colNames = keys.join(', ');
-      const placeholders = keys.map((_, idx) => $).join(', ');
-
-      const sql = INSERT INTO  () VALUES () ON CONFLICT DO NOTHING;;
+      const placeholders = keys.map((_, idx) => '$' + (idx + 1)).join(', ');
+      const sql = `INSERT INTO ${table} (${colNames}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
 
       try {
         await db.pool.query(sql, sanitizedValues);
@@ -59,7 +57,7 @@ async function restoreAllData() {
           const nonIdValues = nonIdKeys.map(k => (typeof row[k] === 'object' && row[k] !== null) ? JSON.stringify(row[k]) : row[k]);
           const nonIdCols = nonIdKeys.join(', ');
           const nonIdPlaceholders = nonIdKeys.map((_, idx) => $).join(', ');
-          const fallbackSql = INSERT INTO  () VALUES ();;
+          const fallbackSql = `INSERT INTO ${table} (${nonIdKeys.join(', ')}) VALUES (${nonIdKeys.map((_, i) => '$' + (i + 1)).join(', ')})`;
           await db.pool.query(fallbackSql, nonIdValues);
         } catch (_) {}
       }
@@ -69,7 +67,7 @@ async function restoreAllData() {
   // Sync sequence IDs for tables with SERIAL primary keys
   for (const table of tableOrder) {
     try {
-      await db.pool.query(SELECT setval(pg_get_serial_sequence('', 'id'), COALESCE(MAX(id), 1)) FROM ;);
+      await db.pool.query(`SELECT setval(pg_get_serial_sequence('${table}', 'id'), COALESCE(MAX(id), 1)) FROM ${table}`);
     } catch (_) {}
   }
 

@@ -52,6 +52,12 @@ module.exports = function initVoiceSocket(io) {
       voiceNamespace.to(targetSocketId).emit('ice_candidate', { from: socket.id, candidate });
     });
 
+    socket.on('speaking_state', ({ channelId, isSpeaking }) => {
+      if (channelId) {
+        socket.to(channelId).emit('speaking_state', { from: socket.id, isSpeaking: Boolean(isSpeaking) });
+      }
+    });
+
     socket.on('disconnect', () => {
       // Remove socket from any channels it was part of
       const allChannels = VoiceManager.listChannels();

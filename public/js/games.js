@@ -482,7 +482,8 @@ function getBuiltinGameHtml(type, title) {
             obstacles = [];
             score = 0;
             isGameOver = false;
-            document.getElementById('game-over').style.display = 'none';
+            const gameOverEl = document.getElementById('game-over');
+            if (gameOverEl) gameOverEl.style.display = 'none';
           }
 
           function loop() {
@@ -494,8 +495,8 @@ function getBuiltinGameHtml(type, title) {
               ball.x += ball.speedX;
 
               slopeOffset += 8;
-              score += 1;
-              document.getElementById('score-val').innerText = score;
+              const scoreValEl = document.getElementById('score-val');
+              if (scoreValEl) scoreValEl.innerText = score;
 
               // Spawn 3D road obstacles
               if (Math.random() < 0.05) {
@@ -511,8 +512,10 @@ function getBuiltinGameHtml(type, title) {
               // Check boundaries
               if (Math.abs(ball.x) > 340) {
                 isGameOver = true;
-                document.getElementById('final-score').innerText = score;
-                document.getElementById('game-over').style.display = 'flex';
+                const finalScoreEl = document.getElementById('final-score');
+                const gameOverEl = document.getElementById('game-over');
+                if (finalScoreEl) finalScoreEl.innerText = score;
+                if (gameOverEl) gameOverEl.style.display = 'flex';
               }
             }
 
@@ -890,8 +893,8 @@ export function getGameRunnerHtml(game) {
           window.RufflePlayer = window.RufflePlayer || {};
           window.addEventListener('DOMContentLoaded', () => {
             const ruffle = window.RufflePlayer.newest();
-            const player = ruffle.createPlayer();
-            document.getElementById('ruffle-wrap').appendChild(player);
+            const wrap = document.getElementById('ruffle-wrap');
+            if (wrap) wrap.appendChild(player);
             player.load("${proxiedSwf}");
           });
         </script>
@@ -977,7 +980,7 @@ export async function openGame(slug) {
       if (res.ok) {
         gameData = data.game;
       } else if (data.is_vip_locked) {
-        return alert('👑 PRO Exclusive: This item is restricted to PRO and Administrator accounts. Unlock access in the PRO Lounge!');
+        return alert('🚧 Premium Exclusive (Coming Soon): This item is part of the upcoming Nitro Premium release! Full access will be available when Premium launches.');
       }
     } catch (e) {}
   }
@@ -1136,9 +1139,14 @@ function setupPlayerModal() {
       if (!user) return alert('Please log in to submit a rating.');
       if (!activeGame) return;
 
-      const rating = document.getElementById('review-rating-select').value;
-      const review_text = document.getElementById('review-text-input').value.trim();
-      const tips = document.getElementById('review-tips-input').value.trim();
+      const ratingEl = document.getElementById('review-rating-select');
+      const textEl = document.getElementById('review-text-input');
+      const tipsEl = document.getElementById('review-tips-input');
+      if (!ratingEl) return;
+
+      const rating = ratingEl.value;
+      const review_text = textEl ? textEl.value.trim() : '';
+      const tips = tipsEl ? tipsEl.value.trim() : '';
 
       try {
         const token = localStorage.getItem('nitro_jwt_token');
@@ -1513,17 +1521,17 @@ export function setupBugReportModal() {
 }
 
 const DEFAULT_APPS = [
-  { id: 'app-tiktok', slug: 'app-tiktok', title: 'TikTok Trending Videos', author: 'TikTok', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611605698335-8b1569810432?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed' },
+  { id: 'app-tiktok', slug: 'app-tiktok', title: 'TikTok Trending Videos', author: 'TikTok', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611605698323-b1e992d37256?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed' },
   { id: 'app-youtube', slug: 'app-youtube', title: 'YouTube Unblocked Player', author: 'Google', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube-nocookie.com/embed/videoseries?list=PL4fGSI1pDJn6jXS_OtU6X286j25_-HJge' },
   { id: 'app-desmos', slug: 'app-desmos', title: 'Desmos Graphing Calculator', author: 'Desmos', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator' },
   { id: 'app-geogebra', slug: 'app-geogebra', title: 'GeoGebra Math Suite', author: 'GeoGebra', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator' },
   { id: 'app-wolfram', slug: 'app-wolfram', title: 'WolframAlpha Computational Engine', author: 'Wolfram', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/' },
   { id: 'app-wikipedia', slug: 'app-wikipedia', title: 'Wikipedia Encyclopedia', author: 'Wikimedia', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/' },
-  { id: 'app-scratch', slug: 'app-scratch', title: 'Scratch 3.0 Creative Studio', author: 'MIT', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/' },
+  { id: 'app-scratch', slug: 'app-scratch', title: 'Scratch 3.0 Creative Studio', author: 'MIT', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/' },
   { id: 'app-canva', slug: 'app-canva', title: 'Canva Design Studio', author: 'Canva', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/' },
-  { id: 'app-duckduckgo', slug: 'app-duckduckgo', title: 'DuckDuckGo Academic Search', author: 'DuckDuckGo', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/' },
+  { id: 'app-duckduckgo', slug: 'app-duckduckgo', title: 'DuckDuckGo Academic Search', author: 'DuckDuckGo', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/' },
   { id: 'app-chess', slug: 'app-chess', title: 'Chess.com Multiplayer', author: 'Chess.com', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=500', embed_type: 'iframe_url', embed_content: 'https://www.chess.com/' },
-  { id: 'app-spotify', slug: 'app-spotify', title: 'Spotify Web Player', author: 'Spotify', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1614680376593-902f749f7cfc?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M' }
+  { id: 'app-spotify', slug: 'app-spotify', title: 'Spotify Web Player', author: 'Spotify', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M' }
 ];
 
 export async function loadApps() {
@@ -1539,9 +1547,8 @@ export async function loadApps() {
     }
   } catch (err) {}
 
-  const combined = [...fetchedApps, ...DEFAULT_APPS];
-  const uniqueApps = Array.from(new Map(combined.map(a => [a.title.toLowerCase(), a])).values());
-  const filtered = uniqueApps.filter(a => !search || a.title.toLowerCase().includes(search) || (a.author && a.author.toLowerCase().includes(search)));
+  const appList = fetchedApps.length > 0 ? fetchedApps : DEFAULT_APPS;
+  const filtered = appList.filter(a => !search || a.title.toLowerCase().includes(search) || (a.author && a.author.toLowerCase().includes(search)));
 
   renderGames(filtered, 'apps-grid');
 }

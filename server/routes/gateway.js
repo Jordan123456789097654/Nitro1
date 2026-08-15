@@ -408,7 +408,7 @@ router.all('/', async (req, res) => {
     }
   } catch (e) {}
 
-  let targetUrl = req.query.url;
+  let rawUrlInput = (req.query.url || '').trim();
   let user = req.user;
 
   if (!user && req.query.token) {
@@ -422,30 +422,196 @@ router.all('/', async (req, res) => {
     user = { id: null, username: 'Guest', role: 'member', is_banned: false };
   }
 
-  if (user.is_banned || user.is_gateway_banned || (user.gateway_timeout_until && new Date(user.gateway_timeout_until) > new Date())) {
-    const timeoutMsg = user.gateway_timeout_until ? ` (Timeout active until ${new Date(user.gateway_timeout_until).toLocaleString()})` : '';
+  // 1. Check if user is currently WEBSITE BANNED (Strike 3 or admin ban)
+  if (user.is_banned || (user.banned_until && new Date(user.banned_until) > new Date())) {
+    const timeUntilStr = user.banned_until ? ` (Suspension active until ${new Date(user.banned_until).toLocaleString()})` : '';
     return res.status(403).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
-        <title>Gateway Access Revoked</title>
+        <title>🚫 STRIKE 3 - 3-Day Website Suspension Active</title>
         <style>
-          body { background: #090a0f; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-          .card { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 500px; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
-          h2 { color: #ef4444; margin-top: 0; font-size: 1.6rem; }
+          body { background: #0c0e17; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+          .card { background: rgba(239, 68, 68, 0.25); border: 2px solid #dc2626; padding: 40px; border-radius: 20px; max-width: 520px; box-shadow: 0 0 50px rgba(220, 38, 38, 0.6); }
+          .badge { background: #dc2626; color: #fff; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 1px; }
+          h2 { color: #f87171; margin: 16px 0 10px 0; font-size: 1.7rem; }
           p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
+          .strike-counter { font-size: 1.4rem; font-weight: 900; color: #f87171; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 12px; display: inline-block; margin: 16px 0; border: 1px dashed #dc2626; }
         </style>
       </head>
       <body>
         <div class="card">
-          <h2>🚫 Gateway Access Revoked</h2>
-          <p>Your web gateway access has been restricted by an administrator.${timeoutMsg}</p>
+          <span class="badge">🚫 Account Suspended</span>
+          <h2>3-Day Website Ban Active</h2>
+          <p>Your website access has been suspended due to 3 policy strikes for searching/accessing restricted domains.${timeUntilStr}</p>
+          <div class="strike-counter">⚡ 3 / 3 STRIKES REACHED</div>
         </div>
       </body>
       </html>
     `);
   }
+
+  const isOwnerOrAdmin = ['owner', 'admin'].includes(user.role);
+
+  // 2. BLOCKED DOMAIN & SEARCH QUERY CHECK BEFORE PROXY TIMEOUT CHECK!
+  if (!isOwnerOrAdmin && rawUrlInput) {
+    try {
+      const blockedDomains = await db.getBlockedDomains();
+      const rawLower = rawUrlInput.toLowerCase();
+      let decodedLower = '';
+      try { decodedLower = decodeURIComponent(rawUrlInput).toLowerCase(); } catch(e) {}
+
+      let searchParamsQuery = '';
+      try {
+        const tempUrl = new URL(rawUrlInput.startsWith('http') ? rawUrlInput : 'https://' + rawUrlInput);
+        searchParamsQuery = (tempUrl.searchParams.get('q') || tempUrl.searchParams.get('search') || '').toLowerCase();
+      } catch(e) {}
+
+      const matched = (blockedDomains || []).find(b => {
+        const dom = b.domain.toLowerCase().trim();
+        if (!dom) return false;
+        return rawLower.includes(dom) ||
+               (decodedLower && decodedLower.includes(dom)) ||
+               (searchParamsQuery && searchParamsQuery.includes(dom));
+      });
+
+      if (matched) {
+        // Record Strike for User Account
+        let penalty = { count: 1, action: 'STRIKE_1_WARNING' };
+        if (user.id) {
+          penalty = await db.recordGatewayViolation(user.id);
+        }
+
+        sendDiscordLog({
+          category: 'gateway',
+          action: 'BLOCKED_DOMAIN_SEARCH_ATTEMPT',
+          admin: user.username || 'Guest',
+          target: matched.domain,
+          details: `Query: "${rawUrlInput}" | Strike Count: ${penalty.count}/3 | Action: ${penalty.action}`
+        });
+
+        const matchedName = matched.domain;
+
+        if (penalty.action === 'WEBSITE_BAN_3_DAYS' || penalty.count >= 3) {
+          return res.status(403).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>🚫 STRIKE 3 - 3-Day Website Suspension</title>
+              <style>
+                body { background: #0c0e17; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+                .card { background: rgba(239, 68, 68, 0.25); border: 2px solid #dc2626; padding: 40px; border-radius: 20px; max-width: 520px; box-shadow: 0 0 50px rgba(220, 38, 38, 0.6); }
+                .badge { background: #dc2626; color: #fff; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 1px; }
+                h2 { color: #f87171; margin: 16px 0 10px 0; font-size: 1.7rem; }
+                p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
+                .strike-counter { font-size: 1.4rem; font-weight: 900; color: #f87171; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 12px; display: inline-block; margin: 16px 0; border: 1px dashed #dc2626; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <span class="badge">🚫 Account Suspended</span>
+                <h2>3-Day Website Ban Issued</h2>
+                <p>You have reached maximum policy violations (3/3 Strikes) for searching/accessing restricted domain <code>${matchedName}</code>.</p>
+                <div class="strike-counter">⚡ 3 / 3 STRIKES REACHED</div>
+                <p style="font-size:0.85rem; color:#fca5a5;">Your account and device access have been suspended across the entire platform for <strong>3 Days</strong>.</p>
+              </div>
+            </body>
+            </html>
+          `);
+        } else if (penalty.action === 'PROXY_BAN_30_MIN' || penalty.count === 2) {
+          return res.status(403).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>⛔ STRIKE 2 - 30-Minute Proxy Ban</title>
+              <style>
+                body { background: #0c0e17; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+                .card { background: rgba(239, 68, 68, 0.15); border: 2px solid #ef4444; padding: 40px; border-radius: 20px; max-width: 520px; box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
+                .badge { background: #ef4444; color: #fff; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 1px; }
+                h2 { color: #ef4444; margin: 16px 0 10px 0; font-size: 1.6rem; }
+                p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
+                .strike-counter { font-size: 1.4rem; font-weight: 900; color: #ef4444; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 12px; display: inline-block; margin: 16px 0; border: 1px dashed #ef4444; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <span class="badge">⛔ Proxy Suspended</span>
+                <h2>30-Minute Proxy Ban Applied</h2>
+                <p>You attempted to access restricted domain <code>${matchedName}</code> after receiving a prior warning.</p>
+                <div class="strike-counter">⚡ 2 / 3 STRIKES RECORDED</div>
+                <p style="font-size:0.85rem; color:#f87171;">Your Web Gateway access is suspended for <strong>30 minutes</strong>. Attempting 1 more violation will result in a <strong>3-Day Website Suspension</strong>.</p>
+              </div>
+            </body>
+            </html>
+          `);
+        } else {
+          return res.status(403).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>⚠️ STRIKE 1 WARNING - Domain Restricted</title>
+              <style>
+                body { background: #0c0e17; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+                .card { background: rgba(245, 158, 11, 0.12); border: 2px solid #f59e0b; padding: 40px; border-radius: 20px; max-width: 520px; box-shadow: 0 0 30px rgba(245, 158, 11, 0.3); }
+                .badge { background: #f59e0b; color: #000; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 1px; }
+                h2 { color: #fbbf24; margin: 16px 0 10px 0; font-size: 1.6rem; }
+                p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
+                .strike-counter { font-size: 1.4rem; font-weight: 900; color: #fbbf24; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 12px; display: inline-block; margin: 16px 0; border: 1px dashed #f59e0b; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <span class="badge">⚠️ Policy Violation Issued</span>
+                <h2>Domain Access Restricted</h2>
+                <p>The domain or search query <code>${matchedName}</code> is restricted by platform policy.</p>
+                <div class="strike-counter">⚡ 1 / 3 STRIKES RECORDED</div>
+                <p style="font-size:0.85rem; color:#94a3b8;">Warning: A 2nd violation will result in an immediate <strong>30-Minute Proxy Ban</strong>. A 3rd violation will result in a <strong>3-Day Website Suspension</strong>.</p>
+              </div>
+            </body>
+            </html>
+          `);
+        }
+      }
+    } catch (e) {
+      console.error('Blocked domain check error:', e);
+    }
+  }
+
+  // 3. Check if user is PROXY TIMEOUT BANNED (Strike 2 active for general requests)
+  if (user.is_gateway_banned || (user.gateway_timeout_until && new Date(user.gateway_timeout_until) > new Date())) {
+    const timeoutMsg = user.gateway_timeout_until ? ` (Timeout active until ${new Date(user.gateway_timeout_until).toLocaleTimeString()})` : '';
+    return res.status(403).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>⛔ STRIKE 2 - 30-Minute Proxy Ban Active</title>
+        <style>
+          body { background: #0c0e17; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+          .card { background: rgba(239, 68, 68, 0.15); border: 2px solid #ef4444; padding: 40px; border-radius: 20px; max-width: 520px; box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
+          .badge { background: #ef4444; color: #fff; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 1px; }
+          h2 { color: #ef4444; margin: 16px 0 10px 0; font-size: 1.6rem; }
+          p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
+          .strike-counter { font-size: 1.4rem; font-weight: 900; color: #ef4444; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 12px; display: inline-block; margin: 16px 0; border: 1px dashed #ef4444; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <span class="badge">⛔ Proxy Suspended</span>
+          <h2>30-Minute Proxy Ban Active</h2>
+          <p>Your proxy access is suspended for 30 minutes due to 2 policy strikes.${timeoutMsg}</p>
+          <div class="strike-counter">⚡ 2 / 3 STRIKES RECORDED</div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  let targetUrl = rawUrlInput;
 
   if (!targetUrl || targetUrl.trim() === '') {
     targetUrl = 'https://html.duckduckgo.com/html/?q=math+solver';
@@ -517,38 +683,6 @@ router.all('/', async (req, res) => {
       </body>
       </html>
     `);
-  }
-
-  const isOwnerOrAdmin = ['owner', 'admin'].includes(user.role);
-
-  // Blocked Domains Check
-  if (!isOwnerOrAdmin) {
-    try {
-      const blockedDomains = await db.getBlockedDomains();
-      const matched = (blockedDomains || []).find(b => hostname.includes(b.domain.toLowerCase()));
-      if (matched) {
-        return res.status(403).send(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>Domain Restricted</title>
-            <style>
-              body { background: #090a0f; color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-              .card { background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; padding: 40px; border-radius: 16px; max-width: 480px; }
-              h2 { color: #fbbf24; margin-top: 0; }
-            </style>
-          </head>
-          <body>
-            <div class="card">
-              <h2>🚫 Domain Restricted</h2>
-              <p>The domain <code>${hostname}</code> has been restricted by platform policy.</p>
-            </div>
-          </body>
-          </html>
-        `);
-      }
-    } catch (e) {}
   }
 
   // Engine Resolution & Headers

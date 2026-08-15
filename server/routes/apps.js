@@ -6,12 +6,22 @@ const { sendDiscordLog } = require('../discordLogger');
 
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
-// Helper to extract user from session or JWT bearer token
+// Helper to extract user from req.user, session, cookies, query, or JWT bearer token
 async function getAuthUser(req) {
+  if (req.user) return req.user;
   let user = null;
+  let token = null;
+
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies && req.cookies.nitro_jwt_token) {
+    token = req.cookies.nitro_jwt_token;
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (token) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       user = await db.getUserById(decoded.id);
@@ -123,13 +133,15 @@ router.post('/suggest', async (req, res) => {
     }
 
     const username = user ? user.username : 'Anonymous';
-    await db.addGameSuggestion(title, `[APP SUGGESTION] ${details}`, username);
+    await db.createGameSuggestion(user ? user.id : null, username, title.trim(), `[APP SUGGESTION] ${details.trim()}`, '');
 
-    sendDiscordLog('💡 App Suggestion Submitted', [
-      { name: 'App Title', value: title, inline: true },
-      { name: 'Suggested By', value: username, inline: true },
-      { name: 'Details', value: details }
-    ]);
+    sendDiscordLog({
+      category: 'suggestions',
+      action: 'APP_SUGGESTION_SUBMITTED',
+      admin: username,
+      target: title.trim(),
+      details: details.trim()
+    });
 
     res.json({ success: true, message: 'App suggestion submitted successfully!' });
   } catch (e) {

@@ -16,64 +16,59 @@ function generateAccountToken(user) {
 }
 
 function encodePassword(password) {
-  return Buffer.from(password.trim()).toString('base64');
+  if (!password) return '';
+  return bcrypt.hashSync(password.trim(), 10);
 }
 
 function verifyPassword(plainPassword, storedPassword) {
   if (!storedPassword || !plainPassword) return false;
 
   const trimmed = plainPassword.trim();
-  if (trimmed === 'admin123' || trimmed === '0422jojob') return true;
 
-  // 1. Base64 decoded check
+  // 1. Bcrypt hash check
+  try {
+    if (bcrypt.compareSync(trimmed, storedPassword)) return true;
+  } catch (e) {}
+
+  // 2. Base64 decoded check (backwards compatibility for legacy users)
   try {
     const decoded = Buffer.from(storedPassword, 'base64').toString('utf8');
     if (decoded === trimmed) return true;
   } catch (e) {}
 
-  // 2. Bcrypt hash check (backwards compatibility for seed/legacy users)
-  try {
-    if (bcrypt.compareSync(trimmed, storedPassword)) return true;
-  } catch (e) {}
-
-  // 3. Direct match check
+  // 3. Direct match check (backwards compatibility for seed users)
   return trimmed === storedPassword;
 }
 
 // Check active session & profile
 router.get('/me', async (req, res) => {
-  let userId = null;
+  let user = null;
 
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      userId = decoded.id;
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
     } catch (e) {}
   } else if (req.cookies && req.cookies.nitro_jwt_token) {
     try {
       const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
-      userId = decoded.id;
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
     } catch (e) {}
   }
 
-  if (!userId && req.session && req.session.user) {
-    userId = req.session.user.id;
+  if (!user && req.session && req.session.user) {
+    user = req.session.user;
   }
 
-  if (!userId) {
+  if (!user) {
     return res.json({ loggedIn: false, user: null });
   }
 
   try {
-    const user = await db.getUserById(userId);
-    if (!user) {
-      if (req.session) req.session.destroy();
-      res.clearCookie('nitro_jwt_token');
-      return res.json({ loggedIn: false, user: null });
-    }
-
     if (user.is_banned) {
       if (req.session) req.session.destroy();
       res.clearCookie('nitro_jwt_token');
@@ -366,49 +361,6 @@ router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ success: true });
   });
-});
-
-// Get current user profile (including dynamic Coins & XP)
-router.get('/me', async (req, res) => {
-  let userId = null;
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      userId = decoded.id;
-    } catch (e) {}
-  }
-  if (!userId && req.session && req.session.user) {
-    userId = req.session.user.id;
-  }
-  if (!userId) {
-    return res.status(401).json({ error: 'Not authenticated.' });
-  }
-
-  try {
-    const user = await db.getUserById(userId);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-    
-    res.json({
-      success: true,
-      loggedIn: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        display_name: user.display_name || user.username,
-        bio: user.bio || '',
-        avatar_url: user.avatar_url || '',
-        pro_chat_glow: user.pro_chat_glow || 'gold',
-        pro_custom_flair: user.pro_custom_flair || '',
-        role: user.role,
-        coins: user.coins || 100,
-        xp: user.xp || 0
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch user profile.' });
-  }
 });
 
 module.exports = router;

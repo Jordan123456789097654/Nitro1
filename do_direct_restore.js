@@ -16,7 +16,7 @@ async function runRestoration() {
     const rows = backup[table];
     if (!rows || rows.length === 0) continue;
 
-    console.log(?? Inserting  records into []...);
+    console.log(`📦 Inserting ${rows.length} records into [${table}]...`);
 
     for (const row of rows) {
       const keys = Object.keys(row);
@@ -25,7 +25,7 @@ async function runRestoration() {
       const cols = keys.join(', ');
       const placeholders = keys.map((_, i) => '$' + (i + 1)).join(', ');
 
-      const query = INSERT INTO  () VALUES () ON CONFLICT DO NOTHING;;
+      const query = `INSERT INTO ${table} (${cols}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
 
       try {
         await pool.query(query, values);
@@ -36,7 +36,7 @@ async function runRestoration() {
           const nonIdValues = nonIdKeys.map(k => (typeof row[k] === 'object' && row[k] !== null) ? JSON.stringify(row[k]) : row[k]);
           const nonIdCols = nonIdKeys.join(', ');
           const nonIdPlaceholders = nonIdKeys.map((_, i) => '$' + (i + 1)).join(', ');
-          const fallbackQuery = INSERT INTO  () VALUES ();;
+          const fallbackQuery = `INSERT INTO ${table} (${nonIdKeys.join(', ')}) VALUES (${nonIdKeys.map((_, i) => '$' + (i + 1)).join(', ')})`;
           await pool.query(fallbackQuery, nonIdValues);
         } catch (_) {}
       }
@@ -46,18 +46,18 @@ async function runRestoration() {
   // Update serial sequences for all tables
   for (const table of tables) {
     try {
-      await pool.query(SELECT setval(pg_get_serial_sequence('', 'id'), COALESCE(MAX(id), 1)) FROM ;);
+      await pool.query(`SELECT setval(pg_get_serial_sequence('${table}', 'id'), COALESCE(MAX(id), 1)) FROM ${table}`);
     } catch (_) {}
   }
 
-  console.log('?? RESTORATION COMPLETE! Checking row counts...');
+  console.log('✅ RESTORATION COMPLETE! Checking row counts...');
 
   for (const table of ['users', 'games', 'user_playlists', 'moderation_logs', 'ip_logs', 'game_reviews', 'chat_messages', 'announcements']) {
     try {
-      const res = await pool.query(SELECT COUNT(*) FROM ;);
-      console.log(  -> Table []:  rows);
+      const res = await pool.query(`SELECT COUNT(*) FROM ${table}`);
+      console.log(`  -> Table [${table}]: ${res.rows[0].count} rows`);
     } catch (e) {
-      console.log(  -> Table []: Error ());
+      console.log(`  -> Table [${table}]: Error (${e.message})`);
     }
   }
 

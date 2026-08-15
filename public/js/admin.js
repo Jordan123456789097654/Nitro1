@@ -20,6 +20,7 @@ export function initAdmin() {
   setupAdminTabs();
   setupAdminActions();
   setupMaintenanceToggle();
+  setupAiMaintenanceToggle();
   setupAnnouncementForm();
   setupDomainBlockForm();
   setupUpdateLogForm();
@@ -471,6 +472,57 @@ function setupMaintenanceToggle() {
   });
 }
 
+function setupAiMaintenanceToggle() {
+  const toggleBtn = document.getElementById('admin-toggle-ai-btn');
+  const badge = document.getElementById('admin-ai-status-badge');
+
+  async function checkAiStatus() {
+    try {
+      const res = await authFetch('/api/admin/ai-status');
+      const data = await res.json();
+      updateAiBadge(data.ai_enabled);
+    } catch (e) {}
+  }
+
+  function updateAiBadge(enabled) {
+    if (badge) {
+      if (enabled) {
+        badge.innerHTML = '🟢 AI Online';
+        badge.style.cssText = 'padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;';
+      } else {
+        badge.innerHTML = '🔴 Under Maintenance';
+        badge.style.cssText = 'padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444;';
+      }
+    }
+    if (toggleBtn) {
+      toggleBtn.textContent = enabled ? 'Turn AI Off (Maintenance)' : 'Turn AI On (Online)';
+    }
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', async () => {
+      try {
+        const res = await authFetch('/api/admin/toggle-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success) {
+          updateAiBadge(data.ai_enabled);
+          alert(data.message);
+        } else {
+          alert(data.error || 'Failed to toggle AI state.');
+        }
+      } catch (e) {
+        alert('Error toggling AI maintenance mode.');
+      }
+    });
+  }
+
+  checkAiStatus();
+}
+
 function setupAnnouncementForm() {
   const form = document.getElementById('admin-announcement-form');
   if (!form) return;
@@ -620,79 +672,110 @@ export async function fetchUsers() {
     if (!contentType || !contentType.includes('application/json')) return;
 
     const data = await res.json();
-    const tbody = document.getElementById('admin-users-tbody');
-    if (!tbody) return;
-
-    if (!data.users || data.users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No users found</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = data.users.map(u => {
-      let statusHtml = '<span style="color:#10b981; font-weight:700;">ACTIVE</span>';
-      if (u.is_banned) {
-        statusHtml = '<span style="color:#ef4444; font-weight:700;">⛔ BANNED</span>';
-      } else if (u.is_gateway_banned) {
-        statusHtml = '<span style="color:#f59e0b; font-weight:700;">🌐 GATEWAY RESTRICTED</span>';
-      } else if (u.muted_until && new Date(u.muted_until) > new Date()) {
-        statusHtml = `<span style="color:#a855f7; font-weight:700;">MUTED (Until ${new Date(u.muted_until).toLocaleTimeString()})</span>`;
-      } else if (u.gateway_timeout_until && new Date(u.gateway_timeout_until) > new Date()) {
-        statusHtml = '<span style="color:#f59e0b; font-weight:700;">GATEWAY TIMEOUT</span>';
-      }
-
-      if (u.force_password_reset) {
-        statusHtml += ' <span style="color:#38bdf8; font-size:0.75rem; display:block;">(Force Reset Pending)</span>';
-      }
-
-      const displayName = u.display_name && u.display_name !== u.username ? `<span style="color:#38bdf8; font-size:0.82rem;">(${u.display_name})</span>` : '';
-
-      return `
-        <tr>
-          <td>#${u.id}</td>
-          <td>
-            <strong>${u.username}</strong> ${displayName}
-            ${u.gateway_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block;">(Strikes: ${u.gateway_violations_count}/3)</span>` : ''}
-          </td>
-          <td>
-            <select class="custom-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 4px 8px; font-size: 0.8rem; font-weight: 800; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; cursor: pointer;">
-              <option value="member" ${u.role === 'member' ? 'selected' : ''}>👤 Student (Member)</option>
-              <option value="student_plus" ${u.role === 'student_plus' ? 'selected' : ''}>🎓 Student Plus</option>
-              <option value="pro" ${u.role === 'pro' ? 'selected' : ''}>⚡ PRO Member</option>
-              <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ VIP Member</option>
-              <option value="premium_vip" ${u.role === 'premium_vip' ? 'selected' : ''}>🌟 Premium VIP</option>
-              <option value="elite_patron" ${u.role === 'elite_patron' ? 'selected' : ''}>💎 Elite Patron</option>
-              <option value="moderator" ${u.role === 'moderator' ? 'selected' : ''}>⚔️ Moderator</option>
-              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>🛡️ Administrator</option>
-              <option value="owner" ${u.role === 'owner' ? 'selected' : ''}>👑 Owner / Creator</option>
-            </select>
-          </td>
-          <td>${statusHtml}</td>
-          <td>
-            <div class="action-btn-group" style="display: flex; flex-wrap: wrap; gap: 4px;">
-              <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
-              <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
-              <button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')">🔇 Mute</button>
-              <button class="btn-small" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="window.resetUserPassword(${u.id}, '${u.username}')">🔑 Pass</button>
-              <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
-              ${u.is_banned ? 
-                `<button class="btn-small unban" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
-                `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
-              }
-              ${u.is_gateway_banned ? 
-                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;" onclick="window.setGatewayBan(${u.id}, false)">🔓 Ungateway</button>` : 
-                `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b;" onclick="window.setGatewayBan(${u.id}, true)">🌐 Gateway Ban</button>`
-              }
-              ${u.role !== 'admin' || u.username.toLowerCase() !== 'jordandaniels' ?
-                `<button class="btn-small danger" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
-              }
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    window.allAdminUsersList = data.users || [];
+    renderAdminUsersList();
+    setupUserSearchInputListener();
   } catch (err) {
     console.error('fetchUsers error:', err);
   }
+}
+
+function setupUserSearchInputListener() {
+  const searchInput = document.getElementById('admin-user-search');
+  if (searchInput && !searchInput.dataset.listenerAttached) {
+    searchInput.dataset.listenerAttached = 'true';
+    searchInput.addEventListener('input', () => {
+      renderAdminUsersList();
+    });
+  }
+}
+
+export function renderAdminUsersList() {
+  const tbody = document.getElementById('admin-users-tbody');
+  if (!tbody) return;
+
+  const searchInput = document.getElementById('admin-user-search');
+  const search = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+  const users = (window.allAdminUsersList || []).filter(u => {
+    if (!search) return true;
+    return (u.username && u.username.toLowerCase().includes(search)) ||
+           (u.display_name && u.display_name.toLowerCase().includes(search)) ||
+           (u.role && u.role.toLowerCase().includes(search)) ||
+           String(u.id).includes(search);
+  });
+
+  if (users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">No users found matching query</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    let statusHtml = '<span style="color:#10b981; font-weight:800; background:rgba(16,185,129,0.15); border:1px solid #10b981; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🟢 ACTIVE</span>';
+    if (u.is_banned) {
+      statusHtml = '<span style="color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); border:1px solid #ef4444; padding:3px 10px; border-radius:99px; font-size:0.78rem;">⛔ BANNED</span>';
+    } else if (u.is_gateway_banned) {
+      statusHtml = '<span style="color:#f59e0b; font-weight:800; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🌐 RESTRICTED</span>';
+    } else if (u.muted_until && new Date(u.muted_until) > new Date()) {
+      statusHtml = `<span style="color:#c084fc; font-weight:800; background:rgba(168,85,247,0.15); border:1px solid #a855f7; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🔇 MUTED (${new Date(u.muted_until).toLocaleTimeString()})</span>`;
+    }
+
+    if (u.force_password_reset) {
+      statusHtml += '<span style="color:#38bdf8; font-size:0.72rem; display:block; margin-top:4px; font-weight:700;">🔄 Reset Pending</span>';
+    }
+
+    const displayName = u.display_name && u.display_name !== u.username ? `<span style="color:#38bdf8; font-size:0.82rem; display:block;">(${u.display_name})</span>` : '';
+    const coins = u.coins !== undefined ? u.coins : 0;
+    const xp = u.xp !== undefined ? u.xp : 0;
+
+    return `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s ease;">
+        <td style="padding: 12px 14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="background:rgba(255,255,255,0.1); color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:800;">#${u.id}</span>
+            <div>
+              <strong style="color:#fff; font-size:0.95rem;">${u.username}</strong>
+              ${displayName}
+              ${u.gateway_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block;">(Strikes: ${u.gateway_violations_count}/3)</span>` : ''}
+            </div>
+          </div>
+        </td>
+        <td style="padding: 12px 14px;">
+          <select class="custom-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 6px 10px; font-size: 0.82rem; font-weight: 800; border-radius: 8px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; cursor: pointer;">
+            <option value="member" ${u.role === 'member' ? 'selected' : ''}>👤 Student (Member)</option>
+            <option value="student_plus" ${u.role === 'student_plus' ? 'selected' : ''}>🎓 Student Plus</option>
+            <option value="pro" ${u.role === 'pro' ? 'selected' : ''}>⚡ PRO Member</option>
+            <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>⭐ VIP Member</option>
+            <option value="premium_vip" ${u.role === 'premium_vip' ? 'selected' : ''}>🌟 Premium VIP</option>
+            <option value="elite_patron" ${u.role === 'elite_patron' ? 'selected' : ''}>💎 Elite Patron</option>
+            <option value="moderator" ${u.role === 'moderator' ? 'selected' : ''}>⚔️ Moderator</option>
+            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>🛡️ Administrator</option>
+            <option value="owner" ${u.role === 'owner' ? 'selected' : ''}>👑 Owner / Creator</option>
+          </select>
+        </td>
+        <td style="padding: 12px 14px;">${statusHtml}</td>
+        <td style="padding: 12px 14px;">
+          <div style="font-size:0.85rem; font-weight:800; color:#fbbf24;">🪙 ${coins} Coins</div>
+          <div style="font-size:0.78rem; color:#a855f7; font-weight:700;">✨ ${xp} XP</div>
+        </td>
+        <td style="padding: 12px 14px;">
+          <div class="action-btn-group" style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; border-radius:6px; font-weight:700;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
+            <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
+            <button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')">🔇 Mute</button>
+            <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
+            ${u.is_banned ? 
+              `<button class="btn-small unban" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
+              `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
+            }
+            ${u.role !== 'owner' && u.username.toLowerCase() !== 'jordandaniels' ?
+              `<button class="btn-small danger" style="background: rgba(239, 68, 68, 0.3); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
+            }
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 let allAdminGamesList = [];

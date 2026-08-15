@@ -55,6 +55,19 @@ function initChatSocket(io) {
     return Array.from(unique.values());
   }
 
+  function broadcastFriendStatuses() {
+    const statusMap = {};
+    for (const [, conn] of activeConnections.entries()) {
+      if (conn.username) {
+        statusMap[conn.username.toLowerCase()] = {
+          online: true,
+          activity: conn.currentActivity || 'Online'
+        };
+      }
+    }
+    io.emit('friend_status_broadcast', statusMap);
+  }
+
   function broadcastLiveConnections() {
     const list = getDeduplicatedConnections();
     io.to('admin_channel').emit('active_connections_update', {
@@ -63,6 +76,7 @@ function initChatSocket(io) {
       slowmode: chatSlowmodeSeconds
     });
     io.emit('online_count', list.length);
+    broadcastFriendStatuses();
   }
 
   io.on('connection', async (socket) => {
@@ -382,7 +396,7 @@ function initChatSocket(io) {
     });
 
     socket.on('admin_mute_user', async ({ targetUserId, durationMinutes, adminUser }) => {
-      if (!adminUser || adminUser.role !== 'admin') return;
+      if (!adminUser || !['admin', 'owner'].includes(adminUser.role)) return;
       try {
         const target = await db.getUserById(targetUserId);
         if (!target) return;

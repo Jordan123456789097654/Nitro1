@@ -109,7 +109,8 @@ app.use(async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      user = await db.getUserById(decoded.id);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
     } catch (e) {}
   }
 
@@ -141,10 +142,10 @@ app.use(async (req, res, next) => {
 // Authentication Enforcement Middleware for API routes
 app.use('/api', (req, res, next) => {
   const openPaths = [
-    '/auth/login', '/auth/register', '/auth/me', '/status', '/visit', '/gateway',
-    '/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/status', '/api/visit', '/api/gateway',
+    '/auth/login', '/auth/register', '/auth/me', '/status', '/visit', '/gateway', '/admin',
+    '/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/status', '/api/visit', '/api/gateway', '/api/admin',
     '/games', '/api/games', '/polls', '/api/polls', '/voice', '/api/voice', '/updates', '/api/updates',
-    '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard'
+    '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard', '/ai', '/api/ai'
   ];
   if (openPaths.some(p => req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
@@ -162,7 +163,7 @@ app.use(async (req, res, next) => {
   try {
     const isMaintenance = await db.getMaintenanceMode();
     if (isMaintenance) {
-      const isOwner = req.user && (req.user.role === 'owner' || req.user.username.toLowerCase() === 'jordandaniels');
+      const isOwner = req.user && (req.user.role === 'owner' || (req.user.username && req.user.username.toLowerCase() === 'jordandaniels'));
       if (!isOwner) {
         if (req.path.startsWith('/api/')) {
           return res.status(503).json({ error: 'Maintenance Mode is active. Access is temporarily restricted to the platform Owner.', maintenance: true });
@@ -176,8 +177,8 @@ app.use(async (req, res, next) => {
 
 // Global Authentication Enforcement for non-API routes
 app.use((req, res, next) => {
-  // Allow public assets, root, and auth routes
-  const allowed = ['/', '/login', '/signup', '/js', '/css', '/favicon.ico'];
+  // Allow public assets, root, auth, and API routes
+  const allowed = ['/', '/login', '/signup', '/js', '/css', '/favicon.ico', '/api'];
   if (allowed.some(p => req.path === p || req.path.startsWith(p))) return next();
   if (!req.user) {
     if (req.accepts('html')) return res.redirect('/login');
@@ -203,7 +204,7 @@ app.use('/js', (req, res, next) => {
 app.get('/api/status', async (req, res) => {
   try {
     const isMaintenance = await db.getMaintenanceMode();
-    const isOwner = req.user && (req.user.role === 'owner' || req.user.username.toLowerCase() === 'jordandaniels');
+    const isOwner = req.user && (req.user.role === 'owner' || (req.user.username && req.user.username.toLowerCase() === 'jordandaniels'));
     const isAdmin = req.user && ['admin', 'owner'].includes(req.user.role);
     const announcement = await db.getActiveAnnouncement();
     const visits = await db.getSiteVisits();
@@ -239,9 +240,6 @@ app.post('/api/visit', async (req, res) => {
   }
 });
 
-// Static files (Frontend Client)
-app.use(express.static(path.join(__dirname, '../public')));
-
 // API Routes
 app.use('/gateway', gatewayRoutes);
 app.use('/api/auth', authRoutes);
@@ -255,6 +253,10 @@ app.use('/api/voice', require('./routes/voice'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/soundboard', require('./routes/soundboard'));
+app.use('/api/ai', require('./routes/ai'));
+
+// Static files (Frontend Client)
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Initialize Real-time Socket.io Chat, DMs & Live Monitoring
 initChatSocket(io);
