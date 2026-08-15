@@ -157,7 +157,10 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
 
   let rewritten = htmlContent;
 
-  // Remove meta CSP and X-Frame-Options tags
+  // Comprehensive Meta CSP & Frame-Ancestors Stripping
+  rewritten = rewritten.replace(/<meta[^>]*Content-Security-Policy[^>]*>/gi, '');
+  rewritten = rewritten.replace(/<meta[^>]*frame-ancestors[^>]*>/gi, '');
+  rewritten = rewritten.replace(/<meta[^>]*X-Frame-Options[^>]*>/gi, '');
   rewritten = rewritten.replace(/<meta[^>]*http-equiv=["']?(Content-Security-Policy|X-Frame-Options)["']?[^>]*>/gi, '');
 
   // Strip inline frame buster scripts
@@ -184,6 +187,23 @@ function rewriteHtml(htmlContent, baseUrl, gatewayPrefix) {
       (function() {
         window.__NITRO_GATEWAY_BASE__ = "${baseUrl}";
         window.__NITRO_GATEWAY_PREFIX__ = "${gatewayPrefix}";
+
+        // Dynamic Meta CSP & Frame-Ancestors Destroyer
+        try {
+          var destroyCspMetas = function() {
+            var metas = document.querySelectorAll('meta');
+            metas.forEach(function(m) {
+              var equiv = m.getAttribute('http-equiv') || '';
+              var content = m.getAttribute('content') || '';
+              if (/content-security-policy/i.test(equiv) || /frame-ancestors/i.test(content) || /x-frame-options/i.test(equiv)) {
+                m.parentNode && m.parentNode.removeChild(m);
+              }
+            });
+          };
+          destroyCspMetas();
+          var observer = new MutationObserver(function() { destroyCspMetas(); });
+          observer.observe(document.documentElement || document, { childList: true, subtree: true });
+        } catch(e) {}
 
         // Frame Buster Shield: Lock window.top & window.parent to current window
         try {
