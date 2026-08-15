@@ -37,6 +37,91 @@ function initChatSocket(io) {
     return sanitized;
   }
 
+  async function evaluateCustomFilter(text, user, socket) {
+    if (!text) return { allowed: true, cleanText: text };
+    try {
+      const filterWords = await db.getFilterWords();
+      let cleanText = text;
+      let worstRule = null;
+
+      for (const rule of filterWords) {
+        if (!rule.word) continue;
+        const targetType = rule.filter_type || 'both';
+        if (['chat', 'both'].includes(targetType)) {
+          const escaped = rule.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
+          if (regex.test(cleanText)) {
+            const p = rule.punishment || 'censor';
+            if (p === 'censor') {
+              cleanText = cleanText.replace(regex, '***');
+            } else {
+              worstRule = rule;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!worstRule) {
+        return { allowed: true, cleanText };
+      }
+
+      const punishment = worstRule.punishment || 'block';
+      const userId = user ? user.id : null;
+      const username = user ? user.username : 'User';
+
+      sendDiscordLog({
+        category: 'moderation',
+        action: 'MANUAL_FILTER_TRIGGERED',
+        admin: 'CUSTOM_FILTER_ENGINE',
+        target: username,
+        details: `Matched forbidden word "${worstRule.word}" (Punishment: ${punishment})`
+      });
+
+      if (punishment === 'block') {
+        socket.emit('error_message', `🚫 [Blocked] Message blocked due to forbidden keyword: "${worstRule.word}".`);
+        return { allowed: false };
+      }
+
+      if (punishment === 'warn') {
+        if (userId) await db.recordGatewayViolation(userId);
+        socket.emit('error_message', `⚠️ [Warning Strike] Strike issued for using restricted word ("${worstRule.word}").`);
+        return { allowed: false };
+      }
+
+      if (punishment === 'mute_5m') {
+        if (userId) await db.muteUser(userId, 5);
+        socket.emit('error_message', `🔇 [Muted] Automatically muted for 5 minutes for restricted word ("${worstRule.word}").`);
+        return { allowed: false };
+      }
+
+      if (punishment === 'mute_1h') {
+        if (userId) await db.muteUser(userId, 60);
+        socket.emit('error_message', `🔇 [Muted] Automatically muted for 1 hour for restricted word ("${worstRule.word}").`);
+        return { allowed: false };
+      }
+
+      if (punishment === 'ban_1d') {
+        if (userId) await db.banUser(userId, `Auto-suspended for restricted word: "${worstRule.word}"`, 1);
+        socket.emit('error_message', `⛔ [Suspended] Account suspended for 1 day due to prohibited word violation.`);
+        socket.disconnect(true);
+        return { allowed: false };
+      }
+
+      if (punishment === 'perm_ban') {
+        if (userId) await db.banUser(userId, `Permanently banned for restricted word: "${worstRule.word}"`, 0);
+        socket.emit('error_message', `💀 [Permanent Ban] Account permanently banned due to severe prohibited word violation.`);
+        socket.disconnect(true);
+        return { allowed: false };
+      }
+
+      return { allowed: true, cleanText };
+    } catch (e) {
+      console.error('evaluateCustomFilter error:', e);
+      return { allowed: true, cleanText: text };
+    }
+  }
+
   function getDeduplicatedConnections() {
     const unique = new Map();
     for (const [sId, conn] of activeConnections.entries()) {
@@ -243,10 +328,17 @@ function initChatSocket(io) {
         userLastMessageTime.set(trackerKey, now);
 
         const role = (dbUser && dbUser.role) || user.role || 'member';
-        const cleanText = await sanitizeContent(messageContent.slice(0, 400));
+        let cleanText = await sanitizeContent(messageContent.slice(0, 400));
         const audioUrl = data.audioUrl || '';
 
-        // Run Groq AI Moderation Check
+        // 1. Run Manual Database Word & Punishment Filter Rules
+        if (cleanText && cleanText.trim() && role !== 'admin' && role !== 'owner') {
+          const customCheck = await evaluateCustomFilter(cleanText, user, socket);
+          if (!customCheck.allowed) return;
+          cleanText = customCheck.cleanText;
+        }
+
+        // 2. Run Groq AI Moderation Check
         if (cleanText && cleanText.trim() && role !== 'admin' && role !== 'owner') {
           const aiCheck = await checkMessageWithGroqModeration(cleanText);
           if (aiCheck && aiCheck.flagged) {
@@ -288,9 +380,14 @@ function initChatSocket(io) {
           return socket.emit('error_message', `User "${recipientUsername}" not found.`);
         }
 
-        const cleanText = await sanitizeContent(text.trim().slice(0, 300));
+        let cleanText = await sanitizeContent(text.trim().slice(0, 300));
 
-        // Run Groq AI Moderation Check
+        // 1. Run Manual Database Word & Punishment Filter Rules
+        const customCheck = await evaluateCustomFilter(cleanText, sender, socket);
+        if (!customCheck.allowed) return;
+        cleanText = customCheck.cleanText;
+
+        // 2. Run Groq AI Moderation Check
         const aiCheck = await checkMessageWithGroqModeration(cleanText);
         if (aiCheck && aiCheck.flagged) {
           sendDiscordLog({

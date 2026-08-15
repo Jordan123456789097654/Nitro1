@@ -1329,6 +1329,7 @@
           <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
           <button class="admin-tab-btn" data-tab="announcements">📢 Announcements</button>
           <button class="admin-tab-btn" data-tab="domains">🚫 Domain Filters</button>
+          <button class="admin-tab-btn" data-tab="wordfilters">🤬 Word & Punishment Filters</button>
           <button class="admin-tab-btn" data-tab="games">🎮 Catalog</button>
           <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions</button>
           <button class="admin-tab-btn" data-tab="soundboard" onclick="window.adminFetchSoundboard()">🔊 Manage Soundboards</button>
@@ -1548,6 +1549,65 @@
               </tr>
             </thead>
             <tbody id="admin-domains-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Admin Tab: Word & Punishment Filters -->
+        <div class="admin-tab-content" id="tab-wordfilters" style="display: none;">
+          <div style="margin-bottom: 14px;">
+            <h3 style="color: #ef4444;">🤬 Manual Word & Punishment Filter Rules</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Define manual forbidden words/phrases and select the exact automated punishment (censor, block, warning strike, 5m/1h mute, or 1d/permanent ban).</p>
+          </div>
+
+          <form id="admin-add-wordfilter-form" style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 18px; border-radius: var(--radius-md); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: end;">
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #fff;">Forbidden Word / Phrase</label>
+              <input type="text" id="admin-filter-word-input" placeholder="e.g. badword, spamlink" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+            </div>
+
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #fbbf24;">Automated Punishment</label>
+              <select id="admin-filter-punishment-select" style="width: 100%; padding: 8px 12px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">
+                <option value="censor">*** Censor (Replace with ***)</option>
+                <option value="block">🚫 Block Message (Reject send)</option>
+                <option value="warn">⚠️ Warning Strike (Block + 1 Strike)</option>
+                <option value="mute_5m">🔇 5-Minute Mute (Block + Mute 5m)</option>
+                <option value="mute_1h">🔇 1-Hour Mute (Block + Mute 1h)</option>
+                <option value="ban_1d">⛔ 1-Day Suspension (Block + 24h Ban)</option>
+                <option value="perm_ban">💀 Permanent Ban (Block + Account Ban)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #38bdf8;">Filter Scope / Target</label>
+              <select id="admin-filter-target-select" style="width: 100%; padding: 8px 12px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+                <option value="both">⚡ Both (Chat & Proxy Gateway)</option>
+                <option value="chat">💬 Community Chat Only</option>
+                <option value="gateway">🌐 Web Gateway Proxy Only</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: var(--text-muted);">Reason / Notes</label>
+              <input type="text" id="admin-filter-reason-input" placeholder="e.g. Vulgarity / Harassment" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+            </div>
+
+            <div>
+              <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 9px; font-weight: 800; background: #ef4444; border-color: #ef4444;">➕ Add Word Rule</button>
+            </div>
+          </form>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Forbidden Word / Phrase</th>
+                <th>Automated Punishment</th>
+                <th>Filter Scope</th>
+                <th>Reason / Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-wordfilters-tbody"></tbody>
           </table>
         </div>
 

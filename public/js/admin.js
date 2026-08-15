@@ -957,20 +957,43 @@ async function fetchFilters() {
     if (!contentType || !contentType.includes('application/json')) return;
 
     const data = await res.json();
-    const tbody = document.getElementById('admin-filters-tbody');
+    const tbody = document.getElementById('admin-wordfilters-tbody') || document.getElementById('admin-filters-tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = (data.filters || []).map(f => `
-      <tr>
-        <td><code>${f.word}</code></td>
-        <td><span class="chat-badge">${f.filter_type}</span></td>
-        <td>
-          <button class="btn-small danger" onclick="window.deleteFilter(${f.id})">Remove</button>
-        </td>
-      </tr>
-    `).join('');
+    const punishmentBadgeMap = {
+      censor: '<span style="color:#fbbf24; font-weight:800; background:rgba(251,191,36,0.15); border:1px solid #fbbf24; padding:3px 10px; border-radius:99px; font-size:0.78rem;">*** Censor</span>',
+      block: '<span style="color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); border:1px solid #ef4444; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🚫 Block Send</span>',
+      warn: '<span style="color:#f59e0b; font-weight:800; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; padding:3px 10px; border-radius:99px; font-size:0.78rem;">⚠️ Warning Strike</span>',
+      mute_5m: '<span style="color:#c084fc; font-weight:800; background:rgba(168,85,247,0.15); border:1px solid #a855f7; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🔇 5m Mute</span>',
+      mute_1h: '<span style="color:#a855f7; font-weight:800; background:rgba(168,85,247,0.25); border:1px solid #a855f7; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🔇 1h Mute</span>',
+      ban_1d: '<span style="color:#ef4444; font-weight:800; background:rgba(239,68,68,0.25); border:1px solid #ef4444; padding:3px 10px; border-radius:99px; font-size:0.78rem;">⛔ 24h Suspension</span>',
+      perm_ban: '<span style="color:#fff; font-weight:900; background:rgba(239,68,68,0.6); border:1px solid #ef4444; padding:3px 10px; border-radius:99px; font-size:0.78rem;">💀 Account Ban</span>'
+    };
+
+    if (!data.filters || data.filters.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">No manual filter rules configured. Add one above!</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.filters.map(f => {
+      const pBadge = punishmentBadgeMap[f.punishment || 'censor'] || `<span class="chat-badge">${f.punishment || 'censor'}</span>`;
+      const scopeBadge = `<span style="color:#38bdf8; font-weight:700; font-size:0.78rem;">${(f.filter_type || 'both').toUpperCase()}</span>`;
+      const reasonStr = f.reason || 'Restricted language';
+
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 12px 14px;"><code style="color:#fbbf24; font-weight:800; font-size:0.92rem; background:rgba(0,0,0,0.4); padding:3px 8px; border-radius:6px;">${f.word}</code></td>
+          <td style="padding: 12px 14px;">${pBadge}</td>
+          <td style="padding: 12px 14px;">${scopeBadge}</td>
+          <td style="padding: 12px 14px; color: var(--text-muted); font-size:0.85rem;">${reasonStr}</td>
+          <td style="padding: 12px 14px;">
+            <button class="btn-small danger" style="padding: 5px 12px; font-weight: 700;" onclick="window.deleteFilter(${f.id})">🗑️ Remove Rule</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   } catch (err) {
-    // Suppress
+    console.error('fetchFilters error:', err);
   }
 }
 
@@ -1145,7 +1168,7 @@ function setupAdminTabs() {
       if (targetTab === 'users') fetchUsers();
       if (targetTab === 'games') fetchAdminGames();
       if (targetTab === 'domains') fetchBlockedDomains();
-      if (targetTab === 'filters') fetchFilters();
+      if (targetTab === 'filters' || targetTab === 'wordfilters') fetchFilters();
       if (targetTab === 'suggestions') window.adminFetchSuggestions();
       if (targetTab === 'logs') fetchLogs();
       if (targetTab === 'webhooks') fetchAdminWebhooks();
@@ -1489,25 +1512,34 @@ function setupAdminActions() {
     });
   }
 
-  const addFilterBtn = document.getElementById('add-filter-btn');
-  if (addFilterBtn) {
-    addFilterBtn.addEventListener('click', async () => {
-      const wordInput = document.getElementById('new-filter-word');
-      const word = wordInput.value.trim();
-      if (!word) return;
+  const addWordfilterForm = document.getElementById('admin-add-wordfilter-form');
+  if (addWordfilterForm) {
+    addWordfilterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const word = document.getElementById('admin-filter-word-input')?.value.trim();
+      const punishment = document.getElementById('admin-filter-punishment-select')?.value || 'censor';
+      const filter_type = document.getElementById('admin-filter-target-select')?.value || 'both';
+      const reason = document.getElementById('admin-filter-reason-input')?.value.trim() || '';
+
+      if (!word) return alert('Forbidden word or phrase required.');
 
       try {
         const res = await authFetch('/api/admin/filters/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ word, filter_type: 'both' })
+          body: JSON.stringify({ word, punishment, filter_type, reason })
         });
+        const data = await res.json();
         if (res.ok) {
-          wordInput.value = '';
+          document.getElementById('admin-filter-word-input').value = '';
+          if (document.getElementById('admin-filter-reason-input')) document.getElementById('admin-filter-reason-input').value = '';
+          alert(`Filter rule for "${word}" (${punishment}) added successfully!`);
           fetchFilters();
+        } else {
+          alert(data.error || 'Failed to add filter rule.');
         }
-      } catch (e) {
-        alert('Error adding filter rule');
+      } catch (err) {
+        alert('Error adding filter rule.');
       }
     });
   }

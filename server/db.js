@@ -63,8 +63,15 @@ const db = {
           id SERIAL PRIMARY KEY,
           word VARCHAR(100) UNIQUE NOT NULL,
           filter_type VARCHAR(20) DEFAULT 'both',
+          punishment VARCHAR(50) DEFAULT 'censor',
+          reason TEXT DEFAULT '',
+          created_by VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        ALTER TABLE filter_words ADD COLUMN IF NOT EXISTS punishment VARCHAR(50) DEFAULT 'censor';
+        ALTER TABLE filter_words ADD COLUMN IF NOT EXISTS reason TEXT DEFAULT '';
+        ALTER TABLE filter_words ADD COLUMN IF NOT EXISTS created_by VARCHAR(100) DEFAULT 'admin';
 
         CREATE TABLE IF NOT EXISTS chat_messages (
           id SERIAL PRIMARY KEY,
@@ -1084,14 +1091,18 @@ const db = {
     }
   },
 
-  async addFilterWord(word, filter_type = 'both') {
+  async addFilterWord(word, filter_type = 'both', punishment = 'censor', reason = '', created_by = 'admin') {
     try {
-      const res = await pool.query(
-        'INSERT INTO filter_words (word, filter_type) VALUES ($1, $2) ON CONFLICT (word) DO NOTHING RETURNING *',
-        [word, filter_type]
-      );
+      const cleanWord = String(word).trim().toLowerCase();
+      const res = await pool.query(`
+        INSERT INTO filter_words (word, filter_type, punishment, reason, created_by)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (word) DO UPDATE SET filter_type = $2, punishment = $3, reason = $4, created_by = $5
+        RETURNING *
+      `, [cleanWord, filter_type, punishment, reason, created_by]);
       return res.rows[0];
     } catch (e) {
+      console.error('addFilterWord error:', e.message);
       return null;
     }
   },

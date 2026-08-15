@@ -755,14 +755,14 @@ router.get('/filters', async (req, res) => {
 });
 
 router.post('/filters/add', async (req, res) => {
-  const { word, filter_type } = req.body;
+  const { word, filter_type = 'both', punishment = 'censor', reason = '' } = req.body;
   const admin = req.adminUser.username;
 
-  if (!word) return res.status(400).json({ error: 'Word is required.' });
+  if (!word || !word.trim()) return res.status(400).json({ error: 'Word or phrase is required.' });
 
   try {
-    const filter = await db.addFilterWord(word.toLowerCase().trim(), filter_type || 'both');
-    await db.createModerationLog('ADD_FILTER', admin, word, `Type: ${filter_type || 'both'}`);
+    const filter = await db.addFilterWord(word.toLowerCase().trim(), filter_type, punishment, reason, admin);
+    await db.createModerationLog('ADD_FILTER', admin, word, `Punishment: ${punishment} | Scope: ${filter_type}`);
     res.status(201).json({ success: true, filter });
   } catch (err) {
     res.status(500).json({ error: 'Failed to add filter word.' });
