@@ -1039,18 +1039,9 @@ function initDevToolsProtection() {
     }
   }, true);
 
-  // DevTools Dimension & Timing Detection Trap Loop
+  // DevTools Timing Trap Loop for non-owners
   setInterval(() => {
     if (isOwner()) return;
-
-    const threshold = 160;
-    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-
-    if (widthThreshold || heightThreshold) {
-      purgeAndLockdown();
-      return;
-    }
 
     const startTime = performance.now();
     try {
