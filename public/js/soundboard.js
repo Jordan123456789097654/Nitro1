@@ -182,7 +182,7 @@ function playAudioUrl(url) {
 
 window.reloadSoundboardHub = function() {
   const iframe = document.getElementById('soundboard-gateway-frame');
-  if (iframe) iframe.src = '/api/gateway?url=' + encodeURIComponent('https://soundbuttons.net/');
+  if (iframe) iframe.src = '/api/gateway?url=' + encodeURIComponent('https://soundbuttonsworld.com/');
 };
 
 window.fullscreenSoundboardHub = function() {
