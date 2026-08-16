@@ -20,7 +20,6 @@ export function initEmbedStudio() {
 
   const helperDock = document.getElementById('embed-helper-dock');
   const dockFullscreenBtn = document.getElementById('embed-dock-fullscreen-btn');
-  const dockPopoutBtn = document.getElementById('embed-dock-popout-btn');
   const dockCloakBtn = document.getElementById('embed-dock-cloak-btn');
   const dockProxyBtn = document.getElementById('embed-dock-proxy-btn');
   const dockCloseBtn = document.getElementById('embed-dock-close-btn');
@@ -257,23 +256,79 @@ export default {
     });
   }
 
-  // Floating Embed Helper Dock Actions
-  if (dockFullscreenBtn) {
-    dockFullscreenBtn.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-        dockFullscreenBtn.textContent = '⛶ Exit Full';
+  // Cross-browser Fullscreen Engine for Iframes & Google Sites
+  const isCurrentlyFullscreen = () => {
+    return !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement ||
+      document.body.classList.contains('pseudo-fullscreen')
+    );
+  };
+
+  const updateFullscreenButtonUI = (isFull) => {
+    if (dockFullscreenBtn) {
+      dockFullscreenBtn.innerHTML = isFull ? '⛶ Exit Full' : '⛶ Fullscreen';
+      dockFullscreenBtn.style.background = isFull ? 'rgba(56, 189, 248, 0.3)' : 'rgba(56, 189, 248, 0.15)';
+      dockFullscreenBtn.style.borderColor = '#38bdf8';
+    }
+  };
+
+  const toggleEmbedFullscreen = () => {
+    const doc = document;
+    const docEl = document.documentElement;
+
+    if (!isCurrentlyFullscreen()) {
+      const rfs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+      if (rfs) {
+        try {
+          const promise = rfs.call(docEl);
+          if (promise && typeof promise.then === 'function') {
+            promise.then(() => {
+              updateFullscreenButtonUI(true);
+            }).catch(() => {
+              // Sandbox policy prevented native fullscreen, fallback to viewport fill
+              document.body.classList.add('pseudo-fullscreen');
+              updateFullscreenButtonUI(true);
+            });
+          } else {
+            updateFullscreenButtonUI(true);
+          }
+        } catch (err) {
+          document.body.classList.add('pseudo-fullscreen');
+          updateFullscreenButtonUI(true);
+        }
       } else {
-        document.exitFullscreen().catch(() => {});
-        dockFullscreenBtn.textContent = '⛶ Fullscreen';
+        document.body.classList.add('pseudo-fullscreen');
+        updateFullscreenButtonUI(true);
+      }
+    } else {
+      const efs = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+      if (efs && (doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement)) {
+        try {
+          efs.call(doc).catch(() => {});
+        } catch (e) {}
+      }
+      document.body.classList.remove('pseudo-fullscreen');
+      updateFullscreenButtonUI(false);
+    }
+  };
+
+  // Sync fullscreen change events
+  ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+    document.addEventListener(evt, () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+      updateFullscreenButtonUI(isFull);
+      if (!isFull) {
+        document.body.classList.remove('pseudo-fullscreen');
       }
     });
-  }
+  });
 
-  if (dockPopoutBtn) {
-    dockPopoutBtn.addEventListener('click', () => {
-      window.open(getCleanOrigin(), '_blank');
-    });
+  // Floating Embed Helper Dock Actions
+  if (dockFullscreenBtn) {
+    dockFullscreenBtn.addEventListener('click', toggleEmbedFullscreen);
   }
 
   if (dockCloakBtn) {
@@ -291,7 +346,7 @@ export default {
         const iframe = doc.createElement('iframe');
         iframe.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;';
         iframe.src = `${origin}/embed`;
-        iframe.allow = 'fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera';
+        iframe.allow = 'fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera; focus-without-user-activation *';
         iframe.setAttribute('allowfullscreen', 'true');
         doc.body.style.margin = '0';
         doc.body.style.overflow = 'hidden';
