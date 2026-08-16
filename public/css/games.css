@@ -349,3 +349,42 @@
   border: none;
   display: block;
 }
+
+/* Pseudo-fullscreen for Game Player Modal in Nested Iframes */
+body.player-pseudo-fullscreen #player-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  background: #000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+}
+
+body.player-pseudo-fullscreen #player-modal .modal-card {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.player-pseudo-fullscreen #player-frame-wrapper,
+body.player-pseudo-fullscreen .player-iframe {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  border-radius: 0 !important;
+}
+

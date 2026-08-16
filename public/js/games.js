@@ -999,24 +999,27 @@ export async function openGame(slug) {
 
     const iframe = document.createElement('iframe');
     iframe.className = 'player-iframe';
-    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture; accelerometer; gyroscope; magnetometer; web-share;');
+    iframe.setAttribute('allow', 'autoplay; fullscreen *; gamepad; camera; microphone; clipboard-read; clipboard-write; display-capture; accelerometer; gyroscope; magnetometer; web-share');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.setAttribute('webkitallowfullscreen', 'true');
+    iframe.setAttribute('mozallowfullscreen', 'true');
     if (activeGame.embed_type === 'html_code') {
-      iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals');
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock allow-orientation-lock');
     }
+
+    const shimScript = '<script>window.macExportApis_ = window.macExportApis_ || function(){return{};}; try{if(window.parent && !window.parent.macExportApis_) window.parent.macExportApis_ = window.macExportApis_;}catch(e){} try{if(window.top && !window.top.macExportApis_) window.top.macExportApis_ = window.macExportApis_;}catch(e){}</script>';
 
     const runnerHtml = getGameRunnerHtml(activeGame);
     if (runnerHtml) {
       // Built‑in game runner (e.g., built‑in engines, emulators)
-      iframe.srcdoc = runnerHtml;
+      iframe.srcdoc = shimScript + runnerHtml;
     } else if (activeGame.embed_type === 'html_code' && activeGame.embed_content) {
       // Direct HTML embed – render the raw HTML via srcdoc
-      iframe.srcdoc = activeGame.embed_content;
+      iframe.srcdoc = shimScript + activeGame.embed_content;
     } else if (activeGame.embed_type === 'iframe_url' && activeGame.embed_content) {
       // Load the URL via gateway to correctly serve static files and handle spaces
       iframe.src = getProxiedUrl(activeGame.embed_content, activeGame.category === 'Apps');
     }
-
-
 
     frameWrapper.appendChild(iframe);
     modal.classList.add('active');
@@ -1194,9 +1197,34 @@ function setupPlayerModal() {
 
   if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', () => {
+      const modalEl = document.getElementById('player-modal');
       const iframe = document.querySelector('.player-iframe');
-      if (iframe && iframe.requestFullscreen) {
-        iframe.requestFullscreen();
+      
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.body.classList.contains('player-pseudo-fullscreen'));
+      
+      if (!isFull) {
+        const target = iframe || modalEl || document.documentElement;
+        const rfs = target.requestFullscreen || target.webkitRequestFullscreen || target.mozRequestFullScreen || target.msRequestFullscreen;
+        if (rfs) {
+          try {
+            const p = rfs.call(target);
+            if (p && typeof p.then === 'function') {
+              p.catch(() => {
+                document.body.classList.add('player-pseudo-fullscreen');
+              });
+            }
+          } catch(e) {
+            document.body.classList.add('player-pseudo-fullscreen');
+          }
+        } else {
+          document.body.classList.add('player-pseudo-fullscreen');
+        }
+      } else {
+        const efs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (efs && (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement)) {
+          try { efs.call(document).catch(() => {}); } catch(e) {}
+        }
+        document.body.classList.remove('player-pseudo-fullscreen');
       }
     });
   }
