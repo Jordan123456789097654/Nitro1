@@ -791,16 +791,26 @@
         </div>
       </div>
 
+      <!-- Target URL Input -->
+      <div style="margin-bottom: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; white-space: nowrap;">Target Web Domain / URL:</label>
+        <input type="url" id="embed-target-url-input" placeholder="https://your-app.onrender.com" style="flex: 1; min-width: 220px; padding: 6px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #38bdf8; border-radius: 6px; font-size: 0.82rem; font-family: monospace;">
+        <button type="button" id="embed-reset-url-btn" class="btn-small" style="background: rgba(255,255,255,0.08); color: #fff; font-size: 0.75rem;">Current Host</button>
+      </div>
+
       <!-- Mode Selection Tabs -->
       <div style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; flex-wrap: wrap;">
         <button type="button" class="btn-small active embed-tab-btn" data-embed-type="fullscreen" style="background: rgba(56,189,248,0.2); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700;">
           🖥️ Google Sites Fullscreen
         </button>
-        <button type="button" class="btn-small embed-tab-btn" data-embed-type="widget" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700;">
-          📦 Responsive Widget Frame
+        <button type="button" class="btn-small embed-tab-btn" data-embed-type="proxyrelay" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fbbf24; font-weight: 700;">
+          🛡️ Proxy-Wrapped Embed
         </button>
-        <button type="button" class="btn-small embed-tab-btn" data-embed-type="proxy" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fbbf24; font-weight: 700;">
-          ⚡ Web Proxy Only Embed
+        <button type="button" class="btn-small embed-tab-btn" data-embed-type="worker" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #a855f7; font-weight: 700;">
+          ☁️ Cloudflare Worker Proxy
+        </button>
+        <button type="button" class="btn-small embed-tab-btn" data-embed-type="widget" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-weight: 700;">
+          📦 Responsive Widget
         </button>
         <button type="button" class="btn-small embed-tab-btn" data-embed-type="guide" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #10b981; font-weight: 700;">
           📖 How to Add to Google Sites

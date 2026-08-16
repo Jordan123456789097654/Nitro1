@@ -7,6 +7,9 @@ export function initEmbedStudio() {
   const settingsOpenBtn = document.getElementById('settings-open-embed-btn');
   const settingsQuickCopyBtn = document.getElementById('settings-quick-copy-embed-btn');
   
+  const targetUrlInput = document.getElementById('embed-target-url-input');
+  const resetUrlBtn = document.getElementById('embed-reset-url-btn');
+
   const textarea = document.getElementById('embed-code-textarea');
   const copyBtn = document.getElementById('copy-embed-code-btn');
   const tabBtns = document.querySelectorAll('.embed-tab-btn');
@@ -35,20 +38,89 @@ export function initEmbedStudio() {
 
   // Get current origin safely
   const getCleanOrigin = () => {
+    if (targetUrlInput && targetUrlInput.value.trim()) {
+      let val = targetUrlInput.value.trim();
+      if (!val.startsWith('http://') && !val.startsWith('https://')) {
+        val = 'https://' + val;
+      }
+      return val.replace(/\/+$/, '');
+    }
     try {
-      return window.location.origin || `${window.location.protocol}//${window.location.host}`;
+      return (window.location.origin || `${window.location.protocol}//${window.location.host}`).replace(/\/+$/, '');
     } catch(e) {
-      return 'https://your-nitro-domain.com';
+      return 'https://your-app.onrender.com';
     }
   };
+
+  if (targetUrlInput) {
+    targetUrlInput.value = (window.location.origin || '').replace(/\/+$/, '');
+    targetUrlInput.addEventListener('input', () => {
+      updateEmbedCode(currentEmbedType);
+    });
+  }
+
+  if (resetUrlBtn && targetUrlInput) {
+    resetUrlBtn.addEventListener('click', () => {
+      targetUrlInput.value = (window.location.origin || '').replace(/\/+$/, '');
+      updateEmbedCode(currentEmbedType);
+    });
+  }
 
   const generateEmbedCode = (type) => {
     const origin = getCleanOrigin();
     switch(type) {
+      case 'proxyrelay':
+        return `<!-- Nitro AI & Games Multi-Proxy Google Sites Embed -->
+<script>
+  (function() {
+    var TARGET_URL = "${origin}/embed";
+    var iframe = document.createElement('iframe');
+    iframe.src = TARGET_URL;
+    iframe.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;";
+    iframe.setAttribute('allow', 'fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera; focus-without-user-activation *');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock allow-orientation-lock');
+    document.documentElement.style.cssText = "margin:0; padding:0; overflow:hidden; height:100%;";
+    document.body.style.cssText = "margin:0; padding:0; overflow:hidden; height:100%; background:#000;";
+    document.body.appendChild(iframe);
+  })();
+<\\/script>`;
+      case 'worker':
+        return `/* ☁️ Free Cloudflare Worker Reverse Proxy Script (100% Unblockable on Google Sites)
+   1. Create a free Cloudflare account -> Workers & Pages -> Create Application
+   2. Paste this code and click Deploy!
+   3. Embed your *.workers.dev URL into Google Sites! */
+
+export default {
+  async fetch(request) {
+    const targetUrl = '${origin}';
+    const url = new URL(request.url);
+    const proxyUrl = new URL(url.pathname + url.search, targetUrl);
+
+    const newHeaders = new Headers(request.headers);
+    newHeaders.set('Host', new URL(targetUrl).host);
+
+    const response = await fetch(proxyUrl.toString(), {
+      method: request.method,
+      headers: newHeaders,
+      body: request.body,
+      redirect: 'follow'
+    });
+
+    const responseHeaders = new Headers(response.headers);
+    responseHeaders.set('Content-Security-Policy', 'frame-ancestors *');
+    responseHeaders.delete('X-Frame-Options');
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders
+    });
+  }
+};`;
       case 'widget':
         return `<iframe src="${origin}/" style="width:100%; height:900px; border:none; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock"></iframe>`;
-      case 'proxy':
-        return `<iframe src="${origin}/?view=browser" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera; focus-without-user-activation *" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock allow-orientation-lock"></iframe>`;
       case 'fullscreen':
       default:
         return `<iframe src="${origin}/embed" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera; focus-without-user-activation *" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock allow-orientation-lock"></iframe>`;
@@ -73,14 +145,24 @@ export function initEmbedStudio() {
       }
     });
 
+    const label = document.getElementById('embed-code-label');
     if (type === 'guide') {
       if (codeSection) codeSection.style.display = 'none';
       if (guideBox) guideBox.style.display = 'block';
     } else {
       if (codeSection) codeSection.style.display = 'block';
       if (guideBox) guideBox.style.display = 'none';
+      if (label) {
+        if (type === 'worker') {
+          label.textContent = 'Cloudflare Worker Proxy Code (Deploy at workers.cloudflare.com):';
+        } else if (type === 'proxyrelay') {
+          label.textContent = 'Proxy-Wrapped Google Sites Embed Code (Paste into Embed Code):';
+        } else {
+          label.textContent = "HTML Embed Code (Paste into Google Sites 'Embed Code'):";
+        }
+      }
       if (textarea) {
-        textarea.value = generateEmbedCode(type);
+        textarea.value = generateEmbedCode(type).replace('<\\/script>', '</script>');
       }
     }
   };
