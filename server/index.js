@@ -60,6 +60,12 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Allow framing across Google Sites (sites.google.com, googleusercontent.com, and custom domains)
+  res.setHeader('Content-Security-Policy', "frame-ancestors *");
+  res.removeHeader('X-Frame-Options');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Permissions-Policy', 'fullscreen=*, gamepad=*, autoplay=*, clipboard-read=*, clipboard-write=*, microphone=*, camera=*');
   next();
 });
 
@@ -176,8 +182,8 @@ app.use(async (req, res, next) => {
 
 // Global Authentication Enforcement for non-API routes
 app.use((req, res, next) => {
-  // Allow public assets, root, auth, and API routes
-  const allowed = ['/', '/login', '/signup', '/js', '/css', '/favicon.ico', '/api'];
+  // Allow public assets, root, embed, auth, and API routes
+  const allowed = ['/', '/embed', '/login', '/signup', '/js', '/css', '/favicon.ico', '/api'];
   if (allowed.some(p => req.path === p || req.path.startsWith(p))) return next();
   if (!req.user) {
     if (req.accepts('html')) return res.redirect('/login');

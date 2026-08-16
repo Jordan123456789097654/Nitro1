@@ -1091,3 +1091,26 @@ input:checked + .slider:before {
   color: #64748b;
 }
 
+/* Embedded Frame & Google Sites Optimization Styles */
+body.is-embedded-frame {
+  overflow-x: hidden;
+}
+
+#embed-helper-dock {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--accent-glow);
+}
+
+#embed-helper-dock:hover {
+  transform: translateY(-2px);
+}
+
+.embed-tab-btn {
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.embed-tab-btn:hover {
+  opacity: 0.9;
+}
+

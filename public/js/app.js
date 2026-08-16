@@ -11,6 +11,7 @@ import { initAiHelper } from './ai.js';
 import { initSoundboard } from './soundboard.js';
 import { initVoiceRooms } from './voice.js';
 import { initFriends, fetchFriends, sendFriendRequest } from './friends.js';
+import { initEmbedStudio } from './embed.js';
 
 export const FAVICON_MAP = {
   default: '/favicon.svg',
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSoundboard();
   initVoiceRooms();
   initFriends();
+  initEmbedStudio();
   initToolsDropdown();
   initCloakMode();
   initPersonalBranding();
