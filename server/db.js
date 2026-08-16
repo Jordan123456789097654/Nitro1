@@ -348,6 +348,9 @@ const db = {
       // Ensure ALL catalog games have is_vip = false while premium is paused
       await pool.query("UPDATE games SET is_vip = false");
 
+      // Clean up / remove Apps category items
+      await pool.query("DELETE FROM games WHERE category = 'Apps' OR slug LIKE 'app-%'");
+
       // Seed default restricted domains & keywords
       const defaultBlockedSeed = [
         { domain: 'roblox', reason: 'Restricted Gaming Domain Keyword' },

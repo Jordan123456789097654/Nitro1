@@ -1581,19 +1581,7 @@ export function setupBugReportModal() {
   });
 }
 
-const DEFAULT_APPS = [
-  { id: 'app-tiktok', slug: 'app-tiktok', title: 'TikTok Trending Videos', author: 'TikTok', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611605698323-b1e992d37256?w=500', embed_type: 'iframe_url', embed_content: 'https://www.tiktok.com/embed' },
-  { id: 'app-youtube', slug: 'app-youtube', title: 'YouTube Unblocked Player', author: 'Google', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500', embed_type: 'iframe_url', embed_content: 'https://www.youtube-nocookie.com/embed/videoseries?list=PL4fGSI1pDJn6jXS_OtU6X286j25_-HJge' },
-  { id: 'app-desmos', slug: 'app-desmos', title: 'Desmos Graphing Calculator', author: 'Desmos', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500', embed_type: 'iframe_url', embed_content: 'https://www.desmos.com/calculator' },
-  { id: 'app-geogebra', slug: 'app-geogebra', title: 'GeoGebra Math Suite', author: 'GeoGebra', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500', embed_type: 'iframe_url', embed_content: 'https://www.geogebra.org/calculator' },
-  { id: 'app-wolfram', slug: 'app-wolfram', title: 'WolframAlpha Computational Engine', author: 'Wolfram', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wolframalpha.com/' },
-  { id: 'app-wikipedia', slug: 'app-wikipedia', title: 'Wikipedia Encyclopedia', author: 'Wikimedia', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500', embed_type: 'iframe_url', embed_content: 'https://www.wikipedia.org/' },
-  { id: 'app-scratch', slug: 'app-scratch', title: 'Scratch 3.0 Creative Studio', author: 'MIT', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500', embed_type: 'iframe_url', embed_content: 'https://scratch.mit.edu/' },
-  { id: 'app-canva', slug: 'app-canva', title: 'Canva Design Studio', author: 'Canva', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500', embed_type: 'iframe_url', embed_content: 'https://www.canva.com/' },
-  { id: 'app-duckduckgo', slug: 'app-duckduckgo', title: 'DuckDuckGo Academic Search', author: 'DuckDuckGo', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=500', embed_type: 'iframe_url', embed_content: 'https://html.duckduckgo.com/html/' },
-  { id: 'app-chess', slug: 'app-chess', title: 'Chess.com Multiplayer', author: 'Chess.com', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=500', embed_type: 'iframe_url', embed_content: 'https://www.chess.com/' },
-  { id: 'app-spotify', slug: 'app-spotify', title: 'Spotify Web Player', author: 'Spotify', category: 'Apps', thumbnail_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500', embed_type: 'iframe_url', embed_content: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M' }
-];
+const DEFAULT_APPS = [];
 
 export async function loadApps() {
   const appSearchInput = document.getElementById('app-search-input');
@@ -1608,8 +1596,21 @@ export async function loadApps() {
     }
   } catch (err) {}
 
-  const appList = fetchedApps.length > 0 ? fetchedApps : DEFAULT_APPS;
-  const filtered = appList.filter(a => !search || a.title.toLowerCase().includes(search) || (a.author && a.author.toLowerCase().includes(search)));
+  const filtered = fetchedApps.filter(a => !search || a.title.toLowerCase().includes(search) || (a.author && a.author.toLowerCase().includes(search)));
+
+  if (filtered.length === 0) {
+    const grid = document.getElementById('apps-grid');
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+          <div style="font-size: 2.8rem; margin-bottom: 12px;">📦</div>
+          <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.2rem;">No Web Applications</h3>
+          <p style="font-size: 0.85rem; max-width: 400px; margin: 0 auto;">Applications list is currently clean. You can add custom utilities anytime from the Admin Panel.</p>
+        </div>
+      `;
+    }
+    return;
+  }
 
   renderGames(filtered, 'apps-grid');
 }
@@ -1623,3 +1624,4 @@ setupFilterAndSearch = function() {
     appSearchInput.addEventListener('input', () => loadApps());
   }
 };
+
