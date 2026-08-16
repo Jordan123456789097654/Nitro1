@@ -319,8 +319,10 @@ function setupSocketListeners() {
 
   socket.on('user_muted', ({ username, durationMinutes }) => {
     const user = getCurrentUser();
-    if (user && user.username.toLowerCase() === username.toLowerCase()) {
-      alert(`🔇 You have been temporarily muted for ${durationMinutes} minutes.`);
+    if (user && user.username && user.username.toLowerCase() === username.toLowerCase()) {
+      if (confirm(`🔇 You have been temporarily muted for ${durationMinutes} minutes.\n\nWould you like to submit an appeal to staff?`)) {
+        if (window.openAppealModal) window.openAppealModal(user.username);
+      }
     }
   });
 
@@ -330,7 +332,14 @@ function setupSocketListeners() {
   });
 
   socket.on('error_message', (msg) => {
-    alert(`⚠️ ${msg}`);
+    if (typeof msg === 'string' && (msg.includes('muted') || msg.includes('Muted') || msg.includes('banned') || msg.includes('Suspended') || msg.includes('prohibited word'))) {
+      if (confirm(`⚠️ ${msg}\n\nWould you like to submit an appeal to staff?`)) {
+        const user = getCurrentUser();
+        if (window.openAppealModal) window.openAppealModal(user ? user.username : '');
+      }
+    } else {
+      alert(`⚠️ ${msg}`);
+    }
   });
 
   socket.on('online_count', (count) => {
@@ -720,7 +729,7 @@ function formatMessageText(text, gifUrl, audioUrl) {
 
 function formatChatTimestamp(rawTimestamp) {
   if (!rawTimestamp) {
-    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true }) + ' EST';
   }
 
   let d;
@@ -738,7 +747,7 @@ function formatChatTimestamp(rawTimestamp) {
     d = new Date();
   }
 
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true }) + ' EST';
 }
 
 function appendChatMessage(msg) {

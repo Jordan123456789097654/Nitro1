@@ -56,26 +56,55 @@ function initChatSocket(io) {
               cleanText = cleanText.replace(regex, '***');
             } else {
               worstRule = rule;
-              break;
             }
           }
         }
       }
 
+      // If no punishing rule was matched (only censor rules or clean text), allow through!
       if (!worstRule) {
         return { allowed: true, cleanText };
       }
 
-      const punishment = worstRule.punishment || 'block';
-      const userId = user ? user.id : null;
-      const username = user ? user.username : 'User';
+      let targetId = user ? user.id : null;
+      let username = user ? user.username : 'User';
+      if (!targetId && user && user.username) {
+        try {
+          const u = await db.getUserByUsername(user.username);
+          if (u) {
+            targetId = u.id;
+            username = u.username;
+          }
+        } catch (e) {}
+      }
+      const isOwner = user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'));
+
+      // Log to moderation logs
+      await db.createModerationLog(
+        'MANUAL_FILTER_TRIGGERED',
+        'WORD_FILTER_SHIELD',
+        `@${username}`,
+        `Matched word "${worstRule.word}" (Punishment: ${punishment})`
+      );
+
+      // Log to AI Incident Feed
+      await db.logAiModerationViolation({
+        userId: targetId,
+        username,
+        message: text,
+        category: 'word_filter',
+        severity: ['perm_ban', 'ban_1d'].includes(punishment) ? 'extreme' : ['mute_1h', 'mute_5m'].includes(punishment) ? 'high' : 'medium',
+        confidence: 1.0,
+        action_taken: punishment,
+        reason: `Matched filter word: "${worstRule.word}"`
+      });
 
       sendDiscordLog({
         category: 'moderation',
         action: 'MANUAL_FILTER_TRIGGERED',
         admin: 'CUSTOM_FILTER_ENGINE',
-        target: username,
-        details: `Matched forbidden word "${worstRule.word}" (Punishment: ${punishment})`
+        target: `@${username}`,
+        details: `Matched forbidden word "${worstRule.word}" (Punishment: ${punishment}) | Message: "${text}"`
       });
 
       if (punishment === 'block') {
@@ -84,34 +113,46 @@ function initChatSocket(io) {
       }
 
       if (punishment === 'warn') {
-        if (userId) await db.recordGatewayViolation(userId);
+        if (targetId) await db.recordGatewayViolation(targetId);
         socket.emit('error_message', `⚠️ [Warning Strike] Strike issued for using restricted word ("${worstRule.word}").`);
         return { allowed: false };
       }
 
       if (punishment === 'mute_5m') {
-        if (userId) await db.muteUser(userId, 5);
+        if (targetId) {
+          const mutedUntil = await db.muteUser(targetId, 5);
+          io.emit('user_muted', { userId: targetId, username, durationMinutes: 5, mutedUntil });
+        }
         socket.emit('error_message', `🔇 [Muted] Automatically muted for 5 minutes for restricted word ("${worstRule.word}").`);
         return { allowed: false };
       }
 
       if (punishment === 'mute_1h') {
-        if (userId) await db.muteUser(userId, 60);
+        if (targetId) {
+          const mutedUntil = await db.muteUser(targetId, 60);
+          io.emit('user_muted', { userId: targetId, username, durationMinutes: 60, mutedUntil });
+        }
         socket.emit('error_message', `🔇 [Muted] Automatically muted for 1 hour for restricted word ("${worstRule.word}").`);
         return { allowed: false };
       }
 
       if (punishment === 'ban_1d') {
-        if (userId) await db.banUser(userId, `Auto-suspended for restricted word: "${worstRule.word}"`, 1);
+        if (targetId) {
+          await db.banUser(targetId, `Auto-suspended for restricted word: "${worstRule.word}"`, 1);
+          io.emit('user_banned', { userId: targetId, username, reason: `Restricted word: "${worstRule.word}"`, durationDays: 1 });
+        }
         socket.emit('error_message', `⛔ [Suspended] Account suspended for 1 day due to prohibited word violation.`);
-        socket.disconnect(true);
+        if (!isOwner) socket.disconnect(true);
         return { allowed: false };
       }
 
       if (punishment === 'perm_ban') {
-        if (userId) await db.banUser(userId, `Permanently banned for restricted word: "${worstRule.word}"`, 0);
+        if (targetId) {
+          await db.banUser(targetId, `Permanently banned for restricted word: "${worstRule.word}"`, 0);
+          io.emit('user_banned', { userId: targetId, username, reason: `Severe prohibited word: "${worstRule.word}"`, durationDays: 0 });
+        }
         socket.emit('error_message', `💀 [Permanent Ban] Account permanently banned due to severe prohibited word violation.`);
-        socket.disconnect(true);
+        if (!isOwner) socket.disconnect(true);
         return { allowed: false };
       }
 
@@ -120,6 +161,96 @@ function initChatSocket(io) {
       console.error('evaluateCustomFilter error:', e);
       return { allowed: true, cleanText: text };
     }
+  }
+
+  async function handleAiModerationEnforcement(cleanText, user, socket, context = 'Global Chat') {
+    if (!cleanText || !cleanText.trim()) return { allowed: true, cleanText };
+
+    const aiCheck = await checkMessageWithGroqModeration(cleanText);
+    if (!aiCheck || !aiCheck.flagged) {
+      return { allowed: true, cleanText };
+    }
+
+    let targetId = user ? user.id : null;
+    let username = user ? user.username : 'Anonymous';
+    if (!targetId && user && user.username) {
+      try {
+        const u = await db.getUserByUsername(user.username);
+        if (u) {
+          targetId = u.id;
+          username = u.username;
+        }
+      } catch (e) {}
+    }
+
+    const action = aiCheck.recommended_action || 'block';
+    const isOwner = user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'));
+
+    // 1. Persist incident in AI Moderation Incident Feed DB
+    await db.logAiModerationViolation({
+      userId: targetId,
+      username,
+      message: cleanText,
+      category: aiCheck.category,
+      severity: aiCheck.severity,
+      confidence: aiCheck.confidence,
+      action_taken: action,
+      reason: aiCheck.reason
+    });
+
+    // 2. Send rich Discord notification
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'GROQ_AI_FLAGGED',
+      admin: 'AI_SAFETY_ENGINE',
+      target: `@${username}`,
+      details: `[${context}] Flagged message: "${cleanText}" | Category: ${aiCheck.category} (${aiCheck.severity} severity, ${Math.round((aiCheck.confidence || 0.95) * 100)}% conf) | Action: ${action} | Reason: ${aiCheck.reason}`
+    });
+
+    if (action === 'censor' || aiCheck.action_type === 'censor') {
+      const censored = aiCheck.censored_text || '***';
+      return { allowed: true, cleanText: censored };
+    }
+
+    if (action === 'warn' || aiCheck.action_type === 'warn') {
+      if (targetId) await db.recordGatewayViolation(targetId);
+      socket.emit('error_message', `⚠️ [AI Warning Strike] Strike issued: ${aiCheck.reason} (${aiCheck.category}).`);
+      return { allowed: false };
+    }
+
+    // Dynamic Ban Enforcement (1 day, 3 days, 7 days, 14 days, 30 days, or Permanent)
+    if (aiCheck.action_type === 'ban' || action.startsWith('ban') || action === 'perm_ban') {
+      let banDays = typeof aiCheck.duration_days === 'number' ? aiCheck.duration_days : (action === 'perm_ban' ? 0 : action === 'ban_30d' ? 30 : action === 'ban_7d' ? 7 : action === 'ban_3d' ? 3 : 1);
+      const isPerm = banDays === 0;
+      const banLabel = isPerm ? 'Permanently Banned' : `Suspended for ${banDays} Day(s)`;
+
+      if (targetId) {
+        await db.banUser(targetId, `AI Auto-Ban (${banLabel}): ${aiCheck.reason} [${aiCheck.category}]`, banDays);
+        io.emit('user_banned', { userId: targetId, username, reason: aiCheck.reason, durationDays: banDays });
+      }
+
+      socket.emit('error_message', `⛔ [AI Auto-Ban] Account ${banLabel}: ${aiCheck.reason} (${aiCheck.category}).`);
+      if (!isOwner) socket.disconnect(true);
+      return { allowed: false };
+    }
+
+    // Dynamic Mute Enforcement (5m, 15m, 1h, 24h)
+    if (aiCheck.action_type === 'mute' || action.startsWith('mute')) {
+      let muteMins = typeof aiCheck.duration_minutes === 'number' ? aiCheck.duration_minutes : (action === 'mute_24h' ? 1440 : action === 'mute_1h' ? 60 : action === 'mute_15m' ? 15 : 5);
+      const muteLabel = muteMins >= 60 ? `${Math.round(muteMins / 60)} hour(s)` : `${muteMins} minute(s)`;
+
+      if (targetId) {
+        const mutedUntil = await db.muteUser(targetId, muteMins);
+        io.emit('user_muted', { userId: targetId, username, durationMinutes: muteMins, mutedUntil });
+      }
+
+      socket.emit('error_message', `🔇 [AI Auto-Mute] You were muted for ${muteLabel}: ${aiCheck.reason} (${aiCheck.category}).`);
+      return { allowed: false };
+    }
+
+    // Default 'block'
+    socket.emit('error_message', `🛡️ [Groq AI Moderation] Message blocked: ${aiCheck.reason} (${aiCheck.category}).`);
+    return { allowed: false };
   }
 
   function getDeduplicatedConnections() {
@@ -261,213 +392,225 @@ function initChatSocket(io) {
       }
     });
 
-    // Global Chat Message with Spam & Raid Shield
-    socket.on('send_message', async (data) => {
-      const { user, text, gifUrl } = data;
-      if (!user || !user.username) return;
+  async function checkUserMutedOrBanned(user) {
+    if (!user) return { isBanned: false, isMuted: false, dbUser: null };
+    let dbUser = null;
+    if (user.id) {
+      try { dbUser = await db.getUserById(user.id); } catch(e) {}
+    }
+    if (!dbUser && user.username) {
+      try { dbUser = await db.getUserByUsername(user.username); } catch(e) {}
+    }
+    if (!dbUser) return { isBanned: false, isMuted: false, dbUser: null };
 
-      const messageContent = (gifUrl ? `[GIF:${gifUrl}] ` : '') + (text || '').trim();
-      if (!messageContent) return;
+    if (dbUser.is_banned) {
+      return { isBanned: true, reason: dbUser.ban_reason || 'Account suspended', dbUser };
+    }
 
-      try {
-        let dbUser = null;
-        if (user.id) {
-          try { dbUser = await db.getUserById(user.id); } catch(e) {}
-        }
-        if (!dbUser && user.username) {
-          try { dbUser = await db.getUserByUsername(user.username); } catch(e) {}
-        }
+    if (dbUser.muted_until && new Date(dbUser.muted_until) > new Date()) {
+      const remainingMins = Math.ceil((new Date(dbUser.muted_until) - new Date()) / (1000 * 60));
+      return { isMuted: true, remainingMins, mutedUntil: dbUser.muted_until, dbUser };
+    }
 
-        if (dbUser && dbUser.is_banned) {
-          return socket.emit('error_message', 'You are banned from sending messages.');
-        }
+    return { isBanned: false, isMuted: false, dbUser };
+  }
 
-        // Check Mute
-        if (dbUser && dbUser.muted_until && new Date(dbUser.muted_until) > new Date()) {
-          const remainingMins = Math.ceil((new Date(dbUser.muted_until) - new Date()) / (1000 * 60));
-          return socket.emit('error_message', `🔇 You are temporarily muted for ${remainingMins} more minute(s).`);
-        }
+  // Global Chat Message with Spam & Raid Shield
+  socket.on('send_message', async (data) => {
+    const { user, text, gifUrl } = data;
+    if (!user || !user.username) return;
 
-        const trackerKey = user.id || clientIp;
-        const now = Date.now();
+    const messageContent = (gifUrl ? `[GIF:${gifUrl}] ` : '') + (text || '').trim();
+    if (!messageContent) return;
 
-        // Spam & Raid Shield Check (Auto-Mute on Rapid Flooding or 3 Identical Messages)
-        if (!dbUser || dbUser.role !== 'admin') {
-          let history = userMessageHistory.get(trackerKey) || [];
-          history = history.filter(h => now - h.time < 12000); // retain last 12s
-
-          const duplicateCount = history.filter(h => h.text.toLowerCase() === messageContent.toLowerCase()).length;
-          const rapidFloodCount = history.filter(h => now - h.time < 3000).length;
-
-          if (duplicateCount >= 2 || rapidFloodCount >= 4) {
-            await db.muteUser(user.id, 5);
-            sendDiscordLog({
-              category: 'moderation',
-              action: 'AUTO_RAID_SHIELD_MUTED',
-              admin: 'SYSTEM_RAID_SHIELD',
-              target: user.username,
-              details: `User automatically muted for 5 minutes due to chat spam/raid attempt (${duplicateCount >= 2 ? 'Repeated duplicate text' : 'Rapid message flooding'}).`
-            });
-            return socket.emit('error_message', '🛡️ [Raid Shield] You were automatically muted for 5 minutes for rapid message flooding.');
-          }
-
-          history.push({ text: messageContent, time: now });
-          userMessageHistory.set(trackerKey, history);
-        }
-
-        // Check Slowmode
-        if (chatSlowmodeSeconds > 0 && (!dbUser || dbUser.role !== 'admin')) {
-          const lastTime = userLastMessageTime.get(trackerKey) || 0;
-          const elapsed = (now - lastTime) / 1000;
-          if (elapsed < chatSlowmodeSeconds) {
-            const waitTime = Math.ceil(chatSlowmodeSeconds - elapsed);
-            return socket.emit('error_message', `⏳ Slowmode active. Please wait ${waitTime}s.`);
-          }
-        }
-
-        userLastMessageTime.set(trackerKey, now);
-
-        const role = (dbUser && dbUser.role) || user.role || 'member';
-        let cleanText = await sanitizeContent(messageContent.slice(0, 400));
-        const audioUrl = data.audioUrl || '';
-
-        // 1. Run Manual Database Word & Punishment Filter Rules
-        if (cleanText && cleanText.trim() && role !== 'admin' && role !== 'owner') {
-          const customCheck = await evaluateCustomFilter(cleanText, user, socket);
-          if (!customCheck.allowed) return;
-          cleanText = customCheck.cleanText;
-        }
-
-        // 2. Run Groq AI Moderation Check
-        if (cleanText && cleanText.trim() && role !== 'admin' && role !== 'owner') {
-          const aiCheck = await checkMessageWithGroqModeration(cleanText);
-          if (aiCheck && aiCheck.flagged) {
-            sendDiscordLog({
-              category: 'moderation',
-              action: 'AI_CHAT_MODERATION_BLOCKED',
-              admin: 'GROQ_AI_SHIELD',
-              target: user.username,
-              details: `Blocked message: "${cleanText}" (Reason: ${aiCheck.reason})`
-            });
-            return socket.emit('error_message', `🛡️ [Groq AI Moderation] Message blocked: ${aiCheck.reason}`);
-          }
-        }
-
-        const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, audioUrl);
-        io.emit('new_message', newMsg);
-      } catch (err) {
-        console.error('Chat error:', err);
+    try {
+      const authCheck = await checkUserMutedOrBanned(user);
+      if (authCheck.isBanned) {
+        return socket.emit('error_message', `⛔ You are banned from sending messages: ${authCheck.reason}`);
       }
-    });
 
-    // Direct Messages (DMs)
-    socket.on('send_dm', async (data) => {
-      const { sender, recipientUsername, text } = data;
-      if (!sender || !recipientUsername || !text || text.trim() === '') return;
+      if (authCheck.isMuted) {
+        return socket.emit('error_message', `🔇 You are temporarily muted for ${authCheck.remainingMins} more minute(s).`);
+      }
 
-      try {
-        const senderUser = await db.getUserById(sender.id);
-        if (senderUser && senderUser.is_banned) {
-          return socket.emit('error_message', 'Banned users cannot send direct messages.');
-        }
+      const dbUser = authCheck.dbUser;
+      const trackerKey = user.id || clientIp;
+      const now = Date.now();
 
-        if (senderUser && senderUser.muted_until && new Date(senderUser.muted_until) > new Date()) {
-          return socket.emit('error_message', 'You are temporarily muted.');
-        }
+      // Spam & Raid Shield Check (Auto-Mute on Rapid Flooding or 3 Identical Messages)
+      if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'owner')) {
+        let history = userMessageHistory.get(trackerKey) || [];
+        history = history.filter(h => now - h.time < 12000); // retain last 12s
 
-        const receiverUser = await db.getUserByUsername(recipientUsername);
-        if (!receiverUser) {
-          return socket.emit('error_message', `User "${recipientUsername}" not found.`);
-        }
+        const duplicateCount = history.filter(h => h.text.toLowerCase() === messageContent.toLowerCase()).length;
+        const rapidFloodCount = history.filter(h => now - h.time < 3000).length;
 
-        let cleanText = await sanitizeContent(text.trim().slice(0, 300));
-
-        // 1. Run Manual Database Word & Punishment Filter Rules
-        const customCheck = await evaluateCustomFilter(cleanText, sender, socket);
-        if (!customCheck.allowed) return;
-        cleanText = customCheck.cleanText;
-
-        // 2. Run Groq AI Moderation Check
-        const aiCheck = await checkMessageWithGroqModeration(cleanText);
-        if (aiCheck && aiCheck.flagged) {
+        if (duplicateCount >= 2 || rapidFloodCount >= 4) {
+          if (user.id) await db.muteUser(user.id, 5);
           sendDiscordLog({
             category: 'moderation',
-            action: 'AI_DM_MODERATION_BLOCKED',
-            admin: 'GROQ_AI_SHIELD',
-            target: sender.username,
-            details: `Blocked DM to @${recipientUsername}: "${cleanText}" (Reason: ${aiCheck.reason})`
+            action: 'AUTO_RAID_SHIELD_MUTED',
+            admin: 'SYSTEM_RAID_SHIELD',
+            target: user.username,
+            details: `User automatically muted for 5 minutes due to chat spam/raid attempt (${duplicateCount >= 2 ? 'Repeated duplicate text' : 'Rapid message flooding'}).`
           });
-          return socket.emit('error_message', `🛡️ [Groq AI Moderation] Direct Message blocked: ${aiCheck.reason}`);
+          return socket.emit('error_message', '🛡️ [Raid Shield] You were automatically muted for 5 minutes for rapid message flooding.');
         }
 
-        const newDm = await db.createDM(sender.id, receiverUser.id, sender.username, receiverUser.username, cleanText);
+        history.push({ text: messageContent, time: now });
+        userMessageHistory.set(trackerKey, history);
+      }
 
-        for (const [sId, c] of activeConnections.entries()) {
-          if (c.username && c.username.toLowerCase() === recipientUsername.toLowerCase()) {
-            io.to(sId).emit('new_dm', newDm);
-            io.to(sId).emit('open_dms_update');
-          }
+      // Check Slowmode
+      if (chatSlowmodeSeconds > 0 && (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'owner'))) {
+        const lastTime = userLastMessageTime.get(trackerKey) || 0;
+        const elapsed = (now - lastTime) / 1000;
+        if (elapsed < chatSlowmodeSeconds) {
+          const waitTime = Math.ceil(chatSlowmodeSeconds - elapsed);
+          return socket.emit('error_message', `⏳ Slowmode active. Please wait ${waitTime}s.`);
         }
-
-        socket.emit('new_dm', newDm);
-        socket.emit('open_dms_update');
-      } catch (e) {
-        console.error('DM error:', e);
-      }
-    });
-
-    socket.on('get_dm_history', async (data) => {
-      const { username1, username2 } = data;
-      if (!username1 || !username2) return;
-      try {
-        const history = await db.getDMs(username1, username2);
-        socket.emit('dm_history', { otherUser: username2, messages: history });
-      } catch (e) {
-        console.error('DM history error:', e);
-      }
-    });
-
-    socket.on('get_open_dms', async ({ username }) => {
-      if (!username) return;
-      try {
-        const convos = await db.getUserConversations(username);
-        socket.emit('open_dms_list', convos);
-      } catch (e) {
-        socket.emit('open_dms_list', []);
-      }
-    });
-
-    // Private Rooms
-    socket.on('join_private_room', ({ roomCode, user }) => {
-      if (!roomCode) return;
-      const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
-      socket.join(cleanRoom);
-      socket.emit('joined_private_room', { roomCode });
-      io.to(cleanRoom).emit('private_room_system_msg', {
-        roomCode,
-        message: `👋 ${user ? user.username : 'A student'} joined room #${roomCode}.`
-      });
-    });
-
-    socket.on('send_private_room_msg', async ({ roomCode, user, text }) => {
-      if (!roomCode || !user || !text) return;
-      const cleanText = await sanitizeContent(text.trim().slice(0, 300));
-      const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
-
-      // Run Groq AI Moderation Check
-      const aiCheck = await checkMessageWithGroqModeration(cleanText);
-      if (aiCheck && aiCheck.flagged) {
-        return socket.emit('error_message', `🛡️ [Groq AI Moderation] Private Room message blocked: ${aiCheck.reason}`);
       }
 
-      io.to(cleanRoom).emit('private_room_message', {
-        roomCode,
-        username: user.username,
-        role: user.role,
-        message: cleanText,
-        created_at: new Date().toISOString()
-      });
+      userLastMessageTime.set(trackerKey, now);
+
+      const role = (dbUser && dbUser.role) || user.role || 'member';
+      let cleanText = messageContent.slice(0, 400);
+      const audioUrl = data.audioUrl || '';
+
+      // 1. Run Manual Database Word & Punishment Filter Rules
+      if (cleanText && cleanText.trim()) {
+        const customCheck = await evaluateCustomFilter(cleanText, user, socket);
+        if (!customCheck.allowed) return;
+        cleanText = customCheck.cleanText;
+      }
+
+      // 2. Run Remade Groq AI Moderation Engine
+      if (cleanText && cleanText.trim()) {
+        const aiEnforce = await handleAiModerationEnforcement(cleanText, user, socket, 'Global Chat');
+        if (!aiEnforce.allowed) return;
+        cleanText = aiEnforce.cleanText;
+      }
+
+      const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, audioUrl);
+      io.emit('new_message', newMsg);
+    } catch (err) {
+      console.error('Chat error:', err);
+    }
+  });
+
+  // Direct Messages (DMs)
+  socket.on('send_dm', async (data) => {
+    const { sender, recipientUsername, text } = data;
+    if (!sender || !recipientUsername || !text || text.trim() === '') return;
+
+    try {
+      const authCheck = await checkUserMutedOrBanned(sender);
+      if (authCheck.isBanned) {
+        return socket.emit('error_message', 'Banned users cannot send direct messages.');
+      }
+
+      if (authCheck.isMuted) {
+        return socket.emit('error_message', `🔇 You are temporarily muted for ${authCheck.remainingMins} more minute(s).`);
+      }
+
+      const receiverUser = await db.getUserByUsername(recipientUsername);
+      if (!receiverUser) {
+        return socket.emit('error_message', `User "${recipientUsername}" not found.`);
+      }
+
+      let cleanText = text.trim().slice(0, 300);
+
+      // 1. Run Manual Database Word & Punishment Filter Rules
+      const customCheck = await evaluateCustomFilter(cleanText, sender, socket);
+      if (!customCheck.allowed) return;
+      cleanText = customCheck.cleanText;
+
+      // 2. Run Remade Groq AI Moderation Engine
+      const aiEnforce = await handleAiModerationEnforcement(cleanText, sender, socket, `DM to @${recipientUsername}`);
+      if (!aiEnforce.allowed) return;
+      cleanText = aiEnforce.cleanText;
+
+      const newDm = await db.createDM(sender.id || authCheck.dbUser?.id || null, receiverUser.id, sender.username, receiverUser.username, cleanText);
+
+      for (const [sId, c] of activeConnections.entries()) {
+        if (c.username && c.username.toLowerCase() === recipientUsername.toLowerCase()) {
+          io.to(sId).emit('new_dm', newDm);
+          io.to(sId).emit('open_dms_update');
+        }
+      }
+
+      socket.emit('new_dm', newDm);
+      socket.emit('open_dms_update');
+    } catch (e) {
+      console.error('DM error:', e);
+    }
+  });
+
+  socket.on('get_dm_history', async (data) => {
+    const { username1, username2 } = data;
+    if (!username1 || !username2) return;
+    try {
+      const history = await db.getDMs(username1, username2);
+      socket.emit('dm_history', { otherUser: username2, messages: history });
+    } catch (e) {
+      console.error('DM history error:', e);
+    }
+  });
+
+  socket.on('get_open_dms', async ({ username }) => {
+    if (!username) return;
+    try {
+      const convos = await db.getUserConversations(username);
+      socket.emit('open_dms_list', convos);
+    } catch (e) {
+      socket.emit('open_dms_list', []);
+    }
+  });
+
+  // Private Rooms
+  socket.on('join_private_room', ({ roomCode, user }) => {
+    if (!roomCode) return;
+    const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
+    socket.join(cleanRoom);
+    socket.emit('joined_private_room', { roomCode });
+    io.to(cleanRoom).emit('private_room_system_msg', {
+      roomCode,
+      message: `👋 ${user ? user.username : 'A student'} joined room #${roomCode}.`
     });
+  });
+
+  socket.on('send_private_room_msg', async ({ roomCode, user, text }) => {
+    if (!roomCode || !user || !text) return;
+
+    const authCheck = await checkUserMutedOrBanned(user);
+    if (authCheck.isBanned) {
+      return socket.emit('error_message', 'Banned users cannot chat in private rooms.');
+    }
+    if (authCheck.isMuted) {
+      return socket.emit('error_message', `🔇 You are temporarily muted for ${authCheck.remainingMins} more minute(s).`);
+    }
+
+    let cleanText = text.trim().slice(0, 300);
+    const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
+
+    // 1. Run Manual Database Word & Punishment Filter Rules
+    const customCheck = await evaluateCustomFilter(cleanText, user, socket);
+    if (!customCheck.allowed) return;
+    cleanText = customCheck.cleanText;
+
+    // 2. Run Groq AI Moderation Check
+    const aiEnforce = await handleAiModerationEnforcement(cleanText, user, socket, `Room #${roomCode}`);
+    if (!aiEnforce.allowed) return;
+    cleanText = aiEnforce.cleanText;
+
+    io.to(cleanRoom).emit('private_room_message', {
+      roomCode,
+      username: user.username,
+      role: user.role,
+      message: cleanText,
+      created_at: new Date().toISOString()
+    });
+  });
 
     // Collaborative Study Whiteboard
     socket.on('join_whiteboard', ({ roomCode }) => {
@@ -541,8 +684,25 @@ function initChatSocket(io) {
         const target = await db.getUserById(targetUserId);
         if (!target) return;
 
-        await db.muteUser(targetUserId, durationMinutes);
-        io.emit('user_muted', { userId: targetUserId, username: target.username, durationMinutes });
+        const mins = parseInt(durationMinutes, 10);
+        if (mins <= 0) {
+          await db.unmuteUser(targetUserId);
+          io.emit('user_unmuted', { userId: targetUserId, username: target.username });
+          for (const [sId, conn] of activeConnections.entries()) {
+            if (conn.userId === targetUserId || (conn.username && conn.username.toLowerCase() === target.username.toLowerCase())) {
+              io.to(sId).emit('error_message', '🔊 Your chat mute has been lifted by an administrator.');
+            }
+          }
+        } else {
+          const mutedUntil = await db.muteUser(targetUserId, mins);
+          io.emit('user_muted', { userId: targetUserId, username: target.username, durationMinutes: mins, mutedUntil });
+          for (const [sId, conn] of activeConnections.entries()) {
+            if (conn.userId === targetUserId || (conn.username && conn.username.toLowerCase() === target.username.toLowerCase())) {
+              io.to(sId).emit('user_muted', { username: target.username, durationMinutes: mins, mutedUntil });
+              io.to(sId).emit('error_message', `🔇 You have been muted for ${mins} minutes by an administrator.`);
+            }
+          }
+        }
       } catch (e) {
         console.error('Mute error:', e);
       }

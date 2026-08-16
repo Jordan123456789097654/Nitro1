@@ -7,13 +7,34 @@ import { getSharedSocket } from './socket.js';
 
 let adminSocket = null;
 
-function authFetch(url, options = {}) {
+function getLocalOrCookieToken() {
   const token = localStorage.getItem('nitro_jwt_token');
+  if (token) return token;
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf('nitro_jwt_token=') === 0) return decodeURIComponent(c.substring('nitro_jwt_token='.length));
+  }
+  return null;
+}
+
+function authFetch(url, options = {}) {
+  const token = getLocalOrCookieToken();
   const headers = { ...(options.headers || {}) };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
   return fetch(url, { ...options, headers, credentials: 'same-origin' });
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 export function initAdmin() {
@@ -30,6 +51,9 @@ export function initAdmin() {
   setupUpdateDisableControls();
   setupBulkImporter();
   setupCreateUserForm();
+  setupAiModerationStudio();
+  setupEditFilterModal();
+  setupAppealsReviewStudio();
   connectAdminSocket();
 }
 
@@ -762,7 +786,10 @@ export function renderAdminUsersList() {
           <div class="action-btn-group" style="display: flex; flex-wrap: wrap; gap: 6px;">
             <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; border-radius:6px; font-weight:700;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
             <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
-            <button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')">🔇 Mute</button>
+            ${u.muted_until && new Date(u.muted_until) > new Date() ?
+              `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnmuteUser(${u.id}, '${u.username}')" title="Lift chat mute immediately">🔊 Unmute</button>` :
+              `<button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')" title="Mute user from sending chat messages">🔇 Mute</button>`
+            }
             <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
             ${u.is_banned ? 
               `<button class="btn-small unban" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
@@ -987,7 +1014,10 @@ async function fetchFilters() {
           <td style="padding: 12px 14px;">${scopeBadge}</td>
           <td style="padding: 12px 14px; color: var(--text-muted); font-size:0.85rem;">${reasonStr}</td>
           <td style="padding: 12px 14px;">
-            <button class="btn-small danger" style="padding: 5px 12px; font-weight: 700;" onclick="window.deleteFilter(${f.id})">🗑️ Remove Rule</button>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="btn-small" style="padding: 5px 12px; font-weight: 700; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius: 6px;" onclick='window.adminEditFilterPrompt(${JSON.stringify(f).replace(/'/g, "&apos;").replace(/"/g, "&quot;")})'>✏️ Edit</button>
+              <button class="btn-small danger" style="padding: 5px 12px; font-weight: 700;" onclick="window.deleteFilter(${f.id})">🗑️ Remove</button>
+            </div>
           </td>
         </tr>
       `;
@@ -995,6 +1025,22 @@ async function fetchFilters() {
   } catch (err) {
     console.error('fetchFilters error:', err);
   }
+}
+
+function formatEstDateTime(dateInput) {
+  if (!dateInput) return '';
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  }) + ' EST';
 }
 
 async function fetchLogs() {
@@ -1019,7 +1065,7 @@ async function fetchLogs() {
         <td><strong>${l.action}</strong></td>
         <td>${l.admin_username}</td>
         <td>${l.target}</td>
-        <td>${new Date(l.created_at).toLocaleString()}</td>
+        <td>${formatEstDateTime(l.created_at)}</td>
       </tr>
     `).join('');
   } catch (err) {
@@ -1169,10 +1215,19 @@ function setupAdminTabs() {
       if (targetTab === 'games') fetchAdminGames();
       if (targetTab === 'domains') fetchBlockedDomains();
       if (targetTab === 'filters' || targetTab === 'wordfilters') fetchFilters();
-      if (targetTab === 'suggestions') window.adminFetchSuggestions();
+      if (targetTab === 'aimod') window.loadAiModerationStudio();
+      if (targetTab === 'appeals') {
+        if (window.fetchAppeals) window.fetchAppeals();
+      }
+      if (targetTab === 'suggestions') {
+        if (window.adminFetchSuggestions) window.adminFetchSuggestions();
+      }
       if (targetTab === 'logs') fetchLogs();
       if (targetTab === 'webhooks') fetchAdminWebhooks();
       if (targetTab === 'radar') fetchActivityRadar();
+      if (targetTab === 'polls') {
+        if (window.loadPolls) window.loadPolls();
+      }
     });
   });
 
@@ -1190,17 +1245,54 @@ function setupAdminActions() {
     }
   };
 
-  window.adminMutePrompt = (userId, username) => {
-    const duration = prompt(`Mute ${username} for how many minutes? (e.g. 5, 15, 60):`, '15');
-    if (!duration) return;
+  window.adminMutePrompt = async (userId, username) => {
+    const duration = prompt(`Mute @${username} from chat for how many minutes? (e.g. 5, 15, 60, 1440 for 1 day, or enter 0 to unmute):`, '15');
+    if (duration === null) return;
     const mins = parseInt(duration, 10);
-    if (isNaN(mins) || mins <= 0) return alert('Invalid duration');
+    if (isNaN(mins) || mins < 0) return alert('Please enter a valid number of minutes (0 or greater).');
 
-    const user = getCurrentUser();
-    if (adminSocket && user) {
-      adminSocket.emit('admin_mute_user', { targetUserId: userId, durationMinutes: mins, adminUser: user });
-      alert(`🔇 ${username} muted for ${mins} minutes.`);
-      setTimeout(fetchUsers, 500);
+    if (mins === 0) {
+      return window.adminUnmuteUser(userId, username);
+    }
+
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/mute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ durationMinutes: mins, reason: 'Muted by administrator' })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`🔇 @${username} has been muted for ${mins} minutes.`);
+        const user = getCurrentUser();
+        if (adminSocket && user) {
+          adminSocket.emit('admin_mute_user', { targetUserId: userId, durationMinutes: mins, adminUser: user });
+        }
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to mute user.');
+      }
+    } catch (e) {
+      alert('Error muting user.');
+    }
+  };
+
+  window.adminUnmuteUser = async (userId, username) => {
+    if (!confirm(`Are you sure you want to lift the chat mute for @${username}?`)) return;
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/unmute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`🔊 Chat mute lifted for @${username}.`);
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to unmute user.');
+      }
+    } catch (e) {
+      alert('Error unmuting user.');
     }
   };
 
@@ -1544,6 +1636,41 @@ function setupAdminActions() {
     });
   }
 
+  // Bulk word block form handling
+  const bulkForm = document.getElementById('admin-bulk-wordfilter-form');
+  if (bulkForm) {
+    bulkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const textarea = document.getElementById('admin-bulk-words-textarea');
+      const wordsText = textarea ? textarea.value : '';
+      const punishment = document.getElementById('admin-bulk-punishment-select')?.value || 'censor';
+      const filter_type = document.getElementById('admin-bulk-target-select')?.value || 'both';
+      const reason = document.getElementById('admin-bulk-reason-input')?.value.trim() || '';
+
+      const words = wordsText.split(/[\n,;]+/).map(w => w.trim()).filter(Boolean);
+      if (words.length === 0) return alert('Please enter at least one word or phrase to block.');
+
+      try {
+        const res = await authFetch('/api/admin/filters/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ words, filter_type, punishment, reason })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          textarea.value = '';
+          if (document.getElementById('admin-bulk-reason-input')) document.getElementById('admin-bulk-reason-input').value = '';
+          alert(data.message || `Successfully added ${data.count || words.length} word(s).`);
+          fetchFilters();
+        } else {
+          alert(data.error || 'Failed to bulk add filter rules.');
+        }
+      } catch (err) {
+        alert('Error during bulk block operation.');
+      }
+    });
+  }
+
   const editGameModalClose = document.getElementById('admin-edit-game-modal-close');
   if (editGameModalClose) {
     editGameModalClose.addEventListener('click', () => {
@@ -1672,6 +1799,561 @@ function setupAdminActions() {
       }
     } catch (err) {
       alert('Error denying suggestion.');
+    }
+  };
+}
+
+// 🤖 Groq AI Safety & Moderation Studio Frontend Module
+function setupAiModerationStudio() {
+  const form = document.getElementById('aimod-settings-form');
+  const toggleBtn = document.getElementById('aimod-studio-toggle-btn');
+  const statusBadge = document.getElementById('aimod-studio-status-badge');
+  const testBtn = document.getElementById('aimod-run-test-btn');
+  const clearTestBtn = document.getElementById('aimod-clear-test-btn');
+
+  function updateStatusUi(enabled) {
+    const isOnline = Boolean(enabled);
+    if (statusBadge) {
+      if (isOnline) {
+        statusBadge.textContent = '🟢 AI ONLINE';
+        statusBadge.style.cssText = 'padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;';
+      } else {
+        statusBadge.textContent = '🔴 UNDER MAINTENANCE';
+        statusBadge.style.cssText = 'padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444;';
+      }
+    }
+    if (toggleBtn) {
+      toggleBtn.textContent = isOnline ? 'Turn AI Off (Maintenance)' : 'Turn AI On (Online)';
+      toggleBtn.style.background = isOnline 
+        ? 'linear-gradient(135deg, #e11d48, #be123c)'
+        : 'linear-gradient(135deg, #10b981, #059669)';
+    }
+
+    // Also sync radar toggle badge if present
+    const radarBadge = document.getElementById('admin-ai-status-badge');
+    const radarToggleBtn = document.getElementById('admin-toggle-ai-btn');
+    if (radarBadge) {
+      radarBadge.textContent = isOnline ? '🟢 AI Online' : '🔴 Under Maintenance';
+      radarBadge.style.cssText = isOnline 
+        ? 'padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;'
+        : 'padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444;';
+    }
+    if (radarToggleBtn) {
+      radarToggleBtn.textContent = isOnline ? 'Turn AI Off (Maintenance)' : 'Turn AI On (Online)';
+    }
+  }
+
+  const radarToggleBtn = document.getElementById('admin-toggle-ai-btn');
+  if (radarToggleBtn && !radarToggleBtn.dataset.bound) {
+    radarToggleBtn.dataset.bound = 'true';
+    radarToggleBtn.addEventListener('click', async () => {
+      try {
+        const res = await authFetch('/api/admin/toggle-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (res.ok) {
+          updateStatusUi(data.ai_enabled);
+          alert(data.message);
+        } else {
+          alert(data.error || 'Failed to toggle AI engine.');
+        }
+      } catch (e) {
+        alert('Error toggling AI engine.');
+      }
+    });
+  }
+
+  window.loadAiModerationStudio = async () => {
+    try {
+      const res = await authFetch('/api/admin/ai-config');
+      if (res.ok) {
+        const data = await res.json();
+        const cfg = data.config || {};
+
+        // Chat AI fields
+        const chatModel = document.getElementById('simple-chat-model');
+        const chatPersonality = document.getElementById('simple-chat-personality');
+        const chatTemp = document.getElementById('simple-chat-temp');
+        const chatRateLimit = document.getElementById('simple-chat-ratelimit');
+        const chatDirectives = document.getElementById('simple-chat-directives');
+
+        if (chatModel && cfg.chatModel) chatModel.value = cfg.chatModel;
+        if (chatPersonality && cfg.chatPersonality) chatPersonality.value = cfg.chatPersonality;
+        if (chatTemp && cfg.chatTemperature !== undefined) chatTemp.value = String(cfg.chatTemperature);
+        if (chatRateLimit && cfg.chatRateLimit) chatRateLimit.value = String(cfg.chatRateLimit);
+        if (chatDirectives && cfg.chatCustomDirectives !== undefined) chatDirectives.value = cfg.chatCustomDirectives;
+
+        // Moderation fields
+        const modStrictness = document.getElementById('simple-mod-strictness');
+        const modPolicy = document.getElementById('simple-mod-policy');
+        const modModel = document.getElementById('simple-mod-model');
+
+        if (modStrictness && cfg.strictness) modStrictness.value = cfg.strictness;
+        if (modPolicy && cfg.actionPolicy) modPolicy.value = cfg.actionPolicy;
+        if (modModel && cfg.model) modModel.value = cfg.model;
+
+        updateStatusUi(cfg.enabled && cfg.chatEnabled !== false);
+      }
+    } catch (e) {
+      console.warn('loadAiModerationStudio config error:', e);
+    }
+    window.fetchAiLogs();
+  };
+
+  // Handle saving Chat AI settings
+  const chatForm = document.getElementById('clean-ai-chat-form');
+  if (chatForm) {
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const chatModel = document.getElementById('simple-chat-model')?.value || 'gemini-2.5-flash';
+      const chatPersonality = document.getElementById('simple-chat-personality')?.value || 'friendly';
+      const chatTemperature = parseFloat(document.getElementById('simple-chat-temp')?.value || '0.7');
+      const chatRateLimit = parseInt(document.getElementById('simple-chat-ratelimit')?.value || '30', 10);
+      const chatCustomDirectives = document.getElementById('simple-chat-directives')?.value || '';
+
+      try {
+        const res = await authFetch('/api/admin/ai-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatModel, chatPersonality, chatTemperature, chatRateLimit, chatCustomDirectives })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ Chat AI Assistant settings saved successfully!');
+        } else {
+          alert(data.error || 'Failed to save Chat AI settings.');
+        }
+      } catch (err) {
+        alert('Network error saving Chat AI settings.');
+      }
+    });
+  }
+
+  // Handle saving Moderation settings
+  const modForm = document.getElementById('clean-ai-mod-form');
+  if (modForm) {
+    modForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const strictness = document.getElementById('simple-mod-strictness')?.value || 'strict';
+      const actionPolicy = document.getElementById('simple-mod-policy')?.value || 'auto_punish';
+      const model = document.getElementById('simple-mod-model')?.value || 'llama-3.3-70b-versatile';
+
+      try {
+        const res = await authFetch('/api/admin/ai-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ strictness, actionPolicy, model })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ AI Moderation & Safety policy saved successfully!');
+          updateStatusUi(data.config?.enabled);
+        } else {
+          alert(data.error || 'Failed to update Safety policy.');
+        }
+      } catch (err) {
+        alert('Network error saving Safety policy.');
+      }
+    });
+  }
+
+  // Handle Master Toggle in AI Studio
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', async () => {
+      try {
+        const res = await authFetch('/api/admin/toggle-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (res.ok) {
+          updateStatusUi(data.ai_enabled);
+          alert(data.message);
+        } else {
+          alert(data.error || 'Failed to toggle AI engine.');
+        }
+      } catch (e) {
+        alert('Error toggling AI engine.');
+      }
+    });
+  }
+
+  // Interactive Live Playground Tester
+  if (testBtn) {
+    testBtn.addEventListener('click', async () => {
+      const input = document.getElementById('aimod-test-input');
+      const text = input ? input.value.trim() : '';
+      if (!text) return alert('Please enter sample text to test.');
+
+      const resultBox = document.getElementById('aimod-test-result-box');
+      const badge = document.getElementById('aimod-test-badge');
+      const latency = document.getElementById('aimod-test-latency');
+      const details = document.getElementById('aimod-test-details');
+
+      testBtn.disabled = true;
+      testBtn.textContent = '⏳ Analyzing...';
+
+      const strictness = document.getElementById('simple-mod-strictness')?.value || document.getElementById('aimod-strictness-select')?.value || 'balanced';
+      const actionPolicy = document.getElementById('simple-mod-policy')?.value || document.getElementById('aimod-policy-select')?.value || 'auto_punish';
+      const model = document.getElementById('simple-mod-model')?.value || document.getElementById('aimod-model-select')?.value || 'llama-3.3-70b-versatile';
+
+      try {
+        const res = await authFetch('/api/admin/ai-test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, strictness, actionPolicy, model })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.evaluation) {
+          const ev = data.evaluation;
+          if (resultBox) resultBox.style.display = 'block';
+
+          if (badge) {
+            if (ev.flagged) {
+              badge.textContent = `⛔ FLAGGED (${(ev.severity || 'MEDIUM').toUpperCase()})`;
+              badge.style.cssText = 'background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; font-weight: 800; padding: 3px 10px; border-radius: 99px; font-size: 0.76rem;';
+            } else {
+              badge.textContent = '🟢 SAFE / ACCEPTABLE';
+              badge.style.cssText = 'background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; font-weight: 800; padding: 3px 10px; border-radius: 99px; font-size: 0.76rem;';
+            }
+          }
+
+          if (latency) {
+            latency.textContent = `⏱️ ${ev.latencyMs || 0}ms (${ev.modelUsed || model})`;
+          }
+
+          if (details) {
+            details.innerHTML = `
+              <div style="margin-bottom: 4px;"><strong>Category:</strong> <span style="color:#fbbf24;">${ev.category || 'none'}</span> &bull; <strong>Confidence:</strong> ${Math.round((ev.confidence || 1) * 100)}%</div>
+              <div style="margin-bottom: 4px;"><strong>Recommended Action:</strong> <code style="color:#38bdf8; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px;">${ev.recommended_action || 'allow'}</code></div>
+              <div style="margin-bottom: 4px;"><strong>Reason:</strong> ${ev.reason || 'N/A'}</div>
+              ${ev.censored_text ? `<div style="margin-top: 6px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 6px;"><strong>Censored Preview:</strong> <em>"${ev.censored_text}"</em></div>` : ''}
+            `;
+          }
+        } else {
+          alert(data.error || 'AI evaluation failed.');
+        }
+      } catch (err) {
+        alert('Network error testing AI moderation.');
+      } finally {
+        testBtn.disabled = false;
+        testBtn.textContent = '⚡ Test AI Moderation';
+      }
+    });
+  }
+
+  if (clearTestBtn) {
+    clearTestBtn.addEventListener('click', () => {
+      const input = document.getElementById('aimod-test-input');
+      const resultBox = document.getElementById('aimod-test-result-box');
+      if (input) input.value = '';
+      if (resultBox) resultBox.style.display = 'none';
+    });
+  }
+
+  // Fetch AI Moderation Incident Feed
+  window.fetchAiLogs = async () => {
+    const tbody = document.getElementById('aimod-logs-tbody');
+    if (!tbody) return;
+
+    try {
+      const res = await authFetch('/api/admin/ai-logs');
+      if (!res.ok) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Failed to load incident logs.</td></tr>';
+        return;
+      }
+      const data = await res.json();
+      const logs = data.logs || [];
+
+      if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No AI violations recorded yet. The chat is clean! 🎉</td></tr>';
+        return;
+      }
+
+      const severityBadgeMap = {
+        low: '<span style="color:#fbbf24; font-weight:800; background:rgba(251,191,36,0.15); border:1px solid #fbbf24; padding:2px 8px; border-radius:99px; font-size:0.75rem;">LOW</span>',
+        medium: '<span style="color:#f59e0b; font-weight:800; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; padding:2px 8px; border-radius:99px; font-size:0.75rem;">MEDIUM</span>',
+        high: '<span style="color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); border:1px solid #ef4444; padding:2px 8px; border-radius:99px; font-size:0.75rem;">HIGH</span>',
+        extreme: '<span style="color:#fff; font-weight:900; background:#dc2626; border:1px solid #ef4444; padding:2px 8px; border-radius:99px; font-size:0.75rem;">EXTREME</span>'
+      };
+
+      tbody.innerHTML = logs.map(l => {
+        const sev = severityBadgeMap[l.severity?.toLowerCase()] || `<span class="chat-badge">${l.severity || 'MED'}</span>`;
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 10px 12px; font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">${formatEstDateTime(l.created_at)}</td>
+            <td style="padding: 10px 12px;"><strong style="color: #38bdf8;">@${l.username || 'User'}</strong></td>
+            <td style="padding: 10px 12px; max-width: 280px; word-break: break-word;"><code style="color:#ff6b6b; background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:4px;">${l.message || ''}</code></td>
+            <td style="padding: 10px 12px;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="color:#cbd5e1; font-size:0.82rem; font-weight:700;">${l.category || 'general'}</span>
+                ${sev}
+              </div>
+            </td>
+            <td style="padding: 10px 12px;"><span style="color:#10b981; font-weight:800; font-size:0.82rem;">${(l.action_taken || 'blocked').toUpperCase()}</span></td>
+            <td style="padding: 10px 12px; color: var(--text-muted); font-size: 0.82rem;">${l.reason || 'Flagged'}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching logs.</td></tr>';
+    }
+  };
+
+  window.clearAiLogs = async () => {
+    if (!confirm('Are you sure you want to clear all AI moderation incident history?')) return;
+    try {
+      const res = await authFetch('/api/admin/ai-logs', { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'AI incident logs cleared.');
+        window.fetchAiLogs();
+      } else {
+        alert(data.error || 'Failed to clear logs.');
+      }
+    } catch (e) {
+      alert('Error clearing AI incident logs.');
+    }
+  };
+}
+
+// ✏️ Edit Word Filter & Punishment Modal Controller
+function setupEditFilterModal() {
+  const modal = document.getElementById('admin-edit-filter-modal');
+  const form = document.getElementById('admin-edit-filter-form');
+  const closeBtn = document.getElementById('close-edit-filter-modal-btn');
+  const cancelBtn = document.getElementById('cancel-edit-filter-btn');
+
+  const closeModal = () => {
+    if (modal) modal.style.display = 'none';
+  };
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  window.adminEditFilterPrompt = (filter) => {
+    if (!modal || !filter) return;
+    const idInput = document.getElementById('edit-filter-id');
+    const wordInput = document.getElementById('edit-filter-word-input');
+    const punishmentSelect = document.getElementById('edit-filter-punishment-select');
+    const targetSelect = document.getElementById('edit-filter-target-select');
+    const reasonInput = document.getElementById('edit-filter-reason-input');
+
+    if (idInput) idInput.value = filter.id;
+    if (wordInput) wordInput.value = filter.word || '';
+    if (punishmentSelect) punishmentSelect.value = filter.punishment || 'censor';
+    if (targetSelect) targetSelect.value = filter.filter_type || 'both';
+    if (reasonInput) reasonInput.value = filter.reason || '';
+
+    modal.style.display = 'flex';
+  };
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit-filter-id')?.value;
+      const word = document.getElementById('edit-filter-word-input')?.value.trim();
+      const punishment = document.getElementById('edit-filter-punishment-select')?.value;
+      const filter_type = document.getElementById('edit-filter-target-select')?.value;
+      const reason = document.getElementById('edit-filter-reason-input')?.value.trim();
+
+      if (!id || !word) return alert('Word/phrase cannot be empty.');
+
+      try {
+        const res = await authFetch(`/api/admin/filters/${id}/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word, punishment, filter_type, reason })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(data.message || 'Filter rule updated successfully!');
+          closeModal();
+          fetchFilters();
+        } else {
+          alert(data.error || 'Failed to update filter rule.');
+        }
+      } catch (err) {
+        alert('Network error updating filter rule.');
+      }
+    });
+  }
+}
+
+// ==========================================
+// 🛡️ STUDENT PUNISHMENT APPEALS REVIEW STUDIO
+// ==========================================
+function setupAppealsReviewStudio() {
+  window.fetchAppeals = async (status = null) => {
+    const listEl = document.getElementById('admin-appeals-list');
+    const badgeEl = document.getElementById('admin-appeals-badge');
+    const filterSelect = document.getElementById('admin-appeals-filter');
+    const filterVal = status || (filterSelect ? filterSelect.value : 'pending');
+
+    if (!listEl) return;
+
+    try {
+      const res = await authFetch(`/api/admin/appeals?status=${encodeURIComponent(filterVal)}`);
+      if (!res.ok) {
+        listEl.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Failed to load appeals.</div>';
+        return;
+      }
+
+      const data = await res.json();
+      const appeals = data.appeals || [];
+
+      // Update pending badge count
+      const pendingCount = appeals.filter(a => a.status === 'pending').length;
+      if (badgeEl) {
+        if (pendingCount > 0) {
+          badgeEl.textContent = pendingCount;
+          badgeEl.style.display = 'inline-block';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+
+      if (appeals.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 40px; background: rgba(0,0,0,0.25); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+            <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">✨</span>
+            <strong style="color: #fff; font-size: 1.05rem;">No ${filterVal === 'pending' ? 'Pending' : ''} Appeals Found</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem;">All punishment appeals have been reviewed and processed.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = appeals.map(a => {
+        const isPending = a.status === 'pending';
+        const isApproved = a.status === 'approved';
+        const isRejected = a.status === 'rejected';
+
+        const aiRec = a.ai_recommendation || 'review';
+        const isAiApprove = aiRec.toLowerCase().includes('approve');
+        const aiBadgeBg = isAiApprove ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+        const aiBadgeBorder = isAiApprove ? '#10b981' : '#ef4444';
+        const aiBadgeColor = isAiApprove ? '#34d399' : '#f87171';
+        const aiIcon = isAiApprove ? '✅' : '❌';
+
+        const statusBadgeBg = isApproved ? 'rgba(16, 185, 129, 0.2)' : isRejected ? 'rgba(239, 68, 68, 0.2)' : 'rgba(251, 191, 36, 0.2)';
+        const statusBadgeColor = isApproved ? '#10b981' : isRejected ? '#ef4444' : '#fbbf24';
+
+        const formattedDate = formatEstDateTime(a.created_at);
+
+        return `
+          <div style="background: #0e121e; border: 1px solid ${isPending ? 'rgba(56, 189, 248, 0.4)' : 'rgba(255,255,255,0.08)'}; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.4rem;">👤</span>
+                <div>
+                  <strong style="color: #fff; font-size: 1.05rem;">@${escapeHtml(a.username)}</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 6px;">(Appeal #${a.id} • ${escapeHtml(a.punishment_type.toUpperCase())})</span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.75rem; padding: 3px 10px; border-radius: 99px; font-weight: 800; background: ${statusBadgeBg}; color: ${statusBadgeColor};">
+                  ${escapeHtml(a.status.toUpperCase())}
+                </span>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">${formattedDate}</span>
+              </div>
+            </div>
+
+            <!-- Original Infraction -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <span style="font-size: 0.75rem; color: #f59e0b; font-weight: 800; text-transform: uppercase;">⚠️ Original Punishment Reason:</span>
+                <p style="margin: 3px 0 0; font-size: 0.85rem; color: #cbd5e1;">${escapeHtml(a.original_reason || 'Policy violation')}</p>
+              </div>
+              <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 6px; padding: 3px 10px;">
+                <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">Category: ${escapeHtml(a.incident_category || 'General')}</span>
+              </div>
+            </div>
+
+            <!-- Student's Detailed Questionnaire Responses -->
+            <div style="background: rgba(56, 189, 248, 0.04); border-left: 3px solid #38bdf8; border-radius: 4px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 800; text-transform: uppercase;">1. Incident Context & Explanation:</span>
+                <p style="margin: 3px 0 0; font-size: 0.85rem; color: #fff; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(a.incident_description || a.appeal_text)}</p>
+              </div>
+              ${a.why_second_chance ? `
+                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
+                  <span style="font-size: 0.75rem; color: #a855f7; font-weight: 800; text-transform: uppercase;">2. Second Chance Plea & Remorse:</span>
+                  <p style="margin: 3px 0 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(a.why_second_chance)}</p>
+                </div>
+              ` : ''}
+              ${a.prevention_commitment ? `
+                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
+                  <span style="font-size: 0.75rem; color: #10b981; font-weight: 800; text-transform: uppercase;">3. Future Prevention Commitment:</span>
+                  <p style="margin: 3px 0 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(a.prevention_commitment)}</p>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Groq AI Pre-Review Assessment -->
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid ${aiBadgeBorder}; border-radius: 10px; padding: 12px 16px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 1rem;">🤖</span>
+                  <strong style="color: #fff; font-size: 0.85rem;">Groq AI Safety Arbitrator Recommendation:</strong>
+                </div>
+                <span style="font-size: 0.75rem; padding: 3px 10px; border-radius: 99px; font-weight: 900; background: ${aiBadgeBg}; color: ${aiBadgeColor}; border: 1px solid ${aiBadgeBorder};">
+                  ${aiIcon} AI Suggestion: ${escapeHtml(aiRec.toUpperCase())}
+                </span>
+              </div>
+              <p style="margin: 0; font-size: 0.82rem; color: #cbd5e1; line-height: 1.4;">${escapeHtml(a.ai_rationale || 'Evaluated based on remorse and risk criteria.')}</p>
+            </div>
+
+            ${!isPending ? `
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px 14px; font-size: 0.8rem; color: var(--text-muted);">
+                <span>Reviewed by <strong style="color:#fff;">${escapeHtml(a.reviewed_by || 'Admin')}</strong> • Notes: <span style="color:#cbd5e1;">${escapeHtml(a.admin_notes || 'None')}</span></span>
+              </div>
+            ` : `
+              <!-- Admin Action Decision Buttons -->
+              <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
+                <button class="btn-small danger" onclick="window.adminReviewAppeal(${a.id}, 'rejected', '${escapeHtml(a.username)}')" style="padding: 8px 16px; font-weight: 700; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">
+                  ❌ Reject Appeal
+                </button>
+                <button class="btn-pill primary" onclick="window.adminReviewAppeal(${a.id}, 'approved', '${escapeHtml(a.username)}')" style="padding: 8px 20px; font-weight: 800; background: #10b981; border-color: #10b981; color: #000;">
+                  ✅ Approve & Lift Punishment
+                </button>
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('fetchAppeals error:', err);
+      listEl.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Connection error loading appeals.</div>';
+    }
+  };
+
+  window.adminReviewAppeal = async (appealId, decision, username) => {
+    const notes = prompt(`Enter optional review notes for @${username} (Decision: ${decision.toUpperCase()}):`, '');
+    if (notes === null) return; // User cancelled
+
+    try {
+      const res = await authFetch(`/api/admin/appeals/${appealId}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision, adminNotes: notes })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Appeal #${appealId} successfully ${decision}.`);
+        window.fetchAppeals();
+        if (window.fetchUsers) window.fetchUsers();
+      } else {
+        alert(data.error || 'Failed to review appeal.');
+      }
+    } catch (err) {
+      alert('Network error reviewing appeal.');
     }
   };
 }

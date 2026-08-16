@@ -26,7 +26,7 @@ window.closeAddGameModal = function() {
 };
 
 window.openSuggestModal = function() {
-  const modal = document.getElementById('suggestion-modal');
+  const modal = document.getElementById('suggest-modal') || document.getElementById('suggestion-modal');
   if (modal) {
     modal.classList.add('active');
     modal.style.display = 'flex';
@@ -34,7 +34,7 @@ window.openSuggestModal = function() {
 };
 
 window.closeSuggestModal = function() {
-  const modal = document.getElementById('suggestion-modal');
+  const modal = document.getElementById('suggest-modal') || document.getElementById('suggestion-modal');
   if (modal) {
     modal.classList.remove('active');
     modal.style.display = 'none';
@@ -42,7 +42,7 @@ window.closeSuggestModal = function() {
 };
 
 window.openBugModal = function() {
-  const modal = document.getElementById('bug-report-modal');
+  const modal = document.getElementById('bug-modal') || document.getElementById('bug-report-modal');
   if (modal) {
     modal.classList.add('active');
     modal.style.display = 'flex';
@@ -50,7 +50,7 @@ window.openBugModal = function() {
 };
 
 window.closeBugModal = function() {
-  const modal = document.getElementById('bug-report-modal');
+  const modal = document.getElementById('bug-modal') || document.getElementById('bug-report-modal');
   if (modal) {
     modal.classList.remove('active');
     modal.style.display = 'none';
@@ -1454,29 +1454,45 @@ function setupAddGameForm() {
 
 export function setupSuggestionModal() {
   const form = document.getElementById('suggest-form');
-  const modal = document.getElementById('suggestion-modal');
+  const modal = document.getElementById('suggest-modal') || document.getElementById('suggestion-modal');
+  const closeBtn = document.getElementById('suggest-modal-close');
+
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    });
+  }
+
   if (!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const title = document.getElementById('suggest-title')?.value || '';
-    const details = document.getElementById('suggest-details')?.value || '';
+    const title = document.getElementById('suggest-title')?.value.trim() || '';
+    const details = (document.getElementById('suggest-details') || document.getElementById('suggest-desc'))?.value.trim() || '';
     const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+
+    if (!title || !details) {
+      return alert('Please fill in both the game title and details/URL.');
+    }
 
     try {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/games/suggestions', {
+      const res = await fetch('/api/games/suggest', {
         method: 'POST',
         headers,
         body: JSON.stringify({ title, details })
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && (data.success || !data.error)) {
         alert('🎉 Suggestion submitted successfully! Thank you for improving Nitro.');
         form.reset();
-        if (modal) modal.classList.remove('active');
+        if (modal) {
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+        }
       } else {
         alert(data.error || 'Failed to submit suggestion.');
       }
@@ -1488,29 +1504,46 @@ export function setupSuggestionModal() {
 
 export function setupBugReportModal() {
   const form = document.getElementById('bug-form');
-  const modal = document.getElementById('bug-report-modal');
+  const modal = document.getElementById('bug-modal') || document.getElementById('bug-report-modal');
+  const closeBtn = document.getElementById('bug-modal-close');
+
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    });
+  }
+
   if (!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const title = document.getElementById('bug-title')?.value || '';
-    const details = document.getElementById('bug-details')?.value || '';
+    const title = document.getElementById('bug-title')?.value.trim() || '';
+    const category = document.getElementById('bug-category')?.value || 'General';
+    const description = (document.getElementById('bug-desc') || document.getElementById('bug-details'))?.value.trim() || '';
     const token = localStorage.getItem('nitro_jwt_token') || sessionStorage.getItem('nitro_jwt_token');
+
+    if (!title || !description) {
+      return alert('Please fill in both the bug title and description.');
+    }
 
     try {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/games/bugs', {
+      const res = await fetch('/api/games/bug-report', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ title, details })
+        body: JSON.stringify({ title, category, description })
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && (data.success || !data.error)) {
         alert('🐞 Bug report submitted! Our dev team will investigate.');
         form.reset();
-        if (modal) modal.classList.remove('active');
+        if (modal) {
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+        }
       } else {
         alert(data.error || 'Failed to submit bug report.');
       }

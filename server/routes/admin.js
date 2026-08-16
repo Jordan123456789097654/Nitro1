@@ -6,12 +6,13 @@ const db = require('../db');
 const systemState = require('../systemState');
 const { sendDiscordLog } = require('../discordLogger');
 const { getActiveConnectionsList } = require('../chatSocket');
+const { testGroqModeration } = require('../aiModeration');
 
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
-// Middleware to restrict access to Admins only (supports Session and Bearer JWT)
+// Middleware to restrict access to Admins only (supports Session, Cookies, and Bearer JWT)
 const requireAdmin = async (req, res, next) => {
-  let user = req.session && req.session.user;
+  let user = req.user || (req.session && req.session.user);
 
   if (!user && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
     const token = req.headers.authorization.split(' ')[1];
@@ -22,7 +23,15 @@ const requireAdmin = async (req, res, next) => {
     } catch (e) {}
   }
 
-  if (!user || !['admin', 'owner'].includes(user.role)) {
+  if (!user && req.cookies && req.cookies.nitro_jwt_token) {
+    try {
+      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+    } catch (e) {}
+  }
+
+  if (!user || (!['admin', 'owner'].includes(user.role) && user.username?.toLowerCase() !== 'jordandaniels')) {
     return res.status(403).json({ error: 'Access denied. Administrator or Owner privileges required.' });
   }
 
@@ -42,15 +51,17 @@ const requireOwner = (req, res, next) => {
 
 // PUBLIC NITRO AI STATUS CHECK ENDPOINT
 router.get('/ai-status', (req, res) => {
-  res.json({ ai_enabled: systemState.isAiEnabled() });
+  res.json({ ai_enabled: systemState.isAiEnabled(), config: systemState.getAiConfig() });
 });
 
 router.use(requireAdmin);
 
-router.post('/toggle-ai', (req, res) => {
+// Toggle AI Online/Maintenance Mode
+router.post('/toggle-ai', async (req, res) => {
   const { enabled } = req.body;
-  const newState = enabled !== undefined ? !!enabled : !systemState.isAiEnabled();
-  systemState.setAiEnabled(newState);
+  const current = systemState.isAiEnabled();
+  const newState = enabled !== undefined ? Boolean(enabled) : !current;
+  const updated = await systemState.updateAiConfig({ enabled: newState, chatEnabled: newState });
 
   sendDiscordLog({
     category: 'admin',
@@ -62,8 +73,94 @@ router.post('/toggle-ai', (req, res) => {
   res.json({
     success: true,
     ai_enabled: newState,
+    config: updated,
     message: `Nitro AI is now ${newState ? 'ONLINE' : 'UNDER MAINTENANCE'}`
   });
+});
+
+// Get AI Power Matrix Configuration
+router.get('/ai-config', (req, res) => {
+  res.json({
+    success: true,
+    config: systemState.getAiConfig(),
+    defaults: systemState.getDefaultAiConfig ? systemState.getDefaultAiConfig() : {}
+  });
+});
+
+// Update AI Power Matrix Configuration
+router.post('/ai-config', async (req, res) => {
+  try {
+    const updated = await systemState.updateAiConfig(req.body);
+
+    await db.createModerationLog(
+      'UPDATE_AI_CONFIG',
+      req.adminUser.username,
+      'AI Power Matrix',
+      `Model: ${updated.primaryChatModel || updated.chatModel}, RateLimit: ${updated.globalChatRateLimitPerMin || 30}req/m, Temp: ${updated.chatTemperature}`
+    );
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'UPDATE_AI_POWER_MATRIX',
+      admin: req.adminUser.username,
+      details: `AI Power Matrix Updated: Model: ${updated.primaryChatModel} | Provider: ${updated.primaryChatProvider}`
+    });
+
+    res.json({ success: true, config: updated, message: 'AI Power Matrix configuration saved successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update AI configuration.' });
+  }
+});
+
+// Reset AI Power Matrix to Factory Defaults
+router.post('/ai-config/reset', async (req, res) => {
+  try {
+    const defaults = await systemState.resetAiConfigToDefaults();
+    await db.createModerationLog('RESET_AI_CONFIG', req.adminUser.username, 'AI Power Matrix', 'Reset all 90+ options to factory defaults');
+    res.json({ success: true, config: defaults, message: 'All AI options reset to factory defaults!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset AI configuration.' });
+  }
+});
+
+// Interactive Playground: Test AI Moderation with arbitrary input
+router.post('/ai-test', async (req, res) => {
+  const { text, strictness, actionPolicy, model } = req.body;
+  if (!text || typeof text !== 'string') {
+    return res.status(400).json({ error: 'Text prompt required for AI moderation testing.' });
+  }
+
+  try {
+    const evaluation = await testGroqModeration(text, {
+      strictness,
+      actionPolicy,
+      model
+    });
+    res.json({ success: true, evaluation });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'AI moderation test failed.' });
+  }
+});
+
+// Get recent AI Moderation Incident Logs
+router.get('/ai-logs', async (req, res) => {
+  try {
+    const logs = await db.getAiModerationLogs(100);
+    res.json({ success: true, logs });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve AI incident logs.' });
+  }
+});
+
+// Clear AI Incident Logs
+router.delete('/ai-logs', async (req, res) => {
+  try {
+    await db.clearAiModerationLogs();
+    await db.createModerationLog('CLEAR_AI_LOGS', req.adminUser.username, 'AI Shield', 'Cleared all AI incident history');
+    res.json({ success: true, message: 'AI moderation incident logs cleared.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear AI incident logs.' });
+  }
 });
 
 
@@ -650,6 +747,70 @@ router.post('/users/:id/ban', async (req, res) => {
   }
 });
 
+// Mute User (Duration in minutes)
+router.post('/users/:id/mute', async (req, res) => {
+  const targetId = req.params.id;
+  const admin = req.adminUser.username;
+  const { durationMinutes = 15, reason = 'Muted by admin' } = req.body;
+
+  try {
+    const targetUser = await db.getUserById(targetId);
+    if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    if (['admin', 'owner'].includes(targetUser.role) && req.adminUser.role !== 'owner') {
+      return res.status(403).json({ error: 'Cannot mute an administrator or owner.' });
+    }
+
+    const mins = Number(durationMinutes) || 15;
+    const mutedUntil = await db.muteUser(targetId, mins);
+
+    await db.createModerationLog('MUTE_USER', admin, targetUser.username, `Muted for ${mins}m: ${reason}`);
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'MUTE_USER',
+      admin,
+      target: targetUser.username,
+      details: `User muted for ${mins} minutes: ${reason}`
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_muted', { username: targetUser.username, durationMinutes: mins, mutedUntil });
+    }
+
+    res.json({ success: true, message: `@${targetUser.username} muted for ${mins} minutes.`, mutedUntil });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to mute user.' });
+  }
+});
+
+// Unmute User
+router.post('/users/:id/unmute', async (req, res) => {
+  const targetId = req.params.id;
+  const admin = req.adminUser.username;
+
+  try {
+    const targetUser = await db.getUserById(targetId);
+    if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    await db.unmuteUser(targetId);
+    await db.createModerationLog('UNMUTE_USER', admin, targetUser.username, 'Chat mute lifted by admin');
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'UNMUTE_USER',
+      admin,
+      target: targetUser.username,
+      details: 'User chat mute lifted by administrator.'
+    });
+
+    res.json({ success: true, message: `Chat mute lifted for @${targetUser.username}.` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to unmute user.' });
+  }
+});
+
 // Gateway Ban / Restrict Gateway Access Only (with Duration Support)
 router.post('/users/:id/gateway-ban', async (req, res) => {
   const { is_gateway_banned, reason, durationHours } = req.body;
@@ -769,6 +930,30 @@ router.post('/filters/add', async (req, res) => {
   }
 });
 
+router.post('/filters/bulk', async (req, res) => {
+  const { wordsText, words, filter_type = 'both', punishment = 'censor', reason = '' } = req.body;
+  const admin = req.adminUser.username;
+
+  let wordList = [];
+  if (Array.isArray(words)) {
+    wordList = words;
+  } else if (typeof wordsText === 'string') {
+    wordList = wordsText.split(/[\n,;]+/).map(w => w.trim()).filter(Boolean);
+  }
+
+  if (wordList.length === 0) {
+    return res.status(400).json({ error: 'Please enter at least one word or phrase to mass block.' });
+  }
+
+  try {
+    const result = await db.addFilterWordsBulk(wordList, filter_type, punishment, reason, admin);
+    await db.createModerationLog('BULK_ADD_FILTERS', admin, `${result.count} words`, `Punishment: ${punishment} | Scope: ${filter_type}`);
+    res.status(201).json({ success: true, count: result.count, message: `Successfully mass-blocked ${result.count} word(s)!` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to mass block words.' });
+  }
+});
+
 router.delete('/filters/:id', async (req, res) => {
   const admin = req.adminUser.username;
   try {
@@ -777,6 +962,23 @@ router.delete('/filters/:id', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete filter.' });
+  }
+});
+
+// Update Filter Word & Punishment
+router.post('/filters/:id/update', async (req, res) => {
+  const targetId = req.params.id;
+  const admin = req.adminUser.username;
+  const { word, filter_type = 'both', punishment = 'censor', reason = '' } = req.body;
+
+  try {
+    const updated = await db.updateFilterWord(targetId, { word, filter_type, punishment, reason });
+    if (!updated) return res.status(404).json({ error: 'Filter rule not found.' });
+
+    await db.createModerationLog('UPDATE_FILTER', admin, updated.word, `Punishment: ${punishment} | Scope: ${filter_type}`);
+    res.json({ success: true, filter: updated, message: `Filter rule for "${updated.word}" updated successfully!` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update filter rule.' });
   }
 });
 
@@ -923,5 +1125,117 @@ router.post('/suggestions/:id/deny', async (req, res) => {
   }
 });
 
+
+// ==========================================
+// 🛡️ PUNISHMENT APPEALS MANAGEMENT
+// ==========================================
+
+// Get all appeals (with optional status filter)
+router.get('/appeals', async (req, res) => {
+  try {
+    const status = req.query.status || 'all';
+    const appeals = await db.getAppeals(status);
+    res.json({ success: true, appeals });
+  } catch (err) {
+    console.error('Get appeals error:', err);
+    res.status(500).json({ error: 'Failed to fetch appeals.' });
+  }
+});
+
+// Review appeal (Approve or Reject)
+router.post('/appeals/:id/review', async (req, res) => {
+  const admin = req.adminUser.username;
+  const appealId = req.params.id;
+  const { decision, adminNotes } = req.body; // decision: 'approved' | 'rejected'
+
+  if (!['approved', 'rejected'].includes(decision)) {
+    return res.status(400).json({ error: 'Decision must be either "approved" or "rejected".' });
+  }
+
+  try {
+    const appeal = await db.getAppealById(appealId);
+    if (!appeal) {
+      return res.status(404).json({ error: 'Appeal not found.' });
+    }
+
+    const updatedAppeal = await db.reviewAppeal(appealId, {
+      status: decision,
+      adminNotes: adminNotes || '',
+      reviewedBy: admin
+    });
+
+    if (decision === 'approved') {
+      // Find target user by ID or Username
+      let targetUser = null;
+      if (appeal.user_id) {
+        targetUser = await db.getUserById(appeal.user_id);
+      }
+      if (!targetUser && appeal.username) {
+        targetUser = await db.getUserByUsername(appeal.username);
+      }
+
+      const effectiveUserId = targetUser ? targetUser.id : appeal.user_id;
+
+      if (effectiveUserId) {
+        await db.unbanUser(effectiveUserId);
+        await db.unmuteUser(effectiveUserId);
+      }
+
+      // Also ensure ban and mute are cleared by username in case IDs shifted
+      if (appeal.username) {
+        try {
+          const { pool } = require('../db');
+          await pool.query(`
+            UPDATE users 
+            SET is_banned = false, ban_reason = NULL, banned_until = NULL, muted_until = NULL,
+                is_gateway_banned = false, gateway_timeout_until = NULL, gateway_violations_count = 0
+            WHERE LOWER(username) = LOWER($1)
+          `, [appeal.username.trim()]);
+        } catch (e) {}
+      }
+
+      await db.createModerationLog('APPEAL_APPROVED', admin, appeal.username, `Punishment lifted. Admin notes: ${adminNotes || 'None'}`);
+
+      sendDiscordLog({
+        category: 'moderation',
+        action: 'APPEAL_APPROVED',
+        admin,
+        target: `@${appeal.username}`,
+        details: `Punishment appeal approved. ${appeal.punishment_type.toUpperCase()} lifted. Notes: ${adminNotes || 'None'}`
+      });
+
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('appeal_status_updated', { appealId, username: appeal.username, status: 'approved' });
+        io.emit('user_unbanned', { userId: effectiveUserId, username: appeal.username });
+        io.emit('user_unmuted', { userId: effectiveUserId, username: appeal.username });
+      }
+    } else {
+      await db.createModerationLog('APPEAL_REJECTED', admin, appeal.username, `Appeal rejected. Notes: ${adminNotes || 'None'}`);
+
+      sendDiscordLog({
+        category: 'moderation',
+        action: 'APPEAL_REJECTED',
+        admin,
+        target: `@${appeal.username}`,
+        details: `Punishment appeal rejected. ${appeal.punishment_type.toUpperCase()} maintained. Notes: ${adminNotes || 'None'}`
+      });
+
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('appeal_status_updated', { appealId, username: appeal.username, status: 'rejected' });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Appeal #${appealId} successfully ${decision}.`,
+      appeal: updatedAppeal
+    });
+  } catch (err) {
+    console.error('Review appeal error:', err);
+    res.status(500).json({ error: 'Failed to review appeal.' });
+  }
+});
 
 module.exports = router;

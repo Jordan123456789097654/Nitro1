@@ -70,9 +70,14 @@ router.get('/me', async (req, res) => {
 
   try {
     if (user.is_banned) {
-      if (req.session) req.session.destroy();
-      res.clearCookie('nitro_jwt_token');
-      return res.status(403).json({ loggedIn: false, is_banned: true, reason: user.ban_reason || 'Account suspended by administrator.', error: 'Account suspended.' });
+      return res.status(403).json({
+        loggedIn: false,
+        is_banned: true,
+        userId: user.id,
+        username: user.username,
+        reason: user.ban_reason || 'Account suspended by administrator.',
+        error: 'Account suspended.'
+      });
     }
 
     res.json({
@@ -303,6 +308,7 @@ router.post('/login', async (req, res) => {
         return res.status(403).json({
           error: `🚫 ACCOUNT SUSPENDED: Your account is suspended${timeUntilStr}.\nReason: ${user.ban_reason || 'Violation of terms of service'}`,
           is_banned: true,
+          username: user.username,
           reason: user.ban_reason || 'Violation of terms of service'
         });
       }
@@ -352,6 +358,102 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error during login.' });
+  }
+});
+
+// Submit a punishment appeal (for muted or suspended users)
+router.post('/submit-appeal', async (req, res) => {
+  try {
+    const { evaluateAppealWithGroq } = require('../aiModeration');
+    const { username, appealText, incidentCategory, incidentDescription, whySecondChance, preventionCommitment, rulesAgreed } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ error: 'Username is required to submit an appeal.' });
+    }
+
+    const effectiveDesc = (incidentDescription && incidentDescription.trim()) || (appealText && appealText.trim()) || '';
+    if (!effectiveDesc || effectiveDesc.length < 10) {
+      return res.status(400).json({ error: 'Please provide a meaningful explanation of what occurred (minimum 10 characters).' });
+    }
+
+    const cleanUsername = username.trim();
+    const user = await db.getUserByUsername(cleanUsername);
+    if (!user) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    const isBanned = Boolean(user.is_banned);
+    const isMuted = Boolean(user.muted_until && new Date(user.muted_until) > new Date());
+
+    if (!isBanned && !isMuted) {
+      return res.status(400).json({ error: 'This account does not currently have an active ban or mute punishment.' });
+    }
+
+    // Check if user already has a pending appeal
+    const alreadyPending = await db.hasPendingAppeal(user.id, cleanUsername);
+    if (alreadyPending) {
+      return res.status(400).json({ error: 'You already have a pending appeal under administrative review. Please wait for staff review.' });
+    }
+
+    const punishmentType = isBanned ? 'ban' : 'mute';
+    const originalReason = user.ban_reason || 'Automated safety policy violation';
+
+    const compiledAppealText = appealText || [
+      incidentCategory ? `[Category: ${incidentCategory}]` : '',
+      `Incident Description: ${effectiveDesc}`,
+      whySecondChance ? `Second Chance Justification: ${whySecondChance.trim()}` : '',
+      preventionCommitment ? `Future Prevention Plan: ${preventionCommitment.trim()}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    // Run Groq AI Pre-Review
+    const aiEvaluation = await evaluateAppealWithGroq({
+      username: cleanUsername,
+      punishmentType,
+      originalReason,
+      appealText: compiledAppealText,
+      incidentCategory: incidentCategory || 'General Infraction',
+      incidentDescription: effectiveDesc,
+      whySecondChance: (whySecondChance && whySecondChance.trim()) || 'Requested second chance',
+      preventionCommitment: (preventionCommitment && preventionCommitment.trim()) || 'Committed to follow rules',
+      rulesAgreed: rulesAgreed !== false
+    });
+
+    const appeal = await db.createAppeal({
+      userId: user.id,
+      username: cleanUsername,
+      punishmentType,
+      originalReason,
+      appealText: compiledAppealText,
+      incidentCategory: incidentCategory || 'General Infraction',
+      incidentDescription: effectiveDesc,
+      whySecondChance: (whySecondChance && whySecondChance.trim()) || '',
+      preventionCommitment: (preventionCommitment && preventionCommitment.trim()) || '',
+      rulesAgreed: rulesAgreed !== false,
+      aiRecommendation: aiEvaluation.recommendation,
+      aiRationale: aiEvaluation.rationale,
+      aiConfidence: aiEvaluation.confidence
+    });
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'PUNISHMENT_APPEAL_SUBMITTED',
+      admin: 'STUDENT_APPEAL_SYSTEM',
+      target: `@${cleanUsername}`,
+      details: `[${punishmentType.toUpperCase()} APPEAL] User submitted detailed appeal (${incidentCategory || 'General'}). AI Pre-Review: ${aiEvaluation.recommendation?.toUpperCase()} (${Math.round((aiEvaluation.confidence || 0.9) * 100)}% conf). Rationale: "${aiEvaluation.rationale}"`
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new_appeal_submitted', appeal);
+    }
+
+    res.json({
+      success: true,
+      message: 'Your appeal has been submitted successfully and forwarded to staff for review.',
+      appeal
+    });
+  } catch (err) {
+    console.error('Submit appeal error:', err);
+    res.status(500).json({ error: 'Internal server error submitting appeal.' });
   }
 });
 

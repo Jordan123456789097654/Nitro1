@@ -142,8 +142,7 @@ app.use(async (req, res, next) => {
 // Authentication Enforcement Middleware for API routes
 app.use('/api', (req, res, next) => {
   const openPaths = [
-    '/auth/login', '/auth/register', '/auth/me', '/status', '/visit', '/gateway', '/admin',
-    '/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/status', '/api/visit', '/api/gateway', '/api/admin',
+    '/auth', '/api/auth', '/status', '/api/status', '/visit', '/api/visit', '/gateway', '/api/gateway', '/admin', '/api/admin',
     '/games', '/api/games', '/polls', '/api/polls', '/voice', '/api/voice', '/updates', '/api/updates',
     '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard', '/ai', '/api/ai'
   ];

@@ -31,31 +31,38 @@
   color: var(--accent-color);
 }
 
-.admin-tabs-nav {
-  display: flex;
-  gap: 10px;
-  border-bottom: 1px solid var(--card-border);
-  padding-bottom: 12px;
-  overflow-x: auto;
+.admin-categorized-hub {
+  background: rgba(12, 16, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
 }
 
 .admin-tab-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-muted);
   font-weight: 700;
-  font-size: 0.95rem;
-  padding: 8px 18px;
+  font-size: 0.85rem;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+}
+
+.admin-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .admin-tab-btn.active {
   background: var(--accent-color);
   color: #fff;
-  box-shadow: 0 0 12px var(--accent-glow);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 16px var(--accent-glow);
 }
 
 .admin-tab-content {

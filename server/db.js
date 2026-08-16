@@ -248,10 +248,50 @@ const db = {
           is_resolved BOOLEAN DEFAULT false,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS ai_moderation_logs (
+          id SERIAL PRIMARY KEY,
+          user_id INT,
+          username VARCHAR(50) NOT NULL,
+          message TEXT NOT NULL,
+          category VARCHAR(50) DEFAULT 'general',
+          severity VARCHAR(20) DEFAULT 'medium',
+          confidence FLOAT DEFAULT 1.0,
+          action_taken VARCHAR(50) DEFAULT 'blocked',
+          reason TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS appeals (
+          id SERIAL PRIMARY KEY,
+          user_id INT,
+          username VARCHAR(100) NOT NULL,
+          punishment_type VARCHAR(50) NOT NULL,
+          original_reason TEXT,
+          appeal_text TEXT NOT NULL,
+          incident_category VARCHAR(100),
+          incident_description TEXT,
+          why_second_chance TEXT,
+          prevention_commitment TEXT,
+          rules_agreed BOOLEAN DEFAULT true,
+          ai_recommendation VARCHAR(50),
+          ai_rationale TEXT,
+          ai_confidence FLOAT DEFAULT 0.9,
+          status VARCHAR(50) DEFAULT 'pending',
+          admin_notes TEXT,
+          reviewed_by VARCHAR(100),
+          reviewed_at TIMESTAMP,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       // Safe column additions
       await pool.query(`
+        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS incident_category VARCHAR(100);
+        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS incident_description TEXT;
+        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS why_second_chance TEXT;
+        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS prevention_commitment TEXT;
+        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS rules_agreed BOOLEAN DEFAULT true;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(100);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';
         ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT '';
@@ -758,6 +798,21 @@ const db = {
     }
   },
 
+  async unbanUser(userId) {
+    try {
+      await pool.query(`
+        UPDATE users 
+        SET is_banned = false, ban_reason = NULL, banned_until = NULL,
+            is_gateway_banned = false, gateway_timeout_until = NULL, gateway_violations_count = 0
+        WHERE id = $1
+      `, [userId]);
+      return true;
+    } catch (e) {
+      console.error('unbanUser error:', e.message);
+      return false;
+    }
+  },
+
   async unmuteUser(userId) {
     try {
       await pool.query('UPDATE users SET muted_until = NULL WHERE id = $1', [userId]);
@@ -1106,6 +1161,28 @@ const db = {
       return null;
     }
   },
+  async addFilterWordsBulk(wordsArray, filter_type = 'both', punishment = 'censor', reason = '', created_by = 'admin') {
+    try {
+      if (!Array.isArray(wordsArray) || wordsArray.length === 0) return { count: 0 };
+
+      const cleanWords = [...new Set(wordsArray.map(w => String(w).trim().toLowerCase()).filter(w => w.length > 0))];
+      if (cleanWords.length === 0) return { count: 0 };
+
+      let addedCount = 0;
+      for (const w of cleanWords) {
+        await pool.query(`
+          INSERT INTO filter_words (word, filter_type, punishment, reason, created_by)
+          VALUES ($1, $2, $3, $4, $5)
+          ON CONFLICT (word) DO UPDATE SET filter_type = $2, punishment = $3, reason = $4, created_by = $5
+        `, [w, filter_type, punishment, reason, created_by]);
+        addedCount++;
+      }
+      return { success: true, count: addedCount };
+    } catch (e) {
+      console.error('addFilterWordsBulk error:', e.message);
+      return { success: false, count: 0 };
+    }
+  },
 
   async deleteFilterWord(id) {
     try {
@@ -1113,6 +1190,24 @@ const db = {
       return true;
     } catch (e) {
       return false;
+    }
+  },
+
+  async updateFilterWord(id, { word, filter_type, punishment, reason }) {
+    try {
+      const res = await pool.query(`
+        UPDATE filter_words
+        SET word = COALESCE($1, word),
+            filter_type = COALESCE($2, filter_type),
+            punishment = COALESCE($3, punishment),
+            reason = COALESCE($4, reason)
+        WHERE id = $5
+        RETURNING *
+      `, [word ? String(word).trim().toLowerCase() : null, filter_type, punishment, reason, id]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('updateFilterWord error:', e.message);
+      return null;
     }
   },
 
@@ -1973,6 +2068,270 @@ const db = {
       return res.rows;
     } catch (e) {
       return [];
+    }
+  },
+
+  async banUser(userId, reason = 'Account suspended', durationDays = 0) {
+    try {
+      let bannedUntil = null;
+      if (durationDays && Number(durationDays) > 0) {
+        bannedUntil = new Date(Date.now() + Number(durationDays) * 24 * 60 * 60 * 1000);
+      }
+      await pool.query(
+        'UPDATE users SET is_banned = true, ban_reason = $1, banned_until = $2 WHERE id = $3',
+        [reason, bannedUntil, userId]
+      );
+      return { success: true, bannedUntil };
+    } catch (e) {
+      console.error('banUser error:', e.message);
+      return false;
+    }
+  },
+
+  async logAiModerationViolation({ userId, username, message, category, severity, confidence, action_taken, reason }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO ai_moderation_logs (user_id, username, message, category, severity, confidence, action_taken, reason)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `, [userId || null, username || 'Anonymous', message, category || 'general', severity || 'medium', confidence || 1.0, action_taken || 'blocked', reason || '']);
+      return res.rows[0];
+    } catch (e) {
+      console.error('logAiModerationViolation error:', e.message);
+      return null;
+    }
+  },
+
+  async getAiModerationLogs(limit = 100) {
+    try {
+      const res = await pool.query('SELECT * FROM ai_moderation_logs ORDER BY id DESC LIMIT $1', [limit]);
+      return res.rows;
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async clearAiModerationLogs() {
+    try {
+      await pool.query('DELETE FROM ai_moderation_logs');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  async createAppeal({ userId, username, punishmentType, originalReason, appealText, incidentCategory, incidentDescription, whySecondChance, preventionCommitment, rulesAgreed, aiRecommendation, aiRationale, aiConfidence }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO appeals (user_id, username, punishment_type, original_reason, appeal_text, incident_category, incident_description, why_second_chance, prevention_commitment, rules_agreed, ai_recommendation, ai_rationale, ai_confidence, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'pending')
+        RETURNING *
+      `, [
+        userId || null,
+        username,
+        punishmentType || 'punishment',
+        originalReason || 'Policy violation',
+        appealText || '',
+        incidentCategory || 'General Rule Violation',
+        incidentDescription || '',
+        whySecondChance || '',
+        preventionCommitment || '',
+        rulesAgreed !== false,
+        aiRecommendation || 'review',
+        aiRationale || '',
+        aiConfidence || 0.9
+      ]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createAppeal error:', e.message);
+      return null;
+    }
+  },
+
+  async getAppeals(statusFilter = null) {
+    try {
+      let query = 'SELECT * FROM appeals';
+      const params = [];
+      if (statusFilter && statusFilter !== 'all') {
+        query += ' WHERE status = $1';
+        params.push(statusFilter);
+      }
+      query += ' ORDER BY id DESC';
+      const res = await pool.query(query, params);
+      return res.rows;
+    } catch (e) {
+      console.error('getAppeals error:', e.message);
+      return [];
+    }
+  },
+
+  async getAppealById(id) {
+    try {
+      const res = await pool.query('SELECT * FROM appeals WHERE id = $1', [id]);
+      return res.rows[0] || null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  async hasPendingAppeal(userId, username) {
+    try {
+      const res = await pool.query(
+        'SELECT id FROM appeals WHERE (user_id = $1 OR LOWER(username) = LOWER($2)) AND status = $3 LIMIT 1',
+        [userId || 0, username || '', 'pending']
+      );
+      return res.rows.length > 0;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  async reviewAppeal(id, { status, adminNotes, reviewedBy }) {
+    try {
+      const res = await pool.query(`
+        UPDATE appeals 
+        SET status = $1, admin_notes = $2, reviewed_by = $3, reviewed_at = CURRENT_TIMESTAMP
+        WHERE id = $4
+        RETURNING *
+      `, [status, adminNotes || '', reviewedBy || 'Admin', id]);
+      return res.rows[0] || null;
+    } catch (e) {
+      console.error('reviewAppeal error:', e.message);
+      return null;
+    }
+  },
+
+  // Social & Friendships
+  async getUserFriends(userId) {
+    try {
+      const res = await pool.query(`
+        SELECT 
+          f.id as friendship_id,
+          u.id as friend_id,
+          u.username,
+          u.display_name,
+          u.role,
+          u.avatar_url,
+          f.created_at as became_friends_at
+        FROM friendships f
+        JOIN users u ON (CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END) = u.id
+        WHERE (f.user_id = $1 OR f.friend_id = $1) AND f.status = 'accepted'
+        ORDER BY u.username ASC
+      `, [userId]);
+      return res.rows;
+    } catch (e) {
+      console.error('getUserFriends error:', e.message);
+      return [];
+    }
+  },
+
+  async getPendingFriendRequests(userId) {
+    try {
+      const incoming = await pool.query(`
+        SELECT 
+          f.id as request_id,
+          u.id as sender_id,
+          u.username as sender_username,
+          u.role as sender_role,
+          u.avatar_url as sender_avatar,
+          f.created_at
+        FROM friendships f
+        JOIN users u ON f.user_id = u.id
+        WHERE f.friend_id = $1 AND f.status = 'pending'
+        ORDER BY f.id DESC
+      `, [userId]);
+
+      const outgoing = await pool.query(`
+        SELECT 
+          f.id as request_id,
+          u.id as receiver_id,
+          u.username as receiver_username,
+          u.role as receiver_role,
+          u.avatar_url as receiver_avatar,
+          f.created_at
+        FROM friendships f
+        JOIN users u ON f.friend_id = u.id
+        WHERE f.user_id = $1 AND f.status = 'pending'
+        ORDER BY f.id DESC
+      `, [userId]);
+
+      return {
+        incoming: incoming.rows,
+        outgoing: outgoing.rows
+      };
+    } catch (e) {
+      console.error('getPendingFriendRequests error:', e.message);
+      return { incoming: [], outgoing: [] };
+    }
+  },
+
+  async sendFriendRequest(userId, friendUsername) {
+    try {
+      const targetUser = await this.getUserByUsername(friendUsername);
+      if (!targetUser) {
+        return { error: 'User not found.' };
+      }
+      if (targetUser.id === userId) {
+        return { error: 'You cannot send a friend request to yourself.' };
+      }
+
+      // Check existing friendship/request
+      const existing = await pool.query(`
+        SELECT * FROM friendships 
+        WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
+      `, [userId, targetUser.id]);
+
+      if (existing.rows.length > 0) {
+        const status = existing.rows[0].status;
+        if (status === 'accepted') return { error: `You are already friends with @${targetUser.username}.` };
+        if (existing.rows[0].user_id === userId) return { error: `Pending request already sent to @${targetUser.username}.` };
+        // If the other user already sent a request to this user, auto-accept it!
+        await pool.query(`UPDATE friendships SET status = 'accepted' WHERE id = $1`, [existing.rows[0].id]);
+        return { success: true, autoAccepted: true, friend: targetUser };
+      }
+
+      const res = await pool.query(`
+        INSERT INTO friendships (user_id, friend_id, status)
+        VALUES ($1, $2, 'pending')
+        RETURNING *
+      `, [userId, targetUser.id]);
+
+      return { success: true, request: res.rows[0], targetUser };
+    } catch (e) {
+      console.error('sendFriendRequest error:', e.message);
+      return { error: 'Failed to send friend request.' };
+    }
+  },
+
+  async respondFriendRequest(userId, requestId, status) {
+    try {
+      const req = await pool.query(`SELECT * FROM friendships WHERE id = $1 AND friend_id = $2`, [requestId, userId]);
+      if (!req.rows.length) {
+        return { success: false, error: 'Request not found.' };
+      }
+      if (status === 'accepted') {
+        await pool.query(`UPDATE friendships SET status = 'accepted' WHERE id = $1`, [requestId]);
+        return { success: true, status: 'accepted' };
+      } else {
+        await pool.query(`DELETE FROM friendships WHERE id = $1`, [requestId]);
+        return { success: true, status: 'declined' };
+      }
+    } catch (e) {
+      console.error('respondFriendRequest error:', e.message);
+      return { success: false, error: 'Database error.' };
+    }
+  },
+
+  async removeFriend(userId, friendId) {
+    try {
+      await pool.query(`
+        DELETE FROM friendships 
+        WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
+      `, [userId, friendId]);
+      return { success: true };
+    } catch (e) {
+      console.error('removeFriend error:', e.message);
+      return { success: false };
     }
   }
 };

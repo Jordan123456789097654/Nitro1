@@ -197,6 +197,38 @@ select option:hover {
   background: var(--bg-color) !important;
 }
 
+/* AI Helper Modal Theme Integration */
+#ai-helper-modal .modal-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text-main) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow) !important;
+}
+
+#ai-helper-modal aside {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-right: 1px solid var(--card-border) !important;
+}
+
+#ai-helper-modal .ai-avatar-box {
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-glow)) !important;
+  color: #fff !important;
+  box-shadow: 0 0 12px var(--accent-glow) !important;
+}
+
+#ai-helper-modal .ai-mode-chip.active {
+  background: var(--accent-glow) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important;
+}
+
+#ai-helper-modal .ai-prompt-chip:hover {
+  background: var(--accent-glow) !important;
+  border-color: var(--accent-color) !important;
+  color: var(--text-main) !important;
+}
+
 #ai-helper-modal .ai-message.bot .ai-bubble {
   background: var(--card-bg) !important;
   border: 1px solid var(--card-border) !important;
@@ -243,5 +275,16 @@ select option:hover {
 #ai-helper-modal .copy-ai-ans-btn:hover {
   background: var(--accent-color) !important;
   color: #ffffff !important;
+}
+
+#ai-fc-card-box {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 10px 30px var(--accent-glow) !important;
+}
+
+.inline-math, .math-block {
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important;
+  background: var(--accent-glow) !important;
 }
 

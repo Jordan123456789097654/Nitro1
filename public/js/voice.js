@@ -1,4 +1,4 @@
-// Real-time Voice Rooms & WebRTC Audio Signaling Engine with Voice Changer FX
+// Real-time Voice Rooms & WebRTC Audio Signaling Engine with Voice Changer FX, Spatial Audio, PTT & Screen Sharing
 import { getCurrentUser } from './auth.js';
 import { getSharedSocket } from './socket.js';
 
@@ -7,10 +7,19 @@ let activeChannelId = null;
 let activeChannelName = 'Study Hangout';
 let localStream = null;
 let processedStream = null;
+let localScreenStream = null;
 let peerConnections = {}; // targetSocketId -> RTCPeerConnection
+let peerPannerNodes = {}; // targetSocketId -> StereoPannerNode
 let isMuted = false;
 let isDeafened = false;
 let currentVoicePreset = 'normal';
+
+// Voice Activation & Push-to-Talk (PTT)
+let voiceActivationMode = 'voice_activity'; // 'voice_activity' | 'ptt'
+let isPttPressed = false;
+
+// Spatial 3D Stereo Audio
+let isSpatialAudioEnabled = true;
 
 // Audio Context & Level Detection for Speaking Indicator & Voice FX
 let audioCtx = null;
@@ -31,6 +40,8 @@ const RTC_CONFIG = {
 export function initVoiceRooms() {
   setupVoiceUI();
   setupSidebarVoiceDockUI();
+  setupPttKeyListeners();
+  setupStudyRoomModal();
   fetchVoiceChannels();
   initVoiceSocketConnection();
 }
@@ -51,10 +62,21 @@ function initVoiceSocketConnection() {
 function setupVoiceSocketListeners() {
   if (!voiceSocket) return;
 
-  voiceSocket.on('voice_participants', ({ participants }) => {
+  voiceSocket.on('voice_channels_list', ({ channels }) => {
+    renderVoiceChannelsList(channels);
+  });
+
+  voiceSocket.on('voice_participants', ({ channelId, participants, screenSharer }) => {
     updateVoiceParticipantsUI(participants);
     updateSidebarVoiceParticipantsUI(participants);
     syncPeerConnections(participants);
+
+    if (screenSharer && screenSharer !== voiceSocket.id) {
+      const container = document.getElementById('voice-screen-video-container');
+      const label = document.getElementById('voice-screen-sharer-label');
+      if (container) container.style.display = 'block';
+      if (label) label.textContent = '🖥️ Classmate Screen Share (Live)';
+    }
   });
 
   voiceSocket.on('voice_offer', async ({ from, sdp }) => {
@@ -96,6 +118,20 @@ function setupVoiceSocketListeners() {
     peerSpeakingStates[from] = isSpeaking;
     updateParticipantSpeakingUI(from, isSpeaking);
   });
+
+  // Screen Sharing State Updates
+  voiceSocket.on('screen_share_state', ({ sharerSocketId, isSharing }) => {
+    const container = document.getElementById('voice-screen-video-container');
+    const label = document.getElementById('voice-screen-sharer-label');
+    if (!container) return;
+
+    if (isSharing && sharerSocketId !== voiceSocket.id) {
+      container.style.display = 'block';
+      if (label) label.textContent = '🖥️ Classmate Screen Share (Live)';
+    } else if (!isSharing && sharerSocketId !== voiceSocket.id) {
+      container.style.display = 'none';
+    }
+  });
 }
 
 function startAudioLevelDetection(stream) {
@@ -111,7 +147,7 @@ function startAudioLevelDetection(stream) {
     const dataArray = new Uint8Array(bufferLength);
 
     audioCheckInterval = setInterval(() => {
-      if (isMuted || !localStream) {
+      if (isMuted || !localStream || (voiceActivationMode === 'ptt' && !isPttPressed)) {
         if (isSpeakingLocally) {
           isSpeakingLocally = false;
           broadcastLocalSpeakingState(false);
@@ -125,13 +161,13 @@ function startAudioLevelDetection(stream) {
         sum += dataArray[i];
       }
       const average = sum / bufferLength;
-      const speaking = average > 18; // volume threshold
+      const speaking = average > 16; // volume threshold for speaking glow
 
       if (speaking !== isSpeakingLocally) {
         isSpeakingLocally = speaking;
         broadcastLocalSpeakingState(speaking);
       }
-    }, 120);
+    }, 100);
 
     // Apply voice preset if selected
     if (currentVoicePreset !== 'normal') {
@@ -162,7 +198,6 @@ function stopAudioLevelDetection() {
 function applyVoicePreset(preset) {
   currentVoicePreset = preset || 'normal';
 
-  // Synchronize dropdowns
   const mainSel = document.getElementById('voice-changer-select');
   const sideSel = document.getElementById('sidebar-voice-changer-select');
   if (mainSel && mainSel.value !== currentVoicePreset) mainSel.value = currentVoicePreset;
@@ -170,7 +205,6 @@ function applyVoicePreset(preset) {
 
   if (!localStream || !micSource || !audioCtx) return;
 
-  // Clean up previous FX nodes
   fxNodes.forEach(n => { try { n.disconnect(); } catch (_) {} });
   fxNodes = [];
 
@@ -179,7 +213,6 @@ function applyVoicePreset(preset) {
   if (currentVoicePreset === 'normal') {
     micSource.connect(destination);
   } else if (currentVoicePreset === 'robot') {
-    // Robot FX: Ring Modulation
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.frequency.setValueAtTime(50, audioCtx.currentTime);
@@ -191,7 +224,6 @@ function applyVoicePreset(preset) {
     gain.connect(destination);
     fxNodes.push(osc, gain);
   } else if (currentVoicePreset === 'deep') {
-    // Deep Vader FX: Lowpass Filter & Bass Boost
     const lp = audioCtx.createBiquadFilter();
     lp.type = 'lowpass';
     lp.frequency.setValueAtTime(320, audioCtx.currentTime);
@@ -204,7 +236,6 @@ function applyVoicePreset(preset) {
     bass.connect(destination);
     fxNodes.push(lp, bass);
   } else if (currentVoicePreset === 'helium') {
-    // Helium FX: Highpass Filter & Treble Boost
     const hp = audioCtx.createBiquadFilter();
     hp.type = 'highpass';
     hp.frequency.setValueAtTime(1400, audioCtx.currentTime);
@@ -217,7 +248,6 @@ function applyVoicePreset(preset) {
     treble.connect(destination);
     fxNodes.push(hp, treble);
   } else if (currentVoicePreset === 'alien') {
-    // Alien FX: Bandpass Filter & Frequency LFO Modulation
     const bp = audioCtx.createBiquadFilter();
     bp.type = 'bandpass';
     bp.frequency.setValueAtTime(1200, audioCtx.currentTime);
@@ -237,7 +267,6 @@ function applyVoicePreset(preset) {
     bp.connect(destination);
     fxNodes.push(bp, lfo, lfoGain);
   } else if (currentVoicePreset === 'radio') {
-    // Walkie-Talkie FX: Bandpass + Waveshaper Distortion
     const hp = audioCtx.createBiquadFilter();
     hp.type = 'highpass';
     hp.frequency.setValueAtTime(400, audioCtx.currentTime);
@@ -260,7 +289,6 @@ function applyVoicePreset(preset) {
     dist.connect(destination);
     fxNodes.push(hp, lp, dist);
   } else if (currentVoicePreset === 'echo') {
-    // Space Echo FX: Delay & Feedback
     const delay = audioCtx.createDelay();
     delay.delayTime.setValueAtTime(0.25, audioCtx.currentTime);
 
@@ -307,19 +335,22 @@ function broadcastLocalSpeakingState(isSpeaking) {
 function updateParticipantSpeakingUI(socketId, isSpeaking) {
   const mainEl = document.getElementById(`voice-part-${socketId}`);
   if (mainEl) {
-    if (isSpeaking) mainEl.classList.add('is-speaking');
-    else mainEl.classList.remove('is-speaking');
+    if (isSpeaking) {
+      mainEl.classList.add('speaking', 'is-speaking');
+    } else {
+      mainEl.classList.remove('speaking', 'is-speaking');
+    }
   }
 
   const sideEl = document.getElementById(`sidebar-voice-part-${socketId}`);
   const sideAvatar = document.getElementById(`sidebar-voice-avatar-${socketId}`);
   if (sideEl) {
     if (isSpeaking) {
-      sideEl.classList.add('is-speaking');
-      if (sideAvatar) sideAvatar.classList.add('speaking-ring');
+      sideEl.classList.add('speaking', 'is-speaking');
+      if (sideAvatar) sideAvatar.classList.add('speaking', 'speaking-ring');
     } else {
-      sideEl.classList.remove('is-speaking');
-      if (sideAvatar) sideAvatar.classList.remove('speaking-ring');
+      sideEl.classList.remove('speaking', 'is-speaking');
+      if (sideAvatar) sideAvatar.classList.remove('speaking', 'speaking-ring');
     }
   }
 }
@@ -338,6 +369,11 @@ function createPeerConnection(targetSocketId) {
     pc.addTrack(activeTrack, localStream);
   }
 
+  // Add screen track if currently sharing
+  if (localScreenStream) {
+    localScreenStream.getTracks().forEach(t => pc.addTrack(t, localScreenStream));
+  }
+
   pc.onicecandidate = (event) => {
     if (event.candidate && voiceSocket) {
       voiceSocket.emit('ice_candidate', {
@@ -349,6 +385,19 @@ function createPeerConnection(targetSocketId) {
   };
 
   pc.ontrack = (event) => {
+    const stream = event.streams[0];
+    const isVideo = event.track.kind === 'video';
+
+    if (isVideo) {
+      const screenVideo = document.getElementById('voice-screen-video');
+      const screenContainer = document.getElementById('voice-screen-video-container');
+      if (screenVideo) {
+        screenVideo.srcObject = stream;
+        if (screenContainer) screenContainer.style.display = 'block';
+      }
+      return;
+    }
+
     let audioEl = document.getElementById(`audio-peer-${targetSocketId}`);
     if (!audioEl) {
       audioEl = document.createElement('audio');
@@ -357,8 +406,23 @@ function createPeerConnection(targetSocketId) {
       audioEl.style.display = 'none';
       document.body.appendChild(audioEl);
     }
-    audioEl.srcObject = event.streams[0];
+    audioEl.srcObject = stream;
     audioEl.muted = isDeafened;
+
+    // Apply Spatial 3D Stereo Panning
+    try {
+      if (audioCtx && isSpatialAudioEnabled) {
+        const peerSource = audioCtx.createMediaStreamSource(stream);
+        const panner = audioCtx.createStereoPanner();
+        // Spread peer pan between -0.7 (left) and +0.7 (right)
+        const peerCount = Object.keys(peerConnections).length;
+        const panVal = Math.max(-0.8, Math.min(0.8, (peerCount % 2 === 0 ? 0.6 : -0.6) * (0.5 + (peerCount * 0.15))));
+        panner.pan.setValueAtTime(panVal, audioCtx.currentTime);
+        peerSource.connect(panner);
+        panner.connect(audioCtx.destination);
+        peerPannerNodes[targetSocketId] = panner;
+      }
+    } catch (e) {}
   };
 
   return pc;
@@ -386,88 +450,246 @@ async function syncPeerConnections(participants) {
 }
 
 export async function fetchVoiceChannels() {
+  if (voiceSocket) {
+    voiceSocket.emit('get_voice_channels');
+  }
+}
+
+function renderVoiceChannelsList(channels) {
   const container = document.getElementById('voice-channels-list');
   if (!container) return;
 
-  try {
-    const token = localStorage.getItem('nitro_jwt_token');
-    const res = await fetch('/api/voice/list', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await res.json();
-    const channels = data.channels || [];
+  if (!channels || channels.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: var(--text-muted);">
+        <p>No active voice channels. Click "+ Create Voice Room" to start one!</p>
+      </div>
+    `;
+    return;
+  }
 
-    if (channels.length === 0) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 24px; color: var(--text-muted);">
-          <p>No active voice channels. Click "+ Create Room" to start one!</p>
-        </div>
-      `;
-      return;
-    }
+  container.innerHTML = channels.map(ch => {
+    const isConnected = activeChannelId === ch.id;
+    const count = ch.participantCount || 0;
+    const limit = ch.limit || 15;
+    const isFull = count >= limit;
+    const cat = ch.category || 'Study';
 
-    container.innerHTML = channels.map(ch => `
-      <div class="voice-channel-card ${activeChannelId === ch.id ? 'active' : ''}">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 1.4rem;">🎧</span>
+    return `
+      <div class="voice-channel-card ${isConnected ? 'active' : ''}" style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid ${isConnected ? '#38bdf8' : 'var(--card-border)'}; padding: 14px 18px; border-radius: var(--radius-md); transition: all 0.2s ease;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem;">${cat === 'Gaming' ? '🎮' : cat === 'Math' ? '📐' : cat === 'Coding' ? '💻' : cat === 'Chill' ? '☕' : '🎧'}</span>
           <div>
-            <strong style="color: #fff; font-size: 0.95rem;">${escapeHtml(ch.name)}</strong>
-            <span style="display: block; font-size: 0.78rem; color: #38bdf8;">${ch.participantCount} Participant${ch.participantCount === 1 ? '' : 's'} connected</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <strong style="color: #fff; font-size: 0.95rem;">${escapeHtml(ch.name)}</strong>
+              <span style="font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 800;">${escapeHtml(cat)}</span>
+              ${ch.screenSharer ? '<span style="font-size: 0.68rem; padding: 2px 6px; border-radius: 6px; background: rgba(168,85,247,0.25); color: #c084fc; font-weight: 800;">🖥️ SCREEN LIVE</span>' : ''}
+            </div>
+            <span style="display: block; font-size: 0.78rem; color: ${isFull ? '#ef4444' : '#10b981'}; margin-top: 3px; font-weight: 600;">
+              ● ${count} / ${limit} Students Connected ${isFull ? '(FULL)' : ''}
+            </span>
           </div>
         </div>
         <div>
-          ${activeChannelId === ch.id 
-            ? `<button class="btn-small danger" onclick="window.leaveVoiceChannel('${ch.id}')">Disconnect</button>`
-            : `<button class="btn-small primary" onclick="window.joinVoiceChannel('${ch.id}', '${escapeHtml(ch.name)}')" style="background:#10b981; border-color:#10b981; color:#000; font-weight:800;">Connect</button>`}
+          ${isConnected 
+            ? `<button class="btn-small danger" onclick="window.leaveVoiceChannel('${ch.id}')" style="padding: 7px 16px; font-weight: 700;">Disconnect</button>`
+            : `<button class="btn-small primary" onclick="window.joinVoiceChannel('${ch.id}', '${escapeHtml(ch.name)}')" ${isFull ? 'disabled' : ''} style="background: ${isFull ? 'rgba(255,255,255,0.1)' : '#10b981'}; border-color: ${isFull ? 'rgba(255,255,255,0.1)' : '#10b981'}; color: ${isFull ? '#64748b' : '#000'}; font-weight: 800; padding: 7px 16px;">Connect</button>`}
         </div>
       </div>
-    `).join('');
-  } catch (e) {
-    // Suppress network error
+    `;
+  }).join('');
+}
+
+function setupPttKeyListeners() {
+  window.addEventListener('keydown', (e) => {
+    if (voiceActivationMode !== 'ptt' || !activeChannelId || !localStream) return;
+    const tag = e.target.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    if (e.code === 'Space' || e.code === 'KeyV') {
+      if (!isPttPressed) {
+        isPttPressed = true;
+        if (!isMuted) localStream.getAudioTracks().forEach(t => t.enabled = true);
+        const pttBadge = document.getElementById('voice-ptt-active-badge');
+        if (pttBadge) pttBadge.style.display = 'inline-block';
+      }
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (voiceActivationMode !== 'ptt' || !activeChannelId || !localStream) return;
+    if (e.code === 'Space' || e.code === 'KeyV') {
+      isPttPressed = false;
+      localStream.getAudioTracks().forEach(t => t.enabled = false);
+      const pttBadge = document.getElementById('voice-ptt-active-badge');
+      if (pttBadge) pttBadge.style.display = 'none';
+      if (isSpeakingLocally) {
+        isSpeakingLocally = false;
+        broadcastLocalSpeakingState(false);
+      }
+    }
+  });
+}
+
+function setupStudyRoomModal() {
+  const modal = document.getElementById('create-study-room-modal');
+  const form = document.getElementById('create-study-room-form');
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('study-room-name-input')?.value.trim();
+      const category = document.getElementById('study-room-category-select')?.value;
+      const limit = document.getElementById('study-room-limit-input')?.value;
+      const user = getCurrentUser();
+
+      if (!name) return alert('Room title is required.');
+
+      if (voiceSocket) {
+        voiceSocket.emit('create_study_room', { name, category, limit, user });
+      }
+
+      if (modal) modal.style.display = 'none';
+      form.reset();
+    });
   }
 }
 
 function setupVoiceUI() {
   const createBtn = document.getElementById('create-voice-channel-btn');
   if (createBtn) {
-    createBtn.addEventListener('click', async () => {
-      const name = prompt('Enter new Voice Room Name:', 'Study Hangout');
-      if (!name || !name.trim()) return;
-
-      try {
-        const token = localStorage.getItem('nitro_jwt_token');
-        const res = await fetch('/api/voice/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ name: name.trim() })
-        });
-        const data = await res.json();
-        if (res.ok && data.channelId) {
-          fetchVoiceChannels();
-          window.joinVoiceChannel(data.channelId, data.name);
-        }
-      } catch (e) {
-        alert('Failed to create voice channel.');
-      }
+    createBtn.addEventListener('click', () => {
+      const modal = document.getElementById('create-study-room-modal');
+      if (modal) modal.style.display = 'flex';
     });
   }
 
   const muteBtn = document.getElementById('voice-mute-btn');
-  if (muteBtn) {
-    muteBtn.addEventListener('click', toggleMute);
-  }
+  if (muteBtn) muteBtn.addEventListener('click', toggleMute);
 
   const deafenBtn = document.getElementById('voice-deafen-btn');
-  if (deafenBtn) {
-    deafenBtn.addEventListener('click', toggleDeafen);
-  }
+  if (deafenBtn) deafenBtn.addEventListener('click', toggleDeafen);
 
   const mainFxSelect = document.getElementById('voice-changer-select');
   if (mainFxSelect) {
     mainFxSelect.addEventListener('change', (e) => applyVoicePreset(e.target.value));
+  }
+
+  // Push-to-talk mode toggle
+  const actModeSelect = document.getElementById('voice-activation-mode-select');
+  if (actModeSelect) {
+    actModeSelect.addEventListener('change', (e) => {
+      voiceActivationMode = e.target.value;
+      if (voiceActivationMode === 'ptt') {
+        if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
+        alert('Push-to-Talk Enabled: Hold [SPACEBAR] or [V] while speaking in the voice room!');
+      } else {
+        if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+      }
+    });
+  }
+
+  // Spatial Audio Toggle
+  const spatialBtn = document.getElementById('voice-spatial-toggle-btn');
+  if (spatialBtn) {
+    spatialBtn.addEventListener('click', () => {
+      isSpatialAudioEnabled = !isSpatialAudioEnabled;
+      spatialBtn.textContent = isSpatialAudioEnabled ? '🎧 Spatial: ON' : '🎧 Spatial: OFF';
+      spatialBtn.style.background = isSpatialAudioEnabled ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+      spatialBtn.style.color = isSpatialAudioEnabled ? '#38bdf8' : '#94a3b8';
+    });
+  }
+
+  // Screen Sharing
+  const screenBtn = document.getElementById('voice-share-screen-btn');
+  if (screenBtn) {
+    screenBtn.addEventListener('click', toggleScreenShare);
+  }
+
+  const screenCloseBtn = document.getElementById('voice-screen-close-btn');
+  if (screenCloseBtn) {
+    screenCloseBtn.addEventListener('click', stopScreenSharing);
+  }
+
+  const screenFullscreenBtn = document.getElementById('voice-screen-fullscreen-btn');
+  if (screenFullscreenBtn) {
+    screenFullscreenBtn.addEventListener('click', () => {
+      const vid = document.getElementById('voice-screen-video');
+      if (vid && vid.requestFullscreen) vid.requestFullscreen();
+    });
+  }
+}
+
+async function toggleScreenShare() {
+  if (localScreenStream) {
+    stopScreenSharing();
+  } else {
+    startScreenSharing();
+  }
+}
+
+async function startScreenSharing() {
+  if (!activeChannelId) return alert('Please join a voice room first to share your screen.');
+
+  try {
+    localScreenStream = await navigator.mediaDevices.getDisplayMedia({
+      video: { cursor: 'always' },
+      audio: false
+    });
+
+    const screenVideo = document.getElementById('voice-screen-video');
+    const screenContainer = document.getElementById('voice-screen-video-container');
+    const screenBtn = document.getElementById('voice-share-screen-btn');
+    const label = document.getElementById('voice-screen-sharer-label');
+
+    if (screenVideo) screenVideo.srcObject = localScreenStream;
+    if (screenContainer) screenContainer.style.display = 'block';
+    if (label) label.textContent = '🖥️ Your Screen (Broadcasting Live)';
+    if (screenBtn) {
+      screenBtn.textContent = '🛑 Stop Sharing';
+      screenBtn.style.background = '#ef4444';
+      screenBtn.style.borderColor = '#ef4444';
+      screenBtn.style.color = '#fff';
+    }
+
+    const videoTrack = localScreenStream.getVideoTracks()[0];
+    Object.values(peerConnections).forEach(pc => {
+      pc.addTrack(videoTrack, localScreenStream);
+    });
+
+    if (voiceSocket) {
+      voiceSocket.emit('screen_share_start', { channelId: activeChannelId });
+    }
+
+    videoTrack.onended = () => {
+      stopScreenSharing();
+    };
+  } catch (err) {
+    console.warn('Screen share canceled or failed:', err.message);
+  }
+}
+
+function stopScreenSharing() {
+  if (localScreenStream) {
+    localScreenStream.getTracks().forEach(t => t.stop());
+    localScreenStream = null;
+  }
+
+  const screenContainer = document.getElementById('voice-screen-video-container');
+  const screenVideo = document.getElementById('voice-screen-video');
+  const screenBtn = document.getElementById('voice-share-screen-btn');
+
+  if (screenVideo) screenVideo.srcObject = null;
+  if (screenContainer) screenContainer.style.display = 'none';
+  if (screenBtn) {
+    screenBtn.textContent = '🖥️ Share Screen';
+    screenBtn.style.background = 'rgba(168, 85, 247, 0.2)';
+    screenBtn.style.borderColor = '#a855f7';
+    screenBtn.style.color = '#c084fc';
+  }
+
+  if (voiceSocket && activeChannelId) {
+    voiceSocket.emit('screen_share_stop', { channelId: activeChannelId });
   }
 }
 
@@ -480,14 +702,10 @@ function setupSidebarVoiceDockUI() {
   }
 
   const muteBtn = document.getElementById('sidebar-voice-mute-btn');
-  if (muteBtn) {
-    muteBtn.addEventListener('click', toggleMute);
-  }
+  if (muteBtn) muteBtn.addEventListener('click', toggleMute);
 
   const deafenBtn = document.getElementById('sidebar-voice-deafen-btn');
-  if (deafenBtn) {
-    deafenBtn.addEventListener('click', toggleDeafen);
-  }
+  if (deafenBtn) deafenBtn.addEventListener('click', toggleDeafen);
 
   const sideFxSelect = document.getElementById('sidebar-voice-changer-select');
   if (sideFxSelect) {
@@ -503,7 +721,7 @@ function toggleMute() {
 
   const mainMuteBtn = document.getElementById('voice-mute-btn');
   if (mainMuteBtn) {
-    mainMuteBtn.textContent = isMuted ? '🔇 Unmute Mic' : '🎙️ Mute Mic';
+    mainMuteBtn.textContent = isMuted ? '🔇 Unmute' : '🎙️ Mute';
     mainMuteBtn.style.background = isMuted ? '#ef4444' : 'rgba(255,255,255,0.1)';
   }
 
@@ -545,6 +763,9 @@ window.joinVoiceChannel = async (channelId, channelName) => {
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    if (voiceActivationMode === 'ptt') {
+      localStream.getAudioTracks().forEach(t => t.enabled = false);
+    }
     startAudioLevelDetection(localStream);
   } catch (e) {
     alert('🎤 Microphone access permission is required for voice rooms.');
@@ -578,6 +799,7 @@ window.joinVoiceChannel = async (channelId, channelName) => {
 
 window.leaveVoiceChannel = (channelId) => {
   stopAudioLevelDetection();
+  stopScreenSharing();
 
   if (activeChannelId && voiceSocket) {
     voiceSocket.emit('voice_leave', { channelId: activeChannelId });
@@ -590,6 +812,7 @@ window.leaveVoiceChannel = (channelId) => {
 
   Object.values(peerConnections).forEach(pc => pc.close());
   peerConnections = {};
+  peerPannerNodes = {};
 
   activeChannelId = null;
 
@@ -637,8 +860,8 @@ function updateVoiceParticipantsUI(participants) {
     const badgeColor = isOwner || isPro ? '#000' : '#94a3b8';
 
     return `
-      <div id="voice-part-${socketId}" class="voice-participant-chip ${isSpeaking ? 'is-speaking' : ''}" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; color: #fff; transition: all 0.2s ease;">
-        <span class="online-dot" style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+      <div id="voice-part-${socketId}" class="voice-participant-chip voice-participant-pill ${isSpeaking ? 'speaking is-speaking' : ''}" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.35); border: 1px solid ${isSpeaking ? '#10b981' : 'rgba(255,255,255,0.1)'}; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; color: #fff; transition: all 0.2s ease;">
+        <span class="online-dot voice-avatar ${isSpeaking ? 'speaking' : ''}" style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
         <strong style="color: #fff;">${escapeHtml(displayName)}</strong>
         <span style="font-size: 0.75rem; color: #94a3b8;">(@${escapeHtml(username)})</span>
         <span style="font-size: 0.65rem; font-weight: 900; padding: 2px 7px; border-radius: 6px; background: ${badgeBg}; color: ${badgeColor}; text-transform: uppercase;">${badgeLabel}</span>
@@ -664,9 +887,9 @@ function updateSidebarVoiceParticipantsUI(participants) {
     const isSpeaking = peerSpeakingStates[socketId] || (socketId === voiceSocket?.id && isSpeakingLocally);
 
     return `
-      <div id="sidebar-voice-part-${socketId}" class="voice-participant-row ${isSpeaking ? 'is-speaking' : ''}">
+      <div id="sidebar-voice-part-${socketId}" class="voice-participant-row ${isSpeaking ? 'speaking is-speaking' : ''}">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <div id="sidebar-voice-avatar-${socketId}" class="voice-avatar-wrap ${isSpeaking ? 'speaking-ring' : ''}">
+          <div id="sidebar-voice-avatar-${socketId}" class="voice-avatar-wrap voice-avatar ${isSpeaking ? 'speaking speaking-ring' : ''}">
             👤
           </div>
           <span style="color: #fff; font-weight: 700; font-size: 0.82rem;">${escapeHtml(displayName)}</span>

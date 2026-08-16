@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCookieConsent();
   initKonamiCode();
   setupBadgesModal();
+  setupAppealModal();
   window.openPublicProfile = openPublicProfile;
 
   initAuth((user) => {
@@ -662,6 +663,18 @@ function initNavigation() {
       window.switchView(btn.dataset.view);
     });
   });
+
+  const openFriendsBtn = document.getElementById('open-friends-btn');
+  if (openFriendsBtn) {
+    openFriendsBtn.addEventListener('click', () => {
+      window.switchView('chat');
+      setTimeout(() => {
+        const friendsTab = document.querySelector('.chat-mode-tab[data-mode="friends"]');
+        if (friendsTab) friendsTab.click();
+        if (typeof fetchFriends === 'function') fetchFriends();
+      }, 100);
+    });
+  }
 }
 
 function initParticleCanvas() {
@@ -951,6 +964,156 @@ export async function openPublicProfile(username) {
   }
 
   modal.classList.add('active');
+}
+
+function setupAppealModal() {
+  const modal = document.getElementById('punishment-appeal-modal');
+  const form = document.getElementById('punishment-appeal-form');
+  const usernameInput = document.getElementById('appeal-username-input');
+  const categorySelect = document.getElementById('appeal-category-select');
+  const descInput = document.getElementById('appeal-desc-input');
+  const whyInput = document.getElementById('appeal-why-input');
+  const preventionInput = document.getElementById('appeal-prevention-input');
+  const pledgeCheck1 = document.getElementById('appeal-pledge-check1');
+  const pledgeCheck2 = document.getElementById('appeal-pledge-check2');
+  const feedback = document.getElementById('appeal-status-feedback');
+  const submitBtn = document.getElementById('submit-appeal-btn');
+
+  // Embedded Ban Screen Form Elements
+  const banForm = document.getElementById('ban-screen-appeal-form');
+  const banUserInput = document.getElementById('ban-screen-username-input');
+  const banCategorySelect = document.getElementById('ban-screen-category-select');
+  const banDescInput = document.getElementById('ban-screen-desc-input');
+  const banWhyInput = document.getElementById('ban-screen-why-input');
+  const banPreventionInput = document.getElementById('ban-screen-prevention-input');
+  const banPledge1 = document.getElementById('ban-screen-pledge-check1');
+  const banPledge2 = document.getElementById('ban-screen-pledge-check2');
+  const banFeedback = document.getElementById('ban-screen-feedback');
+  const banSubmitBtn = document.getElementById('ban-screen-submit-btn');
+
+  window.openAppealModal = (suggestedUsername = '') => {
+    const defaultUser = suggestedUsername || localStorage.getItem('nitro_last_banned_user') || localStorage.getItem('nitro_remembered_username') || '';
+    
+    // Check if ban overlay is showing
+    const banOverlay = document.getElementById('account-banned-overlay');
+    const banBox = document.getElementById('ban-screen-appeal-box');
+    const actionsRow = document.getElementById('ban-screen-actions-row');
+    if (banOverlay && banOverlay.style.display !== 'none' && banBox) {
+      if (banUserInput) banUserInput.value = defaultUser;
+      if (banDescInput) banDescInput.value = '';
+      if (banWhyInput) banWhyInput.value = '';
+      if (banPreventionInput) banPreventionInput.value = '';
+      if (banFeedback) banFeedback.style.display = 'none';
+      banBox.style.display = 'block';
+      if (actionsRow) actionsRow.style.display = 'none';
+      return;
+    }
+
+    if (!modal) return;
+    if (usernameInput) usernameInput.value = defaultUser;
+    if (descInput) descInput.value = '';
+    if (whyInput) whyInput.value = '';
+    if (preventionInput) preventionInput.value = '';
+    if (feedback) {
+      feedback.style.display = 'none';
+      feedback.textContent = '';
+    }
+    modal.style.display = 'flex';
+  };
+
+  async function handleDetailedAppealSubmission(payload, sbtn, fback, successCallback) {
+    if (!payload.username) return alert('Username is required.');
+    if (!payload.incidentDescription || payload.incidentDescription.length < 10) {
+      return alert('Please describe what happened in Question 1 (minimum 10 characters).');
+    }
+    if (!payload.whySecondChance || payload.whySecondChance.length < 10) {
+      return alert('Please explain why you are requesting another chance in Question 2 (minimum 10 characters).');
+    }
+    if (!payload.preventionCommitment || payload.preventionCommitment.length < 10) {
+      return alert('Please describe your future prevention plan in Question 3 (minimum 10 characters).');
+    }
+
+    if (sbtn) {
+      sbtn.disabled = true;
+      sbtn.textContent = '🤖 Groq AI Arbitrating Appeal...';
+    }
+
+    try {
+      const res = await fetch('/api/auth/submit-appeal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        if (fback) {
+          fback.style.display = 'block';
+          fback.style.background = 'rgba(16, 185, 129, 0.15)';
+          fback.style.border = '1px solid #10b981';
+          fback.style.color = '#34d399';
+          fback.innerHTML = `✅ <strong>Detailed Appeal Received!</strong><br>${data.message || 'Staff and Groq AI will review your questionnaire.'}`;
+        }
+        if (successCallback) successCallback();
+      } else {
+        if (fback) {
+          fback.style.display = 'block';
+          fback.style.background = 'rgba(239, 68, 68, 0.15)';
+          fback.style.border = '1px solid #ef4444';
+          fback.style.color = '#f87171';
+          fback.innerHTML = `⚠️ <strong>Submission Note:</strong><br>${data.error || 'Failed to submit appeal.'}`;
+        }
+      }
+    } catch (err) {
+      alert('Network error submitting appeal.');
+    } finally {
+      if (sbtn) {
+        sbtn.disabled = false;
+        sbtn.textContent = '🚀 Submit Detailed Appeal';
+      }
+    }
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        username: usernameInput?.value.trim(),
+        incidentCategory: categorySelect?.value,
+        incidentDescription: descInput?.value.trim(),
+        whySecondChance: whyInput?.value.trim(),
+        preventionCommitment: preventionInput?.value.trim(),
+        rulesAgreed: pledgeCheck1?.checked && pledgeCheck2?.checked
+      };
+      handleDetailedAppealSubmission(payload, submitBtn, feedback, () => {
+        if (descInput) descInput.value = '';
+        if (whyInput) whyInput.value = '';
+        if (preventionInput) preventionInput.value = '';
+        setTimeout(() => {
+          if (modal) modal.style.display = 'none';
+        }, 3500);
+      });
+    });
+  }
+
+  if (banForm) {
+    banForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        username: banUserInput?.value.trim(),
+        incidentCategory: banCategorySelect?.value,
+        incidentDescription: banDescInput?.value.trim(),
+        whySecondChance: banWhyInput?.value.trim(),
+        preventionCommitment: banPreventionInput?.value.trim(),
+        rulesAgreed: banPledge1?.checked && banPledge2?.checked
+      };
+      handleDetailedAppealSubmission(payload, banSubmitBtn, banFeedback, () => {
+        if (banDescInput) banDescInput.value = '';
+        if (banWhyInput) banWhyInput.value = '';
+        if (banPreventionInput) banPreventionInput.value = '';
+      });
+    });
+  }
 }
 
 function initDevToolsProtection() {

@@ -76,4 +76,27 @@ router.post('/respond', authenticateToken, async (req, res) => {
   }
 });
 
+// Get pending friend requests specifically
+router.get('/requests', authenticateToken, async (req, res) => {
+  try {
+    const pending = await db.getPendingFriendRequests(req.user.id);
+    res.json({ success: true, pending });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch friend requests.' });
+  }
+});
+
+// Remove / Unfriend
+router.delete('/:friendId', authenticateToken, async (req, res) => {
+  try {
+    const friendId = parseInt(req.params.friendId, 10);
+    if (!friendId) return res.status(400).json({ error: 'Invalid friend ID.' });
+
+    await db.removeFriend(req.user.id, friendId);
+    res.json({ success: true, message: 'Friend removed successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove friend.' });
+  }
+});
+
 module.exports = router;

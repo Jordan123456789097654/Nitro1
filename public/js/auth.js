@@ -84,10 +84,16 @@ export function deleteCookie(name) {
   document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
 }
 
-export function showBannedScreen(reason = 'Violation of platform guidelines') {
-  deleteCookie('nitro_jwt_token');
-  localStorage.removeItem('nitro_jwt_token');
-  localStorage.removeItem('nitro_remembered_username');
+let lastBannedUsername = '';
+
+export function showBannedScreen(reason = 'Violation of platform guidelines', username = '') {
+  if (username) {
+    lastBannedUsername = username;
+    localStorage.setItem('nitro_last_banned_user', username);
+  } else if (!lastBannedUsername) {
+    lastBannedUsername = localStorage.getItem('nitro_last_banned_user') || localStorage.getItem('nitro_remembered_username') || '';
+  }
+
   currentUser = null;
 
   const overlay = document.getElementById('account-banned-overlay');
@@ -96,7 +102,53 @@ export function showBannedScreen(reason = 'Violation of platform guidelines') {
     if (reasonEl) reasonEl.textContent = reason;
     overlay.style.display = 'flex';
   }
+
+  const appealUserInput = document.getElementById('ban-screen-username-input') || document.getElementById('appeal-username-input');
+  if (appealUserInput && lastBannedUsername) {
+    appealUserInput.value = lastBannedUsername;
+  }
 }
+
+window.openBanAppealFromScreen = function() {
+  const bannedUser = lastBannedUsername || localStorage.getItem('nitro_last_banned_user') || localStorage.getItem('nitro_remembered_username') || '';
+  
+  // 1. Try embedded ban-screen appeal box
+  const embeddedBox = document.getElementById('ban-screen-appeal-box');
+  const actionsRow = document.getElementById('ban-screen-actions-row');
+  const embeddedUserInput = document.getElementById('ban-screen-username-input');
+
+  if (embeddedBox) {
+    if (embeddedUserInput && bannedUser) embeddedUserInput.value = bannedUser;
+    embeddedBox.style.display = 'block';
+    if (actionsRow) actionsRow.style.display = 'none';
+    return;
+  }
+
+  // 2. Fallback to modal
+  const modal = document.getElementById('punishment-appeal-modal');
+  const usernameInput = document.getElementById('appeal-username-input');
+  if (usernameInput && bannedUser) {
+    usernameInput.value = bannedUser;
+  }
+  if (window.openAppealModal) {
+    window.openAppealModal(bannedUser);
+  } else if (modal) {
+    modal.style.display = 'flex';
+  }
+};
+
+window.switchAccountFromBanScreen = function() {
+  const overlay = document.getElementById('account-banned-overlay');
+  if (overlay) overlay.style.display = 'none';
+  deleteCookie('nitro_jwt_token');
+  localStorage.removeItem('nitro_jwt_token');
+  localStorage.removeItem('nitro_remembered_username');
+  localStorage.removeItem('nitro_last_banned_user');
+  lastBannedUsername = '';
+  currentUser = null;
+  toggleMandatoryGate(true);
+  updateNavAuthUI();
+};
 
 export async function checkSession(onUserChange) {
   const token = getCookie('nitro_jwt_token') || localStorage.getItem('nitro_jwt_token');
@@ -115,7 +167,7 @@ export async function checkSession(onUserChange) {
     const data = await res.json();
 
     if (data.is_banned && res.status === 403) {
-      showBannedScreen(data.reason || 'Your account has been suspended by an administrator.');
+      showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || localStorage.getItem('nitro_remembered_username') || '');
       return;
     }
 
@@ -580,6 +632,11 @@ function setupMandatoryLoginGate(onUserChange) {
         const data = await res.json();
 
         if (!res.ok) {
+          if (data.is_banned) {
+            toggleMandatoryGate(false);
+            showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username);
+            return;
+          }
           errorMsg.textContent = data.error || 'Authentication error';
           errorMsg.style.display = 'block';
           return;
@@ -699,6 +756,11 @@ function setupAuthModal(onUserChange) {
         const data = await res.json();
 
         if (!res.ok) {
+          if (data.is_banned) {
+            hideModal();
+            showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username);
+            return;
+          }
           errorMsg.textContent = data.error || 'Authentication error';
           errorMsg.style.display = 'block';
           return;

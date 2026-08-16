@@ -20,22 +20,127 @@
 </head>
 <body>
   <!-- UN-BYPASSABLE ACCOUNT BANNED OVERLAY -->
-  <div id="account-banned-overlay" style="display: none; position: fixed; inset: 0; background: #090a0f; z-index: 99999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff;">
-    <div style="font-size: 6rem; margin-bottom: 20px; animation: pulse 1.5s infinite; filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.8));">🚫</div>
-    <h1 style="font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, #ef4444, #dc2626, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 12px;">
-      ACCOUNT PERMANENTLY BANNED
+  <div id="account-banned-overlay" style="display: none; position: fixed; inset: 0; background: #090a0f; z-index: 99999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff; overflow-y: auto;">
+    <div style="font-size: 5rem; margin-bottom: 12px; animation: pulse 1.5s infinite; filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.8));">🚫</div>
+    <h1 style="font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #ef4444, #dc2626, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 10px;">
+      ACCOUNT SUSPENDED
     </h1>
-    <p style="font-size: 1.2rem; color: #cbd5e1; max-width: 600px; line-height: 1.6; margin: 0 0 24px;">
-      Your account access has been suspended by a platform administrator due to terms of service violations.
+    <p style="font-size: 1.1rem; color: #cbd5e1; max-width: 600px; line-height: 1.5; margin: 0 0 20px;">
+      Your account access has been suspended due to community guidelines or safety filter violations.
     </p>
-    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 18px 28px; max-width: 550px; width: 100%; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-      <strong style="color: #f87171; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">REASON FOR BAN</strong>
-      <span id="account-banned-reason-text" style="font-size: 1.1rem; color: #fff; font-weight: 700;">Violation of platform guidelines</span>
+    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 16px 24px; max-width: 550px; width: 100%; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <strong style="color: #f87171; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">REASON FOR SUSPENSION</strong>
+      <span id="account-banned-reason-text" style="font-size: 1.05rem; color: #fff; font-weight: 700;">Violation of platform guidelines</span>
     </div>
-    <div style="display: flex; gap: 12px;">
-      <button onclick="location.reload()" class="btn-pill" style="background: #ef4444; border-color: #ef4444; color: #fff; font-weight: 800; padding: 12px 28px; font-size: 1rem;">🔄 Refresh Page</button>
+
+    <!-- Direct Appeal Card embedded inside Ban Screen -->
+    <div id="ban-screen-appeal-box" style="display: none; background: #121727; border: 1px solid #38bdf8; border-radius: 14px; padding: 22px 26px; max-width: 620px; width: 100%; margin-bottom: 20px; text-align: left; box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 30px rgba(56,189,248,0.2); max-height: 80vh; overflow-y: auto;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.4rem;">⚖️</span>
+          <strong style="color: #38bdf8; font-size: 1.15rem;">Formal Moderation Appeal Questionnaire</strong>
+        </div>
+        <button type="button" onclick="document.getElementById('ban-screen-appeal-box').style.display='none'; document.getElementById('ban-screen-actions-row').style.display='flex';" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 14px; line-height: 1.4;">
+        Please complete all detailed questions honestly. Submissions undergo Groq AI sincerity, ownership, and risk analysis before staff review.
+      </p>
+
+      <form id="ban-screen-appeal-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Account Username</label>
+            <input type="text" id="ban-screen-username-input" required placeholder="Your username..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.85rem;">
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; display: block; margin-bottom: 4px;">Infraction Category</label>
+            <select id="ban-screen-category-select" style="width: 100%; padding: 8px 10px; background: #182035; border: 1px solid rgba(56,189,248,0.3); border-radius: 6px; color: #fff; font-size: 0.82rem;">
+              <option value="Inappropriate Language / Slang">💬 Inappropriate Language / Slang</option>
+              <option value="Toxic Argument / Harassment">💥 Heated Argument / Toxicity</option>
+              <option value="False Positive / Misunderstanding">🤖 Safety Filter False Positive</option>
+              <option value="Shared Device / Sibling on Account">👥 Sibling / Shared Device Incident</option>
+              <option value="Spamming / Disruptive Chat">⚠️ Spamming / Disruptive Chat</option>
+              <option value="Other Policy Violation">❓ Other Platform Misunderstanding</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: #fbbf24; display: block; margin-bottom: 4px;">
+            1. What happened & what led up to this incident?
+          </label>
+          <textarea id="ban-screen-desc-input" required placeholder="Describe what occurred, the conversation or context leading up to the action..." style="width: 100%; height: 80px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+        </div>
+
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: #a855f7; display: block; margin-bottom: 4px;">
+            2. Why should staff reconsider and grant you another chance?
+          </label>
+          <textarea id="ban-screen-why-input" required placeholder="Explain your remorse, why you value the community, or why this punishment should be lifted..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+        </div>
+
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: #10b981; display: block; margin-bottom: 4px;">
+            3. What concrete steps will you take to prevent future rule violations?
+          </label>
+          <textarea id="ban-screen-prevention-input" required placeholder="Detail your future prevention strategy (e.g. keeping chat academic, avoiding arguments, blocking toxic users)..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #cbd5e1; cursor: pointer;">
+            <input type="checkbox" id="ban-screen-pledge-check1" checked required style="accent-color: #38bdf8; width: 15px; height: 15px;">
+            <span>I pledge to follow all platform safety guidelines and treat all students with respect.</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #f87171; cursor: pointer;">
+            <input type="checkbox" id="ban-screen-pledge-check2" checked required style="accent-color: #ef4444; width: 15px; height: 15px;">
+            <span>I acknowledge that any repeated violations will result in permanent account termination.</span>
+          </label>
+        </div>
+
+        <div id="ban-screen-feedback" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; font-weight: 700;"></div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px;">
+          <button type="button" onclick="document.getElementById('ban-screen-appeal-box').style.display='none'; document.getElementById('ban-screen-actions-row').style.display='flex';" class="btn-small" style="background: rgba(255,255,255,0.1); color: #fff;">Cancel</button>
+          <button type="submit" id="ban-screen-submit-btn" class="btn-pill primary" style="background: #38bdf8; border-color: #38bdf8; color: #000; font-weight: 800; padding: 9px 24px;">🚀 Submit Detailed Appeal</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Ban Screen Actions Row -->
+    <div id="ban-screen-actions-row" style="display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 600px;">
+      <button type="button" onclick="window.openBanAppealFromScreen()" class="btn-pill primary" style="background: linear-gradient(135deg, #38bdf8, #3b82f6); border: none; color: #fff; font-weight: 800; padding: 14px 32px; font-size: 1.05rem; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4); cursor: pointer;">
+        ⚖️ Submit Ban Appeal
+      </button>
+      <button type="button" onclick="location.reload()" class="btn-pill" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-weight: 700; padding: 14px 24px; font-size: 1rem; cursor: pointer;">
+        🔄 Refresh Page
+      </button>
+      <button type="button" onclick="window.switchAccountFromBanScreen()" class="btn-pill" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; font-weight: 700; padding: 14px 24px; font-size: 0.95rem; cursor: pointer;">
+        🚪 Log In to Different Account
+      </button>
     </div>
   </div>
+
+  <script>
+    window.openBanAppealFromScreen = function() {
+      var box = document.getElementById('ban-screen-appeal-box');
+      var actions = document.getElementById('ban-screen-actions-row');
+      var userInp = document.getElementById('ban-screen-username-input');
+      var remembered = localStorage.getItem('nitro_last_banned_user') || localStorage.getItem('nitro_remembered_username') || '';
+      if (userInp && remembered) userInp.value = remembered;
+      if (box) box.style.display = 'block';
+      if (actions) actions.style.display = 'none';
+    };
+    window.switchAccountFromBanScreen = function() {
+      var overlay = document.getElementById('account-banned-overlay');
+      if (overlay) overlay.style.display = 'none';
+      document.cookie = 'nitro_jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+      localStorage.removeItem('nitro_jwt_token');
+      localStorage.removeItem('nitro_remembered_username');
+      localStorage.removeItem('nitro_last_banned_user');
+      var gate = document.getElementById('mandatory-login-gate');
+      if (gate) gate.style.display = 'flex';
+    };
+  </script>
 
   <!-- Ambient Particle Background -->
   <div id="nebula-bg"></div>
@@ -206,89 +311,265 @@
 
   <!-- AI HOMEWORK HELPER & TUTOR MODAL (TWO-COLUMN DARK DASHBOARD WITH DYNAMIC THEME INTEGRATION) -->
   <div class="modal-overlay" id="ai-helper-modal">
-    <div class="modal-card" style="max-width: 940px; width: 92vw; height: 82vh; padding: 0; display: flex; flex-direction: row; overflow: hidden; border-radius: var(--radius-lg);">
+    <div class="modal-card" style="max-width: 960px; width: 92vw; height: 84vh; padding: 0; display: flex; flex-direction: row; overflow: hidden; border-radius: var(--radius-lg);">
       
       <!-- LEFT SIDEBAR -->
-      <aside style="width: 240px; padding: 22px 18px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;">
+      <aside style="width: 250px; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; background: rgba(0,0,0,0.3); border-right: 1px solid var(--card-border);">
         <!-- Top Active Badge -->
         <div class="ai-badge" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 0.78rem; padding: 5px 12px; border-radius: 99px; width: fit-content;">
-          ⚡ Nitro AI
+          ⚡ Nitro AI Studio
         </div>
 
         <!-- Title -->
         <div>
-          <h3 style="color: var(--text-main); font-size: 1.35rem; font-weight: 900; margin: 0; letter-spacing: -0.3px;">Nitro AI</h3>
-          <span style="color: var(--text-muted); font-size: 0.76rem; font-weight: 600;">Academic & Chat Companion</span>
+          <h3 style="color: var(--text-main); font-size: 1.25rem; font-weight: 900; margin: 0; letter-spacing: -0.3px;">Nitro AI</h3>
+          <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600;">Academic & Coding Co-Pilot</span>
+        </div>
+
+        <!-- Mode Selector -->
+        <div>
+          <label style="font-size: 0.72rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">
+            Specialized Mode:
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 4px;" id="ai-mode-selector-list">
+            <button type="button" class="ai-mode-chip active" data-mode="general" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; cursor: pointer; transition: 0.2s;">
+              🧠 General Co-Pilot
+            </button>
+            <button type="button" class="ai-mode-chip" data-mode="math" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              📐 Math & STEM Solver
+            </button>
+            <button type="button" class="ai-mode-chip" data-mode="code" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              💻 Senior Code Mentor
+            </button>
+            <button type="button" class="ai-mode-chip" data-mode="writing" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              ✍️ Essay & Writing Coach
+            </button>
+            <button type="button" class="ai-mode-chip" data-mode="science" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              🧪 Science Explainer
+            </button>
+          </div>
         </div>
 
         <!-- Info Card Container -->
-        <div class="ai-info-card" style="border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-          <div style="font-size: 0.84rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+        <div class="ai-info-card" style="border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.78rem; background: rgba(0,0,0,0.25);">
+          <div style="color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: 600;">Model:</span>
-            <strong class="ai-model-val" style="font-weight: 800;">Gemini Flash</strong>
+            <strong class="ai-model-val" style="font-weight: 800; color: #fff;">Gemini 2.5 Flash</strong>
           </div>
-          <div style="font-size: 0.84rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 600;">Status:</span>
-            <strong style="color: #10b981; font-weight: 800;">Ready</strong>
+          <div style="color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600;">Engine:</span>
+            <strong style="color: #10b981; font-weight: 800;">Ultra-Fast</strong>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #10b981; font-weight: 700; padding-top: 4px; border-top: 1px solid var(--card-border);">
-            <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
-            <span>🟢 AI Online</span>
+          <div style="display: flex; align-items: center; gap: 6px; color: #10b981; font-weight: 700; padding-top: 4px; border-top: 1px solid var(--card-border);">
+            <span style="width: 7px; height: 7px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
+            <span>🟢 AI Online (15 req/m)</span>
           </div>
         </div>
 
         <!-- Bottom Outline Clear Conversation Button -->
-        <button id="ai-clear-chat-btn" style="margin-top: auto; background: transparent; padding: 10px 14px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: var(--transition);">
+        <button id="ai-clear-chat-btn" style="margin-top: auto; background: transparent; padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
           🗑️ Clear Conversation
         </button>
       </aside>
 
-      <!-- RIGHT CHAT PANEL -->
-      <main style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-        <!-- Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; flex-shrink: 0;">
+      <!-- RIGHT CHAT & FLASHCARDS PANEL -->
+      <main style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+        <!-- Header & View Switcher -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; flex-shrink: 0; border-bottom: 1px solid var(--card-border);">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="ai-avatar-box" style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🤖</div>
+            <div class="ai-avatar-box" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; background: linear-gradient(135deg, #38bdf8, #3b82f6);">🤖</div>
             <div>
-              <h4 style="color: var(--text-main); font-size: 1.05rem; font-weight: 800; margin: 0;">Nitro AI Workspace</h4>
-              <span class="ai-subtitle-text" style="font-size: 0.75rem; font-weight: 700;">⚡ Powered by Gemini 2.5 Flash • 15 req/min</span>
+              <h4 style="color: var(--text-main); font-size: 0.95rem; font-weight: 800; margin: 0;" id="ai-header-title">Nitro AI • General Co-Pilot</h4>
+              <span class="ai-subtitle-text" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">⚡ Multimodal Reasoning & Interactive Study Studio</span>
             </div>
           </div>
-          <button class="modal-close" id="ai-helper-modal-close" style="position: static; font-size: 1.2rem;">✕</button>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="music-provider-tabs" style="margin: 0;">
+              <button class="music-provider-btn active" id="ai-tab-chat-btn" style="padding: 5px 12px; font-size: 0.75rem;">💬 Chat</button>
+              <button class="music-provider-btn" id="ai-tab-flashcards-btn" style="padding: 5px 12px; font-size: 0.75rem; color: #fbbf24;">🎴 Flashcards</button>
+            </div>
+            <button class="modal-close" id="ai-helper-modal-close" style="position: static; font-size: 1.2rem; margin-left: 6px;">✕</button>
+          </div>
         </div>
 
-        <!-- Message Feed Scroll Container -->
-        <div id="ai-messages-list" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
-        </div>
-
-        <!-- File / Document / Image Preview Bar -->
-        <div id="ai-image-preview-bar" style="display: none; padding: 10px 24px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--card-border); align-items: center; gap: 12px; flex-shrink: 0;">
-          <!-- Image Preview Thumbnail -->
-          <div id="ai-image-preview-wrapper" style="display: none; position: relative;">
-            <img id="ai-image-preview-img" style="height: 48px; width: 48px; border-radius: 8px; border: 1px solid var(--accent-color); object-fit: cover;">
+        <!-- TAB 1: CHAT VIEW -->
+        <div id="ai-chat-view-container" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+          <!-- Message Feed Scroll Container -->
+          <div id="ai-messages-list" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
           </div>
 
-          <!-- Document File Card Badge -->
-          <div id="ai-doc-preview-badge" style="display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--accent-color); padding: 6px 14px; border-radius: 10px; font-size: 0.84rem; color: var(--text-main);">
-            <span style="font-size: 1.1rem;">📄</span>
-            <span id="ai-doc-filename" style="font-weight: 700;">homework.pdf</span>
+          <!-- Quick Prompt Starter Chips -->
+          <div id="ai-quick-prompts-bar" style="display: flex; gap: 8px; padding: 6px 20px; overflow-x: auto; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+            <button type="button" class="ai-prompt-chip" data-prompt="Solve this problem step-by-step with clear explanations: " style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; white-space: nowrap; cursor: pointer;">
+              📐 Step-by-Step Math
+            </button>
+            <button type="button" class="ai-prompt-chip" data-prompt="Review and debug this code, explain any bugs, and provide an optimized fix:\n\n```\n\n```" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; white-space: nowrap; cursor: pointer;">
+              💻 Debug / Fix Code
+            </button>
+            <button type="button" class="ai-prompt-chip" data-prompt="Summarize the core concepts, definitions, and key takeaways of this topic into clean bullet points: " style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; white-space: nowrap; cursor: pointer;">
+              📝 Summarize Notes
+            </button>
+            <button type="button" class="ai-prompt-chip" data-prompt="Create a quick 3-question practice quiz (with answers revealed at the end) on: " style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; white-space: nowrap; cursor: pointer;">
+              🧠 Quiz Me (3 Questions)
+            </button>
+            <button type="button" class="ai-prompt-chip" data-prompt="Explain this concept simply with a real-world analogy: " style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; white-space: nowrap; cursor: pointer;">
+              ✨ Explain Simply (ELI5)
+            </button>
           </div>
 
-          <!-- Remove File Button -->
-          <button type="button" id="ai-remove-image-btn" style="background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; box-shadow: 0 2px 6px rgba(0,0,0,0.4);" title="Remove attachment">✕</button>
+          <!-- File / Document / Image Preview Bar -->
+          <div id="ai-image-preview-bar" style="display: none; padding: 8px 20px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--card-border); align-items: center; gap: 12px; flex-shrink: 0;">
+            <!-- Image Preview Thumbnail -->
+            <div id="ai-image-preview-wrapper" style="display: none; position: relative;">
+              <img id="ai-image-preview-img" style="height: 44px; width: 44px; border-radius: 8px; border: 1px solid var(--accent-color); object-fit: cover;">
+            </div>
+
+            <!-- Document File Card Badge -->
+            <div id="ai-doc-preview-badge" style="display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--accent-color); padding: 6px 14px; border-radius: 10px; font-size: 0.82rem; color: var(--text-main);">
+              <span style="font-size: 1.1rem;">📄</span>
+              <span id="ai-doc-filename" style="font-weight: 700;">homework.pdf</span>
+            </div>
+
+            <!-- Remove File Button -->
+            <button type="button" id="ai-remove-image-btn" style="background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; box-shadow: 0 2px 6px rgba(0,0,0,0.4);" title="Remove attachment">✕</button>
+          </div>
+
+          <!-- Bottom Input Bar -->
+          <form id="ai-chat-form" style="display: flex; gap: 10px; padding: 14px 20px; flex-shrink: 0; align-items: center; border-top: 1px solid var(--card-border);">
+            <input type="file" id="ai-file-input" accept="image/*,.pdf,.txt,.docx" style="display: none;">
+            <button type="button" id="ai-attach-file-btn" style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #38bdf8; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: var(--transition);" title="Upload Document or Photo (PDF/PNG/JPG)">📎</button>
+            <input type="text" id="ai-chat-input" placeholder="Ask Nitro AI anything (or Ctrl+V paste screenshot / attach homework)..." autocomplete="off" required style="flex: 1; padding: 12px 18px; border-radius: var(--radius-full); font-size: 0.92rem; outline: none; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff;">
+            <button type="submit" class="btn-pill primary" style="border: none; font-weight: 800; padding: 0 22px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; height: 42px; background: linear-gradient(135deg, #38bdf8, #3b82f6); color: #000;">
+              <span>Send</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
         </div>
 
-        <!-- Bottom Input Bar -->
-        <form id="ai-chat-form" style="display: flex; gap: 10px; padding: 16px 24px; flex-shrink: 0; align-items: center;">
-          <input type="file" id="ai-file-input" accept="image/*,.pdf,.txt,.docx" style="display: none;">
-          <button type="button" id="ai-attach-file-btn" style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: var(--accent-color); width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: var(--transition);" title="Upload Image (PNG/JPG/WEBP)">📎</button>
-          <input type="text" id="ai-chat-input" placeholder="Ask me anything..." autocomplete="off" required style="flex: 1; padding: 14px 20px; border-radius: var(--radius-full); font-size: 0.94rem; outline: none;">
-          <button type="submit" class="btn-pill primary" style="border: none; font-weight: 800; padding: 0 24px; display: flex; align-items: center; gap: 8px; font-size: 0.92rem; cursor: pointer; height: 44px;">
-            <span>Send</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-          </button>
-        </form>
+        <!-- TAB 2: AI FLASHCARD STUDIO & DECK PLAYER -->
+        <div id="ai-flashcards-view-container" style="display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; gap: 16px;">
+          <!-- Flashcard Deck Generator Form -->
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <strong style="color: #fbbf24; font-size: 1rem;">🎴 AI Flashcard Deck Maker</strong>
+                <span style="display: block; font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">Generate interactive flashcards from any topic, study notes, or uploaded PDF document.</span>
+              </div>
+              <span style="font-size: 0.72rem; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.12); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">📄 PDF Support Enabled</span>
+            </div>
+
+            <!-- PDF / File Attachment Bar for Flashcards -->
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <input type="file" id="ai-fc-file-input" accept=".pdf,.txt,.docx,.md" style="display: none;">
+              <button type="button" id="ai-fc-attach-btn" style="background: rgba(56,189,248,0.12); border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.8rem; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;" title="Upload PDF or notes file">
+                <span>📎 Upload PDF / Notes</span>
+              </button>
+
+              <div id="ai-fc-doc-badge" style="display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--accent-color); padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; color: #fff;">
+                <span>📄</span>
+                <span id="ai-fc-filename" style="font-weight: 700;">document.pdf</span>
+                <button type="button" id="ai-fc-remove-file-btn" style="background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900;" title="Remove document">✕</button>
+              </div>
+
+              <input type="text" id="ai-fc-topic-input" placeholder="Or enter topic / concept (e.g. AP Chemistry Unit 1, Spanish Vocab)..." style="flex: 1; min-width: 220px; padding: 8px 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-size: 0.85rem;">
+
+              <select id="ai-fc-count-select" style="padding: 8px 10px; background: #151b2b; border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-size: 0.82rem;">
+                <option value="6">6 Cards</option>
+                <option value="8" selected>8 Cards</option>
+                <option value="12">12 Cards</option>
+                <option value="16">16 Cards</option>
+              </select>
+
+              <button class="btn-pill primary" id="ai-generate-fc-btn" style="background: #fbbf24; color: #000; border-color: #fbbf24; font-weight: 800; padding: 8px 18px;">✨ Generate Deck</button>
+            </div>
+          </div>
+
+          <!-- Deck Display Container -->
+          <div id="ai-fc-deck-container" style="display: none; flex-direction: column; align-items: center; gap: 16px; margin-top: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 520px;">
+              <strong id="ai-fc-deck-title" style="color: #fff; font-size: 1.05rem;">Calculus Deck</strong>
+              <span id="ai-fc-progress-badge" style="background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.75rem; font-weight: 800; padding: 2px 10px; border-radius: 99px;">Card 1 of 8</span>
+            </div>
+
+            <!-- 3D Flashcard Flip Box -->
+            <div id="ai-fc-card-box" style="width: 100%; max-width: 520px; height: 230px; background: linear-gradient(145deg, #131826, #0e121c); border: 2px solid #38bdf8; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; user-select: none;">
+              <div style="font-size: 0.75rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;" id="ai-fc-side-label">
+                FRONT • QUESTION / TERM (CLICK TO FLIP)
+              </div>
+              <div id="ai-fc-card-content" style="font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.5; overflow-y: auto; padding: 6px 0;">
+                Click to flip and reveal answer.
+              </div>
+              <div id="ai-fc-card-hint" style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">
+                💡 Hint: Click card or press [Space] to flip
+              </div>
+            </div>
+
+            <!-- Deck Controls Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 520px; gap: 10px;">
+              <button class="btn-small" id="ai-fc-prev-btn" style="background: rgba(255,255,255,0.08); color: #fff; font-weight: 700; padding: 8px 16px;">⬅ Prev</button>
+              
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-small" id="ai-fc-mark-review-btn" style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #ef4444; font-weight: 800; padding: 8px 14px;">🔄 Review Later</button>
+                <button class="btn-small" id="ai-fc-mark-known-btn" style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; font-weight: 800; padding: 8px 14px;">✅ I Know This</button>
+              </div>
+
+              <button class="btn-small" id="ai-fc-next-btn" style="background: rgba(255,255,255,0.08); color: #fff; font-weight: 700; padding: 8px 16px;">Next ➡</button>
+            </div>
+
+            <!-- Score Summary Bar -->
+            <div style="display: flex; gap: 16px; font-size: 0.82rem; font-weight: 700;">
+              <span style="color: #10b981;">Mastered: <strong id="ai-fc-known-count">0</strong></span>
+              <span style="color: #ef4444;">Needs Practice: <strong id="ai-fc-review-count">0</strong></span>
+            </div>
+          </div>
+        </div>
       </main>
+
+    </div>
+  </div>
+
+  <!-- IN-CHAT LIVE CODE RUNNER & SANDBOX MODAL -->
+  <div class="modal-overlay" id="ai-code-sandbox-modal" style="display: none;">
+    <div class="modal-card" style="max-width: 820px; width: 92vw; height: 82vh; padding: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--card-border); background: rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.3rem;">⚡</span>
+          <div>
+            <h3 style="margin: 0; color: #38bdf8; font-size: 1.1rem;">Live Code Sandbox & Preview</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Sandboxed in-browser execution runner</span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('ai-code-sandbox-modal').style.display='none'">✕</button>
+      </div>
+
+      <div style="display: flex; flex: 1; overflow: hidden; flex-direction: column;">
+        <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;">
+          <!-- Code Editor / Viewer -->
+          <div style="display: flex; flex-direction: column; border-right: 1px solid var(--card-border); background: #0c0f18;">
+            <div style="padding: 8px 14px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--card-border); font-size: 0.78rem; font-weight: 700; color: #94a3b8; display: flex; justify-content: space-between; align-items: center;">
+              <span>Source Code (HTML/JS/CSS)</span>
+              <button id="sandbox-rerun-btn" class="btn-small" style="background: #38bdf8; color: #000; font-weight: 800; padding: 3px 10px; font-size: 0.72rem;">▶ Rerun Code</button>
+            </div>
+            <textarea id="sandbox-code-textarea" style="flex: 1; padding: 14px; background: transparent; border: none; color: #38bdf8; font-family: monospace; font-size: 0.85rem; resize: none; outline: none; line-height: 1.5;" spellcheck="false"></textarea>
+          </div>
+
+          <!-- Live Output Preview -->
+          <div style="display: flex; flex-direction: column; background: #fff;">
+            <div style="padding: 8px 14px; background: #1e293b; color: #fff; font-size: 0.78rem; font-weight: 700; border-bottom: 1px solid #334155;">
+              🌐 Live Sandbox Render
+            </div>
+            <iframe id="sandbox-preview-iframe" style="flex: 1; width: 100%; height: 100%; border: none; background: #fff;" sandbox="allow-scripts allow-modals"></iframe>
+          </div>
+        </div>
+
+        <!-- Sandbox Console Logs -->
+        <div style="height: 100px; background: #06080d; border-top: 1px solid var(--card-border); padding: 8px 14px; overflow-y: auto; font-family: monospace; font-size: 0.78rem; color: #a7f3d0;" id="sandbox-console-logs">
+          <div>[Sandbox Console Ready]</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
     </div>
   </div>
@@ -508,56 +789,74 @@
   <div class="app-container">
     <!-- Top Floating Pill Navigation -->
     <header class="floating-nav">
-      <div class="nav-brand" id="nav-brand-btn">
-        <span id="nav-avatar-icon" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;">📚</span>
-        <span id="nav-profile-name">Hello, Student</span>
+      <div class="nav-brand" id="nav-brand-btn" title="Click to view profile & achievements">
+        <span id="nav-avatar-icon" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.05rem;">📚</span>
+        <span id="nav-profile-name" style="font-weight: 800; font-size: 0.92rem; color: #fff;">Hello, Student</span>
       </div>
 
+      <!-- Center Primary Navigation -->
       <nav class="nav-links">
-        <button class="nav-btn active" data-view="library" title="Library">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        </button>
-        <button class="nav-btn" data-view="pro" title="PRO Exclusive Lounge (Coming Soon)" style="color: #fbbf24; position: relative;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-          <span style="position: absolute; top: -4px; right: -6px; background: #f59e0b; color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 4px; border-radius: 4px; line-height: 1;">SOON</span>
-        </button>
-        <button class="nav-btn" data-view="chat" title="Global Chat, DMs, Rooms & Whiteboard">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          <span id="chat-dm-badge" style="display: none; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: #38bdf8; border-radius: 50%;"></span>
-        </button>
-        <button class="nav-btn" data-view="browser" title="Sandboxed Multi-Tab Web Browser">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-        </button>
-        <button class="nav-btn" data-view="apps" title="Web Applications">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
-        </button>
-        <button class="nav-btn" id="add-game-nav-btn" data-view="games" title="Add Custom Item (Admin Only)" style="display: none; color: #10b981;">
-          <span style="font-size: 1.1rem;">➕</span>
-        </button>
-        <button class="nav-btn" data-view="paint" title="Paint Studio Deluxe" style="color: #a855f7;">
-          <span style="font-size: 1.15rem;">🎨</span>
-        </button>
-        <button class="nav-btn" data-view="soundboard" title="Interactive Web Audio Soundboard" style="color: #ec4899;">
-          <span style="font-size: 1.15rem;">🔊</span>
-        </button>
-        <button class="nav-btn" id="open-ai-helper-btn" title="AI Homework Helper & Tutor" style="color: #38bdf8;">
-          <span style="font-size: 1.15rem;">🤖</span>
-        </button>
-        <button class="nav-btn" data-view="settings" title="Theme Studio & Settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </button>
-        <!-- LEADERBOARDS DIRECT BUTTON -->
-        <button class="nav-btn" id="nav-leaderboards-btn" title="Multiplayer High-Score Leaderboards" onclick="document.getElementById('open-leaderboards-btn')?.click()" style="color: #fbbf24; font-size: 1.1rem;">
-          🏆
-        </button>
-        <!-- ADMIN ONLY BUTTON -->
-        <button class="nav-btn" data-view="admin" id="admin-nav-btn" title="Admin Dashboard" style="display: none; color: #ef4444;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <span class="nav-badge"></span>
-        </button>
-        <button class="nav-btn" id="auth-modal-btn" title="User Account / Sign In">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </button>
+        <div class="nav-group-cluster primary-cluster">
+          <button class="nav-btn active" data-view="library" title="Game & App Library">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="nav-btn-text">Library</span>
+          </button>
+          <button class="nav-btn" data-view="browser" title="Sandboxed Web Browser">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span class="nav-btn-text">Browser</span>
+          </button>
+          <button class="nav-btn" data-view="chat" id="nav-chat-tab" title="Chat, Voice & Rooms">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span class="nav-btn-text">Chat</span>
+            <span id="chat-dm-badge" style="display: none; position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: #38bdf8; border-radius: 50%;"></span>
+          </button>
+          <button class="nav-btn" data-view="apps" title="Web Applications & Utilities">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+            <span class="nav-btn-text">Apps</span>
+          </button>
+          <button class="nav-btn" data-view="pro" title="PRO Exclusive Lounge" style="color: #fbbf24; position: relative;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span class="nav-btn-text">PRO</span>
+          </button>
+        </div>
+
+        <div class="nav-cluster-divider"></div>
+
+        <!-- Studio & Creative Tools Cluster -->
+        <div class="nav-group-cluster tools-cluster">
+          <button class="nav-btn btn-ai-topbar" id="open-ai-helper-btn" title="Nitro AI Homework Co-Pilot & Tutor" style="color: #38bdf8;">
+            <span style="font-size: 1.1rem;">🤖</span>
+            <span class="nav-btn-text" style="color: #38bdf8;">AI Tutor</span>
+          </button>
+          <button class="nav-btn" data-view="paint" title="Paint Studio Deluxe" style="color: #a855f7;">
+            <span style="font-size: 1.1rem;">🎨</span>
+          </button>
+          <button class="nav-btn" data-view="soundboard" title="Web Audio Soundboard" style="color: #ec4899;">
+            <span style="font-size: 1.1rem;">🔊</span>
+          </button>
+        </div>
+
+        <div class="nav-cluster-divider"></div>
+
+        <!-- Right System & Account Controls -->
+        <div class="nav-group-cluster controls-cluster">
+          <button class="nav-btn" id="nav-leaderboards-btn" title="Multiplayer High-Score Leaderboards" onclick="document.getElementById('open-leaderboards-btn')?.click()" style="color: #fbbf24;">
+            <span style="font-size: 1.1rem;">🏆</span>
+          </button>
+          <button class="nav-btn" data-view="settings" title="Settings & Custom Themes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </button>
+          <!-- ADMIN CONTROL PILL -->
+          <button class="nav-btn admin-topbar-pill" data-view="admin" id="admin-nav-btn" title="Administrative Control Center" style="display: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span class="nav-btn-text" style="color: #ef4444; font-weight: 800;">Admin</span>
+            <span class="nav-badge" id="admin-topbar-badge" style="display: none;"></span>
+          </button>
+          <!-- ACCOUNT AVATAR BUTTON -->
+          <button class="nav-btn" id="auth-modal-btn" title="User Account / Sign In" style="border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </button>
+        </div>
       </nav>
     </header>
 
@@ -635,6 +934,7 @@
           <span class="visitor-counter-pill" title="Total Website Visits">👁️ <span id="site-visitor-count">1,420</span></span>
         </div>
         <div class="profile-actions">
+          <button class="btn-pill" id="open-friends-btn" style="color: #38bdf8; font-weight: 800;" title="View Friends & Pending Requests">👥 Friends</button>
           <button class="btn-pill" id="open-leaderboards-btn" style="color: #fbbf24;" title="Multiplayer High-Score Leaderboards">🏆 Leaderboards</button>
           <button class="btn-pill" id="pro-music-toggle-btn" style="color: #fbbf24; display: none;" title="Open Spotify / YouTube Music Dock">🎵 Music</button>
           <button class="btn-pill" id="open-polls-modal-btn" style="color: #38bdf8;" title="Vote on Community Polls">📊 Polls</button>
@@ -880,32 +1180,61 @@
             <button class="btn-pill primary" id="create-voice-channel-btn" style="background: #10b981; border-color: #10b981; color: #000; font-weight: 800;">＋ Create Voice Room</button>
           </div>
 
-          <div id="voice-connected-bar" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; padding: 12px 18px; border-radius: var(--radius-md);">
-            <strong id="voice-connected-label" style="color: #38bdf8; font-size: 0.95rem;">Connected to Voice</strong>
+          <div id="voice-connected-bar" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(56, 189, 248, 0.12); border: 1px solid #38bdf8; padding: 12px 18px; border-radius: var(--radius-md);">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);">
-                <span style="font-size: 0.8rem; color: #a7f3d0; font-weight: 700;">🎭 Voice FX:</span>
-                <select id="voice-changer-select" style="font-size: 0.8rem; padding: 3px 8px; border-radius: 6px; background: rgba(16,185,129,0.2); border: 1px solid #10b981; color: #fff; font-weight: 700; outline: none; cursor: pointer;">
-                  <option value="normal">🎙️ Normal / Off</option>
-                  <option value="robot">🤖 Cyborg Robot</option>
-                  <option value="alien">👾 Alien Pitch</option>
-                  <option value="deep">👹 Deep Vader</option>
-                  <option value="helium">🎈 Helium High</option>
-                  <option value="radio">📻 Walkie-Talkie</option>
-                  <option value="echo">🔊 Space Echo</option>
+              <strong id="voice-connected-label" style="color: #38bdf8; font-size: 0.95rem;">Connected to Voice</strong>
+              <span id="voice-ptt-active-badge" style="display: none; padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 900; background: #ef4444; color: #fff;">🔴 PTT: SPACE HELD</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <!-- Voice Mode (Open Mic vs PTT) -->
+              <select id="voice-activation-mode-select" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; outline: none; cursor: pointer;" title="Toggle between Open Mic and Push-to-Talk">
+                <option value="voice_activity">🎙️ Voice Activity (Open Mic)</option>
+                <option value="ptt">⌨️ Push-to-Talk (Hold Space)</option>
+              </select>
+
+              <!-- Spatial Audio Toggle -->
+              <button class="btn-small" id="voice-spatial-toggle-btn" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 700;" title="Toggle 3D Binaural Stereo Spatial Audio">🎧 Spatial: ON</button>
+
+              <!-- Screen Sharing Button -->
+              <button class="btn-small" id="voice-share-screen-btn" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; font-weight: 700;" title="Share your screen with room participants">🖥️ Share Screen</button>
+
+              <!-- Voice FX -->
+              <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);">
+                <span style="font-size: 0.78rem; color: #a7f3d0; font-weight: 700;">🎭 FX:</span>
+                <select id="voice-changer-select" style="font-size: 0.78rem; padding: 2px 6px; border-radius: 6px; background: rgba(16,185,129,0.2); border: 1px solid #10b981; color: #fff; font-weight: 700; outline: none; cursor: pointer;">
+                  <option value="normal">🎙️ Normal</option>
+                  <option value="robot">🤖 Robot</option>
+                  <option value="alien">👾 Alien</option>
+                  <option value="deep">👹 Deep</option>
+                  <option value="helium">🎈 Helium</option>
+                  <option value="radio">📻 Radio</option>
+                  <option value="echo">🔊 Echo</option>
                 </select>
               </div>
-              <button class="btn-small" id="voice-mute-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎙️ Mute Mic</button>
+
+              <button class="btn-small" id="voice-mute-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎙️ Mute</button>
               <button class="btn-small" id="voice-deafen-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎧 Deafen</button>
             </div>
           </div>
 
-          <div style="margin-top: 8px;">
+          <!-- Screen Sharing Live Preview Tile -->
+          <div id="voice-screen-video-container" style="display: none; margin-top: 12px; background: #000; border: 1px solid rgba(168, 85, 247, 0.5); border-radius: 12px; overflow: hidden; position: relative;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(0,0,0,0.85); border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <span id="voice-screen-sharer-label" style="font-size: 0.85rem; font-weight: 700; color: #c084fc;">🖥️ Live Screen Share</span>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-small" id="voice-screen-fullscreen-btn" style="padding: 3px 8px; font-size: 0.75rem; background: rgba(255,255,255,0.1); color: #fff;">⤢ Fullscreen</button>
+                <button class="btn-small danger" id="voice-screen-close-btn" style="padding: 3px 8px; font-size: 0.75rem;">Close</button>
+              </div>
+            </div>
+            <video id="voice-screen-video" autoplay playsinline style="width: 100%; max-height: 420px; object-fit: contain; background: #000; display: block;"></video>
+          </div>
+
+          <div style="margin-top: 10px;">
             <h4 style="color: #38bdf8; margin: 0 0 10px; font-size: 0.95rem;">Active Participants in Channel</h4>
             <div id="voice-participants-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
           </div>
 
-          <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">Available Voice Channels</h4>
+          <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">Available Voice & Study Channels</h4>
           <div id="voice-channels-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
 
@@ -1318,22 +1647,48 @@
           </div>
         </div>
 
-        <!-- Sleek Admin Sub-Navigation Tabs -->
-        <div class="admin-tabs-nav" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-          <button class="admin-tab-btn active" data-tab="radar">📊 Activity Radar</button>
-          <button class="admin-tab-btn" data-tab="users">👥 Users & Moderation</button>
-          <button class="admin-tab-btn" data-tab="connections">⚡ Live Connections</button>
-          <button class="admin-tab-btn" data-tab="iptracker" onclick="window.adminFetchIpLogs()">🌐 IP Tracker</button>
-          <button class="admin-tab-btn" data-tab="bulk">📥 Bulk Importer</button>
-          <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
-          <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
-          <button class="admin-tab-btn" data-tab="announcements">📢 Announcements</button>
-          <button class="admin-tab-btn" data-tab="domains">🚫 Domain Filters</button>
-          <button class="admin-tab-btn" data-tab="wordfilters">🤬 Word & Punishment Filters</button>
-          <button class="admin-tab-btn" data-tab="games">🎮 Catalog</button>
-          <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions</button>
-          <button class="admin-tab-btn" data-tab="soundboard" onclick="window.adminFetchSoundboard()">🔊 Manage Soundboards</button>
-          <button class="admin-tab-btn" data-tab="logs">📜 Audit Logs</button>
+        <!-- Categorized Admin Hub Navigation -->
+        <div class="admin-categorized-hub" style="margin-bottom: 24px; background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px 20px;">
+          <!-- Category 1: Overview & Diagnostics -->
+          <div class="admin-nav-category-group" style="margin-bottom: 14px;">
+            <span style="font-size: 0.72rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+              <span>📊</span> OVERVIEW & SYSTEM DIAGNOSTICS
+            </span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="admin-tab-btn active" data-tab="radar">📊 Activity Radar</button>
+              <button class="admin-tab-btn" data-tab="connections">⚡ Live Connections</button>
+              <button class="admin-tab-btn" data-tab="logs">📜 Audit Logs</button>
+            </div>
+          </div>
+
+          <!-- Category 2: Safety & Moderation Hub -->
+          <div class="admin-nav-category-group" style="margin-bottom: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <span style="font-size: 0.72rem; color: #ef4444; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+              <span>🛡️</span> SAFETY, AI & MODERATION HUB
+            </span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="admin-tab-btn" data-tab="aimod" onclick="window.loadAiModerationStudio()" style="border: 1px solid rgba(56, 189, 248, 0.35); background: rgba(56,189,248,0.06);">🤖 AI Moderation Studio</button>
+              <button class="admin-tab-btn" data-tab="appeals" onclick="window.fetchAppeals()" style="border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239,68,68,0.06);">⚖️ Appeals Review Hub <span id="admin-appeals-badge" style="display:none; background:#ef4444; color:#fff; font-size:0.72rem; padding:1px 6px; border-radius:99px; font-weight:800; margin-left:4px;">0</span></button>
+              <button class="admin-tab-btn" data-tab="users">👥 Users & Accounts</button>
+              <button class="admin-tab-btn" data-tab="wordfilters">🤬 Word & Punishment Rules</button>
+              <button class="admin-tab-btn" data-tab="domains">🚫 Gateway Domain Filters</button>
+            </div>
+          </div>
+
+          <!-- Category 3: Content, Catalog & Community -->
+          <div class="admin-nav-category-group" style="padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <span style="font-size: 0.72rem; color: #fbbf24; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+              <span>🎮</span> CONTENT, FEEDBACK & BROADCASTS
+            </span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="admin-tab-btn" data-tab="games">🎮 Catalog Manager</button>
+              <button class="admin-tab-btn" data-tab="bulk">📥 Bulk Importer</button>
+              <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions & Feedback</button>
+              <button class="admin-tab-btn" data-tab="announcements">📢 Global Banner</button>
+              <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
+              <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
+            </div>
+          </div>
         </div>
 
         <!-- Admin Tab: Activity Radar -->
@@ -1361,29 +1716,6 @@
           </div>
 
           <div id="admin-radar-content"></div>
-        </div>
-
-        <!-- Admin Tab: Soundboard Manager -->
-        <div class="admin-tab-content" id="tab-soundboard" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <h3 style="color: #ec4899; margin: 0;">🔊 Soundboard Catalog & Audio Management</h3>
-              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Upload, configure, test play, and delete global community soundboards or user custom sounds.</p>
-            </div>
-            <button class="btn-pill primary" onclick="document.getElementById('open-sound-upload-btn')?.click()" style="font-weight: 800;">➕ Upload Soundboard Sound</button>
-          </div>
-
-          <table class="admin-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: rgba(255,255,255,0.04); text-align: left;">
-                <th style="padding: 10px 12px;">Sound Title & Icon</th>
-                <th style="padding: 10px 12px;">Type</th>
-                <th style="padding: 10px 12px;">Uploaded By</th>
-                <th style="padding: 10px 12px;">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="admin-soundboard-tbody"></tbody>
-          </table>
         </div>
 
         <!-- Admin Tab: Users & Moderation -->
@@ -1433,26 +1765,6 @@
               </tr>
             </thead>
             <tbody id="admin-connections-tbody"></tbody>
-          </table>
-        </div>
-
-        <!-- Admin Tab: IP Tracker Logs -->
-        <div class="admin-tab-content" id="tab-iptracker" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <h3 style="color: #a855f7;">🌐 IP Address & Device Session Tracker</h3>
-            <button class="btn-small primary" onclick="window.adminFetchIpLogs()" style="font-weight: 700;">🔄 Refresh IP Logs</button>
-          </div>
-          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Detailed log of IP addresses, user agents, and login timestamps recorded across accounts.</p>
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>IP Address</th>
-                <th>User Agent Device</th>
-                <th>Last Login Timestamp</th>
-              </tr>
-            </thead>
-            <tbody id="admin-iplogs-tbody"></tbody>
           </table>
         </div>
 
@@ -1554,11 +1866,14 @@
 
         <!-- Admin Tab: Word & Punishment Filters -->
         <div class="admin-tab-content" id="tab-wordfilters" style="display: none;">
-          <div style="margin-bottom: 14px;">
-            <h3 style="color: #ef4444;">🤬 Manual Word & Punishment Filter Rules</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">Define manual forbidden words/phrases and select the exact automated punishment (censor, block, warning strike, 5m/1h mute, or 1d/permanent ban).</p>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="color: #ef4444; margin: 0;">🤬 Word & Punishment Moderation Rules</h3>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Configure forbidden words and specify custom automated penalties (censor, block, strike, mute, or ban).</p>
+            </div>
           </div>
 
+          <!-- Single Word Filter Form -->
           <form id="admin-add-wordfilter-form" style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 18px; border-radius: var(--radius-md); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: end;">
             <div>
               <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #fff;">Forbidden Word / Phrase</label>
@@ -1597,6 +1912,41 @@
             </div>
           </form>
 
+          <!-- Bulk Block Words Form -->
+          <form id="admin-bulk-wordfilter-form" style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 18px; border-radius: var(--radius-md); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: end;">
+            <div style="grid-column: 1 / -1;">
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #ff6b6b;">Mass Block Words (one per line, comma or semicolon separated)</label>
+              <textarea id="admin-bulk-words-textarea" placeholder="Enter words/phrases..." rows="4" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem; resize: vertical;"></textarea>
+            </div>
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #fbbf24;">Automated Punishment</label>
+              <select id="admin-bulk-punishment-select" style="width: 100%; padding: 8px 12px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">
+                <option value="censor">*** Censor (Replace with ***)</option>
+                <option value="block">🚫 Block Message (Reject send)</option>
+                <option value="warn">⚠️ Warning Strike (Block + 1 Strike)</option>
+                <option value="mute_5m">🔇 5-Minute Mute (Block + Mute 5m)</option>
+                <option value="mute_1h">🔇 1-Hour Mute (Block + Mute 1h)</option>
+                <option value="ban_1d">⛔ 1-Day Suspension (Block + 24h Ban)</option>
+                <option value="perm_ban">💀 Permanent Ban (Block + Account Ban)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #38bdf8;">Filter Scope / Target</label>
+              <select id="admin-bulk-target-select" style="width: 100%; padding: 8px 12px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+                <option value="both">⚡ Both (Chat & Proxy Gateway)</option>
+                <option value="chat">💬 Community Chat Only</option>
+                <option value="gateway">🌐 Web Gateway Proxy Only</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: var(--text-muted);">Reason / Notes</label>
+              <input type="text" id="admin-bulk-reason-input" placeholder="e.g. Vulgarity / Spam" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" />
+            </div>
+            <div>
+              <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 9px; font-weight: 800; background: #ef4444; border-color: #ef4444;">🚀 Mass Block Words</button>
+            </div>
+          </form>
+
           <table class="admin-table">
             <thead>
               <tr>
@@ -1609,6 +1959,259 @@
             </thead>
             <tbody id="admin-wordfilters-tbody"></tbody>
           </table>
+        </div>
+
+        <!-- Edit Filter Word & Punishment Modal -->
+        <div id="admin-edit-filter-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
+          <div style="background: #0e121e; border: 1px solid #38bdf8; border-radius: 16px; width: 92%; max-width: 500px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="margin: 0; color: #38bdf8; font-size: 1.2rem;">✏️ Edit Word Filter & Punishment</h3>
+              <button id="close-edit-filter-modal-btn" type="button" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer;">&times;</button>
+            </div>
+            <form id="admin-edit-filter-form" style="display: flex; flex-direction: column; gap: 14px;">
+              <input type="hidden" id="edit-filter-id">
+              <div>
+                <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #fff;">Forbidden Word / Phrase</label>
+                <input type="text" id="edit-filter-word-input" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.9rem;">
+              </div>
+              <div>
+                <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #fbbf24;">Automated Punishment</label>
+                <select id="edit-filter-punishment-select" style="width: 100%; padding: 8px 12px; background: #151b2b; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.88rem; font-weight: 700;">
+                  <option value="censor">*** Censor (Replace with ***)</option>
+                  <option value="block">🚫 Block Message (Reject send)</option>
+                  <option value="warn">⚠️ Warning Strike (Block + 1 Strike)</option>
+                  <option value="mute_5m">🔇 5-Minute Mute (Block + Mute 5m)</option>
+                  <option value="mute_1h">🔇 1-Hour Mute (Block + Mute 1h)</option>
+                  <option value="ban_1d">⛔ 1-Day Suspension (Block + 24h Ban)</option>
+                  <option value="perm_ban">💀 Permanent Ban (Block + Account Ban)</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: #38bdf8;">Filter Scope / Target</label>
+                <select id="edit-filter-target-select" style="width: 100%; padding: 8px 12px; background: #151b2b; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.88rem;">
+                  <option value="both">⚡ Both (Chat & Proxy Gateway)</option>
+                  <option value="chat">💬 Community Chat Only</option>
+                  <option value="gateway">🌐 Web Gateway Proxy Only</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; color: var(--text-muted);">Reason / Notes</label>
+                <input type="text" id="edit-filter-reason-input" placeholder="e.g. Vulgarity / Harassment" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.88rem;">
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" id="cancel-edit-filter-btn" class="btn-small" style="background: rgba(255,255,255,0.1); color: #fff;">Cancel</button>
+                <button type="submit" class="btn-pill primary" style="padding: 8px 20px; font-weight: 800;">💾 Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Remade AI Moderation Studio -->
+        <!-- Admin Tab: Clean AI Management Studio -->
+        <div class="admin-tab-content" id="tab-aimod" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.6rem;">🤖</span>
+                <h3 style="color: #38bdf8; margin: 0; font-size: 1.35rem; font-weight: 800;">AI Engine & Moderation Management</h3>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.86rem; margin-top: 4px;">
+                Customize the Nitro AI Chatbot, set teaching styles, adjust speed limits, and manage chat safety.
+              </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span id="aimod-studio-status-badge" style="padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;">🟢 AI ONLINE</span>
+              <button id="aimod-studio-toggle-btn" class="btn-pill primary" style="background: linear-gradient(135deg, #e11d48, #be123c); border: none; font-weight: 800; padding: 8px 18px;">
+                Turn AI Off
+              </button>
+            </div>
+          </div>
+
+          <!-- Clean 3-Card Configuration Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-bottom: 24px;">
+            
+            <!-- Card 1: Chat AI Assistant Settings -->
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+              <h4 style="color: #38bdf8; margin: 0 0 14px 0; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                <span>💬</span> Chat AI Assistant
+              </h4>
+
+              <form id="clean-ai-chat-form" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #38bdf8; margin-bottom: 5px;">
+                    🧠 AI Model Engine
+                  </label>
+                  <select id="simple-chat-model" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <option value="gemini-2.5-flash" selected>⚡ Google Gemini 2.5 Flash (Fast & Smart)</option>
+                    <option value="gemini-3.1-flash-lite">🚀 Google Gemini 3.1 Flash Lite (Instant)</option>
+                    <option value="llama-3.3-70b-versatile">🦙 Groq Llama 3.3 70B (High Accuracy)</option>
+                    <option value="llama-3.1-8b-instant">⚡ Groq Llama 3.1 8B (Ultra Low Latency)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #fbbf24; margin-bottom: 5px;">
+                    🎭 AI Teaching Style & Personality
+                  </label>
+                  <select id="simple-chat-personality" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <option value="friendly" selected>🤝 Friendly Study Co-Pilot (Helpful & Encouraging)</option>
+                    <option value="professor">🎓 Strict Academic Professor (Formal & Proof-Driven)</option>
+                    <option value="concise">⚡ Concise & Direct (Short bullet points, no fluff)</option>
+                    <option value="socratic">🔍 Socratic Coach (Gives hints and asks guiding questions)</option>
+                  </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div class="form-group">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #a855f7; margin-bottom: 5px;">
+                      🌡️ Creativity Level
+                    </label>
+                    <select id="simple-chat-temp" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                      <option value="0.2">🎯 0.2 (Precise / Math)</option>
+                      <option value="0.7" selected>⚖️ 0.7 (Balanced)</option>
+                      <option value="1.0">🎨 1.0 (Creative Writing)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #10b981; margin-bottom: 5px;">
+                      ⏱️ Site Rate Limit
+                    </label>
+                    <select id="simple-chat-ratelimit" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                      <option value="15">15 requests / min</option>
+                      <option value="30" selected>30 requests / min</option>
+                      <option value="60">60 requests / min</option>
+                      <option value="120">120 requests / min</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 5px;">
+                    📜 Custom Instructions (Optional)
+                  </label>
+                  <textarea id="simple-chat-directives" placeholder="e.g. Always explain scientific formulas step by step..." rows="2" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-size: 0.82rem; resize: vertical;"></textarea>
+                </div>
+
+                <button type="submit" class="btn-pill primary" style="margin-top: auto; padding: 10px; font-weight: 800; background: linear-gradient(135deg, #38bdf8, #3b82f6); color: #000; border: none; justify-content: center;">
+                  💾 Save Chat AI Settings
+                </button>
+              </form>
+            </div>
+
+            <!-- Card 2: AI Safety & Chat Moderation -->
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+              <h4 style="color: #f43f5e; margin: 0 0 14px 0; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                <span>🛡️</span> Chat Safety & Moderation
+              </h4>
+
+              <form id="clean-ai-mod-form" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #fbbf24; margin-bottom: 5px;">
+                    🛡️ Safety Strictness Level
+                  </label>
+                  <select id="simple-mod-strictness" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <option value="strict" selected>🏫 Strict (School Safe - Zero tolerance for toxicity & slurs)</option>
+                    <option value="balanced">⚡ Balanced (Blocks harassment, hate speech & threats)</option>
+                    <option value="lenient">🎮 Relaxed (Permissive banter, blocks extreme threats)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #f43f5e; margin-bottom: 5px;">
+                    ⚖️ Action When Rules Are Broken
+                  </label>
+                  <select id="simple-mod-policy" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <option value="auto_punish" selected>🚨 Auto-Punish (Automatically Mute / Ban rulebreakers)</option>
+                    <option value="block_only">🚫 Block Message Only (Silent drop without account mute)</option>
+                    <option value="censor_warn">*** Censor & Warn (Replace bad words with ***)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #a855f7; margin-bottom: 5px;">
+                    🧠 Moderation AI Model
+                  </label>
+                  <select id="simple-mod-model" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <option value="llama-3.3-70b-versatile" selected>⚡ Llama 3.3 70B (Deep context & accuracy)</option>
+                    <option value="llama-3.1-8b-instant">🚀 Llama 3.1 8B (Instant speed)</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn-pill primary" style="margin-top: auto; padding: 10px; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none; justify-content: center;">
+                  💾 Save Safety Policy
+                </button>
+              </form>
+            </div>
+
+            <!-- Card 3: Interactive Test Playground -->
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+              <h4 style="color: #a855f7; margin: 0 0 14px 0; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                <span>🧪</span> Quick AI Test Playground
+              </h4>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin: 0 0 10px 0;">
+                Test message samples through AI to preview response latency and safety checks in real-time.
+              </p>
+
+              <div style="display: flex; flex-direction: column; gap: 10px; flex: 1;">
+                <textarea id="aimod-test-input" placeholder="Type or paste any test text here..." rows="3" style="width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-size: 0.86rem; resize: vertical;"></textarea>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <button type="button" id="aimod-run-test-btn" class="btn-pill primary" style="flex: 1; padding: 9px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; justify-content: center;">
+                    ⚡ Test Text
+                  </button>
+                  <button type="button" id="aimod-clear-test-btn" class="btn-small" style="background: rgba(255,255,255,0.08); color: #fff;">Clear</button>
+                </div>
+
+                <div id="aimod-test-result-box" style="margin-top: 10px; padding: 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; display: none; font-size: 0.85rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span id="aimod-test-badge" style="font-weight: 800; padding: 3px 10px; border-radius: 99px; font-size: 0.76rem;">SAFE</span>
+                    <span id="aimod-test-latency" style="color: #38bdf8; font-size: 0.78rem; font-weight: 700;">⏱️ 140ms</span>
+                  </div>
+                  <div id="aimod-test-details" style="color: #cbd5e1; line-height: 1.5; font-size: 0.83rem;"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- AI Moderation Incident Feed Table -->
+          <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="color: #fbbf24; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                  <span>📋</span> Live AI Moderation Violations & Enforcements Feed
+                </h4>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">
+                  Real-time stream of flagged chat messages automatically categorized & enforced.
+                </p>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn-small primary" onclick="window.fetchAiLogs()" style="font-weight: 800; padding: 7px 14px;">🔄 Refresh Logs</button>
+                <button class="btn-small danger" onclick="window.clearAiLogs()" style="font-weight: 800; padding: 7px 14px;">🗑️ Clear Logs</button>
+              </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                    <th style="padding: 10px 12px;">Timestamp</th>
+                    <th style="padding: 10px 12px;">User Account</th>
+                    <th style="padding: 10px 12px;">Flagged Message Text</th>
+                    <th style="padding: 10px 12px;">Category & Severity</th>
+                    <th style="padding: 10px 12px;">Punishment Enforced</th>
+                    <th style="padding: 10px 12px;">Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="aimod-logs-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading AI incident logs...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <!-- Admin Tab: Catalog Games -->
@@ -1683,6 +2286,32 @@
             </thead>
             <tbody id="admin-logs-tbody"></tbody>
           </table>
+        </div>
+
+        <!-- Admin Tab: Punishment Appeals Review Studio -->
+        <div class="admin-tab-content" id="tab-appeals" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.4rem;">⚖️</span>
+                <h3 style="color: #38bdf8; margin: 0; font-size: 1.25rem;">Student Punishment Appeals Review Hub</h3>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Review student ban/mute appeals evaluated with Groq AI Sincerity & Risk analysis.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <select id="admin-appeals-filter" class="custom-select-dropdown" onchange="window.fetchAppeals(this.value)" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700;">
+                <option value="pending">⏳ Pending Review Only</option>
+                <option value="all">📋 All Appeals (History)</option>
+                <option value="approved">✅ Approved Appeals</option>
+                <option value="rejected">❌ Rejected Appeals</option>
+              </select>
+              <button class="btn-small primary" onclick="window.fetchAppeals()" style="font-weight: 700;">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <div id="admin-appeals-list" style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="text-align: center; color: var(--text-muted); padding: 30px;">Loading appeals...</div>
+          </div>
         </div>
       </div>
     </section>
@@ -2146,6 +2775,121 @@
         </div>
 
         <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 11px; margin-top: 6px; font-weight: 800;" id="sound-upload-submit-btn">Upload Soundboard Sound</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PUNISHMENT APPEAL MODAL -->
+  <div class="modal-overlay" id="punishment-appeal-modal" style="display: none; position: fixed; inset: 0; z-index: 100000000; background: rgba(0,0,0,0.85); backdrop-filter: blur(18px); align-items: center; justify-content: center;">
+    <div class="modal-card" style="max-width: 620px; text-align: left; background: #0e121d; border: 1px solid #38bdf8; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 30px rgba(56,189,248,0.25); max-height: 88vh; overflow-y: auto;">
+      <button class="modal-close" onclick="document.getElementById('punishment-appeal-modal').style.display='none'">✕</button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <span style="font-size: 1.8rem;">⚖️</span>
+        <div>
+          <h2 style="color: #38bdf8; margin: 0; font-size: 1.3rem;">Formal Moderation Appeal Questionnaire</h2>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0;">Appeal an active chat mute or account suspension for administrative and Groq AI review.</p>
+        </div>
+      </div>
+
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.8rem; color: #cbd5e1;">
+        💡 <strong>Detailed Appeal Standard:</strong> Please respond to each question thoroughly. Submissions undergo Groq AI pre-review for sincerity and accountability before staff determination.
+      </div>
+
+      <form id="punishment-appeal-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-size: 0.8rem; font-weight: 700; color: #fff;">Your Username</label>
+            <input type="text" id="appeal-username-input" required placeholder="Enter your username..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.8rem; font-weight: 700; color: #38bdf8;">Infraction Category</label>
+            <select id="appeal-category-select" style="width: 100%; padding: 8px 10px; background: #182035; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.82rem;">
+              <option value="Inappropriate Language / Slang">💬 Inappropriate Language / Slang</option>
+              <option value="Toxic Argument / Harassment">💥 Heated Argument / Toxicity</option>
+              <option value="False Positive / Misunderstanding">🤖 Safety Filter False Positive</option>
+              <option value="Shared Device / Sibling on Account">👥 Sibling / Shared Device Incident</option>
+              <option value="Spamming / Disruptive Chat">⚠️ Spamming / Disruptive Chat</option>
+              <option value="Other Policy Violation">❓ Other Platform Misunderstanding</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700; color: #fbbf24;">1. What happened & what led up to this incident?</label>
+          <textarea id="appeal-desc-input" required placeholder="Describe what occurred, the conversation or context leading up to the action..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.82rem; resize: vertical;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700; color: #a855f7;">2. Why should staff reconsider and grant you another chance?</label>
+          <textarea id="appeal-why-input" required placeholder="Explain your remorse, why you value the community, or why this punishment should be lifted..." style="width: 100%; height: 70px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.82rem; resize: vertical;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700; color: #10b981;">3. What concrete steps will you take to prevent future violations?</label>
+          <textarea id="appeal-prevention-input" required placeholder="Detail your future prevention strategy (e.g. keeping chat academic, avoiding arguments, blocking toxic users)..." style="width: 100%; height: 70px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.82rem; resize: vertical;"></textarea>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #cbd5e1; cursor: pointer;">
+            <input type="checkbox" id="appeal-pledge-check1" checked required style="accent-color: #38bdf8; width: 15px; height: 15px;">
+            <span>I pledge to follow all platform safety guidelines and treat all students with respect.</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #f87171; cursor: pointer;">
+            <input type="checkbox" id="appeal-pledge-check2" checked required style="accent-color: #ef4444; width: 15px; height: 15px;">
+            <span>I acknowledge that any repeated violations will result in permanent account termination.</span>
+          </label>
+        </div>
+
+        <div id="appeal-status-feedback" style="display: none; padding: 10px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;">
+          <button type="button" class="btn-small" onclick="document.getElementById('punishment-appeal-modal').style.display='none'" style="background: rgba(255,255,255,0.1); color: #fff;">Cancel</button>
+          <button type="submit" class="btn-pill primary" id="submit-appeal-btn" style="padding: 9px 24px; font-weight: 800;">🚀 Submit Detailed Appeal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CREATE STUDY VOICE ROOM MODAL -->
+  <div class="modal-overlay" id="create-study-room-modal" style="display: none;">
+    <div class="modal-card" style="max-width: 480px; text-align: left;">
+      <button class="modal-close" onclick="document.getElementById('create-study-room-modal').style.display='none'">✕</button>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span style="font-size: 1.6rem;">📐</span>
+        <div>
+          <h2 style="color: #10b981; margin: 0; font-size: 1.25rem;">Create Temporary Study Voice Room</h2>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0;">Start a collaborative voice study pod with screen sharing.</p>
+        </div>
+      </div>
+
+      <form id="create-study-room-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label style="font-size: 0.82rem; font-weight: 700; color: #fff;">Room Title</label>
+          <input type="text" id="study-room-name-input" required placeholder="e.g. Calculus Homework Squad" maxlength="40" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-size: 0.82rem; font-weight: 700; color: #38bdf8;">Subject / Category</label>
+            <select id="study-room-category-select" style="width: 100%; padding: 8px 10px; background: #151b2b; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+              <option value="Study">📚 Study / Homework</option>
+              <option value="Math">📐 Math & STEM</option>
+              <option value="Coding">💻 Coding & CS</option>
+              <option value="Gaming">🎮 Gaming Hangout</option>
+              <option value="Chill">☕ Chill / Lo-Fi</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 0.82rem; font-weight: 700; color: #fbbf24;">Participant Limit</label>
+            <input type="number" id="study-room-limit-input" min="2" max="50" value="15" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+          <button type="button" class="btn-small" onclick="document.getElementById('create-study-room-modal').style.display='none'" style="background: rgba(255,255,255,0.1); color: #fff;">Cancel</button>
+          <button type="submit" class="btn-pill primary" style="background: #10b981; border-color: #10b981; color: #000; font-weight: 800; padding: 9px 20px;">🚀 Launch Room</button>
+        </div>
       </form>
     </div>
   </div>

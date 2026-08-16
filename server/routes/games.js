@@ -242,26 +242,28 @@ router.post('/:slug/reviews', async (req, res) => {
 });
 
 // 7. Suggestions & Bug Reports
-router.post('/suggest', async (req, res) => {
-  const { title, details } = req.body;
+async function handleGameSuggestion(req, res) {
+  const { title, details, link } = req.body;
   const user = await getAuthUser(req);
   const username = user ? user.username : 'Guest User';
 
-  if (!title || !details) {
+  const suggestionContent = details || link || '';
+
+  if (!title || !suggestionContent) {
     return res.status(400).json({ error: 'Please provide both the game title and game link/details.' });
   }
 
   try {
     const userId = user ? user.id : null;
-    const suggestion = await db.createGameSuggestion(userId, username, title.trim(), details.trim(), '');
-    await db.createModerationLog('GAME_SUGGESTION', username, title.trim(), details.trim());
+    const suggestion = await db.createGameSuggestion(userId, username, title.trim(), suggestionContent.trim(), link || '');
+    await db.createModerationLog('GAME_SUGGESTION', username, title.trim(), suggestionContent.trim());
 
     sendDiscordLog({
       category: 'suggestions',
       action: 'GAME_SUGGESTION',
       admin: username,
       target: title.trim(),
-      details: details.trim()
+      details: suggestionContent.trim()
     });
 
     res.status(201).json({ success: true, message: 'Game suggestion submitted! Admins have been notified.' });
@@ -269,27 +271,32 @@ router.post('/suggest', async (req, res) => {
     console.error('Suggestion error:', err);
     res.status(500).json({ error: 'Failed to submit game suggestion.' });
   }
-});
+}
 
-router.post('/bug-report', async (req, res) => {
-  const { title, category, description } = req.body;
+router.post('/suggest', handleGameSuggestion);
+router.post('/suggestions', handleGameSuggestion);
+
+async function handleBugReport(req, res) {
+  const { title, category, description, details } = req.body;
   const user = await getAuthUser(req);
   const username = user ? user.username : 'Guest User';
 
-  if (!title || !description) {
+  const desc = description || details || '';
+
+  if (!title || !desc) {
     return res.status(400).json({ error: 'Please provide a title and description for the bug report.' });
   }
 
   try {
-    const report = await db.createBugReport(title.trim(), category || 'General', description.trim(), username);
-    await db.createModerationLog('BUG_REPORT', username, title.trim(), `Category: ${category || 'General'} | ${description.trim()}`);
+    const report = await db.createBugReport(title.trim(), category || 'General', desc.trim(), username);
+    await db.createModerationLog('BUG_REPORT', username, title.trim(), `Category: ${category || 'General'} | ${desc.trim()}`);
 
     sendDiscordLog({
       category: 'bugs',
       action: 'BUG_REPORT',
       admin: username,
       target: `[${category || 'General'}] ${title.trim()}`,
-      details: description.trim()
+      details: desc.trim()
     });
 
     res.status(201).json({ success: true, message: 'Bug report sent to administrators. Thank you!' });
@@ -297,7 +304,11 @@ router.post('/bug-report', async (req, res) => {
     console.error('Bug report error:', err);
     res.status(500).json({ error: 'Failed to submit bug report.' });
   }
-});
+}
+
+router.post('/bug-report', handleBugReport);
+router.post('/bugs', handleBugReport);
+router.post('/bug-reports', handleBugReport);
 
 // 8. Get Single Game
 router.get('/:slug', async (req, res) => {
