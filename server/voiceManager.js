@@ -1,16 +1,18 @@
 // server/voiceManager.js
-// In‑memory management of ephemeral voice channels and study rooms
+// In‑memory management of ephemeral voice channels, study rooms & gaming pods
 
 class VoiceManager {
   constructor() {
-    this.channels = new Map(); // channelId -> { name, creatorId, isDefault, category, limit, screenSharer, participants: Map<socketId, userData> }
+    this.channels = new Map();
     this.nextId = 1;
 
     // Seed default permanent channels
-    this.createChannel('🎧 General Voice Lounge', 0, true, { category: 'General', limit: 30 });
-    this.createChannel('🎮 Gaming Voice #1', 0, true, { category: 'Gaming', limit: 20 });
-    this.createChannel('☕ Lo-Fi Study Lounge', 0, true, { category: 'Study', limit: 25 });
-    this.createChannel('📐 Math & STEM Study Pod', 0, true, { category: 'Study', limit: 15 });
+    this.createChannel('🎧 General Voice Lounge', 0, true, { category: 'General', limit: 40, bitrate: '96kbps' });
+    this.createChannel('🎮 Gaming Squad Arena #1', 0, true, { category: 'Gaming', limit: 12, bitrate: '128kbps' });
+    this.createChannel('⚔️ Competitive Esports Room', 0, true, { category: 'Gaming', limit: 10, bitrate: '128kbps' });
+    this.createChannel('☕ Lo-Fi Study & Homework Pod', 0, true, { category: 'Study', limit: 25, bitrate: '96kbps' });
+    this.createChannel('📐 STEM & Senior Code Mentors', 0, true, { category: 'Study', limit: 15, bitrate: '96kbps' });
+    this.createChannel('🎷 Chill Music & Vibe Lounge', 0, true, { category: 'Chill', limit: 30, bitrate: '128kbps' });
   }
 
   createChannel(name, creatorId, isDefault = false, metadata = {}) {
@@ -21,8 +23,10 @@ class VoiceManager {
       creatorId,
       isDefault,
       category: metadata.category || 'Study',
-      limit: metadata.limit || 15,
-      screenSharer: null, // socketId of currently screen-sharing user
+      limit: metadata.limit || 20,
+      bitrate: metadata.bitrate || '96kbps',
+      password: metadata.password || '',
+      screenSharer: null,
       participants: new Map()
     });
     return channelId;
@@ -35,8 +39,10 @@ class VoiceManager {
         id,
         name: ch.name,
         category: ch.category || 'Study',
-        limit: ch.limit || 15,
+        limit: ch.limit || 20,
+        bitrate: ch.bitrate || '96kbps',
         isDefault: Boolean(ch.isDefault),
+        hasPassword: Boolean(ch.password),
         screenSharer: ch.screenSharer,
         participantCount: ch.participants.size
       });
@@ -52,7 +58,7 @@ class VoiceManager {
       username: user.username || 'Guest',
       display_name: user.display_name || user.username || 'Student',
       role: user.role || 'member',
-      avatar: user.avatar || '',
+      avatar_url: user.avatar_url || user.avatar || '',
       slotIndex: ch.participants.size
     });
     return true;
@@ -65,7 +71,6 @@ class VoiceManager {
       ch.screenSharer = null;
     }
     const deleted = ch.participants.delete(socketId);
-    // Cleanup empty custom channels (do not delete default permanent channels)
     if (ch.participants.size === 0 && !ch.isDefault) {
       this.channels.delete(channelId);
     }

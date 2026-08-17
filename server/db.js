@@ -16,69 +16,84 @@ console.log('⚡ [DB] Supabase Pool configured.');
 const db = {
   pool,
 
-  async initPostgres() {
-    try {
+  async initPostgres() {    try {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
-          username VARCHAR(50) UNIQUE NOT NULL,
-          display_name VARCHAR(100),
+          username VARCHAR(100) UNIQUE NOT NULL,
+          display_name VARCHAR(100) DEFAULT '',
           bio TEXT DEFAULT '',
-          password_hash VARCHAR(255) NOT NULL,
-          role VARCHAR(20) DEFAULT 'member',
+          password_hash TEXT NOT NULL,
+          role VARCHAR(50) DEFAULT 'member',
           avatar_url TEXT DEFAULT '',
+          banner_url TEXT DEFAULT '',
+          chat_bubble_theme VARCHAR(50) DEFAULT 'default',
+          vip_particle_effect VARCHAR(50) DEFAULT 'none',
           pro_chat_glow VARCHAR(50) DEFAULT 'gold',
           pro_custom_flair VARCHAR(50) DEFAULT '',
+          coins INT DEFAULT 100,
+          xp INT DEFAULT 0,
           is_banned BOOLEAN DEFAULT false,
           is_gateway_banned BOOLEAN DEFAULT false,
+          is_proxy_banned BOOLEAN DEFAULT false,
           ban_reason TEXT DEFAULT '',
+          proxy_timeout_until TIMESTAMP,
+          proxy_violations_count INT DEFAULT 0,
           gateway_timeout_until TIMESTAMP,
           gateway_violations_count INT DEFAULT 0,
           banned_until TIMESTAMP,
           muted_until TIMESTAMP,
+          require_profile_update BOOLEAN DEFAULT false,
+          profile_lock_reason TEXT DEFAULT '',
+          is_disabled_for_review BOOLEAN DEFAULT false,
+          review_disable_reason TEXT DEFAULT '',
+          force_password_reset BOOLEAN DEFAULT false,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `);
 
-      await pool.query(`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_gateway_banned BOOLEAN DEFAULT false;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason TEXT DEFAULT '';
+        CREATE TABLE IF NOT EXISTS user_profiles (
+          id SERIAL PRIMARY KEY,
+          user_id INT,
+          profile_name VARCHAR(100) NOT NULL,
+          favorites JSONB DEFAULT '[]'::jsonb,
+          theme_settings JSONB DEFAULT '{}'::jsonb,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
 
         CREATE TABLE IF NOT EXISTS games (
           id SERIAL PRIMARY KEY,
-          title VARCHAR(100) NOT NULL,
-          slug VARCHAR(100) UNIQUE NOT NULL,
-          author VARCHAR(100),
-          thumbnail_url TEXT,
-          embed_type VARCHAR(20) DEFAULT 'html_code',
-          embed_content TEXT,
+          title VARCHAR(200) NOT NULL,
+          slug VARCHAR(200) UNIQUE NOT NULL,
+          description TEXT DEFAULT '',
+          author VARCHAR(100) DEFAULT 'Community',
+          thumbnail_url TEXT NOT NULL,
+          embed_type VARCHAR(50) DEFAULT 'html_code',
+          embed_content TEXT NOT NULL,
           is_vip BOOLEAN DEFAULT false,
           category VARCHAR(50) DEFAULT 'Action',
           clicks INT DEFAULT 0,
-          created_by VARCHAR(50),
+          created_by VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS filter_words (
           id SERIAL PRIMARY KEY,
           word VARCHAR(100) UNIQUE NOT NULL,
-          filter_type VARCHAR(20) DEFAULT 'both',
+          filter_type VARCHAR(50) DEFAULT 'both',
           punishment VARCHAR(50) DEFAULT 'censor',
           reason TEXT DEFAULT '',
           created_by VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        ALTER TABLE filter_words ADD COLUMN IF NOT EXISTS punishment VARCHAR(50) DEFAULT 'censor';
-        ALTER TABLE filter_words ADD COLUMN IF NOT EXISTS reason TEXT DEFAULT '';
-        ALTER TABLE filter_words ADD COLUMN IF NOT EXISTS created_by VARCHAR(100) DEFAULT 'admin';
-
         CREATE TABLE IF NOT EXISTS chat_messages (
           id SERIAL PRIMARY KEY,
           user_id INT,
-          username VARCHAR(50) NOT NULL,
-          role VARCHAR(20) DEFAULT 'member',
+          username VARCHAR(100) NOT NULL,
+          role VARCHAR(50) DEFAULT 'member',
           message TEXT NOT NULL,
+          audio_url TEXT DEFAULT '',
+          image_url TEXT DEFAULT '',
           is_deleted BOOLEAN DEFAULT false,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -87,9 +102,12 @@ const db = {
           id SERIAL PRIMARY KEY,
           sender_id INT,
           receiver_id INT,
-          sender_username VARCHAR(50) NOT NULL,
-          receiver_username VARCHAR(50) NOT NULL,
-          message TEXT NOT NULL,
+          sender_username VARCHAR(100) NOT NULL,
+          receiver_username VARCHAR(100) NOT NULL,
+          message TEXT DEFAULT '',
+          content TEXT DEFAULT '',
+          audio_url TEXT DEFAULT '',
+          image_url TEXT DEFAULT '',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -104,40 +122,52 @@ const db = {
           id SERIAL PRIMARY KEY,
           question TEXT NOT NULL,
           options JSONB NOT NULL,
-          created_by VARCHAR(50),
+          created_by VARCHAR(100) DEFAULT 'admin',
           is_active BOOLEAN DEFAULT true,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS poll_votes (
           id SERIAL PRIMARY KEY,
-          poll_id INT REFERENCES community_polls(id) ON DELETE CASCADE,
+          poll_id INT,
           user_id INT,
           option_index INT NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(poll_id, user_id)
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS moderation_logs (
           id SERIAL PRIMARY KEY,
-          action VARCHAR(50) NOT NULL,
-          admin_username VARCHAR(50) NOT NULL,
+          action VARCHAR(100) NOT NULL,
+          admin_username VARCHAR(100) NOT NULL,
           target VARCHAR(100),
-          reason TEXT,
+          reason TEXT DEFAULT '',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_moderation_logs (
+          id SERIAL PRIMARY KEY,
+          user_id INT,
+          username VARCHAR(100) NOT NULL,
+          message TEXT NOT NULL,
+          category VARCHAR(50) DEFAULT 'general',
+          severity VARCHAR(50) DEFAULT 'medium',
+          confidence FLOAT DEFAULT 1.0,
+          action_taken VARCHAR(50) DEFAULT 'blocked',
+          reason TEXT DEFAULT '',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS site_settings (
-          key VARCHAR(50) PRIMARY KEY,
-          value TEXT,
+          key VARCHAR(100) PRIMARY KEY,
+          value TEXT NOT NULL,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS announcements (
           id SERIAL PRIMARY KEY,
-          title VARCHAR(150) NOT NULL,
+          title VARCHAR(200) NOT NULL,
           message TEXT NOT NULL,
-          alert_type VARCHAR(20) DEFAULT 'info',
+          alert_type VARCHAR(50) DEFAULT 'info',
           is_active BOOLEAN DEFAULT true,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -145,32 +175,39 @@ const db = {
         CREATE TABLE IF NOT EXISTS blocked_domains (
           id SERIAL PRIMARY KEY,
           domain VARCHAR(255) UNIQUE NOT NULL,
-          reason TEXT,
+          reason TEXT DEFAULT '',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS game_suggestions (
           id SERIAL PRIMARY KEY,
-          title VARCHAR(150) NOT NULL,
-          details TEXT NOT NULL,
-          username VARCHAR(50),
+          user_id INT,
+          title VARCHAR(200) NOT NULL,
+          details TEXT DEFAULT '',
+          description TEXT DEFAULT '',
+          username VARCHAR(100) DEFAULT 'Guest',
+          game_url TEXT DEFAULT '',
+          upvotes INT DEFAULT 1,
+          voters TEXT DEFAULT '[]',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS bug_reports (
           id SERIAL PRIMARY KEY,
-          title VARCHAR(150) NOT NULL,
-          category VARCHAR(50),
+          title VARCHAR(200) NOT NULL,
+          category VARCHAR(100) DEFAULT 'general',
           description TEXT NOT NULL,
-          username VARCHAR(50),
+          username VARCHAR(100) DEFAULT 'Guest',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS user_game_stats (
           user_id INT PRIMARY KEY,
-          username VARCHAR(50) NOT NULL,
+          username VARCHAR(100) NOT NULL,
           total_time_seconds INT DEFAULT 0,
           games_played INT DEFAULT 0,
+          coins INT DEFAULT 0,
+          xp INT DEFAULT 0,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -181,11 +218,18 @@ const db = {
           PRIMARY KEY(user_id, game_id)
         );
 
+        CREATE TABLE IF NOT EXISTS game_favorites (
+          id SERIAL PRIMARY KEY,
+          user_id INT NOT NULL,
+          game_id INT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS user_playlists (
           id SERIAL PRIMARY KEY,
           user_id INT NOT NULL,
           title VARCHAR(100) NOT NULL,
-          game_ids JSONB DEFAULT '[]',
+          game_ids JSONB DEFAULT '[]'::jsonb,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -194,48 +238,44 @@ const db = {
           user_id INT NOT NULL,
           game_slug VARCHAR(100) NOT NULL,
           save_data TEXT NOT NULL,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(user_id, game_slug)
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS game_reviews (
           id SERIAL PRIMARY KEY,
           user_id INT,
-          username VARCHAR(50) NOT NULL,
+          username VARCHAR(100) NOT NULL,
           game_slug VARCHAR(100) NOT NULL,
           rating INT NOT NULL,
-          review_text TEXT,
-          tips TEXT,
+          review_text TEXT DEFAULT '',
+          tips TEXT DEFAULT '',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS ip_logs (
           id SERIAL PRIMARY KEY,
           user_id INT,
-          username VARCHAR(50) NOT NULL,
+          username VARCHAR(100) NOT NULL,
           ip_address VARCHAR(45) NOT NULL,
-          user_agent TEXT,
-          location_info TEXT,
+          user_agent TEXT DEFAULT '',
+          location_info TEXT DEFAULT 'Unknown',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
         CREATE TABLE IF NOT EXISTS banned_ips (
           id SERIAL PRIMARY KEY,
           ip_address VARCHAR(45) UNIQUE NOT NULL,
-          reason TEXT,
-          banned_by VARCHAR(50),
+          reason TEXT DEFAULT '',
+          banned_by VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS audio_url TEXT DEFAULT '';
-        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS audio_url TEXT DEFAULT '';
-
         CREATE TABLE IF NOT EXISTS friendships (
           id SERIAL PRIMARY KEY,
-          user_id INT REFERENCES users(id) ON DELETE CASCADE,
-          friend_id INT REFERENCES users(id) ON DELETE CASCADE,
+          user_id INT NOT NULL,
+          friend_id INT NOT NULL,
           status VARCHAR(20) DEFAULT 'pending',
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(user_id, friend_id)
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS contact_messages (
@@ -252,13 +292,13 @@ const db = {
         CREATE TABLE IF NOT EXISTS ai_moderation_logs (
           id SERIAL PRIMARY KEY,
           user_id INT,
-          username VARCHAR(50) NOT NULL,
+          username VARCHAR(100) NOT NULL,
           message TEXT NOT NULL,
           category VARCHAR(50) DEFAULT 'general',
-          severity VARCHAR(20) DEFAULT 'medium',
+          severity VARCHAR(50) DEFAULT 'medium',
           confidence FLOAT DEFAULT 1.0,
           action_taken VARCHAR(50) DEFAULT 'blocked',
-          reason TEXT,
+          reason TEXT DEFAULT '',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -267,57 +307,22 @@ const db = {
           user_id INT,
           username VARCHAR(100) NOT NULL,
           punishment_type VARCHAR(50) NOT NULL,
-          original_reason TEXT,
+          original_reason TEXT DEFAULT '',
           appeal_text TEXT NOT NULL,
-          incident_category VARCHAR(100),
-          incident_description TEXT,
-          why_second_chance TEXT,
-          prevention_commitment TEXT,
+          incident_category VARCHAR(100) DEFAULT '',
+          incident_description TEXT DEFAULT '',
+          why_second_chance TEXT DEFAULT '',
+          prevention_commitment TEXT DEFAULT '',
           rules_agreed BOOLEAN DEFAULT true,
-          ai_recommendation VARCHAR(50),
-          ai_rationale TEXT,
+          ai_recommendation VARCHAR(50) DEFAULT '',
+          ai_rationale TEXT DEFAULT '',
           ai_confidence FLOAT DEFAULT 0.9,
           status VARCHAR(50) DEFAULT 'pending',
-          admin_notes TEXT,
-          reviewed_by VARCHAR(100),
+          admin_notes TEXT DEFAULT '',
+          reviewed_by VARCHAR(100) DEFAULT '',
           reviewed_at TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-      `);
-
-      // Safe column additions
-      await pool.query(`
-        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS incident_category VARCHAR(100);
-        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS incident_description TEXT;
-        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS why_second_chance TEXT;
-        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS prevention_commitment TEXT;
-        ALTER TABLE appeals ADD COLUMN IF NOT EXISTS rules_agreed BOOLEAN DEFAULT true;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(100);
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT '';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_bubble_theme VARCHAR(50) DEFAULT 'default';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_particle_effect VARCHAR(50) DEFAULT 'none';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_chat_glow VARCHAR(50) DEFAULT 'gold';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_custom_flair VARCHAR(50) DEFAULT '';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS muted_until TIMESTAMP;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS force_password_reset BOOLEAN DEFAULT false;
-        ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS sender_id INT;
-        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS receiver_id INT;
-        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS sender_username VARCHAR(50);
-        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS receiver_username VARCHAR(50);
-        ALTER TABLE direct_messages ADD COLUMN IF NOT EXISTS content TEXT;
-        ALTER TABLE game_suggestions ADD COLUMN IF NOT EXISTS user_id INT;
-        ALTER TABLE game_suggestions ADD COLUMN IF NOT EXISTS description TEXT;
-        ALTER TABLE game_suggestions ADD COLUMN IF NOT EXISTS details TEXT;
-        ALTER TABLE game_suggestions ADD COLUMN IF NOT EXISTS game_url TEXT;
-        ALTER TABLE game_suggestions ADD COLUMN IF NOT EXISTS upvotes INT DEFAULT 1;
-        ALTER TABLE game_suggestions ADD COLUMN IF NOT EXISTS voters TEXT DEFAULT '[]';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS coins INT DEFAULT 100;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INT DEFAULT 0;
-        ALTER TABLE user_game_stats ADD COLUMN IF NOT EXISTS coins INT DEFAULT 0;
-        ALTER TABLE user_game_stats ADD COLUMN IF NOT EXISTS xp INT DEFAULT 0;
 
         CREATE TABLE IF NOT EXISTS custom_soundboard_sounds (
           id SERIAL PRIMARY KEY,
@@ -325,7 +330,24 @@ const db = {
           icon VARCHAR(20) DEFAULT '🎵',
           audio_url TEXT NOT NULL,
           is_global BOOLEAN DEFAULT false,
-          uploaded_by VARCHAR(50),
+          uploaded_by VARCHAR(100) DEFAULT 'admin',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS game_play_logs (
+          id SERIAL PRIMARY KEY,
+          user_id INT NOT NULL,
+          username VARCHAR(100) NOT NULL,
+          playtime_seconds INT DEFAULT 60,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS update_logs (
+          id SERIAL PRIMARY KEY,
+          version VARCHAR(50) NOT NULL,
+          title VARCHAR(200) NOT NULL,
+          content TEXT NOT NULL,
+          author VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       `);
@@ -351,28 +373,14 @@ const db = {
       // Clean up / remove Apps category items
       await pool.query("DELETE FROM games WHERE category = 'Apps' OR slug LIKE 'app-%'");
 
-      // Seed default restricted domains & keywords
-      const defaultBlockedSeed = [
-        { domain: 'roblox', reason: 'Restricted Gaming Domain Keyword' },
-        { domain: 'discord', reason: 'Restricted Chat Domain Keyword' },
-        { domain: 'tiktok', reason: 'Restricted Social Media Keyword' },
-        { domain: 'poki', reason: 'Restricted External Unblocked Portal' },
-        { domain: 'crazygames', reason: 'Restricted External Unblocked Portal' },
-        { domain: 'coolmath', reason: 'Restricted External Unblocked Portal' }
-      ];
-      for (const b of defaultBlockedSeed) {
-        try {
-          await pool.query('INSERT INTO blocked_domains (domain, reason) VALUES ($1, $2) ON CONFLICT (domain) DO NOTHING', [b.domain, b.reason]);
-        } catch (e) {}
-      }
-
-      // Ensure users table contains strike & violation columns
+      // Purge requested unblocked domains
       try {
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS gateway_timeout_until TIMESTAMP");
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS gateway_violations_count INT DEFAULT 0");
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_gateway_banned BOOLEAN DEFAULT false");
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_until TIMESTAMP");
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS muted_until TIMESTAMP");
+        await pool.query("DELETE FROM blocked_domains WHERE LOWER(domain) IN ('coolmath', 'crazygames', 'poki', 'tiktok', 'discord', 'roblox')");
+      } catch (e) {}
+
+      // Auto-categorize & assign proportional punishments to all filter_words
+      try {
+        await this.autoCategorizeFilterWordPunishments();
       } catch (e) {}
 
       console.log('✅ [DB] Supabase tables, Base64 passwords, force-reset flags, PRO games, and Classic collection synchronized successfully.');
@@ -806,12 +814,41 @@ const db = {
       await pool.query(`
         UPDATE users 
         SET is_banned = false, ban_reason = NULL, banned_until = NULL,
+            is_disabled_for_review = false, review_disable_reason = '',
             is_gateway_banned = false, gateway_timeout_until = NULL, gateway_violations_count = 0
         WHERE id = $1
       `, [userId]);
       return true;
     } catch (e) {
       console.error('unbanUser error:', e.message);
+      return false;
+    }
+  },
+
+  async banGatewayUser(userId, reason = 'Proxy banned by administrator') {
+    try {
+      await pool.query(`
+        UPDATE users 
+        SET is_gateway_banned = true
+        WHERE id = $1
+      `, [userId]);
+      return true;
+    } catch (e) {
+      console.error('banGatewayUser error:', e.message);
+      return false;
+    }
+  },
+
+  async ungatewayBanUser(userId) {
+    try {
+      await pool.query(`
+        UPDATE users 
+        SET is_gateway_banned = false, gateway_timeout_until = NULL, gateway_violations_count = 0
+        WHERE id = $1
+      `, [userId]);
+      return true;
+    } catch (e) {
+      console.error('ungatewayBanUser error:', e.message);
       return false;
     }
   },
@@ -883,6 +920,26 @@ const db = {
     }
   },
 
+  async unmuteUser(userId) {
+    try {
+      await pool.query('UPDATE users SET muted_until = NULL WHERE id = $1', [userId]);
+      return true;
+    } catch (e) {
+      console.error('unmuteUser error:', e.message);
+      return false;
+    }
+  },
+
+  async unbanUser(userId) {
+    try {
+      await pool.query('UPDATE users SET is_banned = false, ban_reason = NULL, banned_until = NULL WHERE id = $1', [userId]);
+      return true;
+    } catch (e) {
+      console.error('unbanUser error:', e.message);
+      return false;
+    }
+  },
+
   async setForcePasswordReset(userId, status = true) {
     try {
       await pool.query('UPDATE users SET force_password_reset = $1 WHERE id = $2', [Boolean(status), userId]);
@@ -891,6 +948,109 @@ const db = {
       console.error('setForcePasswordReset error:', e.message);
       return false;
     }
+  },
+
+  async setProfileUpdateRequired(userId, status = true, reason = 'Profile compliance update required') {
+    try {
+      await pool.query('UPDATE users SET require_profile_update = $1, profile_lock_reason = $2 WHERE id = $3', [Boolean(status), reason, userId]);
+      return true;
+    } catch (e) {
+      console.error('setProfileUpdateRequired error:', e.message);
+      return false;
+    }
+  },
+
+  async setAccountDisabledForReview(userId, status = true, reason = '10-Day Account Suspension (Pending Admin Review)') {
+    try {
+      await pool.query('UPDATE users SET is_disabled_for_review = $1, review_disable_reason = $2 WHERE id = $3', [Boolean(status), reason, userId]);
+      return true;
+    } catch (e) {
+      console.error('setAccountDisabledForReview error:', e.message);
+      return false;
+    }
+  },
+
+  async getAdminReviewHoldThreshold() {
+    try {
+      const res = await pool.query("SELECT value FROM site_settings WHERE key = 'admin_review_hold_threshold'");
+      if (res.rows && res.rows[0]) return res.rows[0].value;
+      return '10d';
+    } catch (e) {
+      return '10d';
+    }
+  },
+
+  async setAdminReviewHoldThreshold(threshold) {
+    try {
+      await pool.query(`
+        INSERT INTO site_settings (key, value, updated_at)
+        VALUES ('admin_review_hold_threshold', $1, CURRENT_TIMESTAMP)
+        ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = CURRENT_TIMESTAMP
+      `, [threshold]);
+      return true;
+    } catch (e) {
+      console.error('setAdminReviewHoldThreshold error:', e.message);
+      return false;
+    }
+  },
+
+  async getSetting(key) {
+    try {
+      const res = await pool.query('SELECT value FROM site_settings WHERE key = $1', [key]);
+      if (res.rows && res.rows[0]) return res.rows[0].value;
+      return null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  async setSetting(key, value) {
+    try {
+      await pool.query(`
+        INSERT INTO site_settings (key, value, updated_at)
+        VALUES ($1, $2, CURRENT_TIMESTAMP)
+        ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP
+      `, [key, String(value)]);
+      return true;
+    } catch (e) {
+      console.error('setSetting error:', e.message);
+      return false;
+    }
+  },
+
+  async isSignupsEnabled() {
+    try {
+      const val = await this.getSetting('signups_enabled');
+      if (val === null || val === undefined) return true;
+      return val === 'true' || val === '1';
+    } catch (e) {
+      return true;
+    }
+  },
+
+  async setSignupsEnabled(enabled) {
+    return await this.setSetting('signups_enabled', Boolean(enabled) ? 'true' : 'false');
+  },
+
+  async getFeatureSettings() {
+    try {
+      const signupsEnabled = await this.isSignupsEnabled();
+      return {
+        signups_enabled: signupsEnabled
+      };
+    } catch (e) {
+      return { signups_enabled: true };
+    }
+  },
+
+  async updateFeatureSetting(key, enabled) {
+    if (key === 'signups_enabled' || key === 'disable_signups' || key === 'signups') {
+      const isEnabled = key === 'disable_signups' ? !enabled : Boolean(enabled);
+      await this.setSignupsEnabled(isEnabled);
+      return { key: 'signups_enabled', enabled: isEnabled };
+    }
+    await this.setSetting(key, enabled ? 'true' : 'false');
+    return { key, enabled: Boolean(enabled) };
   },
 
   async deleteUser(userId) {
@@ -984,6 +1144,8 @@ const db = {
         sets.push(`password_hash = $${idx++}`);
         values.push(b64);
       }
+      sets.push(`require_profile_update = false`);
+      sets.push(`profile_lock_reason = ''`);
 
       if (sets.length === 0) return true;
 
@@ -1143,9 +1305,124 @@ const db = {
   async getFilterWords() {
     try {
       const res = await pool.query('SELECT * FROM filter_words ORDER BY id DESC');
-      return res.rows;
+      return (res.rows || []).map(r => ({
+        ...r,
+        word: (r.word || '').trim().toLowerCase(),
+        punishment: (r.punishment || 'censor').trim().toLowerCase(),
+        filter_type: (r.filter_type || 'both').trim().toLowerCase()
+      }));
     } catch (e) {
       return [];
+    }
+  },
+
+  async autoCategorizeFilterWordPunishments() {
+    try {
+      const res = await pool.query('SELECT * FROM filter_words');
+      if (!res.rows || res.rows.length === 0) return { updatedCount: 0 };
+
+      let updatedCount = 0;
+
+      // Groq AI API details
+      const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
+      const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
+      const GROQ_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
+
+      const batchSize = 35;
+      const allRows = res.rows;
+
+      for (let i = 0; i < allRows.length; i += batchSize) {
+        const chunk = allRows.slice(i, i + batchSize);
+        const wordList = chunk.map(r => r.word);
+
+        let groqSuccess = false;
+        try {
+          const response = await fetch(GROQ_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: GROQ_MODEL,
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are an expert Content Moderation AI classifier for a web gaming & study platform.
+Categorize EVERY word/phrase in the provided list into EXACTLY one of these 5 punishment tiers:
+- "perm_ban": Extreme hate speech, racial/homophobic slurs, pedophilia, bestiality/zoophilia, illegal content, self-harm/suicide promotion.
+- "ban_3d": Explicit pornography, severe NSFW/sexual terms (yiffy, worldsex, yellow showers, whore, cunt, porn, xxx, etc.), severe swear words.
+- "mute_5m": Insults, harassment, toxic gaming slang (stfu, dumbass, idiot, trash, loser, etc.).
+- "warn": Mild vulgarities, bypass slang, mild words (damn, hell, crap, wtf, etc.).
+- "censor": Standard filter words that should only be replaced with *** without extra penalty.
+
+OUTPUT REQUIREMENT:
+Respond ONLY with a raw JSON array of objects. Do NOT use markdown code blocks (\`\`\`json).
+JSON Format Example:
+[{"word": "word1", "punishment": "ban_3d"}]`
+                },
+                {
+                  role: 'user',
+                  content: JSON.stringify(wordList)
+                }
+              ],
+              temperature: 0.1
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const rawContent = data.choices?.[0]?.message?.content || '';
+            const cleanedJson = rawContent.replace(/```json/gi, '').replace(/```/g, '').trim();
+            const classified = JSON.parse(cleanedJson);
+
+            if (Array.isArray(classified)) {
+              groqSuccess = true;
+              for (const item of classified) {
+                if (!item.word || !item.punishment) continue;
+                const matchRow = chunk.find(r => r.word.toLowerCase().trim() === item.word.toLowerCase().trim());
+                if (matchRow) {
+                  const validPunishments = ['perm_ban', 'ban_3d', 'mute_5m', 'warn', 'censor'];
+                  const p = validPunishments.includes(item.punishment) ? item.punishment : 'censor';
+                  if (matchRow.punishment !== p) {
+                    await pool.query('UPDATE filter_words SET punishment = $1 WHERE id = $2', [p, matchRow.id]);
+                    updatedCount++;
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Groq AI filter categorization batch notice:', e.message);
+        }
+
+        // Local severity fallback if Groq API call fails
+        if (!groqSuccess) {
+          const permBanKeywords = ['nigger', 'nigga', 'faggot', 'kike', 'chink', 'spic', 'retard', 'kys', 'kill yourself', 'pedophile', 'zoophilia', 'bestiality', 'swastika', 'nazi', 'hitler', 'terrorist', 'rape', 'rapist'];
+          const ban3dKeywords = ['fuck', 'shit', 'bitch', 'whore', 'slut', 'cunt', 'dick', 'pussy', 'cock', 'asshole', 'motherfucker', 'hentai', 'yaoi', 'yiffy', 'porno', 'porn', 'xxx', 'xvideo', 'worldsex', 'yellow showers', 'wrinkled starfish', 'wrapping men', 'orgasm', 'ejaculat', 'masturbat', 'strip', 'boob', 'tits', 'penis', 'vagina', 'blowjob', 'handjob', 'cum', 'semen', 'erotic', 'nsfw', 'sex'];
+          const mute5mKeywords = ['stfu', 'fuk', 'idiot', 'dumbass', 'loser', 'trash', 'garbage', 'noob', 'shut up', 'hoe', 'skank', 'dipshit', 'jackass', 'bastard', 'douche', 'wanker'];
+          const warnKeywords = ['damn', 'hell', 'crap', 'ass', 'piss', 'wtf', 'lmao', 'omg', 'bs', 'suck', 'sucks', 'freaking', 'frick', 'biatch'];
+
+          for (const row of chunk) {
+            const w = (row.word || '').toLowerCase().trim();
+            if (!w) continue;
+            let newPunishment = 'censor';
+            if (permBanKeywords.some(k => w.includes(k) || k.includes(w))) newPunishment = 'perm_ban';
+            else if (ban3dKeywords.some(k => w.includes(k) || k.includes(w))) newPunishment = 'ban_3d';
+            else if (mute5mKeywords.some(k => w.includes(k) || k.includes(w))) newPunishment = 'mute_5m';
+            else if (warnKeywords.some(k => w.includes(k) || k.includes(w))) newPunishment = 'warn';
+
+            if (newPunishment !== row.punishment) {
+              await pool.query('UPDATE filter_words SET punishment = $1 WHERE id = $2', [newPunishment, row.id]);
+              updatedCount++;
+            }
+          }
+        }
+      }
+      return { updatedCount };
+    } catch (e) {
+      console.error('autoCategorizeFilterWordPunishments error:', e.message);
+      return { updatedCount: 0 };
     }
   },
 
@@ -1231,13 +1508,13 @@ const db = {
     }
   },
 
-  async createChatMessage(user_id, username, role, message, audio_url = '') {
+  async createChatMessage(user_id, username, role, message, audio_url = '', image_url = '') {
     try {
       const res = await pool.query(`
-        INSERT INTO chat_messages (user_id, username, role, message, audio_url)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO chat_messages (user_id, username, role, message, audio_url, image_url)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
-      `, [user_id, username, role, message, audio_url]);
+      `, [user_id, username, role, message, audio_url, image_url]);
       
       const fullMsg = await pool.query(`
         SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair
@@ -1248,7 +1525,7 @@ const db = {
 
       return fullMsg.rows[0] || res.rows[0];
     } catch (e) {
-      return { id: Date.now(), user_id, username, role, message, audio_url, created_at: new Date() };
+      return { id: Date.now(), user_id, username, role, message, audio_url, image_url, created_at: new Date() };
     }
   },
 
@@ -1347,6 +1624,24 @@ const db = {
         FROM user_game_stats ugs
         LEFT JOIN users u ON ugs.user_id = u.id
         ORDER BY ugs.games_played DESC
+        LIMIT 25
+      `);
+      return res.rows;
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async getTopChattersLeaderboard() {
+    try {
+      const res = await pool.query(`
+        SELECT count(cm.id) as message_count, u.id as user_id, u.username, u.display_name, u.role, u.avatar_url, u.pro_chat_glow,
+               COALESCE(ugs.total_time_seconds, 0) as total_time_seconds, COALESCE(ugs.games_played, 0) as games_played
+        FROM chat_messages cm
+        JOIN users u ON cm.user_id = u.id
+        LEFT JOIN user_game_stats ugs ON u.id = ugs.user_id
+        GROUP BY u.id, u.username, u.display_name, u.role, u.avatar_url, u.pro_chat_glow, ugs.total_time_seconds, ugs.games_played
+        ORDER BY message_count DESC
         LIMIT 25
       `);
       return res.rows;
@@ -2077,14 +2372,27 @@ const db = {
   async banUser(userId, reason = 'Account suspended', durationDays = 0) {
     try {
       let bannedUntil = null;
-      if (durationDays && Number(durationDays) > 0) {
-        bannedUntil = new Date(Date.now() + Number(durationDays) * 24 * 60 * 60 * 1000);
+      const days = Number(durationDays) || 0;
+      if (days > 0) {
+        bannedUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
       }
+
+      const threshold = await this.getAdminReviewHoldThreshold();
+      let isDisabledForReview = false;
+      if (threshold === 'all_bans' && (days > 0 || days === 0)) isDisabledForReview = true;
+      else if (threshold === '1d' && (days >= 1 || days === 0)) isDisabledForReview = true;
+      else if (threshold === '3d' && (days >= 3 || days === 0)) isDisabledForReview = true;
+      else if (threshold === '7d' && (days >= 7 || days === 0)) isDisabledForReview = true;
+      else if (threshold === '10d' && (days >= 10 || days === 0)) isDisabledForReview = true;
+      else if (threshold === 'disabled') isDisabledForReview = false;
+
+      const reviewReason = isDisabledForReview ? `${days > 0 ? days + '-Day' : 'Permanent'} Account Suspension (Pending Admin Review)` : '';
+
       await pool.query(
-        'UPDATE users SET is_banned = true, ban_reason = $1, banned_until = $2 WHERE id = $3',
-        [reason, bannedUntil, userId]
+        'UPDATE users SET is_banned = true, ban_reason = $1, banned_until = $2, is_disabled_for_review = $3, review_disable_reason = $4 WHERE id = $5',
+        [reason, bannedUntil, isDisabledForReview, reviewReason, userId]
       );
-      return { success: true, bannedUntil };
+      return { success: true, bannedUntil, isDisabledForReview };
     } catch (e) {
       console.error('banUser error:', e.message);
       return false;

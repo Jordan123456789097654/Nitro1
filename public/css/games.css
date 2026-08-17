@@ -55,7 +55,7 @@
 
 .search-input-box input:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: 0 0 0 3px var(--accent-glow);
   background: rgba(0, 0, 0, 0.65);
 }
 
@@ -75,7 +75,7 @@
   color: var(--text-muted);
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,7 +91,7 @@
 .view-btn.active {
   background: var(--accent-color);
   color: #fff;
-  box-shadow: 0 0 14px var(--accent-glow);
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 /* Secondary Filter Sub-Bar */
@@ -118,13 +118,11 @@
   background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
+  padding: 6px 12px;
   color: var(--text-main);
-  padding: 7px 14px;
   font-size: 0.85rem;
-  font-weight: 600;
   outline: none;
   cursor: pointer;
-  transition: border-color 0.2s ease;
 }
 
 .sort-select:focus {
@@ -162,21 +160,21 @@
   position: relative;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 18px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   user-select: none;
 }
 
 .game-card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-4px);
   border-color: var(--card-hover-border);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 24px var(--accent-glow);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
 }
 
 .game-thumb-wrap {

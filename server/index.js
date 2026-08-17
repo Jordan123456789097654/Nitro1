@@ -46,6 +46,7 @@ const io = new Server(server, {
   allowEIO3: true,
   pingTimeout: 60000,
   pingInterval: 25000,
+  maxHttpBufferSize: 1e8,
   cookie: false
 });
 app.set('io', io);
@@ -257,8 +258,12 @@ app.use('/api/polls', pollsRoutes);
 app.use('/api/voice', require('./routes/voice'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/music', require('./routes/music'));
 app.use('/api/soundboard', require('./routes/soundboard'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/appeals', require('./routes/appeals'));
+app.use('/api/suggestions', require('./routes/suggestions'));
+app.use('/api/bugs', require('./routes/suggestions'));
 
 // Static files (Frontend Client)
 app.use(express.static(path.join(__dirname, '../public')));

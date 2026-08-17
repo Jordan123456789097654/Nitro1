@@ -362,7 +362,12 @@ function appendMessage(sender, text, timestamp = getFormattedTime(), fileObj = n
     <div class="ai-bubble" style="border-radius: 14px; padding: 14px 18px; font-size: 0.92rem; line-height: 1.6;">
       ${fileAttachmentHtml}
       ${formatAiText(text)}
-      ${!isUser ? `<button class="copy-ai-ans-btn" style="margin-top: 10px; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">📋 Copy Answer</button>` : ''}
+      ${!isUser ? `
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button class="copy-ai-ans-btn" style="padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15);">📋 Copy Answer</button>
+          <button class="tts-ai-ans-btn" style="padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid #38bdf8;">🔊 Read Aloud</button>
+        </div>
+      ` : ''}
     </div>
   `;
 
@@ -373,6 +378,27 @@ function appendMessage(sender, text, timestamp = getFormattedTime(), fileObj = n
       navigator.clipboard.writeText(text);
       copyBtn.textContent = '✅ Copied!';
       setTimeout(() => { copyBtn.textContent = '📋 Copy Answer'; }, 2000);
+    });
+  }
+
+  // Attach Read Aloud Speech Synthesis
+  const ttsBtn = msgDiv.querySelector('.tts-ai-ans-btn');
+  if (ttsBtn) {
+    ttsBtn.addEventListener('click', () => {
+      if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          ttsBtn.textContent = '🔊 Read Aloud';
+          return;
+        }
+        const cleanSpeechText = text.replace(/[*_#`$]/g, '').replace(/https?:\/\/\S+/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanSpeechText.slice(0, 800));
+        utterance.rate = 1.05;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+        ttsBtn.textContent = '🔊 Speaking...';
+        utterance.onend = () => { ttsBtn.textContent = '🔊 Read Aloud'; };
+      }
     });
   }
 

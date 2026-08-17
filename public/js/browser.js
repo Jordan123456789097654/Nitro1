@@ -1,77 +1,113 @@
-// Multi-Tab Sandboxed In-App Browser & Speed Dial Engine
+// Nitro Shield Browser v3.0 - Sandboxed Multi-Tab Browser & Dual-Pane Split View Core
 import { getCurrentUser } from './auth.js';
 
 let tabs = [
   {
     id: 'tab-1',
     title: 'New Tab',
-    url: 'https://html.duckduckgo.com/html/?q=math+solver',
-    history: ['https://html.duckduckgo.com/html/?q=math+solver'],
-    historyIndex: 0
+    url: '',
+    history: [],
+    historyIndex: -1,
+    favicon: '🌐',
+    zoomLevel: 100
   }
 ];
-let activeTabId = 'tab-1';
 
-const SPEED_DIAL_ITEMS = [
-  { name: 'DuckDuckGo', url: 'https://html.duckduckgo.com/html/', icon: '🦆', desc: 'Private Search' },
-  { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Main_Page', icon: '🌐', desc: 'Encyclopedia' },
-  { name: 'Desmos Math', url: 'https://www.desmos.com/calculator', icon: '📐', desc: 'Graphing Tool' },
-  { name: 'Khan Academy', url: 'https://www.khanacademy.org', icon: '📚', desc: 'Study Lessons' },
-  { name: 'WolframAlpha', url: 'https://www.wolframalpha.com', icon: '🧮', desc: 'Computational Math' },
+let activeTabId = 'tab-1';
+let secondarySplitTabId = null;
+let isSplitViewActive = false;
+let bookmarks = [];
+
+const DEFAULT_SPEED_DIALS = [
+  { name: 'Google Search', url: 'https://www.google.com', icon: '🔍', desc: 'Web Search' },
+  { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Main_Page', icon: '🌐', desc: 'Free Encyclopedia' },
+  { name: 'Desmos Math', url: 'https://www.desmos.com/calculator', icon: '📐', desc: 'Graphing Calculator' },
+  { name: 'Khan Academy', url: 'https://www.khanacademy.org', icon: '📚', desc: 'Lessons & Exercises' },
+  { name: 'WolframAlpha', url: 'https://www.wolframalpha.com', icon: '🧮', desc: 'Computational Intelligence' },
   { name: 'Google Classroom', url: 'https://classroom.google.com', icon: '🎓', desc: 'Student Portal' },
   { name: 'GitHub', url: 'https://github.com', icon: '💻', desc: 'Code Repository' },
-  { name: 'Google Docs', url: 'https://docs.google.com', icon: '📝', desc: 'Document Editor' }
+  { name: 'Canva Studio', url: 'https://www.canva.com', icon: '🎨', desc: 'Design & Graphics' }
 ];
 
 export function initBrowser() {
+  loadSavedBookmarks();
   setupTabsUI();
-  setupBrowserControls();
-  renderSpeedDial();
+  setupToolbarControls();
+  setupSplitViewUI();
+  setupSpeedDialUI();
+  renderTabs();
   renderActiveTab();
+}
+
+function loadSavedBookmarks() {
+  try {
+    const saved = localStorage.getItem('nitro_browser_bookmarks');
+    if (saved) {
+      bookmarks = JSON.parse(saved);
+    } else {
+      bookmarks = [...DEFAULT_SPEED_DIALS];
+    }
+  } catch (e) {
+    bookmarks = [...DEFAULT_SPEED_DIALS];
+  }
+}
+
+function saveBookmarks() {
+  try {
+    localStorage.setItem('nitro_browser_bookmarks', JSON.stringify(bookmarks));
+  } catch (e) {}
 }
 
 function setupTabsUI() {
   const newTabBtn = document.getElementById('browser-new-tab-btn');
   if (newTabBtn) {
-    newTabBtn.addEventListener('click', () => {
-      const newId = 'tab-' + Date.now();
-      tabs.push({
-        id: newId,
-        title: 'New Tab',
-        url: '',
-        history: [],
-        historyIndex: -1
-      });
-      activeTabId = newId;
-      renderTabs();
-      renderActiveTab();
-    });
+    newTabBtn.addEventListener('click', () => createNewTab());
   }
+}
+
+function createNewTab(targetUrl = '') {
+  const newId = 'tab-' + Date.now();
+  tabs.push({
+    id: newId,
+    title: 'New Tab',
+    url: targetUrl,
+    history: targetUrl ? [targetUrl] : [],
+    historyIndex: targetUrl ? 0 : -1,
+    favicon: '🌐',
+    zoomLevel: 100
+  });
+  activeTabId = newId;
   renderTabs();
+  renderActiveTab();
 }
 
 function renderTabs() {
-  const tabsContainer = document.getElementById('browser-tabs-strip');
-  if (!tabsContainer) return;
+  const container = document.getElementById('browser-tabs-strip');
+  if (!container) return;
 
-  tabsContainer.innerHTML = tabs.map((t, idx) => `
-    <div class="browser-tab ${t.id === activeTabId ? 'active' : ''}" data-tab-id="${t.id}">
-      <span class="browser-tab-icon">🌐</span>
-      <span class="browser-tab-title">${t.title || 'New Tab'}</span>
-      ${tabs.length > 1 ? `<button class="browser-tab-close" data-close-id="${t.id}">✕</button>` : ''}
-    </div>
-  `).join('');
+  container.innerHTML = tabs.map(t => {
+    const isActive = t.id === activeTabId;
+    const isSecondary = t.id === secondarySplitTabId && isSplitViewActive;
 
-  tabsContainer.querySelectorAll('.browser-tab').forEach(tabEl => {
+    return `
+      <div class="browser-tab ${isActive ? 'active' : ''} ${isSecondary ? 'split-secondary' : ''}" data-tab-id="${t.id}">
+        <span class="browser-tab-favicon">${t.favicon || '🌐'}</span>
+        <span class="browser-tab-title" title="${escapeHtml(t.url || 'New Tab')}">${escapeHtml(t.title || 'New Tab')}</span>
+        ${tabs.length > 1 ? `<button class="browser-tab-close-btn" data-close-id="${t.id}" title="Close Tab">✕</button>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.browser-tab').forEach(tabEl => {
     tabEl.addEventListener('click', (e) => {
-      if (e.target.classList.contains('browser-tab-close')) return;
+      if (e.target.classList.contains('browser-tab-close-btn')) return;
       activeTabId = tabEl.dataset.tabId;
       renderTabs();
       renderActiveTab();
     });
   });
 
-  tabsContainer.querySelectorAll('.browser-tab-close').forEach(btn => {
+  container.querySelectorAll('.browser-tab-close-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const closeId = btn.dataset.closeId;
@@ -79,6 +115,10 @@ function renderTabs() {
       tabs = tabs.filter(t => t.id !== closeId);
       if (activeTabId === closeId) {
         activeTabId = tabs[tabs.length - 1].id;
+      }
+      if (secondarySplitTabId === closeId) {
+        secondarySplitTabId = null;
+        isSplitViewActive = false;
       }
       renderTabs();
       renderActiveTab();
@@ -89,39 +129,65 @@ function renderTabs() {
 function renderActiveTab() {
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
   const urlInput = document.getElementById('browser-url-input');
-  const iframe = document.getElementById('browser-iframe');
+  const primaryIframe = document.getElementById('browser-iframe');
   const speedDial = document.getElementById('browser-speed-dial');
+  const splitWrapper = document.getElementById('browser-viewport-split-wrapper');
+  const secondaryIframe = document.getElementById('browser-iframe-secondary');
 
   if (!activeTab) return;
 
   if (urlInput) urlInput.value = activeTab.url || '';
 
+  // Update Bookmark Star Pill
+  updateBookmarkStarUI(activeTab.url);
+
+  const singleViewport = document.getElementById('browser-viewport-single');
+
   if (!activeTab.url || activeTab.url.trim() === '') {
-    if (speedDial) speedDial.style.display = 'grid';
-    if (iframe) iframe.style.display = 'none';
+    if (speedDial) speedDial.style.display = 'block';
+    if (singleViewport) singleViewport.style.display = 'none';
+    if (primaryIframe) primaryIframe.style.display = 'none';
+    if (splitWrapper) splitWrapper.style.display = 'none';
   } else {
     if (speedDial) speedDial.style.display = 'none';
-    if (iframe) {
-      iframe.style.display = 'block';
-      const token = localStorage.getItem('nitro_jwt_token');
-      const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-      const engineSelect = document.getElementById('browser-gateway-engine-select');
-      const engine = engineSelect ? engineSelect.value : (localStorage.getItem('nitro_gateway_engine') || 'chrome');
-      const engineParam = `&engine=${encodeURIComponent(engine)}`;
 
-      const targetSrc = `/api/gateway?url=${encodeURIComponent(activeTab.url)}${tokenParam}${engineParam}`;
-      if (iframe.src !== `${window.location.origin}${targetSrc}`) {
-        iframe.src = targetSrc;
+    if (isSplitViewActive && secondarySplitTabId) {
+      if (singleViewport) singleViewport.style.display = 'none';
+      if (splitWrapper) splitWrapper.style.display = 'flex';
+      if (primaryIframe) primaryIframe.style.display = 'none';
+
+      const secTab = tabs.find(t => t.id === secondarySplitTabId);
+      if (primaryIframe) updateIframeSrc(primaryIframe, activeTab.url);
+      if (secondaryIframe && secTab) updateIframeSrc(secondaryIframe, secTab.url);
+    } else {
+      if (splitWrapper) splitWrapper.style.display = 'none';
+      if (singleViewport) singleViewport.style.display = 'flex';
+      if (primaryIframe) {
+        primaryIframe.style.display = 'block';
+        updateIframeSrc(primaryIframe, activeTab.url);
       }
     }
   }
 }
 
-function navigateActiveTab(rawUrl) {
+function updateIframeSrc(iframeEl, targetUrl) {
+  if (!iframeEl || !targetUrl) return;
+  const token = localStorage.getItem('nitro_jwt_token');
+  const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
+  const engineSelect = document.getElementById('browser-gateway-engine-select');
+  const engine = engineSelect ? engineSelect.value : (localStorage.getItem('nitro_shield_engine') || 'turbo');
+
+  const proxiedUrl = `/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
+  if (iframeEl.src !== `${window.location.origin}${proxiedUrl}`) {
+    iframeEl.src = proxiedUrl;
+  }
+}
+
+function navigateTab(rawUrl) {
   if (!rawUrl || rawUrl.trim() === '') return;
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
-  const engineSelect = document.getElementById('browser-search-engine-select');
-  const engine = engineSelect ? engineSelect.value : 'duckduckgo';
+  const searchEngineSelect = document.getElementById('browser-search-engine-select');
+  const engine = searchEngineSelect ? searchEngineSelect.value : 'duckduckgo';
 
   let target = rawUrl.trim();
 
@@ -129,15 +195,12 @@ function navigateActiveTab(rawUrl) {
     if (target.includes('.') && !target.includes(' ')) {
       target = 'https://' + target;
     } else {
-      if (engine === 'brave') {
-        target = `https://search.brave.com/search?q=${encodeURIComponent(target)}`;
-      } else if (engine === 'bing') {
-        target = `https://www.bing.com/search?q=${encodeURIComponent(target)}`;
-      } else if (engine === 'google') {
-        target = `https://www.google.com/search?q=${encodeURIComponent(target)}`;
-      } else {
-        target = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(target)}`;
-      }
+      if (engine === 'brave') target = `https://search.brave.com/search?q=${encodeURIComponent(target)}`;
+      else if (engine === 'bing') target = `https://www.bing.com/search?q=${encodeURIComponent(target)}`;
+      else if (engine === 'google') target = `https://www.google.com/search?q=${encodeURIComponent(target)}`;
+      else if (engine === 'wikipedia') target = `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(target)}`;
+      else if (engine === 'wolfram') target = `https://www.wolframalpha.com/input?i=${encodeURIComponent(target)}`;
+      else target = `https://www.google.com/search?q=${encodeURIComponent(target)}`;
     }
   }
 
@@ -145,8 +208,9 @@ function navigateActiveTab(rawUrl) {
   try {
     const host = new URL(target).hostname;
     activeTab.title = host.replace('www.', '');
+    activeTab.favicon = getFaviconEmojiForUrl(target);
   } catch (e) {
-    activeTab.title = target.slice(0, 15);
+    activeTab.title = target.slice(0, 18);
   }
 
   activeTab.history.push(target);
@@ -156,80 +220,44 @@ function navigateActiveTab(rawUrl) {
   renderActiveTab();
 }
 
-function renderSpeedDial() {
-  const container = document.getElementById('browser-speed-dial-grid');
-  if (!container) return;
-
-  container.innerHTML = SPEED_DIAL_ITEMS.map(item => `
-    <div class="speed-dial-card" data-url="${item.url}">
-      <div class="speed-dial-icon">${item.icon}</div>
-      <strong class="speed-dial-name">${item.name}</strong>
-      <span class="speed-dial-desc">${item.desc}</span>
-    </div>
-  `).join('');
-
-  container.querySelectorAll('.speed-dial-card').forEach(card => {
-    card.addEventListener('click', () => {
-      navigateActiveTab(card.dataset.url);
-    });
-  });
+function getFaviconEmojiForUrl(urlStr) {
+  const u = urlStr.toLowerCase();
+  if (u.includes('duckduckgo')) return '🦆';
+  if (u.includes('wikipedia')) return '🌐';
+  if (u.includes('desmos')) return '📐';
+  if (u.includes('khanacademy')) return '📚';
+  if (u.includes('wolfram')) return '🧮';
+  if (u.includes('classroom')) return '🎓';
+  if (u.includes('github')) return '💻';
+  if (u.includes('canva')) return '🎨';
+  if (u.includes('youtube')) return '🔴';
+  return '🌐';
 }
 
-function setupBrowserControls() {
+function setupToolbarControls() {
   const urlInput = document.getElementById('browser-url-input');
   const goBtn = document.getElementById('browser-go-btn');
-  const iframe = document.getElementById('browser-iframe');
   const backBtn = document.getElementById('browser-back');
   const forwardBtn = document.getElementById('browser-forward');
   const refreshBtn = document.getElementById('browser-refresh');
   const homeBtn = document.getElementById('browser-home');
+  const bookmarkStarBtn = document.getElementById('browser-bookmark-star-btn');
+  const engineSelect = document.getElementById('browser-gateway-engine-select');
   const openBlankBtn = document.getElementById('browser-open-blank-btn');
-  const gatewayEngineSelect = document.getElementById('browser-gateway-engine-select');
 
-  if (gatewayEngineSelect) {
-    const savedEngine = localStorage.getItem('nitro_gateway_engine');
-    if (savedEngine) gatewayEngineSelect.value = savedEngine;
-
-    gatewayEngineSelect.addEventListener('change', (e) => {
-      const selected = e.target.value;
-      localStorage.setItem('nitro_gateway_engine', selected);
-      const activeTab = tabs.find(t => t.id === activeTabId);
-      if (activeTab && activeTab.url) {
-        const token = localStorage.getItem('nitro_jwt_token');
-        const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-        iframe.src = `/api/gateway?url=${encodeURIComponent(activeTab.url)}${tokenParam}&engine=${encodeURIComponent(selected)}`;
-      }
+  if (engineSelect) {
+    const saved = localStorage.getItem('nitro_shield_engine');
+    if (saved) engineSelect.value = saved;
+    engineSelect.addEventListener('change', (e) => {
+      localStorage.setItem('nitro_shield_engine', e.target.value);
+      renderActiveTab();
     });
   }
 
   if (goBtn && urlInput) {
-    goBtn.addEventListener('click', () => navigateActiveTab(urlInput.value));
+    goBtn.addEventListener('click', () => navigateTab(urlInput.value));
     urlInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') navigateActiveTab(urlInput.value);
-    });
-  }
-
-  if (refreshBtn && iframe) {
-    refreshBtn.addEventListener('click', () => {
-      const activeTab = tabs.find(t => t.id === activeTabId);
-      if (activeTab && activeTab.url) {
-        const token = localStorage.getItem('nitro_jwt_token');
-        const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-        const engine = gatewayEngineSelect ? gatewayEngineSelect.value : (localStorage.getItem('nitro_gateway_engine') || 'chrome');
-        iframe.src = `/api/gateway?url=${encodeURIComponent(activeTab.url)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
-      }
-    });
-  }
-
-  if (homeBtn) {
-    homeBtn.addEventListener('click', () => {
-      const activeTab = tabs.find(t => t.id === activeTabId);
-      if (activeTab) {
-        activeTab.url = '';
-        activeTab.title = 'New Tab';
-        renderTabs();
-        renderActiveTab();
-      }
+      if (e.key === 'Enter') navigateTab(urlInput.value);
     });
   }
 
@@ -257,41 +285,157 @@ function setupBrowserControls() {
     });
   }
 
-  if (openBlankBtn) {
-    openBlankBtn.addEventListener('click', () => {
-      const activeTab = tabs.find(t => t.id === activeTabId);
-      let targetUrl = activeTab && activeTab.url ? activeTab.url : 'https://html.duckduckgo.com/html/?q=math+solver';
-
-      const token = localStorage.getItem('nitro_jwt_token');
-      const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-      const fullUrl = `${window.location.origin}/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}`;
-
-      const win = window.open('about:blank', '_blank');
-      if (!win) {
-        alert('Pop-up blocked! Please allow pop-ups for about:blank cloak.');
-        return;
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      const primaryIframe = document.getElementById('browser-iframe');
+      if (primaryIframe && primaryIframe.src) {
+        primaryIframe.src = primaryIframe.src;
       }
-
-      const doc = win.document;
-      doc.open();
-      doc.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Google Docs - Workspace</title>
-          <link rel="icon" type="image/x-icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">
-          <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            html, body { width: 100vw; height: 100vh; overflow: hidden; background: #0b0c10; }
-            iframe { width: 100%; height: 100%; border: none; }
-          </style>
-        </head>
-        <body>
-          <iframe src="${fullUrl}" allow="autoplay; fullscreen; clipboard-write; encrypted-media"></iframe>
-        </body>
-        </html>
-      `);
-      doc.close();
     });
   }
+
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab) {
+        activeTab.url = '';
+        activeTab.title = 'New Tab';
+        renderTabs();
+        renderActiveTab();
+      }
+    });
+  }
+
+  if (bookmarkStarBtn) {
+    bookmarkStarBtn.addEventListener('click', () => {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (!activeTab || !activeTab.url) return;
+
+      const idx = bookmarks.findIndex(b => b.url === activeTab.url);
+      if (idx !== -1) {
+        bookmarks.splice(idx, 1);
+      } else {
+        bookmarks.push({
+          name: activeTab.title || 'Bookmark',
+          url: activeTab.url,
+          icon: activeTab.favicon || '⭐',
+          desc: 'Saved Bookmark'
+        });
+      }
+      saveBookmarks();
+      updateBookmarkStarUI(activeTab.url);
+      renderSpeedDial();
+    });
+  }
+
+  if (openBlankBtn) {
+    openBlankBtn.addEventListener('click', launchAboutBlankCloak);
+  }
+}
+
+function updateBookmarkStarUI(currentUrl) {
+  const starBtn = document.getElementById('browser-bookmark-star-btn');
+  if (!starBtn) return;
+  const isBookmarked = bookmarks.some(b => b.url === currentUrl);
+  starBtn.textContent = isBookmarked ? '⭐' : '☆';
+  starBtn.style.color = isBookmarked ? '#fbbf24' : '#94a3b8';
+}
+
+function setupSplitViewUI() {
+  const splitBtn = document.getElementById('browser-split-view-btn');
+  if (splitBtn) {
+    splitBtn.addEventListener('click', () => {
+      if (tabs.length < 2) {
+        createNewTab('https://www.desmos.com/calculator');
+      }
+
+      isSplitViewActive = !isSplitViewActive;
+      if (isSplitViewActive) {
+        const remaining = tabs.filter(t => t.id !== activeTabId);
+        secondarySplitTabId = remaining.length > 0 ? remaining[0].id : null;
+        splitBtn.style.background = '#10b981';
+        splitBtn.style.color = '#000';
+      } else {
+        secondarySplitTabId = null;
+        splitBtn.style.background = 'rgba(255,255,255,0.08)';
+        splitBtn.style.color = '#fff';
+      }
+      renderTabs();
+      renderActiveTab();
+    });
+  }
+}
+
+function setupSpeedDialUI() {
+  renderSpeedDial();
+  const addBtn = document.getElementById('speed-dial-add-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const name = prompt('Enter Bookmark Name:');
+      const url = prompt('Enter Bookmark Web Address (URL):');
+      if (name && url) {
+        bookmarks.push({ name, url, icon: '⭐', desc: 'Custom Tile' });
+        saveBookmarks();
+        renderSpeedDial();
+      }
+    });
+  }
+}
+
+function renderSpeedDial() {
+  const container = document.getElementById('browser-speed-dial-grid');
+  if (!container) return;
+
+  container.innerHTML = bookmarks.map(item => `
+    <div class="speed-dial-card" data-url="${escapeHtml(item.url)}">
+      <div class="speed-dial-icon">${item.icon || '🌐'}</div>
+      <strong class="speed-dial-name">${escapeHtml(item.name)}</strong>
+      <span class="speed-dial-desc">${escapeHtml(item.desc || '')}</span>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.speed-dial-card').forEach(card => {
+    card.addEventListener('click', () => {
+      navigateTab(card.dataset.url);
+    });
+  });
+}
+
+function launchAboutBlankCloak() {
+  const activeTab = tabs.find(t => t.id === activeTabId);
+  let targetUrl = activeTab && activeTab.url ? activeTab.url : 'https://html.duckduckgo.com/html/?q=math+solver';
+
+  const token = localStorage.getItem('nitro_jwt_token');
+  const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
+  const engine = localStorage.getItem('nitro_shield_engine') || 'turbo';
+  const fullUrl = `${window.location.origin}/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
+
+  const win = window.open('about:blank', '_blank');
+  if (!win) return alert('Pop-up blocked! Please allow pop-ups for about:blank cloak.');
+
+  const doc = win.document;
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Google Classroom</title>
+      <link rel="icon" type="image/x-icon" href="https://ssl.gstatic.com/classroom/favicon.png">
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100vw; height: 100vh; overflow: hidden; background: #07090e; }
+        iframe { width: 100%; height: 100%; border: none; }
+      </style>
+    </head>
+    <body>
+      <iframe src="${fullUrl}" allow="autoplay; fullscreen; clipboard-write; encrypted-media"></iframe>
+    </body>
+    </html>
+  `);
+  doc.close();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

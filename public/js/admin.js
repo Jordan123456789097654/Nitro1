@@ -1,5 +1,5 @@
 // Admin Dashboard, Live Connections Monitor, Slowmode & Moderation
-import { getCurrentUser } from './auth.js';
+import { getCurrentUser, applySignupsGateUI } from './auth.js';
 import { loadGames } from './games.js';
 import { checkStatusAndAnnouncements, checkUpdateLogs } from './app.js';
 import { loadPolls } from './polls.js';
@@ -42,6 +42,7 @@ export function initAdmin() {
   setupAdminActions();
   setupMaintenanceToggle();
   setupAiMaintenanceToggle();
+  setupSignupsToggle();
   setupAnnouncementForm();
   setupDomainBlockForm();
   setupUpdateLogForm();
@@ -230,6 +231,7 @@ export async function loadAdminData() {
 
   await Promise.allSettled([
     fetchMaintenance(),
+    fetchSignupsStatus(),
     fetchStats(),
     fetchUsers(),
     fetchLiveConnections(),
@@ -240,6 +242,69 @@ export async function loadAdminData() {
     fetchAdminWebhooks(),
     fetchActivityRadar()
   ]);
+}
+
+async function fetchSignupsStatus() {
+  try {
+    const res = await authFetch('/api/admin/signups-status');
+    if (!res.ok) return;
+    const data = await res.json();
+    updateSignupsUI(data.signups_enabled);
+  } catch (e) {}
+}
+
+function updateSignupsUI(enabled) {
+  const badge = document.getElementById('admin-signups-status-badge');
+  const btn = document.getElementById('admin-toggle-signups-btn');
+  if (badge) {
+    badge.textContent = enabled ? 'Signups ENABLED' : 'Signups DISABLED';
+    badge.style.background = enabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+    badge.style.borderColor = enabled ? '#10b981' : '#ef4444';
+    badge.style.color = enabled ? '#10b981' : '#ef4444';
+  }
+  if (btn) {
+    btn.textContent = enabled ? 'Disable Signups' : 'Enable Signups';
+    btn.style.background = enabled ? '#e11d48' : '#10b981';
+  }
+}
+
+function setupSignupsToggle() {
+  const btn = document.getElementById('admin-toggle-signups-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    const user = getCurrentUser();
+    if (!user || (user.role !== 'owner' && user.username?.toLowerCase() !== 'jordandaniels')) {
+      alert('Toggling account registration is restricted to Supreme Owner rank (OWNER ONLY).');
+      return;
+    }
+
+    try {
+      const currentBadge = document.getElementById('admin-signups-status-badge');
+      const isCurrentlyEnabled = currentBadge ? currentBadge.textContent.includes('ENABLED') : true;
+      const targetState = !isCurrentlyEnabled;
+
+      if (!confirm(`Are you sure you want to ${targetState ? 'ENABLE' : 'DISABLE'} new user signups?`)) return;
+
+      const res = await authFetch('/api/admin/toggle-signups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: targetState })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Signups are now ${targetState ? 'ENABLED' : 'DISABLED'}`);
+        updateSignupsUI(data.signups_enabled);
+        // Also update the login gate UI in real-time
+        applySignupsGateUI(data.signups_enabled);
+      } else {
+        alert(data.error || 'Failed to update registration status. Owner privileges required.');
+      }
+    } catch (e) {
+      alert('Error updating signup status.');
+    }
+  });
 }
 
 function renderLiveConnections(count, connections) {
@@ -736,7 +801,9 @@ export function renderAdminUsersList() {
 
   tbody.innerHTML = users.map(u => {
     let statusHtml = '<span style="color:#10b981; font-weight:800; background:rgba(16,185,129,0.15); border:1px solid #10b981; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🟢 ACTIVE</span>';
-    if (u.is_banned) {
+    if (u.is_disabled_for_review) {
+      statusHtml = '<span style="color:#ef4444; font-weight:900; background:rgba(239,68,68,0.25); border:1px solid #ef4444; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🛑 DISABLED (10D REVIEW)</span>';
+    } else if (u.is_banned) {
       statusHtml = '<span style="color:#ef4444; font-weight:800; background:rgba(239,68,68,0.15); border:1px solid #ef4444; padding:3px 10px; border-radius:99px; font-size:0.78rem;">⛔ BANNED</span>';
     } else if (u.is_gateway_banned) {
       statusHtml = '<span style="color:#f59e0b; font-weight:800; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; padding:3px 10px; border-radius:99px; font-size:0.78rem;">🌐 RESTRICTED</span>';
@@ -747,10 +814,11 @@ export function renderAdminUsersList() {
     if (u.force_password_reset) {
       statusHtml += '<span style="color:#38bdf8; font-size:0.72rem; display:block; margin-top:4px; font-weight:700;">🔄 Reset Pending</span>';
     }
+    if (u.require_profile_update) {
+      statusHtml += '<span style="color:#ef4444; font-size:0.72rem; display:block; margin-top:4px; font-weight:800;">🔒 Profile Fix Required</span>';
+    }
 
     const displayName = u.display_name && u.display_name !== u.username ? `<span style="color:#38bdf8; font-size:0.82rem; display:block;">(${u.display_name})</span>` : '';
-    const coins = u.coins !== undefined ? u.coins : 0;
-    const xp = u.xp !== undefined ? u.xp : 0;
 
     return `
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s ease;">
@@ -779,18 +847,22 @@ export function renderAdminUsersList() {
         </td>
         <td style="padding: 12px 14px;">${statusHtml}</td>
         <td style="padding: 12px 14px;">
-          <div style="font-size:0.85rem; font-weight:800; color:#fbbf24;">🪙 ${coins} Coins</div>
-          <div style="font-size:0.78rem; color:#a855f7; font-weight:700;">✨ ${xp} XP</div>
-        </td>
-        <td style="padding: 12px 14px;">
           <div class="action-btn-group" style="display: flex; flex-wrap: wrap; gap: 6px;">
             <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; border-radius:6px; font-weight:700;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
             <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
+            ${u.require_profile_update ?
+              `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.clearProfileFix(${u.id}, '${u.username}')" title="Clear profile compliance lock">🔓 Unlock Profile</button>` :
+              `<button class="btn-small" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.requireProfileFix(${u.id}, '${u.username}')" title="Lock user account until profile is updated">⚠️ Lock Profile</button>`
+            }
             ${u.muted_until && new Date(u.muted_until) > new Date() ?
               `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnmuteUser(${u.id}, '${u.username}')" title="Lift chat mute immediately">🔊 Unmute</button>` :
               `<button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')" title="Mute user from sending chat messages">🔇 Mute</button>`
             }
             <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
+            ${u.is_gateway_banned ? 
+              `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnproxyBan(${u.id}, '${u.username}')" title="Un-proxy ban user">🌐 Un-Proxy Ban</button>` :
+              `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; border-radius:6px; font-weight:700;" onclick="window.adminProxyBan(${u.id}, '${u.username}')" title="Ban user from gateway proxy">🌐 Proxy Ban</button>`
+            }
             ${u.is_banned ? 
               `<button class="btn-small unban" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
               `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
@@ -1340,6 +1412,63 @@ function setupAdminActions() {
     }
   };
 
+  window.adminProxyBan = async (id, username) => {
+    if (!confirm(`Are you sure you want to ban @${username} from accessing the Proxy Gateway?`)) return;
+    try {
+      const res = await authFetch(`/api/admin/users/${id}/gateway-ban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Proxy Banned by Administrator' })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(`🌐 @${username} has been proxy banned!`);
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to proxy ban user.');
+      }
+    } catch (err) {
+      alert('Error banning user from gateway.');
+    }
+  };
+
+  window.adminUnproxyBan = async (id, username) => {
+    try {
+      const res = await authFetch(`/api/admin/users/${id}/ungateway-ban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(`✅ Proxy ban lifted for @${username}!`);
+        fetchUsers();
+      } else {
+        alert(data.error || 'Failed to lift proxy ban.');
+      }
+    } catch (err) {
+      alert('Error lifting proxy ban.');
+    }
+  };
+
+  window.adminAutoCategorizeFilterWords = async () => {
+    if (!confirm('Auto-categorize and assign proportional punishments (Perm Ban, 3-Day Ban, 5m Mute, Warning) to all filter words in your database?')) return;
+    try {
+      const res = await authFetch('/api/admin/auto-categorize-filters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(`⚡ ${data.message}`);
+        if (window.fetchFilters) window.fetchFilters();
+      } else {
+        alert(data.error || 'Failed to auto-categorize filter words.');
+      }
+    } catch (err) {
+      alert('Error running auto-categorizer.');
+    }
+  };
+
   window.resetUserPassword = async (userId, username) => {
     const newPass = prompt(`Enter new password for ${username}:`);
     if (!newPass) return;
@@ -1376,6 +1505,53 @@ function setupAdminActions() {
       }
     } catch (e) {
       alert('Error setting force password reset.');
+    }
+  };
+
+  window.requireProfileFix = async (userId, username) => {
+    const reason = prompt(
+      `Specify reason for locking @${username}'s account for profile compliance:\n\n` +
+      `1: Inappropriate or offensive Bio\n` +
+      `2: Inappropriate Avatar image\n` +
+      `3: Inappropriate Display Nickname\n` +
+      `Or type a custom reason below:`,
+      'Inappropriate content on profile. Please update your bio/avatar to comply with Community Guidelines.'
+    );
+    if (!reason || !reason.trim()) return;
+
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/require-profile-fix`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason.trim() })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Profile compliance lock applied to @${username}.`);
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to apply profile compliance lock.');
+      }
+    } catch (e) {
+      alert('Error applying profile compliance lock.');
+    }
+  };
+
+  window.clearProfileFix = async (userId, username) => {
+    if (!confirm(`Unlock account and clear profile compliance lock for @${username}?`)) return;
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/clear-profile-fix`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || `Profile lock cleared for @${username}.`);
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to clear profile lock.');
+      }
+    } catch (e) {
+      alert('Error clearing profile lock.');
     }
   };
 
@@ -1423,15 +1599,14 @@ function setupAdminActions() {
 
       const durChoice = prompt(
         'Select Ban Duration (enter hours):\n\n' +
-        '• 1 = 1 Hour\n' +
-        '• 12 = 12 Hours\n' +
         '• 24 = 24 Hours (1 Day)\n' +
         '• 72 = 3 Days\n' +
         '• 168 = 7 Days (1 Week)\n' +
+        '• 240 = 10 Days (Account Review & Disable)\n' +
         '• 720 = 30 Days (1 Month)\n' +
         '• 0 = Permanent Ban\n\n' +
-        'Enter hours (or 0 for Permanent):',
-        '24'
+        'Enter hours (e.g. 240 for 10-Day Account Review):',
+        '240'
       );
       if (durChoice === null) return;
       durationHours = parseInt(durChoice, 10) || 0;
@@ -1890,10 +2065,19 @@ function setupAiModerationStudio() {
         const modStrictness = document.getElementById('simple-mod-strictness');
         const modPolicy = document.getElementById('simple-mod-policy');
         const modModel = document.getElementById('simple-mod-model');
+        const modReviewThreshold = document.getElementById('simple-mod-review-threshold');
 
         if (modStrictness && cfg.strictness) modStrictness.value = cfg.strictness;
         if (modPolicy && cfg.actionPolicy) modPolicy.value = cfg.actionPolicy;
         if (modModel && cfg.model) modModel.value = cfg.model;
+
+        try {
+          const tRes = await authFetch('/api/admin/review-threshold');
+          const tData = await tRes.json();
+          if (tData.threshold && modReviewThreshold) {
+            modReviewThreshold.value = tData.threshold;
+          }
+        } catch(e) {}
 
         updateStatusUi(cfg.enabled && cfg.chatEnabled !== false);
       }
@@ -1940,6 +2124,7 @@ function setupAiModerationStudio() {
       const strictness = document.getElementById('simple-mod-strictness')?.value || 'strict';
       const actionPolicy = document.getElementById('simple-mod-policy')?.value || 'auto_punish';
       const model = document.getElementById('simple-mod-model')?.value || 'llama-3.3-70b-versatile';
+      const threshold = document.getElementById('simple-mod-review-threshold')?.value || '10d';
 
       try {
         const res = await authFetch('/api/admin/ai-config', {
@@ -1947,10 +2132,14 @@ function setupAiModerationStudio() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ strictness, actionPolicy, model })
         });
+        await authFetch('/api/admin/review-threshold', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ threshold })
+        });
         const data = await res.json();
         if (res.ok) {
-          alert('✅ AI Moderation & Safety policy saved successfully!');
-          updateStatusUi(data.config?.enabled);
+          alert('✅ Chat Safety Policy & Admin Review Threshold saved successfully!');
         } else {
           alert(data.error || 'Failed to update Safety policy.');
         }

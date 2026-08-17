@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pdfParse = require('pdf-parse');
 const systemState = require('../systemState');
+const { sendDiscordLog } = require('../discordLogger');
 
 // GET /api/ai/status (Public AI Status Check)
 router.get('/status', (req, res) => {
@@ -22,7 +23,7 @@ const GEMINI_FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.1-f
 const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
 const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
-const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'llama-3.2-11b-vision-preview';
 
 const BASE_SYSTEM_PROMPT = `You are Nitro AI — a high-IQ, quick-witted study co-pilot and conversational assistant. You combine the relaxed, chill personality of a clever friend with the pedagogical precision of an elite tutor.
 
@@ -394,6 +395,17 @@ router.post('/ask', async (req, res) => {
 
   // 9. If answer received from either service
   if (answer) {
+    try {
+      const username = (req.session && req.session.user && req.session.user.username) || req.body.username || 'Guest';
+      sendDiscordLog({
+        category: 'ai_chat',
+        action: 'AI_CHAT_CONVERSATION',
+        admin: username,
+        target: `Mode: ${(activeModeKey || 'general').toUpperCase()}`,
+        details: `**User Question:** ${textQuery || '(Document/Image Attachment)'}\n\n**Nitro AI Response:**\n${answer.length > 1400 ? answer.slice(0, 1400) + '...' : answer}`
+      });
+    } catch (e) {}
+
     return res.json({ answer, success: true });
   }
 

@@ -74,6 +74,15 @@ router.get('/leaderboards/games', async (req, res) => {
   }
 });
 
+router.get('/leaderboards/chatters', async (req, res) => {
+  try {
+    const leaderboard = await db.getTopChattersLeaderboard();
+    res.json({ leaderboard });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch top chatters leaderboard.' });
+  }
+});
+
 // Record Playtime Tick (every 60s while playing)
 router.post('/playtime', async (req, res) => {
   const user = await getAuthUser(req);

@@ -211,6 +211,13 @@ router.post('/profile', async (req, res) => {
 
 // Register new user
 router.post('/register', async (req, res) => {
+  try {
+    const signupsEnabled = await db.isSignupsEnabled();
+    if (!signupsEnabled) {
+      return res.status(403).json({ error: 'Account registration is currently disabled by the platform owner.' });
+    }
+  } catch (e) {}
+
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -359,6 +366,12 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error during login.' });
   }
+});
+
+// Submit Appeal via Auth route alias
+router.post('/submit-appeal', async (req, res) => {
+  const { handleAppealSubmission } = require('./appeals');
+  await handleAppealSubmission(req, res);
 });
 
 // Submit a punishment appeal (for muted or suspended users)

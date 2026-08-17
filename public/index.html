@@ -27,96 +27,92 @@
 </head>
 <body>
   <!-- UN-BYPASSABLE ACCOUNT BANNED OVERLAY -->
-  <div id="account-banned-overlay" style="display: none; position: fixed; inset: 0; background: #090a0f; z-index: 99999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff; overflow-y: auto;">
-    <div style="font-size: 5rem; margin-bottom: 12px; animation: pulse 1.5s infinite; filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.8));">🚫</div>
-    <h1 style="font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #ef4444, #dc2626, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 3px; margin: 0 0 10px;">
-      ACCOUNT SUSPENDED
+  <div id="account-banned-overlay" style="display: none; position: fixed; inset: 0; background: #0b0d13; z-index: 99999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff; overflow-y: auto;">
+    <h1 style="font-size: 2.2rem; font-weight: 800; color: #f87171; letter-spacing: -0.02em; margin: 0 0 10px;">
+      Account Suspended
     </h1>
-    <p style="font-size: 1.1rem; color: #cbd5e1; max-width: 600px; line-height: 1.5; margin: 0 0 20px;">
-      Your account access has been suspended due to community guidelines or safety filter violations.
+    <p style="font-size: 1rem; color: #94a3b8; max-width: 540px; line-height: 1.5; margin: 0 0 20px;">
+      Access has been temporarily restricted for your account due to community policy guidelines.
     </p>
-    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 16px 24px; max-width: 550px; width: 100%; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-      <strong style="color: #f87171; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">REASON FOR SUSPENSION</strong>
-      <span id="account-banned-reason-text" style="font-size: 1.05rem; color: #fff; font-weight: 700;">Violation of platform guidelines</span>
+    <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 14px 20px; max-width: 500px; width: 100%; margin-bottom: 20px;">
+      <strong style="color: #f87171; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px;">Reason</strong>
+      <span id="account-banned-reason-text" style="font-size: 0.95rem; color: #f8fafc; font-weight: 600;">Violation of platform guidelines</span>
     </div>
 
     <!-- Direct Appeal Card embedded inside Ban Screen -->
-    <div id="ban-screen-appeal-box" style="display: none; background: #121727; border: 1px solid #38bdf8; border-radius: 14px; padding: 22px 26px; max-width: 620px; width: 100%; margin-bottom: 20px; text-align: left; box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 30px rgba(56,189,248,0.2); max-height: 80vh; overflow-y: auto;">
+    <div id="ban-screen-appeal-box" style="display: none; background: #121723; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 22px 26px; max-width: 580px; width: 100%; margin-bottom: 20px; text-align: left; box-shadow: 0 16px 40px rgba(0,0,0,0.6); max-height: 80vh; overflow-y: auto;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.4rem;">⚖️</span>
-          <strong style="color: #38bdf8; font-size: 1.15rem;">Formal Moderation Appeal Questionnaire</strong>
-        </div>
+        <strong style="color: #f8fafc; font-size: 1.1rem; font-weight: 700;">Account Appeal Request</strong>
         <button type="button" onclick="document.getElementById('ban-screen-appeal-box').style.display='none'; document.getElementById('ban-screen-actions-row').style.display='flex';" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
       </div>
       <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 14px; line-height: 1.4;">
-        Please complete all detailed questions honestly. Submissions undergo Groq AI sincerity, ownership, and risk analysis before staff review.
+        Please complete the fields below to submit an appeal for review.
       </p>
 
       <form id="ban-screen-appeal-form" style="display: flex; flex-direction: column; gap: 12px;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
-            <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Account Username</label>
-            <input type="text" id="ban-screen-username-input" required placeholder="Your username..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.85rem;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Username</label>
+            <input type="text" id="ban-screen-username-input" required placeholder="Your username..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; font-size: 0.85rem;">
           </div>
           <div>
-            <label style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; display: block; margin-bottom: 4px;">Infraction Category</label>
-            <select id="ban-screen-category-select" style="width: 100%; padding: 8px 10px; background: #182035; border: 1px solid rgba(56,189,248,0.3); border-radius: 6px; color: #fff; font-size: 0.82rem;">
-              <option value="Inappropriate Language / Slang">💬 Inappropriate Language / Slang</option>
-              <option value="Toxic Argument / Harassment">💥 Heated Argument / Toxicity</option>
-              <option value="False Positive / Misunderstanding">🤖 Safety Filter False Positive</option>
-              <option value="Shared Device / Sibling on Account">👥 Sibling / Shared Device Incident</option>
-              <option value="Spamming / Disruptive Chat">⚠️ Spamming / Disruptive Chat</option>
-              <option value="Other Policy Violation">❓ Other Platform Misunderstanding</option>
+            <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Category</label>
+            <select id="ban-screen-category-select" style="width: 100%; padding: 8px 10px; background: #182035; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem;">
+              <option value="Inappropriate Language / Slang">Inappropriate Language</option>
+              <option value="Toxic Argument / Harassment">Heated Dispute / Toxicity</option>
+              <option value="False Positive / Misunderstanding">Safety Filter Misunderstanding</option>
+              <option value="Shared Device / Sibling on Account">Shared Device Incident</option>
+              <option value="Spamming / Disruptive Chat">Spamming / Disruptive Chat</option>
+              <option value="Other Policy Violation">Other Issue</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label style="font-size: 0.8rem; font-weight: 700; color: #fbbf24; display: block; margin-bottom: 4px;">
-            1. What happened & what led up to this incident?
+          <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">
+            1. Context of the incident
           </label>
-          <textarea id="ban-screen-desc-input" required placeholder="Describe what occurred, the conversation or context leading up to the action..." style="width: 100%; height: 80px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+          <textarea id="ban-screen-desc-input" required placeholder="Describe what occurred leading up to the action..." style="width: 100%; height: 80px; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
         </div>
 
         <div>
-          <label style="font-size: 0.8rem; font-weight: 700; color: #a855f7; display: block; margin-bottom: 4px;">
-            2. Why should staff reconsider and grant you another chance?
+          <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">
+            2. Reason for appeal
           </label>
-          <textarea id="ban-screen-why-input" required placeholder="Explain your remorse, why you value the community, or why this punishment should be lifted..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+          <textarea id="ban-screen-why-input" required placeholder="Explain why your account restriction should be reconsidered..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
         </div>
 
         <div>
-          <label style="font-size: 0.8rem; font-weight: 700; color: #10b981; display: block; margin-bottom: 4px;">
-            3. What concrete steps will you take to prevent future rule violations?
+          <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">
+            3. Prevention steps
           </label>
-          <textarea id="ban-screen-prevention-input" required placeholder="Detail your future prevention strategy (e.g. keeping chat academic, avoiding arguments, blocking toxic users)..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+          <textarea id="ban-screen-prevention-input" required placeholder="How will you ensure adherence to community rules in the future?..." style="width: 100%; height: 75px; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
         </div>
 
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
           <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #cbd5e1; cursor: pointer;">
-            <input type="checkbox" id="ban-screen-pledge-check1" checked required style="accent-color: #38bdf8; width: 15px; height: 15px;">
-            <span>I pledge to follow all platform safety guidelines and treat all students with respect.</span>
+            <input type="checkbox" id="ban-screen-pledge-check1" checked required style="accent-color: #e11d48; width: 14px; height: 14px;">
+            <span>I pledge to follow platform community guidelines.</span>
           </label>
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #f87171; cursor: pointer;">
-            <input type="checkbox" id="ban-screen-pledge-check2" checked required style="accent-color: #ef4444; width: 15px; height: 15px;">
-            <span>I acknowledge that any repeated violations will result in permanent account termination.</span>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #cbd5e1; cursor: pointer;">
+            <input type="checkbox" id="ban-screen-pledge-check2" checked required style="accent-color: #e11d48; width: 14px; height: 14px;">
+            <span>I understand repeated infractions may result in permanent restriction.</span>
           </label>
         </div>
 
         <div id="ban-screen-feedback" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; font-weight: 700;"></div>
 
-        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px;">
-          <button type="button" onclick="document.getElementById('ban-screen-appeal-box').style.display='none'; document.getElementById('ban-screen-actions-row').style.display='flex';" class="btn-small" style="background: rgba(255,255,255,0.1); color: #fff;">Cancel</button>
-          <button type="submit" id="ban-screen-submit-btn" class="btn-pill primary" style="background: #38bdf8; border-color: #38bdf8; color: #000; font-weight: 800; padding: 9px 24px;">🚀 Submit Detailed Appeal</button>
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;">
+          <button type="button" onclick="document.getElementById('ban-screen-appeal-box').style.display='none'; document.getElementById('ban-screen-actions-row').style.display='flex';" class="btn-small" style="background: rgba(255,255,255,0.08); color: #fff;">Cancel</button>
+          <button type="submit" id="ban-screen-submit-btn" class="btn-pill primary" style="background: #e11d48; border: none; color: #fff; font-weight: 700; padding: 8px 20px;">Submit Appeal</button>
         </div>
       </form>
     </div>
 
     <!-- Ban Screen Actions Row -->
-    <div id="ban-screen-actions-row" style="display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 600px;">
-      <button type="button" onclick="window.openBanAppealFromScreen()" class="btn-pill primary" style="background: linear-gradient(135deg, #38bdf8, #3b82f6); border: none; color: #fff; font-weight: 800; padding: 14px 32px; font-size: 1.05rem; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4); cursor: pointer;">
-        ⚖️ Submit Ban Appeal
+    <div id="ban-screen-actions-row" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 600px;">
+      <button type="button" onclick="window.openBanAppealFromScreen()" class="btn-pill primary" style="background: #e11d48; border: none; color: #fff; font-weight: 700; padding: 12px 28px; font-size: 0.95rem; cursor: pointer;">
+        Submit Ban Appeal
       </button>
       <button type="button" onclick="location.reload()" class="btn-pill" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-weight: 700; padding: 14px 24px; font-size: 1rem; cursor: pointer;">
         🔄 Refresh Page
@@ -184,14 +180,14 @@
     </div>
   </div>
 
-  <!-- EXTENDED PRO SPOTIFY & YOUTUBE MUSIC PLAYER DOCK -->
-  <div id="pro-music-dock" class="pro-music-dock" style="display: none;">
-    <div class="music-dock-header">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.1rem;">🎧</span>
+  <!-- UNIVERSAL SEARCH-BASED MUSIC PLAYER DOCK -->
+  <div id="pro-music-dock" class="pro-music-dock" style="display: none; flex-direction: column; width: 520px; max-width: 94vw; max-height: 680px; z-index: 9999; border-radius: 20px; background: rgba(14, 18, 30, 0.96); backdrop-filter: blur(24px); border: 1px solid rgba(56, 189, 248, 0.3); box-shadow: 0 25px 60px rgba(0,0,0,0.85); overflow: hidden;">
+    <div class="music-dock-header" style="padding: 14px 16px; border-bottom: 1px solid var(--card-border);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.3rem;">🎧</span>
         <div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <strong style="color: #fbbf24; font-size: 0.85rem;">PRO MUSIC LOUNGE</strong>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #fbbf24; font-size: 0.95rem; font-weight: 900;">UNIVERSAL MUSIC HUB</strong>
             <!-- Audio Equalizer Bars Animation -->
             <div class="music-eq-visualizer">
               <span class="music-eq-bar" style="height: 12px;"></span>
@@ -200,130 +196,138 @@
               <span class="music-eq-bar" style="height: 14px;"></span>
             </div>
           </div>
-          <span id="music-current-title" style="color: #cbd5e1; font-size: 0.75rem;">Lofi Girl Radio</span>
+          <span id="music-current-title" style="color: #cbd5e1; font-size: 0.78rem; font-weight: 600;">Search any song, playlist, or paste link below...</span>
         </div>
       </div>
-      <button id="music-dock-close" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem;">✕</button>
+      <button id="music-dock-close" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">✕</button>
     </div>
 
-    <div class="music-provider-tabs">
-      <button class="music-provider-btn active" id="music-provider-yt">🔴 YouTube</button>
-      <button class="music-provider-btn" id="music-provider-spotify">🟢 Spotify</button>
+    <!-- Live Music Search Bar -->
+    <div style="padding: 12px 16px 6px; display: flex; gap: 8px;">
+      <input type="text" id="music-search-input" placeholder="Search songs, artists, or YouTube playlists..." style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; padding: 9px 14px; font-size: 0.85rem; outline: none;">
+      <button class="btn-pill primary" id="music-search-btn" style="background: #38bdf8; color: #000; font-weight: 800; padding: 8px 16px; font-size: 0.82rem;">🔍 Search</button>
+    </div>
+
+    <!-- Live Search Results Grid (Populates dynamically) -->
+    <div id="music-search-results" style="display: none; flex-direction: column; max-height: 180px; overflow-y: auto; padding: 0 16px 8px;"></div>
+
+    <!-- Un-squished 16:9 Widescreen Video Player Container -->
+    <div style="padding: 8px 16px 4px;">
+      <iframe id="music-player-iframe" style="width: 100%; height: 230px; border-radius: 12px; border: 1px solid var(--card-border); background: #000;" src="about:blank" allow="autoplay; fullscreen; clipboard-write; encrypted-media; picture-in-picture"></iframe>
+    </div>
+
+    <!-- Master Volume Slider Control Bar -->
+    <div style="padding: 6px 16px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; margin: 4px 16px 8px; border: 1px solid var(--card-border);">
+      <button id="music-mute-btn" style="background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: #38bdf8; padding: 0;" title="Mute / Unmute">🔊</button>
+      <input type="range" id="music-volume-slider" min="0" max="100" value="80" style="flex: 1; accent-color: #38bdf8; cursor: pointer; height: 6px;" title="Master Volume">
+      <span id="music-volume-text" style="font-size: 0.78rem; font-weight: 800; color: #38bdf8; min-width: 36px; text-align: right;">80%</span>
     </div>
 
     <!-- Music Control Deck: Prev, Shuffle, Repeat, Next -->
-    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 6px 16px 0;">
-      <button class="music-ctrl-btn" id="music-prev-btn" title="Previous Track">⏮️</button>
-      <button class="music-ctrl-btn" id="music-shuffle-btn" title="Toggle Shuffle">🔀</button>
-      <button class="music-ctrl-btn" id="music-repeat-btn" title="Toggle Repeat">🔁</button>
-      <button class="music-ctrl-btn" id="music-next-btn" title="Next Track">⏭️</button>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 2px 16px 8px;">
+      <button class="music-ctrl-btn" id="music-prev-btn" title="Previous Track" style="font-size: 1.1rem; padding: 6px 12px;">⏮️</button>
+      <button class="music-ctrl-btn" id="music-shuffle-btn" title="Toggle Shuffle" style="font-size: 1.1rem; padding: 6px 12px;">🔀</button>
+      <button class="music-ctrl-btn" id="music-repeat-btn" title="Toggle Repeat" style="font-size: 1.1rem; padding: 6px 12px;">🔁</button>
+      <button class="music-ctrl-btn" id="music-next-btn" title="Next Track" style="font-size: 1.1rem; padding: 6px 12px;">⏭️</button>
     </div>
 
-    <div style="padding: 8px 16px 0;">
-      <iframe id="music-player-iframe" style="width: 100%; height: 85px; border-radius: 8px; border: none;" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    <div style="padding: 8px 16px 4px; font-size: 0.75rem; font-weight: 800; color: #fbbf24; display: flex; align-items: center; justify-content: space-between;">
+      <span>📑 CUSTOM QUEUE & PLAYLIST</span>
     </div>
+    <div class="music-track-list" id="music-track-list" style="max-height: 130px; overflow-y: auto; padding: 0 16px 8px;"></div>
 
-    <div class="music-track-list" id="music-track-list"></div>
-
-    <div style="padding: 8px 16px 14px; display: flex; gap: 6px;">
-      <input type="text" id="music-custom-url-input" placeholder="Paste Spotify or YouTube link..." style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 0.78rem;">
-      <button class="btn-small primary" id="music-load-custom-btn" style="background: #fbbf24; color: #000; font-weight: 800;">Play</button>
+    <div style="padding: 8px 16px 14px; display: flex; gap: 8px;">
+      <input type="text" id="music-custom-url-input" placeholder="Paste YouTube Song, Video, or Playlist URL (list=...)" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: #fff; padding: 8px 12px; font-size: 0.82rem; outline: none;">
+      <button class="btn-small primary" id="music-load-custom-btn" style="background: #fbbf24; color: #000; font-weight: 800; padding: 8px 16px; font-size: 0.82rem;">Load Link / Playlist</button>
     </div>
   </div>
 
-  <!-- MANDATORY LOGIN / REGISTRATION GATE (REALISTIC STUDENT WORKSPACE PORTAL) -->
-  <div id="mandatory-login-gate" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 45%), radial-gradient(circle at 85% 85%, var(--accent-glow) 0%, transparent 45%), #07090e; backdrop-filter: blur(28px); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-    
-    <!-- Ambient Glow Orb -->
-    <div style="position: absolute; width: 450px; height: 450px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); filter: blur(60px); opacity: 0.35; pointer-events: none; border-radius: 50%;"></div>
-    
-    <div class="auth-gate-card" style="background: linear-gradient(160deg, rgba(20, 25, 40, 0.95), rgba(10, 13, 20, 0.98)); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 42px 38px; width: 100%; max-width: 460px; box-shadow: 0 25px 70px -10px rgba(0,0,0,0.9), 0 0 35px var(--accent-glow); text-align: center; position: relative; backdrop-filter: blur(24px); z-index: 1;">
+  <!-- MANDATORY LOGIN / REGISTRATION GATE -->
+  <div id="mandatory-login-gate" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #07090e; z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div class="auth-gate-card" style="background: #111522; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: 0 16px 40px rgba(0,0,0,0.7); text-align: center; position: relative;">
       
-      <!-- SSO Academic Portal Header Badge -->
-      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.28); padding: 5px 14px; border-radius: 99px; font-size: 0.76rem; color: #38bdf8; font-weight: 800; margin-bottom: 18px; letter-spacing: 0.5px;">
-        <span style="width: 7px; height: 7px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
-        <span>STUDENT PORTAL • 256-BIT ENCRYPTED SSO</span>
-      </div>
-
-      <!-- Icon & Branding -->
-      <div style="width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, rgba(56,189,248,0.2), var(--accent-glow)); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 24px var(--accent-glow);">
-        📚
-      </div>
-      <div style="font-size: 1.55rem; font-weight: 900; letter-spacing: -0.3px; color: #f8fafc; margin-bottom: 4px;">Study Helper Workspace</div>
-      <h3 id="gate-form-title" style="color: var(--accent-color); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Sign In to Your Account</h3>
-      <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.4; margin-bottom: 20px;">Access your digital curriculum, study solvers, community chat, and apps.</p>
+      <div style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; color: #f8fafc; margin-bottom: 4px;">Study Helper Workspace</div>
+      <h3 id="gate-form-title" style="color: #94a3b8; font-size: 0.88rem; font-weight: 600; margin-bottom: 18px;">Sign in to your account</h3>
 
       <form id="gate-auth-form" style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
         <div class="form-group" style="margin: 0;">
-          <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <span>Student / User ID</span>
-            <span style="color: var(--text-muted); font-weight: normal; font-size: 0.75rem;">e.g. jordandaniels</span>
+          <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>Username</span>
           </label>
-          <div style="position: relative;">
-            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--text-muted); pointer-events: none;">👤</span>
-            <input type="text" id="gate-username" required placeholder="Enter student username..." style="width: 100%; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 11px 14px 11px 40px; border-radius: 10px; font-size: 0.92rem; outline: none; transition: var(--transition);">
-          </div>
+          <input type="text" id="gate-username" required placeholder="Username..." style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none;">
         </div>
 
         <div class="form-group" style="margin: 0;">
-          <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 5px;">
+          <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: flex; justify-content: space-between; margin-bottom: 5px;">
             <span>Password</span>
-            <span style="color: var(--text-muted); font-weight: normal; font-size: 0.75rem;">e.g. admin123</span>
           </label>
           <div style="position: relative;">
-            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--text-muted); pointer-events: none;">🔒</span>
-            <input type="password" id="gate-password" required placeholder="Enter password..." style="width: 100%; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 11px 40px 11px 40px; border-radius: 10px; font-size: 0.92rem; outline: none; transition: var(--transition);">
-            <button type="button" id="gate-toggle-pwd-btn" onclick="const p = document.getElementById('gate-password'); p.type = p.type === 'password' ? 'text' : 'password'; this.textContent = p.type === 'password' ? '👁️' : '🙈';" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted); padding: 4px;">👁️</button>
+            <input type="password" id="gate-password" required placeholder="Password..." style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 10px 36px 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none;">
+            <button type="button" id="gate-toggle-pwd-btn" onclick="const p = document.getElementById('gate-password'); p.type = p.type === 'password' ? 'text' : 'password';" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; font-size: 0.85rem; cursor: pointer; color: var(--text-muted); padding: 4px;">show</button>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
           <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #94a3b8; cursor: pointer;">
-            <input type="checkbox" id="gate-remember-me" checked style="accent-color: var(--accent-color); width: 15px; height: 15px;">
-            <span>Remember me on this device</span>
+            <input type="checkbox" id="gate-remember-me" checked style="accent-color: #e11d48; width: 14px; height: 14px;">
+            <span>Remember me</span>
           </label>
         </div>
 
-        <div id="gate-error-msg" style="color: #ef4444; font-size: 0.84rem; font-weight: 700; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); padding: 9px 12px; border-radius: 8px; display: none; text-align: center;"></div>
+        <div id="gate-error-msg" style="color: #ef4444; font-size: 0.84rem; font-weight: 600; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; display: none; text-align: center;"></div>
 
-        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 13px; margin-top: 4px; font-size: 0.96rem; font-weight: 800; background: var(--accent-gradient, linear-gradient(135deg, #eb2f5f, #ff4b72)); border: none; border-radius: 12px; box-shadow: 0 8px 24px var(--accent-glow); cursor: pointer; transition: var(--transition);" id="gate-submit-btn">
-          Sign In & Enter Workspace
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 11px; margin-top: 4px; font-size: 0.9rem; font-weight: 700; background: #e11d48; border: none; border-radius: 8px; cursor: pointer;" id="gate-submit-btn">
+          Sign In
         </button>
       </form>
 
-      <div style="margin-top: 18px; font-size: 0.84rem; color: var(--text-muted);">
-        <span id="gate-toggle-text">New student or educator?</span>
-        <a href="#" id="gate-toggle-link" style="color: var(--accent-color); font-weight: 800; text-decoration: none; margin-left: 4px;">Create Account</a>
+      <!-- Register toggle (hidden when signups are disabled) -->
+      <div id="gate-register-row" style="margin-top: 16px; font-size: 0.82rem; color: var(--text-muted);">
+        <span id="gate-toggle-text">Need an account?</span>
+        <a href="#" id="gate-toggle-link" style="color: #e11d48; font-weight: 700; text-decoration: none; margin-left: 4px;">Register</a>
       </div>
 
-      <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <span>🔒 Academic Workspace Protected</span>
-        <span>•</span>
-        <a href="#" id="gate-open-tos" style="color: #94a3b8; text-decoration: underline;">Terms & Privacy Policy</a>
+      <!-- Signups Closed Notice (shown when owner disables registration) -->
+      <div id="gate-signups-closed-notice" style="display: none; margin-top: 16px;">
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 10px; padding: 13px 16px; text-align: left; display: flex; gap: 12px; align-items: flex-start;">
+          <div style="flex-shrink: 0; width: 30px; height: 30px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div>
+            <p style="margin: 0 0 3px; font-size: 0.82rem; font-weight: 700; color: #f59e0b;">Registrations Closed</p>
+            <p style="margin: 0; font-size: 0.78rem; color: #94a3b8; line-height: 1.5;">New account sign-ups are currently paused by the platform owner. If you have an account, you can still sign in above.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- MULTIPLAYER PLAYTIME & HIGH-SCORE LEADERBOARDS MODAL -->
   <div class="modal-overlay" id="leaderboards-modal">
-    <div class="modal-card" style="max-width: 680px;">
-      <button class="modal-close" id="leaderboards-modal-close">✕</button>
-      <h2 style="color: #fbbf24; margin-bottom: 6px; font-size: 1.4rem;">🏆 Global Multiplayer Leaderboards</h2>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Real-time Socket.io player rankings tracked across the student network.</p>
+    <div class="modal-card" style="max-width: 760px; width: 94vw; padding: 24px; border-radius: 12px; background: #0f131d; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <button class="modal-close" id="leaderboards-modal-close" style="top: 18px; right: 18px;">✕</button>
 
-      <div class="music-provider-tabs" style="margin-bottom: 16px;">
-        <button class="music-provider-btn active" id="lb-tab-time">⏳ Total Playtime</button>
-        <button class="music-provider-btn" id="lb-tab-games">🎮 Games Played</button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div>
+          <h2 style="color: #f8fafc; margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">Player Leaderboards</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin: 2px 0 0 0;">Real-time player rankings across the network.</p>
+        </div>
       </div>
 
-      <div style="max-height: 420px; overflow-y: auto;">
-        <table class="admin-table">
+      <div class="music-provider-tabs" style="margin-bottom: 18px; display: flex; gap: 8px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid var(--card-border);">
+        <button class="music-provider-btn active" id="lb-tab-time" style="flex: 1; padding: 7px 12px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: 0.2s;">Total Playtime</button>
+        <button class="music-provider-btn" id="lb-tab-games" style="flex: 1; padding: 7px 12px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: 0.2s;">Games Played</button>
+        <button class="music-provider-btn" id="lb-tab-chatters" style="flex: 1; padding: 7px 12px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: 0.2s;">Top Chatters</button>
+      </div>
+
+      <div style="max-height: 440px; overflow-y: auto; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.2);">
+        <table class="admin-table" style="width: 100%; border-collapse: collapse;">
           <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Player</th>
-              <th>Total Playtime</th>
-              <th>Games Played</th>
+            <tr style="background: rgba(255,255,255,0.03); text-align: left; border-bottom: 1px solid var(--card-border);">
+              <th style="padding: 12px 16px; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Rank</th>
+              <th style="padding: 12px 16px; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Player</th>
+              <th style="padding: 12px 16px; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;" id="lb-col-stat1">Total Playtime</th>
+              <th style="padding: 12px 16px; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;" id="lb-col-stat2">Games Played</th>
             </tr>
           </thead>
           <tbody id="leaderboard-tbody"></tbody>
@@ -332,43 +336,38 @@
     </div>
   </div>
 
-  <!-- AI HOMEWORK HELPER & TUTOR MODAL (TWO-COLUMN DARK DASHBOARD WITH DYNAMIC THEME INTEGRATION) -->
+  <!-- AI HELPER & TUTOR MODAL -->
   <div class="modal-overlay" id="ai-helper-modal">
-    <div class="modal-card" style="max-width: 960px; width: 92vw; height: 84vh; padding: 0; display: flex; flex-direction: row; overflow: hidden; border-radius: var(--radius-lg);">
+    <div class="modal-card" style="max-width: 940px; width: 92vw; height: 84vh; padding: 0; display: flex; flex-direction: row; overflow: hidden; border-radius: 12px;">
       
       <!-- LEFT SIDEBAR -->
-      <aside style="width: 250px; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; background: rgba(0,0,0,0.3); border-right: 1px solid var(--card-border);">
-        <!-- Top Active Badge -->
-        <div class="ai-badge" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 0.78rem; padding: 5px 12px; border-radius: 99px; width: fit-content;">
-          ⚡ Nitro AI Studio
-        </div>
-
+      <aside style="width: 240px; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; background: rgba(0,0,0,0.25); border-right: 1px solid var(--card-border);">
         <!-- Title -->
         <div>
-          <h3 style="color: var(--text-main); font-size: 1.25rem; font-weight: 900; margin: 0; letter-spacing: -0.3px;">Nitro AI</h3>
-          <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600;">Academic & Coding Co-Pilot</span>
+          <h3 style="color: var(--text-main); font-size: 1.15rem; font-weight: 800; margin: 0; letter-spacing: -0.02em;">Nitro Assistant</h3>
+          <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 500;">Academic & Study Co-Pilot</span>
         </div>
 
         <!-- Mode Selector -->
         <div>
-          <label style="font-size: 0.72rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">
-            Specialized Mode:
+          <label style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px;">
+            Select Mode:
           </label>
           <div style="display: flex; flex-direction: column; gap: 4px;" id="ai-mode-selector-list">
-            <button type="button" class="ai-mode-chip active" data-mode="general" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; cursor: pointer; transition: 0.2s;">
-              🧠 General Co-Pilot
+            <button type="button" class="ai-mode-chip active" data-mode="general" style="padding: 7px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: left; background: rgba(225, 29, 72, 0.15); border: 1px solid #e11d48; color: #fff; cursor: pointer; transition: 0.2s;">
+              General Co-Pilot
             </button>
-            <button type="button" class="ai-mode-chip" data-mode="math" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
-              📐 Math & STEM Solver
+            <button type="button" class="ai-mode-chip" data-mode="math" style="padding: 7px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              Math & STEM
             </button>
-            <button type="button" class="ai-mode-chip" data-mode="code" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
-              💻 Senior Code Mentor
+            <button type="button" class="ai-mode-chip" data-mode="code" style="padding: 7px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              Code Mentor
             </button>
-            <button type="button" class="ai-mode-chip" data-mode="writing" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
-              ✍️ Essay & Writing Coach
+            <button type="button" class="ai-mode-chip" data-mode="writing" style="padding: 7px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              Writing Coach
             </button>
-            <button type="button" class="ai-mode-chip" data-mode="science" style="padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
-              🧪 Science Explainer
+            <button type="button" class="ai-mode-chip" data-mode="science" style="padding: 7px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: left; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; cursor: pointer; transition: 0.2s;">
+              Science Explainer
             </button>
           </div>
         </div>
@@ -788,6 +787,46 @@
     </div>
   </div>
 
+  <!-- MANDATORY PROFILE COMPLIANCE LOCK MODAL -->
+  <div class="modal-overlay" id="force-profile-fix-modal" style="z-index: 999999; display: none;">
+    <div class="modal-card" style="max-width: 520px; text-align: left; border: 2px solid #ef4444; background: linear-gradient(145deg, #181018, #0e0c12);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <span style="font-size: 2.4rem;">⚠️</span>
+        <div>
+          <h2 style="color: #ef4444; margin: 0; font-size: 1.35rem; font-weight: 900;">Profile Action Required</h2>
+          <span style="color: #fca5a5; font-size: 0.8rem; font-weight: 700;">Account Access Restricted by Administration</span>
+        </div>
+      </div>
+
+      <div style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
+        <strong style="color: #f87171; font-size: 0.85rem; display: block; margin-bottom: 4px;">📌 Admin Moderation Notice:</strong>
+        <p id="force-profile-fix-reason" style="color: #fff; font-size: 0.88rem; margin: 0; font-weight: 600; line-height: 1.4;">
+          Your profile contains content violating Community Guidelines. Please update your profile details below to restore full account access.
+        </p>
+      </div>
+
+      <form id="force-profile-fix-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Display Nickname</label>
+          <input type="text" id="force-profile-display-name" placeholder="Enter clean display name..." maxlength="50" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Bio / Status Quote</label>
+          <input type="text" id="force-profile-bio" placeholder="Enter clean bio..." maxlength="200" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Avatar Image URL</label>
+          <input type="url" id="force-profile-avatar-url" placeholder="https://..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+        </div>
+
+        <div id="force-profile-fix-error" style="color: #ef4444; font-size: 0.85rem; font-weight: 700; display: none; text-align: center;"></div>
+        <button type="submit" class="btn-pill primary" id="force-profile-fix-submit-btn" style="width: 100%; justify-content: center; padding: 12px; font-weight: 800; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: #fff; margin-top: 6px;">💾 Save & Unlock Account</button>
+      </form>
+    </div>
+  </div>
+
   <!-- COMMUNITY POLLS & GAME VOTING MODAL -->
   <div class="modal-overlay" id="polls-modal">
     <div class="modal-card" style="max-width: 600px;">
@@ -978,6 +1017,25 @@
 
         <!-- Right System & Account Controls -->
         <div class="nav-group-cluster controls-cluster">
+          <!-- REAL-TIME NOTIFICATION BELL -->
+          <div style="position: relative;">
+            <button class="nav-btn" id="nav-notification-bell-btn" title="Notifications & Activity" style="color: #38bdf8; position: relative;">
+              <span style="font-size: 1.1rem;">🔔</span>
+              <span id="nav-notification-badge" style="display: none; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 900; border-radius: 50%; align-items: center; justify-content: center;">0</span>
+            </button>
+
+            <!-- Notification Drawer Dropdown Popup -->
+            <div id="notification-drawer-popup" style="display: none; position: absolute; top: 45px; right: 0; width: 340px; background: linear-gradient(160deg, #121624, #0a0d16); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; overflow: hidden; backdrop-filter: blur(20px);">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3);">
+                <strong style="color: #fff; font-size: 0.9rem;">🔔 Notifications</strong>
+                <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">Live Feed</span>
+              </div>
+              <div id="notification-drawer-list" style="max-height: 320px; overflow-y: auto;">
+                <div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 0.8rem;">No unread notifications</div>
+              </div>
+            </div>
+          </div>
+
           <button class="nav-btn" id="nav-leaderboards-btn" title="Multiplayer High-Score Leaderboards" onclick="document.getElementById('open-leaderboards-btn')?.click()" style="color: #fbbf24;">
             <span style="font-size: 1.1rem;">🏆</span>
           </button>
@@ -997,6 +1055,9 @@
         </div>
       </nav>
     </header>
+
+    <!-- FLOATING CORNER TOAST NOTIFICATIONS CONTAINER -->
+    <div id="toast-notifications-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: auto;"></div>
 
     <!-- DISCORD-LIKE SIDEBAR VOICE DOCK & SPEAKING INDICATORS -->
     <div id="sidebar-voice-dock" class="sidebar-voice-dock" style="display: none;">
@@ -1076,7 +1137,7 @@
           <button class="btn-pill" id="open-leaderboards-btn" style="color: #fbbf24;" title="Multiplayer High-Score Leaderboards">🏆 Leaderboards</button>
           <button class="btn-pill" id="pro-music-toggle-btn" style="color: #fbbf24; display: none;" title="Open Spotify / YouTube Music Dock">🎵 Music</button>
           <button class="btn-pill" id="open-polls-modal-btn" style="color: #38bdf8;" title="Vote on Community Polls">📊 Polls</button>
-          <button class="btn-pill" id="open-study-timer-btn" style="color: #ef4444;" title="Focus Study Timer & Ambient sounds">⏱️ Study Mode</button>
+          <button class="btn-pill" id="open-bug-modal-btn" style="color: #ef4444; font-weight: 800;" title="Report a Bug or Technical Issue">🐛 Bug Reports</button>
           
           <!-- Consolidated Tools Dropdown Menu -->
           <div class="dropdown-wrap">
@@ -1440,7 +1501,21 @@
           <div class="chat-gif-grid" id="chat-gif-grid"></div>
         </div>
 
+        <!-- Image Upload Attachment Preview Bar -->
+        <div id="chat-image-preview-bar" style="display: none; padding: 8px 14px; background: rgba(0,0,0,0.5); border-top: 1px solid var(--card-border); align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img id="chat-image-preview-thumb" src="" style="width: 42px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid #38bdf8;">
+            <div>
+              <span id="chat-image-preview-name" style="font-size: 0.82rem; color: #fff; font-weight: 700; display: block;">image.png</span>
+              <span style="font-size: 0.72rem; color: #10b981;">🤖 Groq AI Vision Scanning Ready</span>
+            </div>
+          </div>
+          <button type="button" id="chat-image-remove-btn" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
         <form class="chat-input-box-wrapper" id="chat-form">
+          <input type="file" id="chat-image-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" style="display: none;">
+          <button type="button" class="btn-small" id="chat-image-btn" style="background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 800;" title="Attach Image (Scanned by Groq AI)">🖼️ Image</button>
           <button type="button" class="btn-small" id="chat-gif-btn" style="background: rgba(255,255,255,0.08); color: #fbbf24; border: 1px solid rgba(255,255,255,0.1); font-weight: 800;" title="Insert Animated GIF / Sticker">GIF</button>
           <button type="button" class="btn-small" id="chat-voice-record-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800;" title="Record 15s Voice Memo">🎙️ Mic</button>
           <input type="text" id="chat-input" placeholder="Type a message... (press Enter to send)" autocomplete="off">
@@ -1449,10 +1524,10 @@
       </div>
     </section>
 
-    <!-- SECTION 5: MULTI-TAB SANDBOXED BROWSER -->
+    <!-- SECTION 5: REMADE MULTI-TAB SANDBOXED BROWSER -->
     <section class="page-view" id="view-browser">
       <div class="header-title-section">
-        <h1>SANDBOXED MULTI-TAB BROWSER</h1>
+        <h1>NITRO SHIELD BROWSER v3.0</h1>
       </div>
       <div class="browser-view-container">
         <!-- Multi-Tab Strip -->
@@ -1467,18 +1542,16 @@
             <button class="browser-btn" id="browser-forward" title="Forward">▶</button>
             <button class="browser-btn" id="browser-refresh" title="Reload">🔄</button>
             <button class="browser-btn" id="browser-home" title="Speed Dial Home">🏠</button>
-            <button class="browser-btn" id="browser-open-blank-btn" title="Open gateway in about:blank disguise" style="color: #fbbf24;">🚀</button>
+            <button class="browser-btn" id="browser-split-view-btn" title="Toggle Dual-Pane Split View" style="color: #38bdf8; font-weight: 800;">↔️ Dual View</button>
+            <button class="browser-btn" id="browser-open-blank-btn" title="Open in about:blank disguise" style="color: #fbbf24;">🚀 Cloak</button>
           </div>
 
-          <!-- Gateway Emulation Engine Selector (Chrome, Firefox, Safari, Tor, Classroom) -->
-          <select id="browser-gateway-engine-select" class="browser-engine-select" title="Gateway Emulation Engine" style="background: #111420; border-color: #38bdf8; color: #38bdf8; font-weight: 700;">
-            <option value="chrome">🌐 Chrome 128 (Windows)</option>
-            <option value="firefox">🦊 Firefox 129 (Quantum)</option>
-            <option value="safari">🍎 Safari 17.5 (macOS)</option>
-            <option value="edge">🌊 Edge 128 (Windows)</option>
-            <option value="mobile">📱 Mobile (iOS iPhone)</option>
-            <option value="classroom">🎓 Google Classroom Stealth</option>
-            <option value="tor">🧅 Tor Onion Stealth</option>
+          <!-- Stealth Gateway Engine Selector Profile -->
+          <select id="browser-gateway-engine-select" class="browser-engine-select" title="Stealth Gateway Engine Profile" style="background: #111420; border-color: #38bdf8; color: #38bdf8; font-weight: 700;">
+            <option value="turbo">⚡ Stealth Turbo (Chrome 128)</option>
+            <option value="shield">🛡️ Shield Ultra (Safari macOS)</option>
+            <option value="academic">🎓 Academic Disguise (Google Classroom)</option>
+            <option value="mirror">🌀 Dynamic Mirror (Linux Chromium)</option>
           </select>
           
           <select id="browser-search-engine-select" class="browser-engine-select" title="Search Engine">
@@ -1486,25 +1559,43 @@
             <option value="brave">🦁 Brave Search</option>
             <option value="bing">🌐 Bing</option>
             <option value="google">🔍 Google</option>
+            <option value="wikipedia">📖 Wikipedia</option>
+            <option value="wolfram">🧮 WolframAlpha</option>
           </select>
 
           <div class="browser-address-bar">
-            <input type="text" id="browser-url-input" placeholder="Enter URL or search term...">
+            <span style="font-size: 0.85rem; color: #10b981; padding-left: 10px;" title="Encrypted Stealth Proxy Active">🔒</span>
+            <input type="text" id="browser-url-input" placeholder="Enter web address or search query...">
+            <button id="browser-bookmark-star-btn" style="background: transparent; border: none; font-size: 1.1rem; cursor: pointer; padding-right: 10px; color: #94a3b8;" title="Bookmark Page">☆</button>
           </div>
-          <button class="btn-pill primary" id="browser-go-btn">Go</button>
+          <button class="btn-pill primary" id="browser-go-btn" style="font-weight: 800; padding: 8px 18px;">Go</button>
         </div>
 
         <!-- Speed Dial Grid (Shown on New Tab) -->
         <div class="browser-speed-dial" id="browser-speed-dial">
-          <div class="speed-dial-header">
-            <h2>⚡ Quick Launch & Bookmarks</h2>
-            <p>Select a study bookmark or enter a URL above</p>
+          <div class="speed-dial-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+            <div>
+              <h2 style="color: #fff; font-size: 1.25rem; font-weight: 800; margin: 0;">⚡ Quick Launch Bookmarks & Speed Dial</h2>
+              <p style="color: #94a3b8; font-size: 0.82rem; margin: 4px 0 0;">Select a study bookmark below or type a web address in the omnibox</p>
+            </div>
+            <button class="btn-pill primary" id="speed-dial-add-btn" style="background: #38bdf8; color: #000; border: none; font-weight: 800; font-size: 0.82rem;">＋ Add Custom Bookmark</button>
           </div>
           <div class="speed-dial-grid" id="browser-speed-dial-grid"></div>
         </div>
 
-        <div class="browser-viewport">
-          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank" style="display: none;"></iframe>
+        <!-- Primary Single Viewport -->
+        <div class="browser-viewport" id="browser-viewport-single">
+          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank" style="display: none; width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+
+        <!-- Dual-Pane Split Screen Viewport Wrapper -->
+        <div id="browser-viewport-split-wrapper" style="display: none; width: 100%; height: 600px; gap: 12px; border-radius: 14px; overflow: hidden;">
+          <div style="flex: 1; height: 100%; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; background: #000;">
+            <iframe id="browser-iframe-primary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank"></iframe>
+          </div>
+          <div style="flex: 1; height: 100%; border: 1px solid #38bdf8; border-radius: 12px; overflow: hidden; background: #000;">
+            <iframe id="browser-iframe-secondary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank"></iframe>
+          </div>
         </div>
       </div>
     </section>
@@ -1741,20 +1832,20 @@
       </div>
     </section>
 
-    <!-- SECTION 6.5: UNBLOCKED PROXIED SOUNDBOARD HUB -->
+    <!-- SECTION 6.5: PROXIED EXTERNAL SOUNDBOARD HUB -->
     <section class="page-view" id="view-soundboard">
-      <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
         <div>
-          <h1 style="background: linear-gradient(90deg, #ec4899, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">UNBLOCKED SOUNDBOARD HUB</h1>
-          <p>Thousands of instant sound effects and memes, proxied live so school network filters cannot block them.</p>
+          <h1 style="background: linear-gradient(90deg, #ec4899, #f59e0b, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">UNBLOCKED SOUNDBOARD HUB</h1>
+          <p>Browse 150,000+ sound buttons and meme soundboards directly inside the platform.</p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-pill secondary" onclick="window.reloadSoundboardHub()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700;">🔄 Reload</button>
-          <button class="btn-pill primary" onclick="window.fullscreenSoundboardHub()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 800;">⤢ Fullscreen</button>
+          <button class="btn-pill secondary" onclick="const f = document.getElementById('soundboard-gateway-frame'); if(f) f.src = f.src;" style="padding: 8px 18px; font-size: 0.82rem; font-weight: 700;">🔄 Reload Soundboard</button>
+          <button class="btn-pill primary" onclick="const f = document.getElementById('soundboard-gateway-frame'); if(f.requestFullscreen) f.requestFullscreen();" style="padding: 8px 18px; font-size: 0.82rem; font-weight: 800;">⤢ Fullscreen</button>
         </div>
       </div>
 
-      <div class="view-content-wrapper" style="margin-top: 16px; height: calc(100vh - 170px); min-height: 620px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; position: relative;">
+      <div class="view-content-wrapper" style="height: calc(100vh - 220px); min-height: 560px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; position: relative;">
         <iframe id="soundboard-gateway-frame" src="/api/gateway?url=https://soundbuttonsworld.com/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
     </section>
@@ -1859,15 +1950,33 @@
           <div style="background: rgba(235, 47, 95, 0.08); border: 1px solid rgba(235, 47, 95, 0.3); border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 1.3rem;">🤖</span>
                 <h4 style="margin: 0; color: #f8fafc; font-size: 1.1rem; font-weight: 800;">Nitro AI Engine Control</h4>
               </div>
               <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.84rem;">Toggle Nitro AI online or place it under scheduled maintenance mode across the platform.</p>
             </div>
             <div style="display: flex; align-items: center; gap: 14px;">
-              <span id="admin-ai-status-badge" style="padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;">🟢 AI Online</span>
-              <button id="admin-toggle-ai-btn" class="btn-pill primary" style="font-weight: 800; padding: 8px 18px; font-size: 0.86rem; background: linear-gradient(135deg, #eb2f5f, #ec4899); border: none; cursor: pointer;">
+              <span id="admin-ai-status-badge" style="padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;">AI Online</span>
+              <button id="admin-toggle-ai-btn" class="btn-pill primary" style="font-weight: 800; padding: 8px 18px; font-size: 0.86rem; background: #e11d48; border: none; cursor: pointer;">
                 Toggle AI Maintenance
+              </button>
+            </div>
+          </div>
+
+          <!-- Owner Control Box: Account Signups Toggle -->
+          <div id="admin-owner-signups-box" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0; color: #f8fafc; font-size: 1.1rem; font-weight: 800;">
+                  Account Registration Control
+                  <span style="font-size: 0.72rem; color: #f59e0b; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; padding: 2px 8px; border-radius: 6px; margin-left: 6px; font-weight: 800;">OWNER ONLY</span>
+                </h4>
+              </div>
+              <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.84rem;">Restrict or allow new user account registrations on the platform.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span id="admin-signups-status-badge" style="padding: 6px 14px; border-radius: 99px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;">Signups ENABLED</span>
+              <button id="admin-toggle-signups-btn" class="btn-pill primary" style="font-weight: 800; padding: 8px 18px; font-size: 0.86rem; background: #e11d48; border: none; cursor: pointer;">
+                Disable Signups
               </button>
             </div>
           </div>
@@ -1880,7 +1989,7 @@
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
             <div>
               <h3 style="color: #38bdf8; margin: 0; font-size: 1.25rem;">👥 Registered Users & Account Moderation</h3>
-              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Manage student accounts, assign staff permissions, adjust economy metrics, and enforce moderation policies.</p>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Manage student accounts, assign staff permissions, and enforce moderation policies.</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
               <input type="text" id="admin-user-search" placeholder="🔍 Search users by name, role or ID..." style="padding: 8px 14px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-size: 0.88rem; width: 280px;">
@@ -1895,7 +2004,6 @@
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">User & Account</th>
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Role & Tier</th>
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Status / Moderation</th>
-                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Economy (Coins / XP)</th>
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Moderation Actions</th>
                 </tr>
               </thead>
@@ -2028,6 +2136,7 @@
               <h3 style="color: #ef4444; margin: 0;">🤬 Word & Punishment Moderation Rules</h3>
               <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">Configure forbidden words and specify custom automated penalties (censor, block, strike, mute, or ban).</p>
             </div>
+            <button class="btn-pill primary" id="admin-auto-categorize-btn" onclick="window.adminAutoCategorizeFilterWords()" style="background: linear-gradient(90deg, #ec4899, #a855f7); border: none; font-weight: 800; padding: 8px 18px;">⚡ Auto-Assign All Word Punishments</button>
           </div>
 
           <!-- Single Word Filter Form -->
@@ -2046,7 +2155,10 @@
                 <option value="mute_5m">🔇 5-Minute Mute (Block + Mute 5m)</option>
                 <option value="mute_1h">🔇 1-Hour Mute (Block + Mute 1h)</option>
                 <option value="ban_1d">⛔ 1-Day Suspension (Block + 24h Ban)</option>
-                <option value="perm_ban">💀 Permanent Ban (Block + Account Ban)</option>
+                <option value="ban_3d">⛔ 3-Day Suspension (Block + 3-Day Ban)</option>
+                <option value="ban_7d">⛔ 7-Day Suspension (Block + 7-Day Ban)</option>
+                <option value="ban_10d_review">🛑 10-Day Account Review (10d Ban + Disable Account)</option>
+                <option value="perm_ban">💀 Permanent Ban (Block + Account Termination)</option>
               </select>
             </div>
 
@@ -2084,7 +2196,10 @@
                 <option value="mute_5m">🔇 5-Minute Mute (Block + Mute 5m)</option>
                 <option value="mute_1h">🔇 1-Hour Mute (Block + Mute 1h)</option>
                 <option value="ban_1d">⛔ 1-Day Suspension (Block + 24h Ban)</option>
-                <option value="perm_ban">💀 Permanent Ban (Block + Account Ban)</option>
+                <option value="ban_3d">⛔ 3-Day Suspension (Block + 3-Day Ban)</option>
+                <option value="ban_7d">⛔ 7-Day Suspension (Block + 7-Day Ban)</option>
+                <option value="ban_10d_review">🛑 10-Day Account Review (10d Ban + Disable Account)</option>
+                <option value="perm_ban">💀 Permanent Ban (Block + Account Termination)</option>
               </select>
             </div>
             <div>
@@ -2140,7 +2255,10 @@
                   <option value="mute_5m">🔇 5-Minute Mute (Block + Mute 5m)</option>
                   <option value="mute_1h">🔇 1-Hour Mute (Block + Mute 1h)</option>
                   <option value="ban_1d">⛔ 1-Day Suspension (Block + 24h Ban)</option>
-                  <option value="perm_ban">💀 Permanent Ban (Block + Account Ban)</option>
+                  <option value="ban_3d">⛔ 3-Day Suspension (Block + 3-Day Ban)</option>
+                  <option value="ban_7d">⛔ 7-Day Suspension (Block + 7-Day Ban)</option>
+                  <option value="ban_10d_review">🛑 10-Day Account Review (10d Ban + Disable Account)</option>
+                  <option value="perm_ban">💀 Permanent Ban (Block + Account Termination)</option>
                 </select>
               </div>
               <div>
@@ -2292,6 +2410,20 @@
                   <select id="simple-mod-model" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
                     <option value="llama-3.3-70b-versatile" selected>⚡ Llama 3.3 70B (Deep context & accuracy)</option>
                     <option value="llama-3.1-8b-instant">🚀 Llama 3.1 8B (Instant speed)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #ef4444; margin-bottom: 5px;">
+                    🛑 Admin Review Hold Threshold
+                  </label>
+                  <select id="simple-mod-review-threshold" class="custom-select-dropdown" style="width: 100%; padding: 9px 12px; font-size: 0.85rem; font-weight: 700; background: #0e121e; color: #fff; border: 1px solid var(--card-border); border-radius: 8px;">
+                    <option value="10d" selected>🛑 10-Day Bans & Above (Hold 10d+ for Admin Review) [Default]</option>
+                    <option value="7d">⛔ 7-Day Bans & Above (Hold 7d+ for Admin Review)</option>
+                    <option value="3d">⛔ 3-Day Bans & Above (Hold 3d+ for Admin Review)</option>
+                    <option value="1d">⛔ 1-Day Bans & Above (Hold 1d+ for Admin Review)</option>
+                    <option value="all_bans">🔒 All Bans (Hold Every Ban for Admin Review)</option>
+                    <option value="disabled">⚡ Disabled (Apply bans immediately without Admin Review hold)</option>
                   </select>
                 </div>
 
@@ -2668,49 +2800,61 @@
 
   <!-- TERMS OF SERVICE MODAL -->
   <div class="modal-overlay" id="tos-modal">
-    <div class="modal-card" style="max-width: 780px;">
+    <div class="modal-card" style="max-width: 860px;">
       <button class="modal-close" id="tos-modal-close">✕</button>
-      <h2 style="color: var(--accent-color); margin-bottom: 14px; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
-        <span>📜</span> Detailed Terms of Service & Acceptable Use Policy
+      <h2 style="color: var(--accent-color); margin-bottom: 14px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+        <span>📜</span> Detailed Terms of Service & Acceptable Use Policy (AUP)
       </h2>
-      <div style="font-size: 0.88rem; line-height: 1.65; color: var(--text-muted); max-height: 480px; overflow-y: auto; padding-right: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 18px; border-radius: 12px;">
-        <h4 style="color: var(--text-main); margin: 0 0 6px; font-size: 1rem;">1. Acceptance of Terms & Eligibility</h4>
-        <p style="margin-bottom: 14px;">By accessing, registering, or utilizing NITRO (BETA), you enter into a binding agreement with the platform. If you do not agree to these terms in full, you are prohibited from using any services, web proxies, games, or community chat features.</p>
+      <div style="font-size: 0.88rem; line-height: 1.7; color: var(--text-muted); max-height: 540px; overflow-y: auto; padding-right: 14px; background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); padding: 22px; border-radius: 12px;">
+        
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; color: #fff; font-size: 0.84rem;">
+          <strong style="color: #38bdf8;">📌 Important Legal Notice:</strong> Please read these Terms of Service thoroughly before utilizing NITRO platform features, web proxies, community chat, or games. Continued use of the platform signifies explicit agreement to all clauses below.
+        </div>
 
-        <h4 style="color: #38bdf8; margin: 14px 0 6px; font-size: 1rem;">2. User Account Security & Responsibility</h4>
-        <p style="margin-bottom: 14px;">Users are solely responsible for maintaining the confidentiality of their login credentials. Any activity originating from your account is deemed your responsibility. Sharing accounts, attempting brute-force authorization, or unauthorized rank elevation is strictly prohibited.</p>
+        <h4 style="color: #fff; margin: 16px 0 6px; font-size: 1.05rem;">1. Acceptance of Terms & Service Scope</h4>
+        <p style="margin-bottom: 14px;">By accessing, registering an account, or interacting with NITRO, you enter into a legally binding contract with the platform administration. Services provided include sandboxed web proxies, educational study tools, AI copilot assistants, real-time community chat, WebRTC voice channels, and unblocked arcade games. If you do not agree with any portion of these terms, you must immediately terminate your session and cease platform usage.</p>
 
-        <h4 style="color: #ef4444; margin: 14px 0 6px; font-size: 1rem;">3. Prohibited Conduct & Community Guidelines</h4>
-        <p style="margin-bottom: 14px;">Users agree not to: (a) broadcast hate speech, harassment, slurs, or explicit content; (b) attempt chat spamming or automated bot flooding; (c) impersonate platform administrators, staff, or the supreme owner; or (d) bypass automated security controls.</p>
+        <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">2. User Account Integrity, Security & Credential Protection</h4>
+        <p style="margin-bottom: 14px;">Users are solely responsible for maintaining the confidentiality of their credentials (usernames and passwords). Account sharing, credential reselling, brute-force authorization attempts, or attempting unauthorized rank elevation to Administrator or Owner roles is strictly prohibited. Activity originating from your account or IP address is deemed your legal responsibility.</p>
 
-        <h4 style="color: #fbbf24; margin: 14px 0 6px; font-size: 1rem;">4. Intellectual Property & Game Embeds</h4>
-        <p style="margin-bottom: 14px;">All games, built-in canvas applications, and third-party embeds remain the intellectual property of their respective creators and publishers. NITRO provides sandboxed web embeds for educational and study break entertainment purposes only.</p>
+        <h4 style="color: #ef4444; margin: 16px 0 6px; font-size: 1.05rem;">3. Zero-Tolerance Content Moderation & Anti-Hate Speech Policy</h4>
+        <p style="margin-bottom: 14px;">NITRO maintains a strict <strong>Zero-Tolerance Policy</strong> regarding hate speech, racial or homophobic slurs, harassment, sexual content, NSFW media, self-harm, or illegal material. All chat messages, usernames, and gateway requests pass through live <strong>Groq AI Moderation</strong> and the <strong>Word Filter Shield Engine</strong>. Violators are subject to immediate automated mutes, account bans, and IP bans without prior notice.</p>
 
-        <h4 style="color: #a855f7; margin: 14px 0 6px; font-size: 1rem;">5. Sandboxed Web Gateway Usage Disclaimer</h4>
-        <p style="margin-bottom: 14px;">The in-app web gateway relay is designed for testing web assets and discreet browsing. Utilizing the gateway to access illegal content, conduct cyber attacks, or breach network security policies is prohibited and subject to immediate IP and account bans.</p>
+        <h4 style="color: #fbbf24; margin: 16px 0 6px; font-size: 1.05rem;">4. Anti-Spam, Anti-Raid & Automated Bot Restrictions</h4>
+        <p style="margin-bottom: 14px;">To preserve chat quality and system stability, the <strong>Automated Raid Shield System</strong> monitors message frequency and content similarity. Spamming identical messages, rapid message flooding, or deploying automated chat bots will trigger an automatic 5-minute mute or suspension. Continued flooding results in permanent account bans.</p>
 
-        <h4 style="color: #10b981; margin: 14px 0 6px; font-size: 1rem;">6. Automated Content Moderation & Filter Logs</h4>
-        <p style="margin-bottom: 14px;">Automated filters continuously monitor public chat messages and username registration for policy violations. Messages violating filter lists are sanitized automatically, and repeat violations trigger automated mutes via the Raid Shield system.</p>
+        <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">5. Sandboxed Web Gateway Proxy Disclaimer & Usage Boundaries</h4>
+        <p style="margin-bottom: 14px;">The Nitro Shield Browser relay is provided strictly for educational asset testing and discreet research. Utilizing the gateway proxy to bypass local network security policies, conduct cyber attacks, access illegal materials, or scrape third-party websites is strictly forbidden. The system automatically blocks restricted domain keywords and logs gateway activity for security compliance.</p>
 
-        <h4 style="color: #f59e0b; margin: 14px 0 6px; font-size: 1rem;">7. IP Address Logging & Security Audits</h4>
-        <p style="margin-bottom: 14px;">To protect the platform against network abuse, DDoS attacks, and unauthorized gateway exploitation, client IP addresses, request headers, and user-agent metadata are logged automatically during session initialization and stored in administrative audit logs.</p>
+        <h4 style="color: #10b981; margin: 16px 0 6px; font-size: 1.05rem;">6. Nitro AI Assistant & Multimodal Safety Protocols</h4>
+        <p style="margin-bottom: 14px;">Nitro AI provides academic assistance and STEM problem solving. Users must not attempt to prompt-inject, jailbreak, or extract system instructions. In compliance with safety standards, any queries involving self-harm, suicide, weapons, or illegal exploits are blocked automatically, with emergency crisis hotline information provided where appropriate.</p>
 
-        <h4 style="color: #ec4899; margin: 14px 0 6px; font-size: 1rem;">8. VIP / PRO Tier Access & Perks</h4>
-        <p style="margin-bottom: 14px;">VIP and PRO access tiers provide advanced customization features, custom chat glows, title flairs, and unfiltered gateway routing. PRO perks are granted or revoked at the platform owner's discretion.</p>
+        <h4 style="color: #f59e0b; margin: 16px 0 6px; font-size: 1.05rem;">7. Automated Disciplinary Escalation Framework</h4>
+        <p style="margin-bottom: 14px;">Platform infractions are handled through a 5-tier automated enforcement system:</p>
+        <ul style="margin: 0 0 14px 20px; padding: 0;">
+          <li style="margin-bottom: 4px;"><strong>*** Censor:</strong> Mild profanity is sanitized with asterisk masking.</li>
+          <li style="margin-bottom: 4px;"><strong>⚠️ Warning Strike:</strong> Message blocked and strike issued to account.</li>
+          <li style="margin-bottom: 4px;"><strong>🔇 5m / 1h Mute:</strong> Repeated chat flooding or toxicity results in chat mute.</li>
+          <li style="margin-bottom: 4px;"><strong>⛔ 1d / 3d Suspension:</strong> Severe profanity or NSFW uploads trigger temporary bans.</li>
+          <li style="margin-bottom: 4px;"><strong>💀 Permanent Ban:</strong> Extreme slurs, hate speech, or malicious exploits trigger permanent account and IP bans.</li>
+        </ul>
 
-        <h4 style="color: #ef4444; margin: 14px 0 6px; font-size: 1rem;">9. Maintenance Mode & Owner Exclusive Access</h4>
-        <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be activated. When enabled, all non-owner connections (including standard admins, VIPs, and members) will be disconnected automatically, reserving exclusive system access to the platform Owner.</p>
+        <h4 style="color: #ec4899; margin: 16px 0 6px; font-size: 1.05rem;">8. Formal Appeal System & AI Arbitration</h4>
+        <p style="margin-bottom: 14px;">Muted or suspended users may submit a formal appeal through the Punishment Appeal Portal. Appeals are evaluated by Groq AI for sincerity and remorse, followed by final administrator review. If an appeal is approved, mutes, account bans, and gateway restrictions are lifted automatically across the platform.</p>
 
-        <h4 style="color: var(--text-main); margin: 14px 0 6px; font-size: 1rem;">10. Limitation of Liability & Warranties</h4>
-        <p style="margin-bottom: 14px;">NITRO is provided "AS IS" without warranties of any kind. The platform administration assumes no liability for service interruptions, data loss, external proxied web content, or third-party game availability.</p>
+        <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">9. Telemetry, Audit Logging & Security Webhooks</h4>
+        <p style="margin-bottom: 14px;">For platform security and abuse prevention, client IP addresses, browser user-agents, authentication events, moderation actions, and chat activity are recorded in secure database audit logs and dispatched live to administrative Discord Webhooks (Moderation Actions, Audit Logs, AI Logs, and Chat Logs).</p>
 
-        <h4 style="color: #38bdf8; margin: 14px 0 6px; font-size: 1rem;">11. Copyright & DMCA Takedown Procedure</h4>
-        <p style="margin-bottom: 14px;">If you believe any content or game embedded on the platform infringes upon your copyright, please contact platform administrators with a formal takedown request containing proof of ownership for prompt removal.</p>
+        <h4 style="color: #ef4444; margin: 16px 0 6px; font-size: 1.05rem;">10. Intellectual Property & DMCA Takedown Procedure</h4>
+        <p style="margin-bottom: 14px;">All games, canvas tools, and embedded web content remain the intellectual property of their original developers and publishers. If you are a copyright owner and believe content on NITRO infringes your copyright, submit a formal DMCA takedown notice with proof of ownership to <code>jordan@nitromath.org</code> for immediate removal.</p>
 
-        <h4 style="color: #10b981; margin: 14px 0 6px; font-size: 1rem;">12. Modifications to Terms & Contact Details</h4>
-        <p style="margin-bottom: 0;">The administration reserves the right to amend these Terms of Service at any time. Continued use of the platform following updates constitutes acceptance of the modified policy terms.</p>
+        <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">11. Maintenance Mode & Supreme Owner Governance</h4>
+        <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be enabled. While active, non-owner connections (including standard members, VIPs, and standard admins) will be disconnected, reserving exclusive system access to the platform Owner (<code>jordandaniels</code>).</p>
+
+        <h4 style="color: var(--text-main); margin: 16px 0 6px; font-size: 1.05rem;">12. Disclaimer of Warranties & Limitation of Liability</h4>
+        <p style="margin-bottom: 0;">NITRO IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. THE PLATFORM ADMINISTRATION ASSUMES NO LIABILITY FOR SERVICE INTERRUPTIONS, DATA LOSS, THIRD-PARTY EMBEDS, OR GATEWAY PROXY ROUTING CONTENT.</p>
       </div>
-      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 18px; padding: 12px; font-weight: 800;">I Have Read & Agree to All Terms</button>
+      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 18px; padding: 12px; font-weight: 800;">I Have Read & Agree to All Detailed Terms</button>
     </div>
   </div>
 
@@ -3054,5 +3198,14 @@
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="/js/app.js"></script>
+  <!-- LIGHTBOX IMAGE MODAL -->
+  <div class="modal-overlay" id="chat-image-lightbox-modal" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); z-index: 999999;">
+    <div style="position: relative; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center;">
+      <button type="button" id="chat-image-lightbox-close" style="position: absolute; top: -14px; right: -14px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 34px; height: 34px; font-weight: 900; font-size: 1.1rem; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">✕</button>
+      <img id="chat-image-lightbox-img" src="" style="max-width: 90vw; max-height: 82vh; border-radius: 12px; border: 2px solid var(--card-border); box-shadow: 0 20px 60px rgba(0,0,0,0.9); object-fit: contain;">
+      <div id="chat-image-lightbox-caption" style="margin-top: 10px; color: #94a3b8; font-size: 0.85rem; background: rgba(0,0,0,0.7); padding: 5px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.1);">Shared in Nitro Games Community Chat • Scanned by Groq AI</div>
+    </div>
+  </div>
+
 </body>
 </html>

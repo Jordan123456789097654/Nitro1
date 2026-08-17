@@ -378,8 +378,109 @@ Respond ONLY with valid JSON.`;
 }
 
 /**
- * Interactive playground / testing method for administrators
+ * Evaluates an image with Groq AI Vision model (llama-3.2-11b-vision-preview).
+ * Scans image for NSFW/nudity, gore, violence, hate speech text inside image, or doxxing.
  */
+async function checkImageWithGroqModeration(imageUrlOrBase64, options = {}) {
+  const startTime = Date.now();
+  if (!imageUrlOrBase64 || typeof imageUrlOrBase64 !== 'string') {
+    return { flagged: false, latencyMs: 0 };
+  }
+
+  const currentConfig = systemState.getAiConfig();
+  if (!currentConfig.enabled && !options.force) {
+    return { flagged: false, bypassed: true, reason: 'AI Moderation Offline' };
+  }
+
+  const visionModel = options.model || 'llama-3.2-11b-vision-preview';
+  const timeoutMs = options.timeoutMs || 7000;
+
+  const systemPrompt = `You are an uncompromising AI Safety Image Moderation Engine for "Nitro Games", a student gaming and chat community.
+Analyze the provided image carefully for inappropriate or unsafe content:
+1. NSFW / Nudity / Explicit Sexual Content
+2. Blood, Gore, Extreme Violence, Graphic Injuries
+3. Hate symbols, Nazi imagery, racist/homophobic text inside image
+4. Doxxing, personal private identity documents, credit cards, SSNs
+5. Illegal substances, weapons, self-harm
+
+Return a valid JSON object matching EXACTLY this schema:
+{
+  "flagged": true | false,
+  "category": "nsfw" | "violence_gore" | "hate_speech" | "doxxing" | "illicit" | "none",
+  "severity": "low" | "medium" | "high" | "extreme" | "none",
+  "confidence": 0.0 to 1.0,
+  "reason": "Short summary of why image was flagged or 'Safe image'",
+  "recommended_action": "block" | "warn" | "ban_1d" | "perm_ban" | "allow"
+}
+
+If the image is completely normal, safe, and appropriate for students (games, memes, art, pets, code, screenshots), return:
+{"flagged": false, "category": "none", "severity": "none", "confidence": 1.0, "reason": "Safe image", "recommended_action": "allow"}
+
+Respond ONLY with valid JSON.`;
+
+  let formattedImageUrl = imageUrlOrBase64;
+  if (!formattedImageUrl.startsWith('http') && !formattedImageUrl.startsWith('data:')) {
+    formattedImageUrl = `data:image/jpeg;base64,${formattedImageUrl}`;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const response = await fetch(GROQ_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: visionModel,
+        temperature: 0.0,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: systemPrompt },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Please evaluate this image for safety compliance.' },
+              { type: 'image_url', image_url: { url: formattedImageUrl } }
+            ]
+          }
+        ]
+      })
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const data = await response.json();
+      const rawContent = data?.choices?.[0]?.message?.content;
+      if (rawContent) {
+        const parsed = JSON.parse(rawContent);
+        return {
+          flagged: Boolean(parsed.flagged),
+          category: parsed.category || 'general',
+          severity: parsed.severity || (parsed.flagged ? 'high' : 'none'),
+          confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.95,
+          reason: parsed.reason || (parsed.flagged ? 'Inappropriate Image Content' : 'Safe image'),
+          recommended_action: parsed.recommended_action || (parsed.flagged ? 'block' : 'allow'),
+          latencyMs: Date.now() - startTime
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[AI Image Moderation] Groq Vision call error:', err.message);
+  }
+
+  return {
+    flagged: false,
+    bypassed: true,
+    reason: 'Groq Vision API unreachable / fallback',
+    latencyMs: Date.now() - startTime
+  };
+}
+
 async function testGroqModeration(text, customOptions = {}) {
   const result = await checkMessageWithGroqModeration(text, {
     force: true,
@@ -390,6 +491,7 @@ async function testGroqModeration(text, customOptions = {}) {
 
 module.exports = {
   checkMessageWithGroqModeration,
+  checkImageWithGroqModeration,
   testGroqModeration,
   evaluateAppealWithGroq,
   normalizeObfuscatedText

@@ -2,12 +2,31 @@ import { getSharedSocket } from './socket.js';
 import { getCurrentUser } from './auth.js';
 
 let audioCtx = null;
+let masterGainNode = null;
+let masterVolume = 0.8;
+let soundboardSearchQuery = '';
+
+// Global AudioContext unlocker on user gesture
+function unlockAudioContext() {
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().then(() => {
+      console.log('🔊 AudioContext unlocked successfully.');
+    }).catch(e => console.warn('AudioContext unlock failed:', e));
+  }
+}
+
+['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evt => {
+  window.addEventListener(evt, unlockAudioContext, { once: false, passive: true });
+});
 
 function getAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
       audioCtx = new AudioContextClass();
+      masterGainNode = audioCtx.createGain();
+      masterGainNode.gain.setValueAtTime(masterVolume, audioCtx.currentTime);
+      masterGainNode.connect(audioCtx.destination);
     }
   }
   if (audioCtx && audioCtx.state === 'suspended') {
@@ -16,43 +35,59 @@ function getAudioContext() {
   return audioCtx;
 }
 
+function getMasterOutput() {
+  const ctx = getAudioContext();
+  if (!ctx) return null;
+  if (!masterGainNode) {
+    masterGainNode = ctx.createGain();
+    masterGainNode.gain.setValueAtTime(masterVolume, ctx.currentTime);
+    masterGainNode.connect(ctx.destination);
+  } else {
+    masterGainNode.gain.setValueAtTime(masterVolume, ctx.currentTime);
+  }
+  return masterGainNode;
+}
+
 // Web Audio API Synthesizers for Instant Sound Effects
 export const SOUND_EFFECTS = {
   vineboom: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(160, now);
-    osc.frequency.exponentialRampToValueAtTime(25, now + 0.5);
-    gain.gain.setValueAtTime(0.8, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+    osc.frequency.exponentialRampToValueAtTime(25, now + 0.6);
+    gain.gain.setValueAtTime(0.9, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(output);
     osc.start(now);
-    osc.stop(now + 0.5);
+    osc.stop(now + 0.6);
   },
   bruh: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(220, now);
-    osc.frequency.linearRampToValueAtTime(110, now + 0.4);
-    gain.gain.setValueAtTime(0.4, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+    osc.frequency.linearRampToValueAtTime(105, now + 0.45);
+    gain.gain.setValueAtTime(0.5, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(output);
     osc.start(now);
-    osc.stop(now + 0.4);
+    osc.stop(now + 0.45);
   },
   victorychime: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     [1046.5, 1318.5, 1567.98, 2093].forEach((f, i) => {
       const osc = ctx.createOscillator();
@@ -60,17 +95,18 @@ export const SOUND_EFFECTS = {
       const start = now + i * 0.08;
       osc.type = 'sine';
       osc.frequency.setValueAtTime(f, start);
-      gain.gain.setValueAtTime(0.3, start);
+      gain.gain.setValueAtTime(0.35, start);
       gain.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(output);
       osc.start(start);
       osc.stop(start + 0.6);
     });
   },
   airhorn: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     [466.16, 466.16, 466.16, 622.25].forEach((freq, idx) => {
       const osc = ctx.createOscillator();
@@ -79,102 +115,194 @@ export const SOUND_EFFECTS = {
       const dur = idx === 3 ? 0.4 : 0.07;
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(freq, start);
-      gain.gain.setValueAtTime(0.35, start);
-      gain.gain.exponentialRampToValueAtTime(0.01, start + dur);
+      gain.gain.setValueAtTime(0.4, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(output);
       osc.start(start);
       osc.stop(start + dur);
     });
   },
   coin: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sine';
     osc.frequency.setValueAtTime(987.77, now);
     osc.frequency.setValueAtTime(1318.51, now + 0.08);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(output);
     osc.start(now);
-    osc.stop(now + 0.3);
+    osc.stop(now + 0.35);
   },
   laser: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(880, now);
-    osc.frequency.exponentialRampToValueAtTime(110, now + 0.15);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+    osc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.18);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(output);
     osc.start(now);
-    osc.stop(now + 0.15);
+    osc.stop(now + 0.18);
   },
   gameover: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.linearRampToValueAtTime(75, now + 0.65);
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.65);
+    osc.connect(gain);
+    gain.connect(output);
+    osc.start(now);
+    osc.stop(now + 0.65);
+  },
+  beep: () => {
+    const ctx = getAudioContext();
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(output);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  },
+  drumroll: () => {
+    const ctx = getAudioContext();
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
+    const now = ctx.currentTime;
+    for (let i = 0; i < 14; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = now + i * 0.038;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(110 + Math.random() * 50, start);
+      gain.gain.setValueAtTime(0.25, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.035);
+      osc.connect(gain);
+      gain.connect(output);
+      osc.start(start);
+      osc.stop(start + 0.035);
+    }
+  },
+  wompwomp: () => {
+    const ctx = getAudioContext();
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
+    const now = ctx.currentTime;
+    [329.63, 311.13, 293.66, 277.18].forEach((f, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = now + idx * 0.22;
+      const dur = idx === 3 ? 0.6 : 0.2;
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f, start);
+      gain.gain.setValueAtTime(0.35, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      osc.connect(gain);
+      gain.connect(output);
+      osc.start(start);
+      osc.stop(start + dur);
+    });
+  },
+  levelup: () => {
+    const ctx = getAudioContext();
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
+    const now = ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = now + idx * 0.08;
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(f, start);
+      gain.gain.setValueAtTime(0.25, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+      osc.connect(gain);
+      gain.connect(output);
+      osc.start(start);
+      osc.stop(start + 0.2);
+    });
+  },
+  quack: () => {
+    const ctx = getAudioContext();
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(300, now);
-    osc.frequency.linearRampToValueAtTime(80, now + 0.6);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+    osc.frequency.linearRampToValueAtTime(150, now + 0.25);
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(output);
     osc.start(now);
-    osc.stop(now + 0.6);
+    osc.stop(now + 0.25);
   },
-  beep: () => {
+  explosion: () => {
     const ctx = getAudioContext();
-    if (!ctx) return;
+    const output = getMasterOutput();
+    if (!ctx || !output) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, now);
-    gain.gain.setValueAtTime(0.2, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(20, now + 0.7);
+    gain.gain.setValueAtTime(0.9, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(output);
     osc.start(now);
-    osc.stop(now + 0.1);
-  },
-  drumroll: () => {
-    const ctx = getAudioContext();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-    for (let i = 0; i < 12; i++) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const start = now + i * 0.04;
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(120 + Math.random() * 40, start);
-      gain.gain.setValueAtTime(0.2, start);
-      gain.gain.exponentialRampToValueAtTime(0.01, start + 0.03);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + 0.03);
-    }
+    osc.stop(now + 0.7);
   }
 };
 
 function playAudioUrl(url) {
   if (!url) return;
   try {
-    const audio = new Audio(url);
-    audio.play().catch(e => console.warn('Audio playback error:', e));
+    let playUrl = url;
+    if (playUrl.startsWith('http') && !playUrl.includes(window.location.host) && !playUrl.includes('/api/gateway')) {
+      playUrl = '/api/gateway?url=' + encodeURIComponent(playUrl);
+    }
+    const audio = new Audio(playUrl);
+    audio.volume = masterVolume;
+    audio.play().catch(e => {
+      console.warn('Audio playback error (retrying after gesture):', e.message);
+      const playOnce = () => {
+        audio.play().catch(() => {});
+        window.removeEventListener('click', playOnce);
+        window.removeEventListener('keydown', playOnce);
+      };
+      window.addEventListener('click', playOnce, { once: true });
+      window.addEventListener('keydown', playOnce, { once: true });
+    });
   } catch (e) {
     console.error('Audio url error:', e);
   }
@@ -193,6 +321,25 @@ window.fullscreenSoundboardHub = function() {
   }
 };
 
+window.switchSoundboardTab = function(tab) {
+  const nativeBtn = document.getElementById('sb-tab-native-btn');
+  const externalBtn = document.getElementById('sb-tab-external-btn');
+  const nativeContent = document.getElementById('soundboard-tab-native-content');
+  const externalContent = document.getElementById('soundboard-tab-external-content');
+
+  if (tab === 'native') {
+    if (nativeBtn) { nativeBtn.classList.add('active'); nativeBtn.style.borderColor = '#ec4899'; nativeBtn.style.background = 'rgba(236, 72, 153, 0.2)'; nativeBtn.style.color = '#ec4899'; }
+    if (externalBtn) { externalBtn.classList.remove('active'); externalBtn.style.borderColor = 'var(--card-border)'; externalBtn.style.background = 'rgba(255,255,255,0.06)'; externalBtn.style.color = '#94a3b8'; }
+    if (nativeContent) nativeContent.style.display = 'block';
+    if (externalContent) externalContent.style.display = 'none';
+  } else {
+    if (externalBtn) { externalBtn.classList.add('active'); externalBtn.style.borderColor = '#ec4899'; externalBtn.style.background = 'rgba(236, 72, 153, 0.2)'; externalBtn.style.color = '#ec4899'; }
+    if (nativeBtn) { nativeBtn.classList.remove('active'); nativeBtn.style.borderColor = 'var(--card-border)'; nativeBtn.style.background = 'rgba(255,255,255,0.06)'; nativeBtn.style.color = '#94a3b8'; }
+    if (externalContent) externalContent.style.display = 'block';
+    if (nativeContent) nativeContent.style.display = 'none';
+  }
+};
+
 export function initSoundboard() {
   const socket = getSharedSocket();
   if (socket) {
@@ -205,29 +352,66 @@ export function initSoundboard() {
     });
   }
 
+  setupMasterVolumeControls();
+  setupSearchInput();
   setupUploadModal();
   loadSoundboards();
 }
+
+function setupMasterVolumeControls() {
+  const volInput = document.getElementById('soundboard-master-volume');
+  const volLabel = document.getElementById('soundboard-volume-label');
+  const volIcon = document.getElementById('soundboard-volume-icon');
+
+  if (volInput) {
+    volInput.addEventListener('input', (e) => {
+      masterVolume = parseFloat(e.target.value);
+      if (masterGainNode && audioCtx) {
+        masterGainNode.gain.setValueAtTime(masterVolume, audioCtx.currentTime);
+      }
+      if (volLabel) volLabel.textContent = `${Math.round(masterVolume * 100)}%`;
+      if (volIcon) volIcon.textContent = masterVolume === 0 ? '🔇' : masterVolume < 0.5 ? '🔉' : '🔊';
+    });
+  }
+}
+
+function setupSearchInput() {
+  const searchInput = document.getElementById('soundboard-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      soundboardSearchQuery = e.target.value.toLowerCase().trim();
+      loadSoundboards();
+    });
+  }
+}
+
+const BUILTIN_ITEMS = [
+  { key: 'vineboom', label: '💥 Vine Boom', icon: '💥', color: '#ef4444' },
+  { key: 'bruh', label: '🗿 Bruh Sound', icon: '🗿', color: '#a855f7' },
+  { key: 'victorychime', label: '🔔 Victory Chime', icon: '🔔', color: '#10b981' },
+  { key: 'airhorn', label: '📢 Airhorn', icon: '📢', color: '#f59e0b' },
+  { key: 'coin', label: '🪙 Retro Coin', icon: '🪙', color: '#fbbf24' },
+  { key: 'laser', label: '⚡ Laser Blast', icon: '⚡', color: '#38bdf8' },
+  { key: 'gameover', label: '💀 Game Over', icon: '💀', color: '#ef4444' },
+  { key: 'drumroll', label: '🥁 Drumroll', icon: '🥁', color: '#a855f7' },
+  { key: 'beep', label: '🔔 Alert Tone', icon: '🔔', color: '#ec4899' },
+  { key: 'wompwomp', label: '🎷 Womp Womp', icon: '🎷', color: '#f59e0b' },
+  { key: 'levelup', label: '⭐ Level Up', icon: '⭐', color: '#10b981' },
+  { key: 'quack', label: '🦆 Quack', icon: '🦆', color: '#fbbf24' },
+  { key: 'explosion', label: '💣 Explosion', icon: '💣', color: '#ef4444' }
+];
 
 async function loadSoundboards() {
   const containerGlobal = document.getElementById('soundboard-grid');
   const containerCustom = document.getElementById('soundboard-grid-custom');
 
-  const BUILTIN_ITEMS = [
-    { key: 'vineboom', label: '💥 Vine Boom', icon: '💥', color: '#ef4444' },
-    { key: 'bruh', label: '🗿 Bruh Sound', icon: '🗿', color: '#a855f7' },
-    { key: 'victorychime', label: '🔔 Victory Chime', icon: '🔔', color: '#10b981' },
-    { key: 'airhorn', label: '📢 Airhorn', icon: '📢', color: '#f59e0b' },
-    { key: 'coin', label: '🪙 Retro Coin', icon: '🪙', color: '#fbbf24' },
-    { key: 'laser', label: '⚡ Laser Blast', icon: '⚡', color: '#38bdf8' },
-    { key: 'gameover', label: '💀 Game Over', icon: '💀', color: '#ef4444' },
-    { key: 'drumroll', label: '🥁 Drumroll', icon: '🥁', color: '#a855f7' },
-    { key: 'beep', label: '🔔 Alert Tone', icon: '🔔', color: '#ec4899' }
-  ];
+  const filteredBuiltin = BUILTIN_ITEMS.filter(item => 
+    !soundboardSearchQuery || item.label.toLowerCase().includes(soundboardSearchQuery) || item.key.toLowerCase().includes(soundboardSearchQuery)
+  );
 
   if (containerGlobal) {
     containerGlobal.innerHTML = '';
-    BUILTIN_ITEMS.forEach(item => {
+    filteredBuiltin.forEach(item => {
       const btn = document.createElement('button');
       btn.className = 'soundboard-card-btn';
       btn.style.borderColor = item.color;
@@ -267,8 +451,13 @@ async function loadSoundboards() {
       const user = getCurrentUser();
       const isOwnerOrAdmin = user && (user.role === 'owner' || user.role === 'admin');
 
-      const customSounds = data.sounds.filter(s => !s.is_global);
-      const globalCustomSounds = data.sounds.filter(s => s.is_global);
+      let customSounds = data.sounds.filter(s => !s.is_global);
+      let globalCustomSounds = data.sounds.filter(s => s.is_global);
+
+      if (soundboardSearchQuery) {
+        customSounds = customSounds.filter(s => (s.title || '').toLowerCase().includes(soundboardSearchQuery));
+        globalCustomSounds = globalCustomSounds.filter(s => (s.title || '').toLowerCase().includes(soundboardSearchQuery));
+      }
 
       // Render admin global sounds into global grid
       globalCustomSounds.forEach(sound => {
@@ -280,7 +469,7 @@ async function loadSoundboards() {
       if (containerCustom) {
         containerCustom.innerHTML = '';
         if (customSounds.length === 0) {
-          containerCustom.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No custom uploaded sounds yet. Click "Upload Custom Sound" above to add your own!</div>';
+          containerCustom.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No custom uploaded sounds match your filter. Click "Upload Custom Sound" above to add your own!</div>';
         } else {
           customSounds.forEach(sound => {
             const btn = createCustomSoundCard(sound, isOwnerOrAdmin, user);
@@ -371,6 +560,7 @@ window.closeSoundUploadModal = function() {
 function setupUploadModal() {
   const modal = document.getElementById('soundboard-upload-modal');
   const openBtn = document.getElementById('open-sound-upload-btn');
+  const openBtnView = document.getElementById('open-sound-upload-btn-view');
   const closeBtn = document.getElementById('soundboard-upload-modal-close');
   const form = document.getElementById('soundboard-upload-form');
 
@@ -380,6 +570,13 @@ function setupUploadModal() {
 
   if (openBtn) {
     openBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.openSoundUploadModal();
+    });
+  }
+
+  if (openBtnView) {
+    openBtnView.addEventListener('click', (e) => {
       e.preventDefault();
       window.openSoundUploadModal();
     });

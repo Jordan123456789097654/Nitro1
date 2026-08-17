@@ -21,6 +21,42 @@ export function initAuth(onUserChange) {
   setupAuthModal(onUserChange);
   setupMandatoryLoginGate(onUserChange);
   setupProfileModal(onUserChange);
+  checkAndApplySignupsGate();
+}
+
+// Fetch signup status once and adjust the login gate UI
+async function checkAndApplySignupsGate() {
+  try {
+    const res = await fetch('/api/admin/signups-status');
+    if (!res.ok) return;
+    const data = await res.json();
+    applySignupsGateUI(data.signups_enabled);
+  } catch (e) {}
+}
+
+export function applySignupsGateUI(signupsEnabled) {
+  const registerRow = document.getElementById('gate-register-row');
+  const closedNotice = document.getElementById('gate-signups-closed-notice');
+  const toggleLink = document.getElementById('gate-toggle-link');
+  const toggleText = document.getElementById('gate-toggle-text');
+  const formTitle = document.getElementById('gate-form-title');
+  const submitBtn = document.getElementById('gate-submit-btn');
+
+  if (!signupsEnabled) {
+    // Hide the register toggle, show the closed notice
+    if (registerRow) registerRow.style.display = 'none';
+    if (closedNotice) closedNotice.style.display = 'block';
+    // If they somehow switched to register mode, reset back to login
+    if (formTitle && formTitle.textContent.toLowerCase().includes('create')) {
+      if (formTitle) formTitle.textContent = 'Sign in to your account';
+      if (submitBtn) submitBtn.textContent = 'Sign In';
+      if (toggleText) toggleText.textContent = 'Need an account?';
+      if (toggleLink) toggleLink.textContent = 'Register';
+    }
+  } else {
+    if (registerRow) registerRow.style.display = '';
+    if (closedNotice) closedNotice.style.display = 'none';
+  }
 }
 
 export function getCurrentUser() {
@@ -178,6 +214,8 @@ export async function checkSession(onUserChange) {
       localStorage.setItem('nitro_jwt_token', token);
       if (data.must_reset_password) {
         setTimeout(handleMandatoryPasswordReset, 600);
+      } else if (data.user && data.user.require_profile_update) {
+        setTimeout(() => handleMandatoryProfileFix(data.user.profile_lock_reason), 600);
       }
     } else {
       currentUser = null;
@@ -265,6 +303,78 @@ export function handleMandatoryPasswordReset() {
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Update Password & Continue';
+      }
+    }
+  };
+}
+
+export function handleMandatoryProfileFix(reason = '') {
+  const modal = document.getElementById('force-profile-fix-modal');
+  const form = document.getElementById('force-profile-fix-form');
+  const reasonEl = document.getElementById('force-profile-fix-reason');
+  const nameInput = document.getElementById('force-profile-display-name');
+  const bioInput = document.getElementById('force-profile-bio');
+  const avatarInput = document.getElementById('force-profile-avatar-url');
+  const errorEl = document.getElementById('force-profile-fix-error');
+  const submitBtn = document.getElementById('force-profile-fix-submit-btn');
+
+  if (!modal || !form) return;
+
+  if (reasonEl && reason) {
+    reasonEl.textContent = reason;
+  }
+  if (currentUser) {
+    if (nameInput) nameInput.value = currentUser.display_name || currentUser.username || '';
+    if (bioInput) bioInput.value = currentUser.bio || '';
+    if (avatarInput) avatarInput.value = currentUser.avatar_url || '';
+  }
+
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (errorEl) errorEl.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Saving & Validating Profile...';
+    }
+
+    try {
+      const token = getCookie('nitro_jwt_token') || localStorage.getItem('nitro_jwt_token');
+      const res = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          display_name: nameInput ? nameInput.value.trim() : '',
+          bio: bioInput ? bioInput.value.trim() : '',
+          avatar_url: avatarInput ? avatarInput.value.trim() : ''
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.user) {
+        throw new Error(data.error || 'Failed to update profile.');
+      }
+
+      currentUser = data.user;
+      currentUser.require_profile_update = false;
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+      alert('✅ Profile updated successfully! Account access restored.');
+      location.reload();
+    } catch (err) {
+      if (errorEl) {
+        errorEl.textContent = err.message || 'Error updating profile.';
+        errorEl.style.display = 'block';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 Save & Unlock Account';
       }
     }
   };
@@ -597,8 +707,19 @@ function setupMandatoryLoginGate(onUserChange) {
   let gateIsRegister = false;
 
   if (toggleLink) {
-    toggleLink.addEventListener('click', (e) => {
+    toggleLink.addEventListener('click', async (e) => {
       e.preventDefault();
+      // Check live if signups are still allowed before switching to register mode
+      if (!gateIsRegister) {
+        try {
+          const res = await fetch('/api/admin/signups-status');
+          const data = await res.json();
+          if (!data.signups_enabled) {
+            applySignupsGateUI(false);
+            return;
+          }
+        } catch (e) {}
+      }
       gateIsRegister = !gateIsRegister;
       if (gateIsRegister) {
         formTitle.textContent = 'Create Academic Account';
@@ -635,6 +756,17 @@ function setupMandatoryLoginGate(onUserChange) {
           if (data.is_banned) {
             toggleMandatoryGate(false);
             showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username);
+            return;
+          }
+          // Show the closed notice for 403 registration-disabled errors
+          if (res.status === 403 && gateIsRegister) {
+            applySignupsGateUI(false);
+            // Reset back to login mode
+            gateIsRegister = false;
+            if (formTitle) formTitle.textContent = 'Sign in to your account';
+            if (submitBtn) submitBtn.textContent = 'Sign In';
+            if (toggleText) toggleText.textContent = 'Need an account?';
+            if (toggleLink) toggleLink.textContent = 'Register';
             return;
           }
           errorMsg.textContent = data.error || 'Authentication error';

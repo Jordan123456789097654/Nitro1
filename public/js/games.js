@@ -1300,52 +1300,94 @@ function setupLeaderboardsModal() {
   const closeBtn = document.getElementById('leaderboards-modal-close');
   const tabTime = document.getElementById('lb-tab-time');
   const tabGames = document.getElementById('lb-tab-games');
+  const tabChatters = document.getElementById('lb-tab-chatters');
+  const colStat1 = document.getElementById('lb-col-stat1');
+  const colStat2 = document.getElementById('lb-col-stat2');
 
   let currentMode = 'playtime';
 
   async function fetchLeaderboard(mode) {
     const tbody = document.getElementById('leaderboard-tbody');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Loading ranking data...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8; font-weight:700;">🔄 Loading live network player rankings...</td></tr>';
+
+    if (colStat1 && colStat2) {
+      if (mode === 'playtime') {
+        colStat1.innerText = 'Total Playtime';
+        colStat2.innerText = 'Games Played';
+      } else if (mode === 'games') {
+        colStat1.innerText = 'Games Played';
+        colStat2.innerText = 'Total Playtime';
+      } else if (mode === 'chatters') {
+        colStat1.innerText = 'Messages Sent';
+        colStat2.innerText = 'Total Playtime';
+      }
+    }
 
     try {
-      const endpoint = mode === 'playtime' ? '/api/games/leaderboards/playtime' : '/api/games/leaderboards/games';
+      const endpoint = `/api/games/leaderboards/${mode}`;
       const res = await fetch(endpoint);
       const data = await res.json();
       const list = data.leaderboard || [];
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">No ranked players yet. Play a game to rank #1!</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;">No ranked players found for this category yet. Be the first to rank #1!</td></tr>';
         return;
       }
 
       tbody.innerHTML = list.map((p, idx) => {
-        let rankBadge = `#${idx + 1}`;
-        if (idx === 0) rankBadge = '🥇 #1';
-        if (idx === 1) rankBadge = '🥈 #2';
-        if (idx === 2) rankBadge = '🥉 #3';
+        let rankBadge = `<span style="color:#94a3b8; font-weight:800; font-size:0.9rem;">#${idx + 1}</span>`;
+        let bgStyle = 'border-bottom: 1px solid rgba(255,255,255,0.05);';
+
+        if (idx === 0) {
+          rankBadge = `<span style="background:linear-gradient(135deg, #fbbf24, #f59e0b); color:#000; font-weight:900; padding:4px 10px; border-radius:99px; font-size:0.85rem; box-shadow:0 0 12px rgba(251,191,36,0.6);">🥇 #1 CHAMPION</span>`;
+          bgStyle += ' background: rgba(251,191,36,0.08);';
+        } else if (idx === 1) {
+          rankBadge = `<span style="background:linear-gradient(135deg, #94a3b8, #64748b); color:#000; font-weight:900; padding:4px 10px; border-radius:99px; font-size:0.85rem; box-shadow:0 0 10px rgba(148,163,184,0.4);">🥈 #2 RUNNER UP</span>`;
+          bgStyle += ' background: rgba(148,163,184,0.05);';
+        } else if (idx === 2) {
+          rankBadge = `<span style="background:linear-gradient(135deg, #d97706, #b45309); color:#fff; font-weight:900; padding:4px 10px; border-radius:99px; font-size:0.85rem; box-shadow:0 0 10px rgba(217,119,6,0.4);">🥉 #3 BRONZE</span>`;
+          bgStyle += ' background: rgba(217,119,6,0.05);';
+        }
 
         const hours = Math.floor((p.total_time_seconds || 0) / 3600);
         const mins = Math.floor(((p.total_time_seconds || 0) % 3600) / 60);
         const timeStr = `${hours}h ${mins}m`;
+        const avatar = p.avatar_url || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(p.username || 'user');
+
+        let stat1Val = timeStr;
+        let stat2Val = `${p.games_played || 0} Plays`;
+
+        if (mode === 'games') {
+          stat1Val = `${p.games_played || 0} Plays`;
+          stat2Val = timeStr;
+        } else if (mode === 'chatters') {
+          stat1Val = `💬 ${p.message_count || 0} Msgs`;
+          stat2Val = timeStr;
+        }
+
+        const roleName = (p.role || 'member').toUpperCase();
+        const roleClass = p.role || 'member';
 
         return `
-          <tr>
-            <td style="font-weight:800; color:${idx < 3 ? '#fbbf24' : '#fff'};">${rankBadge}</td>
-            <td>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:1.1rem;">👤</span>
-                <strong>${p.display_name || p.username}</strong>
-                <span class="chat-badge ${p.role || 'member'}">${(p.role || 'member').toUpperCase()}</span>
+          <tr style="${bgStyle}">
+            <td style="padding: 12px 16px;">${rankBadge}</td>
+            <td style="padding: 12px 16px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${avatar}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--card-border);" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(p.username || 'user')}'">
+                <div>
+                  <strong style="color:#fff; font-size:0.92rem; display:block;">${p.display_name || p.username}</strong>
+                  <span class="chat-badge ${roleClass}" style="font-size:0.68rem; padding:1px 6px;">${roleName}</span>
+                </div>
               </div>
             </td>
-            <td style="color:#38bdf8; font-weight:700;">${timeStr}</td>
-            <td style="color:#10b981; font-weight:700;">${p.games_played || 0} Plays</td>
+            <td style="padding: 12px 16px; color:#38bdf8; font-weight:800; font-size:0.9rem;">${stat1Val}</td>
+            <td style="padding: 12px 16px; color:#10b981; font-weight:700; font-size:0.88rem;">${stat2Val}</td>
           </tr>
         `;
       }).join('');
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error loading ranking.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#ef4444;">Error loading ranking.</td></tr>';
     }
   }
 
@@ -1360,21 +1402,22 @@ function setupLeaderboardsModal() {
     closeBtn.addEventListener('click', () => modal.classList.remove('active'));
   }
 
-  if (tabTime && tabGames) {
-    tabTime.addEventListener('click', () => {
-      currentMode = 'playtime';
-      tabTime.classList.add('active');
-      tabGames.classList.remove('active');
-      fetchLeaderboard('playtime');
-    });
+  const tabs = [
+    { btn: tabTime, mode: 'playtime' },
+    { btn: tabGames, mode: 'games' },
+    { btn: tabChatters, mode: 'chatters' }
+  ];
 
-    tabGames.addEventListener('click', () => {
-      currentMode = 'games';
-      tabGames.classList.add('active');
-      tabTime.classList.remove('active');
-      fetchLeaderboard('games');
-    });
-  }
+  tabs.forEach(t => {
+    if (t.btn) {
+      t.btn.addEventListener('click', () => {
+        currentMode = t.mode;
+        tabs.forEach(x => x.btn && x.btn.classList.remove('active'));
+        t.btn.classList.add('active');
+        fetchLeaderboard(t.mode);
+      });
+    }
+  });
 }
 
 

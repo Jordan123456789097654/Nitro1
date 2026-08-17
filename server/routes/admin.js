@@ -123,6 +123,38 @@ router.post('/ai-config/reset', async (req, res) => {
   }
 });
 
+// Get Admin Review Hold Threshold (Owner Configuration)
+router.get('/review-threshold', async (req, res) => {
+  try {
+    const threshold = await db.getAdminReviewHoldThreshold();
+    res.json({ success: true, threshold });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch review threshold.' });
+  }
+});
+
+// Update Admin Review Hold Threshold (Owner Configuration)
+router.post('/review-threshold', async (req, res) => {
+  const { threshold } = req.body;
+  if (!threshold) return res.status(400).json({ error: 'Threshold required.' });
+
+  try {
+    await db.setAdminReviewHoldThreshold(threshold);
+    await db.createModerationLog('UPDATE_REVIEW_THRESHOLD', req.adminUser.username, 'Safety System', `Admin Review Hold Threshold set to: ${threshold}`);
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'UPDATE_REVIEW_HOLD_THRESHOLD',
+      admin: req.adminUser.username,
+      details: `Admin Review Hold Threshold configured to: ${threshold}`
+    });
+
+    res.json({ success: true, threshold, message: `Admin Review Hold Threshold set to "${threshold}".` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update review threshold.' });
+  }
+});
+
 // Interactive Playground: Test AI Moderation with arbitrary input
 router.post('/ai-test', async (req, res) => {
   const { text, strictness, actionPolicy, model } = req.body;
@@ -197,6 +229,41 @@ router.post('/users/create', async (req, res) => {
 });
 
 // OWNER-ONLY FEATURE TOGGLES API
+router.get('/signups-status', async (req, res) => {
+  try {
+    const signups_enabled = await db.isSignupsEnabled();
+    res.json({ success: true, signups_enabled });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch signup status.' });
+  }
+});
+
+router.post('/toggle-signups', requireOwner, async (req, res) => {
+  try {
+    const current = await db.isSignupsEnabled();
+    const { enabled } = req.body;
+    const newState = enabled !== undefined ? (enabled === true || enabled === 'true') : !current;
+
+    await db.setSignupsEnabled(newState);
+    await db.createModerationLog('TOGGLE_SIGNUPS', req.adminUser.username, 'Account Registration System', `Registration set to ${newState ? 'ENABLED' : 'DISABLED'}`);
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'OWNER_SIGNUPS_TOGGLE',
+      admin: req.adminUser.username,
+      details: `Account registration toggled to ${newState ? 'ENABLED' : 'DISABLED'}`
+    });
+
+    res.json({
+      success: true,
+      signups_enabled: newState,
+      message: `Account registration is now ${newState ? 'ENABLED' : 'DISABLED'}`
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update signup toggle state.' });
+  }
+});
+
 router.get('/features', async (req, res) => {
   try {
     const features = await db.getFeatureSettings();
@@ -264,6 +331,17 @@ router.delete('/blocked-domains/:id', async (req, res) => {
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: 'Failed to delete blocked domain.' });
+  }
+});
+
+// Auto-categorize all filter word punishments
+router.post('/auto-categorize-filters', async (req, res) => {
+  try {
+    const result = await db.autoCategorizeFilterWordPunishments();
+    await db.createModerationLog('AUTO_CATEGORIZE_FILTERS', req.adminUser.username, 'Word Filter Shield', `Auto-categorized ${result.updatedCount || 0} filter words`);
+    res.json({ success: true, message: `Successfully updated punishments for ${result.updatedCount || 0} filter words!` });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to auto-categorize filter words.' });
   }
 });
 
@@ -639,6 +717,89 @@ router.post('/users/:id/force-reset', async (req, res) => {
   }
 });
 
+// Force User to Fix Profile Content (Admin Action)
+router.post('/users/:id/require-profile-fix', async (req, res) => {
+  const targetId = req.params.id;
+  const admin = req.adminUser.username;
+  const { reason } = req.body;
+
+  try {
+    const targetUser = await db.getUserById(targetId);
+    if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    const lockReason = reason && String(reason).trim() ? String(reason).trim() : 'Administrator requested profile compliance update.';
+    await db.setProfileUpdateRequired(targetId, true, lockReason);
+
+    await db.createModerationLog('PROFILE_FIX_REQUIRED', admin, targetUser.username, lockReason);
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'PROFILE_COMPLIANCE_LOCK',
+      admin: admin,
+      target: targetUser.username,
+      details: `Account restricted until profile update: ${lockReason}`
+    });
+
+    res.json({ success: true, message: `Profile compliance lock enabled for @${targetUser.username}.` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to set profile compliance lock.' });
+  }
+});
+
+// Clear Profile Fix Lock (Admin Action)
+router.post('/users/:id/clear-profile-fix', async (req, res) => {
+  const targetId = req.params.id;
+  const admin = req.adminUser.username;
+
+  try {
+    const targetUser = await db.getUserById(targetId);
+    if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    await db.setProfileUpdateRequired(targetId, false, '');
+
+    await db.createModerationLog('PROFILE_FIX_CLEARED', admin, targetUser.username, 'Unlocked by administrator');
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'PROFILE_COMPLIANCE_UNLOCK',
+      admin: admin,
+      target: targetUser.username,
+      details: 'Profile compliance lock cleared by administrator.'
+    });
+
+    res.json({ success: true, message: `Profile lock cleared for @${targetUser.username}.` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear profile compliance lock.' });
+  }
+});
+
+// Gateway Proxy Ban User (Admin Action)
+router.post('/users/:id/gateway-ban', async (req, res) => {
+  const targetId = req.params.id;
+  const admin = req.adminUser.username;
+  const { reason } = req.body;
+
+  try {
+    const targetUser = await db.getUserById(targetId);
+    if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    await db.banGatewayUser(targetId, reason || 'Proxy banned by administrator');
+    await db.createModerationLog('GATEWAY_BAN_USER', admin, targetUser.username, reason || 'Proxy banned by administrator');
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'GATEWAY_BAN_USER',
+      admin: admin,
+      target: targetUser.username,
+      details: `Proxy access banned by administrator: ${reason || 'N/A'}`
+    });
+
+    res.json({ success: true, message: `Proxy access banned for ${targetUser.username}.` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to proxy ban user.' });
+  }
+});
+
 // Ungateway Ban / Clear Gateway Timeout & Strikes
 router.post('/users/:id/ungateway-ban', async (req, res) => {
   const targetId = req.params.id;
@@ -720,7 +881,14 @@ router.post('/users/:id/ban', async (req, res) => {
     }
 
     const banReason = reason || 'Violation of platform guidelines';
-    await db.updateUserBan(targetId, shouldBan, banReason, bannedUntil);
+    const durationDays = durationHours ? Math.ceil(Number(durationHours) / 24) : 0;
+    
+    if (shouldBan) {
+      await db.banUser(targetId, banReason, durationDays);
+    } else {
+      await db.unbanUser(targetId);
+    }
+
     const actionName = shouldBan ? 'BAN_USER' : 'UNBAN_USER';
     const logDetails = shouldBan ? `${banReason} [Banned ${durationText}]` : 'Ban lifted';
 

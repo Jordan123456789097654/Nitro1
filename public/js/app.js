@@ -12,6 +12,7 @@ import { initSoundboard } from './soundboard.js';
 import { initVoiceRooms } from './voice.js';
 import { initFriends, fetchFriends, sendFriendRequest } from './friends.js';
 import { initEmbedStudio } from './embed.js';
+import { initNotifications } from './notifications.js';
 
 export const FAVICON_MAP = {
   default: '/favicon.svg',
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initParticleCanvas();
   initThemes();
   initNavigation();
+  initNotifications();
   initGames();
   initChat();
   initAdmin();
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initKonamiCode();
   setupBadgesModal();
   setupAppealModal();
+  initSuggestAndBugModals();
   window.openPublicProfile = openPublicProfile;
 
   initAuth((user) => {
@@ -646,6 +649,9 @@ window.switchView = function(targetView) {
 
   updateSocketActivity(`Browsing ${targetView.toUpperCase()}`);
 
+  if (targetView === 'chat' && typeof window.refreshChatViewOnNavigate === 'function') {
+    window.refreshChatViewOnNavigate();
+  }
   if (targetView === 'pro') loadProGames();
   if (targetView === 'apps') {
     import('./apps.js').then(m => m.loadApps?.());
@@ -1114,6 +1120,99 @@ function setupAppealModal() {
         if (banWhyInput) banWhyInput.value = '';
         if (banPreventionInput) banPreventionInput.value = '';
       });
+    });
+  }
+}
+
+function initSuggestAndBugModals() {
+  const suggestForm = document.getElementById('suggest-form');
+  const suggestModal = document.getElementById('suggest-modal');
+  const suggestClose = document.getElementById('suggest-modal-close');
+  const suggestOpenBtns = document.querySelectorAll('#open-suggest-modal-btn, [data-open-modal="suggest"]');
+
+  suggestOpenBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (suggestModal) suggestModal.classList.add('active');
+    });
+  });
+  if (suggestClose && suggestModal) {
+    suggestClose.addEventListener('click', () => suggestModal.classList.remove('active'));
+  }
+
+  if (suggestForm) {
+    suggestForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('suggest-title').value.trim();
+      const details = document.getElementById('suggest-details').value.trim();
+      const user = getCurrentUser();
+      const username = user ? user.username : 'Guest';
+
+      if (!title || !details) return alert('Please enter both title and details.');
+
+      try {
+        const res = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, details, username })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('💡 Thank you! Your game suggestion has been submitted to the admins.');
+          suggestForm.reset();
+          if (suggestModal) suggestModal.classList.remove('active');
+        } else {
+          alert(data.error || 'Failed to submit suggestion.');
+        }
+      } catch (err) {
+        alert('Network error submitting suggestion.');
+      }
+    });
+  }
+
+  const bugForm = document.getElementById('bug-form');
+  const bugModal = document.getElementById('bug-modal');
+  const bugClose = document.getElementById('bug-modal-close');
+  const bugOpenBtns = document.querySelectorAll('#open-bug-modal-btn, [data-open-modal="bug"]');
+
+  bugOpenBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (bugModal) bugModal.classList.add('active');
+    });
+  });
+  if (bugClose && bugModal) {
+    bugClose.addEventListener('click', () => bugModal.classList.remove('active'));
+  }
+
+  if (bugForm) {
+    bugForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('bug-title').value.trim();
+      const category = document.getElementById('bug-category').value;
+      const description = document.getElementById('bug-desc').value.trim();
+      const user = getCurrentUser();
+      const username = user ? user.username : 'Guest';
+
+      if (!title || !description) return alert('Please fill in title and description.');
+
+      try {
+        const res = await fetch('/api/bugs/bugs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, category, description, username })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert('🐛 Thank you! Your bug report has been logged for administrators.');
+          bugForm.reset();
+          if (bugModal) bugModal.classList.remove('active');
+        } else {
+          alert(data.error || 'Failed to submit bug report.');
+        }
+      } catch (err) {
+        alert('Network error submitting bug report.');
+      }
     });
   }
 }
