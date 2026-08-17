@@ -33,7 +33,6 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-app.set('trust gateway', 1);
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -200,7 +199,7 @@ app.get('/health', (req, res) => {
 
 // Disable caching on client JS files during development to ensure instant updates
 app.use('/js', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, gateway-revalidate');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   next();
@@ -263,7 +262,7 @@ app.use('/api/soundboard', require('./routes/soundboard'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/appeals', require('./routes/appeals'));
 app.use('/api/suggestions', require('./routes/suggestions'));
-app.use('/api/bugs', require('./routes/suggestions'));
+// Bug reports handled via /api/games/bug-report and /api/suggestions/bugs
 
 // Static files (Frontend Client)
 app.use(express.static(path.join(__dirname, '../public')));

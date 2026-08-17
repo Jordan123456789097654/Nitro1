@@ -389,28 +389,7 @@ const db = {
     }
   },
 
-  // Site Settings & Maintenance Mode
-  async getSetting(key) {
-    try {
-      const res = await pool.query('SELECT value FROM site_settings WHERE key = $1', [key]);
-      return res.rows[0]?.value || null;
-    } catch (e) {
-      return null;
-    }
-  },
-
-  async setSetting(key, value) {
-    try {
-      await pool.query(`
-        INSERT INTO site_settings (key, value, updated_at)
-        VALUES ($1, $2, CURRENT_TIMESTAMP)
-        ON CONFLICT (key)
-        DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP
-      `, [key, value]);
-    } catch (e) {
-      console.error('setSetting error:', e.message);
-    }
-  },
+  // Settings methods defined below near line 997
 
   async getMaintenanceMode() {
     const val = await this.getSetting('maintenance_mode');
@@ -778,26 +757,40 @@ const db = {
     return null;
   },
 
-  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair }) {
+  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password }) {
     try {
-      const res = await pool.query(`
-        UPDATE users 
-        SET avatar_url = COALESCE($1, avatar_url),
-            display_name = COALESCE($2, display_name),
-            bio = COALESCE($3, bio),
-            pro_chat_glow = COALESCE($4, pro_chat_glow),
-            pro_custom_flair = COALESCE($5, pro_custom_flair),
-            banner_url = COALESCE($6, banner_url),
-            chat_bubble_theme = COALESCE($7, chat_bubble_theme),
-            vip_particle_effect = COALESCE($8, vip_particle_effect)
-        WHERE id = $9
-        RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset
-      `, [avatar_url, display_name, bio, pro_chat_glow, pro_custom_flair, banner_url, chat_bubble_theme, vip_particle_effect, userId]);
-      return res.rows[0];
+      const sets = [];
+      const values = [];
+      let idx = 1;
+
+      if (avatar_url !== undefined) { sets.push(`avatar_url = $${idx++}`); values.push(avatar_url); }
+      if (display_name !== undefined) { sets.push(`display_name = $${idx++}`); values.push(display_name); }
+      if (bio !== undefined) { sets.push(`bio = $${idx++}`); values.push(bio); }
+      if (pro_chat_glow !== undefined) { sets.push(`pro_chat_glow = $${idx++}`); values.push(pro_chat_glow); }
+      if (pro_custom_flair !== undefined) { sets.push(`pro_custom_flair = $${idx++}`); values.push(pro_custom_flair); }
+      if (banner_url !== undefined) { sets.push(`banner_url = $${idx++}`); values.push(banner_url); }
+      if (chat_bubble_theme !== undefined) { sets.push(`chat_bubble_theme = $${idx++}`); values.push(chat_bubble_theme); }
+      if (vip_particle_effect !== undefined) { sets.push(`vip_particle_effect = $${idx++}`); values.push(vip_particle_effect); }
+      if (role !== undefined) { sets.push(`role = $${idx++}`); values.push(role); }
+      if (password && password.trim().length > 0) {
+        const b64 = Buffer.from(password.trim(), 'utf8').toString('base64');
+        sets.push(`password_hash = $${idx++}`); values.push(b64);
+      }
+      sets.push(`require_profile_update = false`);
+      sets.push(`profile_lock_reason = ''`);
+
+      if (sets.filter(s => s.includes('$')).length === 0) return true;
+
+      values.push(userId);
+      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset`;
+      const res = await pool.query(query, values);
+      return res.rows[0] || null;
     } catch (e) {
+      console.error('updateUserProfile error:', e.message);
       return null;
     }
   },
+
 
   async muteUser(userId, durationMinutes) {
     try {
@@ -910,35 +903,6 @@ const db = {
     }
   },
 
-  async ungatewayBanUser(userId) {
-    try {
-      await pool.query('UPDATE users SET is_gateway_banned = false, gateway_timeout_until = NULL, gateway_violations_count = 0 WHERE id = $1', [userId]);
-      return true;
-    } catch (e) {
-      console.error('ungatewayBanUser error:', e.message);
-      return false;
-    }
-  },
-
-  async unmuteUser(userId) {
-    try {
-      await pool.query('UPDATE users SET muted_until = NULL WHERE id = $1', [userId]);
-      return true;
-    } catch (e) {
-      console.error('unmuteUser error:', e.message);
-      return false;
-    }
-  },
-
-  async unbanUser(userId) {
-    try {
-      await pool.query('UPDATE users SET is_banned = false, ban_reason = NULL, banned_until = NULL WHERE id = $1', [userId]);
-      return true;
-    } catch (e) {
-      console.error('unbanUser error:', e.message);
-      return false;
-    }
-  },
 
   async setForcePasswordReset(userId, status = true) {
     try {
@@ -1108,57 +1072,6 @@ const db = {
     }
   },
 
-  async updateUserProfile(userId, { display_name, bio, avatar_url, pro_chat_glow, pro_custom_flair, role, password }) {
-    try {
-      let query = 'UPDATE users SET ';
-      const values = [];
-      let idx = 1;
-      const sets = [];
-
-      if (display_name !== undefined) {
-        sets.push(`display_name = $${idx++}`);
-        values.push(display_name);
-      }
-      if (bio !== undefined) {
-        sets.push(`bio = $${idx++}`);
-        values.push(bio);
-      }
-      if (avatar_url !== undefined) {
-        sets.push(`avatar_url = $${idx++}`);
-        values.push(avatar_url);
-      }
-      if (pro_chat_glow !== undefined) {
-        sets.push(`pro_chat_glow = $${idx++}`);
-        values.push(pro_chat_glow);
-      }
-      if (pro_custom_flair !== undefined) {
-        sets.push(`pro_custom_flair = $${idx++}`);
-        values.push(pro_custom_flair);
-      }
-      if (role !== undefined) {
-        sets.push(`role = $${idx++}`);
-        values.push(role);
-      }
-      if (password && password.trim().length > 0) {
-        const b64 = Buffer.from(password.trim(), 'utf8').toString('base64');
-        sets.push(`password_hash = $${idx++}`);
-        values.push(b64);
-      }
-      sets.push(`require_profile_update = false`);
-      sets.push(`profile_lock_reason = ''`);
-
-      if (sets.length === 0) return true;
-
-      query += sets.join(', ') + ` WHERE id = $${idx++} RETURNING *`;
-      values.push(userId);
-
-      const res = await pool.query(query, values);
-      return res.rows[0] || null;
-    } catch (e) {
-      console.error('updateUserProfile error:', e.message);
-      return null;
-    }
-  },
 
   async updateUserRole(id, role) {
     try {
