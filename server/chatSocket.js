@@ -588,11 +588,12 @@ function initChatSocket(io) {
 
   // Direct Messages (DMs)
   socket.on('send_dm', async (data) => {
-    const { sender, recipientUsername, text, imageUrl } = data;
+    const { sender, recipientUsername, text, imageUrl, audioUrl } = data;
     if (!sender || !recipientUsername) return;
     const hasText = Boolean(text && String(text).trim());
     const hasImg = Boolean(imageUrl && String(imageUrl).trim());
-    if (!hasText && !hasImg) return;
+    const hasAudio = Boolean(audioUrl && String(audioUrl).trim());
+    if (!hasText && !hasImg && !hasAudio) return;
 
     try {
       const authCheck = await checkUserMutedOrBanned(sender);
@@ -609,7 +610,7 @@ function initChatSocket(io) {
         return socket.emit('error_message', `User "${recipientUsername}" not found.`);
       }
 
-      let cleanText = text.trim().slice(0, 300);
+      let cleanText = text ? text.trim().slice(0, 300) : '';
 
       // 1. Run Manual Database Word & Punishment Filter Rules
       const customCheck = await evaluateCustomFilter(cleanText, sender, socket);
@@ -621,20 +622,20 @@ function initChatSocket(io) {
       if (!aiEnforce.allowed) return;
       cleanText = aiEnforce.cleanText;
 
-      const newDm = await db.createDM(sender.id || authCheck.dbUser?.id || null, receiverUser.id, sender.username, receiverUser.username, cleanText);
+      const newDm = await db.createDM(sender.id || authCheck.dbUser?.id || null, receiverUser.id, sender.username, receiverUser.username, cleanText, imageUrl, audioUrl);
 
       sendDiscordLog({
         category: 'chat',
         action: 'DIRECT_MESSAGE_SENT',
         admin: sender.username,
         target: `@${receiverUser.username}`,
-        details: cleanText
+        details: cleanText || (imageUrl ? '[Image Attachment]' : '[Audio Attachment]')
       });
 
       for (const [sId, c] of activeConnections.entries()) {
         if (c.username && c.username.toLowerCase() === recipientUsername.toLowerCase()) {
           io.to(sId).emit('new_dm', newDm);
-          io.to(sId).emit('new_direct_message', { sender, message: cleanText });
+          io.to(sId).emit('new_direct_message', { sender, message: cleanText, imageUrl, audioUrl });
           io.to(sId).emit('open_dms_update');
         }
       }

@@ -579,6 +579,7 @@ router.get('/users', async (req, res) => {
 
 const ALLOWED_ROLES = [
   'member',
+  'early_member',
   'student_plus',
   'pro',
   'vip',

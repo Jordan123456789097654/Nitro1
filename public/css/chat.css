@@ -169,6 +169,13 @@
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
+.chat-badge.early_member {
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: #000;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
 .chat-badge.member {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-muted);

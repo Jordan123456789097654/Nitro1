@@ -329,7 +329,7 @@ router.get('/:slug', async (req, res) => {
 
     if (game.is_vip) {
       const user = await getAuthUser(req);
-      if (!user || (!['pro', 'vip', 'premium_vip', 'elite_patron', 'moderator', 'admin', 'owner'].includes(user.role))) {
+      if (!user || (!['pro', 'vip', 'premium_vip', 'elite_patron', 'early_member', 'moderator', 'admin', 'owner'].includes(user.role))) {
         return res.status(403).json({
           error: 'PRO Exclusive: You must have a PRO, VIP, or elevated membership to play this game.',
           is_vip_locked: true

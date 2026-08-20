@@ -1821,13 +1821,13 @@ JSON Format Example:
   },
 
   // Direct Messages (DMs)
-  async createDM(senderId, receiverId, senderUsername, receiverUsername, content) {
+  async createDM(senderId, receiverId, senderUsername, receiverUsername, content, imageUrl = '', audioUrl = '') {
     try {
       const res = await pool.query(`
-        INSERT INTO direct_messages (sender_id, receiver_id, sender_username, receiver_username, content, message)
-        VALUES ($1, $2, $3, $4, $5, $5)
-        RETURNING id, sender_id, receiver_id, sender_username, receiver_username, COALESCE(content, message) as content, created_at
-      `, [senderId, receiverId, senderUsername, receiverUsername, content]);
+        INSERT INTO direct_messages (sender_id, receiver_id, sender_username, receiver_username, content, message, image_url, audio_url)
+        VALUES ($1, $2, $3, $4, $5, $5, $6, $7)
+        RETURNING id, sender_id, receiver_id, sender_username, receiver_username, COALESCE(content, message) as content, image_url, audio_url, created_at
+      `, [senderId, receiverId, senderUsername, receiverUsername, content, imageUrl || '', audioUrl || '']);
       return res.rows[0];
     } catch (e) {
       console.error('createDM error:', e.message);
@@ -1838,6 +1838,8 @@ JSON Format Example:
         sender_username: senderUsername,
         receiver_username: receiverUsername,
         content,
+        image_url: imageUrl || '',
+        audio_url: audioUrl || '',
         created_at: new Date().toISOString()
       };
     }

@@ -181,7 +181,7 @@ router.post('/profile', async (req, res) => {
       await db.updateUserPassword(userId, encoded);
     }
 
-    const isPro = ['pro', 'vip', 'admin'].includes(user.role);
+    const isPro = ['pro', 'vip', 'premium_vip', 'elite_patron', 'early_member', 'moderator', 'admin', 'owner'].includes(user.role);
 
     const updated = await db.updateUserProfile(userId, {
       avatar_url: avatar_url !== undefined ? avatar_url.trim() : user.avatar_url,
@@ -372,6 +372,34 @@ router.post('/login', async (req, res) => {
 router.post('/submit-appeal', async (req, res) => {
   const { handleAppealSubmission } = require('./appeals');
   await handleAppealSubmission(req, res);
+});
+
+// GET /api/auth/profile/:username - Public profile lookup
+router.get('/profile/:username', async (req, res) => {
+  try {
+    const user = await db.getUserByUsername(req.params.username);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        display_name: user.display_name || user.username,
+        bio: user.bio || '',
+        role: user.role || 'member',
+        avatar_url: user.avatar_url || '',
+        banner_url: user.banner_url || '',
+        chat_bubble_theme: user.chat_bubble_theme || '',
+        vip_particle_effect: user.vip_particle_effect || '',
+        pro_chat_glow: user.pro_chat_glow || '',
+        pro_custom_flair: user.pro_custom_flair || ''
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve profile.' });
+  }
 });
 
 

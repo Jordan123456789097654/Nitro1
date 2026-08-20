@@ -391,6 +391,7 @@ export const ROLE_PERK_LEVELS = {
   guest: 0,
   member: 1,
   student_plus: 2,
+  early_member: 3,
   pro: 3,
   vip: 3,
   premium_vip: 4,
@@ -589,6 +590,8 @@ function setupProfileModal(onUserChange) {
         previewRole.innerHTML = '🌟 VIP';
       } else if (currentUser.role === 'pro') {
         previewRole.innerHTML = '⚡ PRO';
+      } else if (currentUser.role === 'early_member') {
+        previewRole.innerHTML = '🌱 EARLY MEMBER';
       } else if (currentUser.role === 'student_plus') {
         previewRole.innerHTML = '🎓 PLUS';
       } else {
@@ -834,7 +837,12 @@ function setupAuthModal(onUserChange) {
       formView.style.display = 'none';
       document.getElementById('auth-current-username').textContent = currentUser.display_name || currentUser.username;
       const roleBadge = document.getElementById('auth-current-role');
-      roleBadge.textContent = currentUser.role.toUpperCase();
+      const roleLabels = {
+        owner: '👑 OWNER', admin: '🛡️ ADMIN', moderator: '⚔️ MOD',
+        elite_patron: '💎 ELITE', premium_vip: '🌟 VIP+', pro: '⚡ PRO',
+        vip: '⭐ VIP', early_member: '🌱 EARLY MEMBER', student_plus: '🎓 PLUS'
+      };
+      roleBadge.textContent = roleLabels[currentUser.role] || currentUser.role.toUpperCase();
       roleBadge.className = `chat-badge ${currentUser.role}`;
       renderAvatarElement(document.getElementById('auth-modal-avatar-preview'), currentUser.avatar_url);
     } else {

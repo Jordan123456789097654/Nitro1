@@ -815,6 +815,7 @@ function initKonamiCode() {
 
 const MASTER_BADGES = [
   { id: 'owner_badge', title: '👑 Supreme Owner', desc: 'Platform creator & supreme administrator (+10,000 XP)', icon: '👑', isUnlocked: (u) => u && (u.role === 'owner' || u.role === 'admin') },
+  { id: 'early_member', title: '🌱 Early Member', desc: 'Joined Nitro during the exclusive beta launch period — OG status forever', icon: '🌱', isUnlocked: (u) => u && (u.role === 'early_member' || u.role === 'owner' || u.role === 'admin') },
   { id: 'konami', title: '🎮 Konami Code Master', desc: 'Entered the legendary retro cheat code (↑ ↑ ↓ ↓ ← → ← → B A)', icon: '🎮', isUnlocked: (u) => (u && u.role === 'owner') || isAchievementUnlocked('konami') },
   { id: 'night_owl', title: '🦉 Night Owl Gamer', desc: 'Logged in and played games late at night past midnight', icon: '🦉', isUnlocked: () => true },
   { id: 'speed_demon', title: '⚡ Speed Demon', desc: 'Recorded over 10 active gaming sessions in the catalog', icon: '⚡', isUnlocked: () => true },
@@ -829,7 +830,7 @@ const MASTER_BADGES = [
   { id: 'snake_champ', title: '🐍 Snake Champion', desc: 'Scored over 50 points in Mini Arcade Snake', icon: '🐍', isUnlocked: () => true },
   { id: 'tictactoe_pro', title: '❌ Tic-Tac-Toe Pro', desc: 'Won 5 rounds in Mini Arcade Tic-Tac-Toe', icon: '❌', isUnlocked: () => true },
   { id: 'social_butterfly', title: '👥 Social Butterfly', desc: 'Connected with classmates & sent friend requests', icon: '👥', isUnlocked: () => true },
-  { id: 'vip_lounge', title: '⭐ VIP Lounge Elite', desc: 'Unlocked PRO & VIP Lounge unblocked games catalog', icon: '⭐', isUnlocked: (u) => u && ['owner', 'admin', 'vip', 'pro', 'elite_patron'].includes(u.role) },
+  { id: 'vip_lounge', title: '⭐ VIP Lounge Elite', desc: 'Unlocked PRO & VIP Lounge unblocked games catalog', icon: '⭐', isUnlocked: (u) => u && ['owner', 'admin', 'vip', 'pro', 'elite_patron', 'early_member'].includes(u.role) },
   { id: 'lofi_listener', title: '🎧 Lofi Listener', desc: 'Enchanted study breaks with ambient lofi music streams', icon: '🎧', isUnlocked: () => true },
   { id: 'nitro_og', title: '🚀 Nitro OG Founder', desc: 'Early access platform beta tester badge', icon: '🚀', isUnlocked: () => true },
   { id: 'gateway_nav', title: '🌐 Gateway Navigator', desc: 'Explored web games via sandboxed gateway relay engine', icon: '🌐', isUnlocked: () => true },
@@ -912,19 +913,64 @@ export async function openPublicProfile(username) {
 
   nameEl.textContent = username;
   handleEl.textContent = `@${username}`;
-  bioEl.textContent = 'Active Study Helper Player & Community Member';
+  bioEl.textContent = 'Loading profile...';
 
-  const isOwnerOrAdmin = username.toLowerCase() === 'jordandaniels';
-  roleEl.textContent = isOwnerOrAdmin ? '👑 OWNER' : 'STUDENT';
-  roleEl.style.background = isOwnerOrAdmin ? 'linear-gradient(90deg, #fbbf24, #ef4444)' : 'rgba(255,255,255,0.1)';
-  roleEl.style.color = isOwnerOrAdmin ? '#000' : '#94a3b8';
-  roleEl.style.fontWeight = '900';
+  const ROLE_BADGE_CONFIG = {
+    owner:        { label: '👑 OWNER',        bg: 'linear-gradient(90deg, #fbbf24, #ef4444)', color: '#000', fw: '900' },
+    admin:        { label: '🛡️ ADMIN',         bg: '#ef4444',                                   color: '#fff', fw: '800' },
+    moderator:    { label: '🛡️ MOD',           bg: '#a855f7',                                   color: '#fff', fw: '800' },
+    elite_patron: { label: '💎 ELITE',         bg: '#ec4899',                                   color: '#fff', fw: '800' },
+    premium_vip:  { label: '⭐ PREMIUM VIP',   bg: '#f59e0b',                                   color: '#000', fw: '800' },
+    pro:          { label: '⚡ PRO',            bg: '#38bdf8',                                   color: '#000', fw: '800' },
+    vip:          { label: '⭐ VIP',            bg: '#fbbf24',                                   color: '#000', fw: '800' },
+    early_member: { label: '🌱 EARLY MEMBER',  bg: 'linear-gradient(90deg, #34d399, #059669)', color: '#000', fw: '800' },
+    student_plus: { label: '🎓 STUDENT+',      bg: '#10b981',                                   color: '#000', fw: '700' },
+    member:       { label: 'MEMBER',            bg: 'rgba(255,255,255,0.1)',                     color: '#94a3b8', fw: '600' },
+  };
 
-  if (avatarEl) {
-    avatarEl.innerHTML = isOwnerOrAdmin ? '👑' : '👤';
+  // Set default view while loading
+  roleEl.textContent = 'MEMBER';
+  roleEl.style.background = 'rgba(255,255,255,0.1)';
+  roleEl.style.color = '#94a3b8';
+  roleEl.style.fontWeight = '600';
+  if (avatarEl) avatarEl.innerHTML = '👤';
+
+  modal.classList.add('active');
+
+  let targetUser = { username, role: 'member' };
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || '';
+    const res = await fetch(`/api/auth/profile/${encodeURIComponent(username)}`, {
+      headers: { Authorization: token ? `Bearer ${token}` : '' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.user) {
+        targetUser = data.user;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to fetch public profile data:', e);
   }
 
-  const targetUser = { username, role: isOwnerOrAdmin ? 'owner' : 'member' };
+  const role = (targetUser.role || 'member').toLowerCase();
+  const cfg = ROLE_BADGE_CONFIG[role] || ROLE_BADGE_CONFIG.member;
+
+  nameEl.textContent = targetUser.display_name || username;
+  handleEl.textContent = `@${username}`;
+  bioEl.textContent = targetUser.bio || 'Nitro Platform Member';
+  roleEl.textContent = cfg.label;
+  roleEl.style.background = cfg.bg;
+  roleEl.style.color = cfg.color;
+  roleEl.style.fontWeight = cfg.fw;
+
+  if (avatarEl) {
+    const avatarIcons = { owner: '👑', admin: '🛡️', moderator: '🛡️', early_member: '🌱', elite_patron: '💎', pro: '⚡', vip: '⭐', premium_vip: '⭐', student_plus: '🎓' };
+    avatarEl.innerHTML = targetUser.avatar_url
+      ? `<img src="${targetUser.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='${avatarIcons[role] || '👤'}'">`
+      : (avatarIcons[role] || '👤');
+  }
+
   const unlockedBadges = MASTER_BADGES.filter(b => b.isUnlocked(targetUser));
   if (badgeCountEl) badgeCountEl.textContent = `${unlockedBadges.length} Unlocked Badges`;
 

@@ -986,13 +986,14 @@ function appendChatMessage(msg) {
     premium_vip: '<span class="chat-badge premium_vip" style="background: #f59e0b; color: #000;">⭐ VIP</span>',
     pro: '<span class="chat-badge pro" style="background: #38bdf8; color: #000;">⚡ PRO</span>',
     vip: '<span class="chat-badge vip" style="background: #fbbf24; color: #000;">⭐ VIP</span>',
+    early_member: '<span class="chat-badge early_member" style="background: linear-gradient(90deg, #34d399, #059669); color: #000; font-weight: 800;">🌱 EARLY</span>',
     student_plus: '<span class="chat-badge student_plus" style="background: #10b981; color: #000;">🎓 PLUS</span>',
     member: '<span class="chat-badge member" style="background: rgba(255,255,255,0.1); color: #94a3b8;">MEMBER</span>'
   };
   const roleBadge = roleBadgeMap[role] || roleBadgeMap.member;
   
   const customFlair = msg.pro_custom_flair ? `<span class="custom-flair-badge">${escapeHtml(msg.pro_custom_flair)}</span>` : '';
-  const glowClass = role === 'owner' ? 'glow-owner' : (msg.pro_chat_glow ? `glow-${msg.pro_chat_glow}` : '');
+  const glowClass = role === 'owner' ? 'glow-owner' : role === 'early_member' ? 'glow-green' : (msg.pro_chat_glow ? `glow-${msg.pro_chat_glow}` : '');
 
   const time = formatChatTimestamp(msg.created_at);
   const displayName = msg.display_name || msg.username || 'Student';

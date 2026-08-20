@@ -14,6 +14,16 @@ let peerPannerNodes = {}; // targetSocketId -> StereoPannerNode
 let pendingIceCandidates = {}; // targetSocketId -> Array of RTCIceCandidate
 let peerVolumes = {}; // targetSocketId -> volume float (0.0 to 1.5)
 
+function cleanSocketId(id) {
+  if (!id) return '';
+  return id.replace(/^\/voice#/, '');
+}
+
+function isSelfSocket(socketId) {
+  if (!voiceSocket || !voiceSocket.id) return false;
+  return cleanSocketId(socketId) === cleanSocketId(voiceSocket.id);
+}
+
 let isMuted = false;
 let isDeafened = false;
 let currentVoicePreset = 'normal';
@@ -89,7 +99,7 @@ function setupVoiceSocketListeners() {
       updateSidebarVoiceParticipantsUI(participants);
       syncPeerConnections(participants);
 
-      if (screenSharer && screenSharer !== voiceSocket.id) {
+      if (screenSharer && !isSelfSocket(screenSharer)) {
         const container = document.getElementById('voice-screen-video-container');
         const label = document.getElementById('voice-screen-sharer-label');
         if (container) container.style.display = 'block';
@@ -154,10 +164,10 @@ function setupVoiceSocketListeners() {
     const label = document.getElementById('voice-screen-sharer-label');
     if (!container) return;
 
-    if (isSharing && sharerSocketId !== voiceSocket.id) {
+    if (isSharing && !isSelfSocket(sharerSocketId)) {
       container.style.display = 'block';
       if (label) label.textContent = '🖥️ Classmate Screen Share (Live)';
-    } else if (!isSharing && sharerSocketId !== voiceSocket.id) {
+    } else if (!isSharing && !isSelfSocket(sharerSocketId)) {
       container.style.display = 'none';
     }
   });
@@ -507,10 +517,13 @@ function createPeerConnection(targetSocketId) {
 
 function syncPeerConnections(participants) {
   if (!participants) return;
-  const currentPeerIds = participants.map(p => typeof p === 'object' ? p.socketId : p).filter(id => id !== voiceSocket?.id);
+  const myCleanId = cleanSocketId(voiceSocket?.id);
+  const currentPeerIds = participants.map(p => typeof p === 'object' ? p.socketId : p).filter(id => cleanSocketId(id) !== myCleanId);
 
   currentPeerIds.forEach(id => {
-    if (!peerConnections[id] && voiceSocket.id < id) {
+    const cleanPeerId = cleanSocketId(id);
+    const cleanMyId = cleanSocketId(voiceSocket.id);
+    if (!peerConnections[id] && cleanMyId < cleanPeerId) {
       const pc = createPeerConnection(id);
       pc.createOffer().then(offer => {
         return pc.setLocalDescription(offer);
@@ -724,7 +737,7 @@ function updateVoiceParticipantsUI(participants) {
     const displayName = isObj ? (p.display_name || p.username || 'Student') : `Peer #${idx + 1}`;
     const role = isObj ? (p.role || 'member') : 'member';
 
-    const isSpeaking = peerSpeakingStates[socketId] || (socketId === voiceSocket?.id && isSpeakingLocally);
+    const isSpeaking = peerSpeakingStates[socketId] || (isSelfSocket(socketId) && isSpeakingLocally);
 
     const isOwner = role === 'owner' || username.toLowerCase() === 'jordandaniels';
     const isPro = role === 'pro' || role === 'vip' || role === 'admin';
@@ -732,7 +745,7 @@ function updateVoiceParticipantsUI(participants) {
     const badgeBg = isOwner ? 'linear-gradient(90deg, #fbbf24, #ef4444)' : (isPro ? 'linear-gradient(90deg, #38bdf8, #818cf8)' : 'rgba(255,255,255,0.12)');
     const badgeColor = isOwner || isPro ? '#000' : '#94a3b8';
 
-    const isSelf = socketId === voiceSocket?.id;
+    const isSelf = isSelfSocket(socketId);
     const currentVol = peerVolumes[socketId] ?? 1.0;
 
     return `
@@ -767,8 +780,8 @@ function updateSidebarVoiceParticipantsUI(participants) {
     const socketId = isObj ? (p.socketId || `peer_${idx}`) : p;
     const username = isObj ? (p.username || 'Student') : `Peer #${idx + 1}`;
     const displayName = isObj ? (p.display_name || p.username || 'Student') : `Peer #${idx + 1}`;
-    const isSpeaking = peerSpeakingStates[socketId] || (socketId === voiceSocket?.id && isSpeakingLocally);
-    const isSelf = socketId === voiceSocket?.id;
+    const isSpeaking = peerSpeakingStates[socketId] || (isSelfSocket(socketId) && isSpeakingLocally);
+    const isSelf = isSelfSocket(socketId);
     const currentVol = peerVolumes[socketId] ?? 1.0;
 
     return `
