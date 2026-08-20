@@ -263,6 +263,23 @@ app.use('/api/ai', require('./routes/ai'));
 app.use('/api/appeals', require('./routes/appeals'));
 app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/shop', require('./routes/shop'));
+
+// GET /api/weather - Proxy wttr.in with curl user-agent to ensure clean plain-text return
+app.get('/api/weather', async (req, res) => {
+  try {
+    const fetch = require('node-fetch');
+    const response = await fetch('https://wttr.in/?format=%c+%t', {
+      headers: { 'User-Agent': 'curl/7.64.1' },
+      timeout: 5000
+    });
+    if (!response.ok) throw new Error();
+    const text = await response.text();
+    res.json({ success: true, weather: text.trim() });
+  } catch (err) {
+    res.json({ success: false, weather: '🌤️ 72°F' });
+  }
+});
+
 // Bug reports handled via /api/games/bug-report and /api/suggestions/bugs
 
 // Static files (Frontend Client)

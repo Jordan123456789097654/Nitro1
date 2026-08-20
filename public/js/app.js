@@ -1392,11 +1392,10 @@ async function initWeatherClock() {
 
   if (weatherEl) {
     try {
-      // Fetch via wttr.in with %c for emoji and %t for temperature (e.g. ⛅️ +72°F)
-      const res = await fetch('https://wttr.in/?format=%c+%t');
+      const res = await fetch('/api/weather');
       if (res.ok) {
-        const text = await res.text();
-        weatherEl.textContent = text.trim() || '🌤️ 72°F';
+        const data = await res.json();
+        weatherEl.textContent = data.weather || '🌤️ 72°F';
       } else {
         weatherEl.textContent = '🌤️ 72°F';
       }
