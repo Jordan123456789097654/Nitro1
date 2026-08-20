@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initFriends();
   initEmbedStudio();
   initToolsDropdown();
-  initNetworkDropdown();
   initCloakMode();
   initPersonalBranding();
   initPresetDisguiseSwitcher();
@@ -251,24 +250,6 @@ function initToolsDropdown() {
       item.addEventListener('click', () => {
         menu.style.display = 'none';
       });
-    });
-  }
-}
-
-function initNetworkDropdown() {
-  const btn = document.getElementById('nav-network-btn');
-  const popup = document.getElementById('network-sites-popup');
-
-  if (btn && popup) {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!btn.contains(e.target) && !popup.contains(e.target)) {
-        popup.style.display = 'none';
-      }
     });
   }
 }
@@ -694,7 +675,7 @@ window.switchView = function(targetView) {
 async function triggerQuestProgress(questType) {
   try {
     const token = localStorage.getItem('nitro_jwt_token') || '';
-    if (!token) return;
+    if (!token || token === 'null' || token === 'undefined') return;
     await fetch('/api/shop/quests/trigger', {
       method: 'POST',
       headers: {
@@ -1395,7 +1376,8 @@ async function initWeatherClock() {
       const res = await fetch('/api/weather');
       if (res.ok) {
         const data = await res.json();
-        weatherEl.textContent = data.weather || '🌤️ 72°F';
+        const cleanWeather = (data.weather || '🌤️ 72°F').replace('+', '');
+        weatherEl.textContent = cleanWeather;
       } else {
         weatherEl.textContent = '🌤️ 72°F';
       }

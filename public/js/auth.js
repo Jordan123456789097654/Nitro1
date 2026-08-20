@@ -15,7 +15,10 @@ const AVATAR_PRESETS = [
   { id: 'pfp-hacker', icon: '⚡', name: 'Hacker', bg: 'linear-gradient(135deg, #22c55e, #14b8a6)' }
 ];
 
+let onUserChangeCallback = null;
+
 export function initAuth(onUserChange) {
+  onUserChangeCallback = onUserChange;
   setupConsoleTokenAuth(onUserChange);
   checkSession(onUserChange);
   setupAuthModal(onUserChange);
@@ -568,7 +571,7 @@ function setupProfileModal(onUserChange) {
     });
   }
 
-  function populateProfileForm() {
+  function populateProfileForm(inventory = []) {
     if (!currentUser) return;
     selectedAvatar = currentUser.avatar_url || '';
     if (displayNameInput) displayNameInput.value = currentUser.display_name || currentUser.username;
@@ -603,27 +606,149 @@ function setupProfileModal(onUserChange) {
     renderAvatarElement(previewAvatar, selectedAvatar);
 
     const userLevel = ROLE_PERK_LEVELS[currentUser.role] || 1;
+    const isPro = userLevel >= 3;
+    const ownedGlows = inventory.filter(i => i.category === 'chat_glow').map(i => i.perk_value);
+    const ownedFlairs = inventory.filter(i => i.category === 'custom_flair').map(i => i.perk_value);
+    const hasOwnedPerks = ownedGlows.length > 0 || ownedFlairs.length > 0;
+
     if (proPerksSection) {
-      // Level >= 3: PRO, VIP, Premium VIP, Elite, Mod, Admin, Owner
-      proPerksSection.style.display = userLevel >= 3 ? 'block' : 'none';
-      if (proChatGlowSelect) proChatGlowSelect.value = currentUser.pro_chat_glow || 'gold';
+      proPerksSection.style.display = (isPro || hasOwnedPerks) ? 'block' : 'none';
+      
+      if (proChatGlowSelect) {
+        proChatGlowSelect.innerHTML = '';
+        const noneOpt = document.createElement('option');
+        noneOpt.value = '';
+        noneOpt.textContent = '⚪ No Glow Effect';
+        proChatGlowSelect.appendChild(noneOpt);
+
+        const GLOW_DEFINITIONS = [
+          { value: 'gold', text: '⚡ Golden Aura' },
+          { value: 'rainbow', text: '🌈 Rainbow Chroma' },
+          { value: 'cyan', text: '💎 Cyberpunk Cyan' },
+          { value: 'fire', text: '🔥 Inferno Flame' },
+          { value: 'emerald', text: '🍃 Matrix Emerald' },
+          { value: 'purple', text: '🔮 Mystic Purple' }
+        ];
+
+        GLOW_DEFINITIONS.forEach(glow => {
+          if (isPro || ownedGlows.includes(glow.value)) {
+            const opt = document.createElement('option');
+            opt.value = glow.value;
+            opt.textContent = glow.text;
+            proChatGlowSelect.appendChild(opt);
+          }
+        });
+        proChatGlowSelect.value = currentUser.pro_chat_glow || '';
+      }
+
       if (proCustomFlairInput) {
-        proCustomFlairInput.value = currentUser.pro_custom_flair || '';
-        // Custom flair only unlocked for Elite Patron (5) and Owner/Admin (7-8)
-        if (userLevel < 5) {
-          proCustomFlairInput.placeholder = 'Locked: Elite Patron / Owner required';
-          proCustomFlairInput.disabled = true;
-        } else {
+        const flairParent = proCustomFlairInput.parentElement;
+        let flairSelect = document.getElementById('profile-pro-custom-flair-select');
+        
+        if (userLevel >= 5) {
+          proCustomFlairInput.style.display = 'block';
           proCustomFlairInput.placeholder = 'e.g. ⚡ VIP ELITE';
           proCustomFlairInput.disabled = false;
+          proCustomFlairInput.value = currentUser.pro_custom_flair || '';
+          
+          if (ownedFlairs.length > 0) {
+            if (!flairSelect) {
+              flairSelect = document.createElement('select');
+              flairSelect.id = 'profile-pro-custom-flair-select';
+              flairSelect.className = 'custom-select-dropdown';
+              flairSelect.style.width = '100%';
+              flairSelect.style.padding = '8px 12px';
+              flairSelect.style.background = '#0e121e';
+              flairSelect.style.color = '#fff';
+              flairSelect.style.border = '1px solid var(--card-border)';
+              flairSelect.style.borderRadius = '8px';
+              flairSelect.style.marginTop = '6px';
+              flairParent.appendChild(flairSelect);
+            }
+            flairSelect.style.display = 'block';
+            flairSelect.innerHTML = '';
+            
+            const noneOpt = document.createElement('option');
+            noneOpt.value = '';
+            noneOpt.textContent = '⚪ Or select purchased flair...';
+            flairSelect.appendChild(noneOpt);
+
+            ownedFlairs.forEach(flair => {
+              const opt = document.createElement('option');
+              opt.value = flair;
+              opt.textContent = flair;
+              flairSelect.appendChild(opt);
+            });
+
+            flairSelect.addEventListener('change', () => {
+              if (flairSelect.value) {
+                proCustomFlairInput.value = flairSelect.value;
+              }
+            });
+          } else {
+            if (flairSelect) flairSelect.style.display = 'none';
+          }
+        } else {
+          if (ownedFlairs.length > 0) {
+            proCustomFlairInput.style.display = 'none';
+            if (!flairSelect) {
+              flairSelect = document.createElement('select');
+              flairSelect.id = 'profile-pro-custom-flair-select';
+              flairSelect.className = 'custom-select-dropdown';
+              flairSelect.style.width = '100%';
+              flairSelect.style.padding = '8px 12px';
+              flairSelect.style.background = '#0e121e';
+              flairSelect.style.color = '#fff';
+              flairSelect.style.border = '1px solid var(--card-border)';
+              flairSelect.style.borderRadius = '8px';
+              flairSelect.style.marginTop = '6px';
+              flairParent.appendChild(flairSelect);
+            }
+            flairSelect.style.display = 'block';
+            flairSelect.innerHTML = '';
+            
+            const noneOpt = document.createElement('option');
+            noneOpt.value = '';
+            noneOpt.textContent = '⚪ No Title Flair';
+            flairSelect.appendChild(noneOpt);
+
+            ownedFlairs.forEach(flair => {
+              const opt = document.createElement('option');
+              opt.value = flair;
+              opt.textContent = flair;
+              flairSelect.appendChild(opt);
+            });
+            flairSelect.value = currentUser.pro_custom_flair || '';
+          } else {
+            proCustomFlairInput.style.display = 'block';
+            proCustomFlairInput.placeholder = 'Locked: Elite Patron / Owner required';
+            proCustomFlairInput.disabled = true;
+            proCustomFlairInput.value = '';
+            if (flairSelect) flairSelect.style.display = 'none';
+          }
         }
       }
     }
   }
 
-  const openHandler = () => {
+  const openHandler = async () => {
     if (!currentUser) return alert('Please log in to edit your profile.');
-    populateProfileForm();
+    
+    let inventory = [];
+    try {
+      const token = localStorage.getItem('nitro_jwt_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch('/api/shop/inventory', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        inventory = data.inventory || [];
+      }
+    } catch (e) {
+      console.warn('Error fetching inventory for profile perks:', e);
+    }
+
+    populateProfileForm(inventory);
     if (modal) modal.classList.add('active');
   };
 
@@ -646,8 +771,10 @@ function setupProfileModal(onUserChange) {
       const display_name = displayNameInput ? displayNameInput.value.trim() : '';
       const bio = bioInput ? bioInput.value.trim() : '';
       const avatar_url = selectedAvatar;
-      const pro_chat_glow = proChatGlowSelect ? proChatGlowSelect.value : 'gold';
-      const pro_custom_flair = proCustomFlairInput ? proCustomFlairInput.value.trim() : '';
+      const pro_chat_glow = proChatGlowSelect ? proChatGlowSelect.value : '';
+      const pro_custom_flair = (proCustomFlairInput && proCustomFlairInput.style.display !== 'none')
+        ? proCustomFlairInput.value.trim()
+        : (document.getElementById('profile-pro-custom-flair-select')?.value || '');
       const current_password = document.getElementById('profile-curr-pass')?.value || '';
       const new_password = document.getElementById('profile-new-pass')?.value || '';
 
@@ -933,12 +1060,22 @@ function setupAuthModal(onUserChange) {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
       await fetch('/api/auth/logout', { method: 'POST' });
-      currentUser = null;
-      localStorage.removeItem('nitro_jwt_token');
-      updateNavAuthUI();
-      hideModal();
-      toggleMandatoryGate(true);
-      if (onUserChange) onUserChange(currentUser);
+      triggerClientLogout();
     });
   }
 }
+
+export function triggerClientLogout() {
+  currentUser = null;
+  localStorage.removeItem('nitro_jwt_token');
+  updateNavAuthUI();
+  
+  const authModal = document.getElementById('auth-modal');
+  if (authModal) authModal.classList.remove('active');
+  const errorMsg = document.getElementById('auth-error-msg');
+  if (errorMsg) errorMsg.style.display = 'none';
+
+  toggleMandatoryGate(true);
+  if (onUserChangeCallback) onUserChangeCallback(currentUser);
+}
+window.triggerClientLogout = triggerClientLogout;

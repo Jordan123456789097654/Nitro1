@@ -9,7 +9,7 @@ let adminSocket = null;
 
 function getLocalOrCookieToken() {
   const token = localStorage.getItem('nitro_jwt_token');
-  if (token) return token;
+  if (token && token !== 'null' && token !== 'undefined') return token;
   const ca = document.cookie.split(';');
   for (let i = 0; i < ca.length; i++) {
     let c = ca[i].trim();
@@ -1273,6 +1273,12 @@ function setupAdminTabs() {
       }
       if (targetTab === 'adminquests') {
         if (window.adminFetchQuests) window.adminFetchQuests();
+      }
+      if (targetTab === 'shoppurchases') {
+        if (window.adminFetchShopPurchases) window.adminFetchShopPurchases();
+      }
+      if (targetTab === 'aiflagged') {
+        if (window.adminFetchAiFlagged) window.adminFetchAiFlagged();
       }
       if (targetTab === 'logs') fetchLogs();
       if (targetTab === 'webhooks') fetchAdminWebhooks();
@@ -2769,12 +2775,13 @@ function setupCreateShopForm() {
       const price = document.getElementById('admin-shop-price').value.trim();
       const category = document.getElementById('admin-shop-cat').value;
       const perk_value = document.getElementById('admin-shop-perk').value.trim();
+      const delivery_note = document.getElementById('admin-shop-delivery-note')?.value.trim() || '';
 
       try {
         const res = await authFetch('/api/admin/shop/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -2827,3 +2834,103 @@ function setupCreateQuestForm() {
     });
   }
 }
+
+window.adminFetchShopPurchases = async () => {
+  const tbody = document.getElementById('shoppurchases-tbody');
+  if (!tbody) return;
+
+  try {
+    const res = await authFetch('/api/admin/shop/purchases');
+    if (!res.ok) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:20px;">Failed to load purchase history.</td></tr>';
+      return;
+    }
+    const data = await res.json();
+    const purchases = data.purchases || [];
+
+    if (purchases.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">No shop purchases recorded yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = purchases.map(p => {
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 10px 12px; font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">${formatEstDateTime(p.purchased_at)}</td>
+          <td style="padding: 10px 12px;"><strong style="color: #38bdf8;">@${escapeHtml(p.username)}</strong></td>
+          <td style="padding: 10px 12px; color: #fff; font-weight: 700;">${escapeHtml(p.item_name)}</td>
+          <td style="padding: 10px 12px;"><span style="color:#cbd5e1; font-size:0.82rem; font-weight:700;">${escapeHtml(p.category)}</span></td>
+          <td style="padding: 10px 12px; color: #fbbf24; font-weight: 800;">🪙 ${p.price}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('adminFetchShopPurchases error:', err);
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching purchases.</td></tr>';
+  }
+};
+
+window.adminFetchAiFlagged = async () => {
+  const punsTbody = document.getElementById('aipuns-tbody');
+  const appealsTbody = document.getElementById('aiappeals-tbody');
+  if (!punsTbody || !appealsTbody) return;
+
+  try {
+    const res = await authFetch('/api/admin/ai-flagged-cases');
+    if (!res.ok) {
+      punsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Failed to load cases.</td></tr>';
+      appealsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Failed to load appeals.</td></tr>';
+      return;
+    }
+    const data = await res.json();
+    const violations = data.violations || [];
+    const appeals = data.appeals || [];
+
+    // Render violations (auto-bans/mutes)
+    if (violations.length === 0) {
+      punsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No AI auto-punishments recorded yet.</td></tr>';
+    } else {
+      punsTbody.innerHTML = violations.map(l => {
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 10px 12px; font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">${formatEstDateTime(l.created_at)}</td>
+            <td style="padding: 10px 12px;"><strong style="color: #38bdf8;">@${escapeHtml(l.username)}</strong></td>
+            <td style="padding: 10px 12px; max-width: 280px; word-break: break-word;"><code style="color:#ff6b6b; background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:4px;">${escapeHtml(l.message || '')}</code></td>
+            <td style="padding: 10px 12px;"><span style="color:#cbd5e1; font-weight:700; font-size:0.82rem;">${escapeHtml(l.category)}</span></td>
+            <td style="padding: 10px 12px;"><span style="color:#ef4444; font-weight:800; font-size:0.82rem;">${(l.action_taken || 'blocked').toUpperCase()}</span></td>
+            <td style="padding: 10px 12px; color: var(--text-muted); font-size: 0.82rem;">${escapeHtml(l.reason || 'Flagged')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render AI pre-reviewed appeals
+    if (appeals.length === 0) {
+      appealsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No AI pre-reviewed appeals found.</td></tr>';
+    } else {
+      appealsTbody.innerHTML = appeals.map(a => {
+        const statusColor = a.status === 'approved' ? '#10b981' : a.status === 'rejected' ? '#ef4444' : '#fbbf24';
+        const aiRec = a.ai_recommendation || 'review';
+        const aiColor = aiRec === 'approve' ? '#10b981' : aiRec === 'reject' ? '#ef4444' : '#fbbf24';
+        
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 10px 12px; font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">${formatEstDateTime(a.created_at)}</td>
+            <td style="padding: 10px 12px;"><strong style="color: #38bdf8;">@${escapeHtml(a.username)}</strong></td>
+            <td style="padding: 10px 12px; color: #cbd5e1; font-size: 0.82rem; font-weight: 700;">${escapeHtml(a.punishment_type.toUpperCase())}</td>
+            <td style="padding: 10px 12px;"><span style="color:${aiColor}; font-weight:800; font-size:0.82rem;">${aiRec.toUpperCase()}</span></td>
+            <td style="padding: 10px 12px; font-size: 0.82rem; color: #fff;">
+              ${escapeHtml(a.ai_rationale || 'N/A')}
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Confidence: ${Math.round((a.ai_confidence || 0.95) * 100)}%</div>
+            </td>
+            <td style="padding: 10px 12px;"><span style="color:${statusColor}; font-weight:800; font-size:0.82rem;">${a.status.toUpperCase()}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    console.error('adminFetchAiFlagged error:', err);
+    punsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching cases.</td></tr>';
+    appealsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching appeals.</td></tr>';
+  }
+};

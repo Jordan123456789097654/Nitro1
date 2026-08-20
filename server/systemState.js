@@ -14,7 +14,7 @@ const DEFAULT_AI_CONFIG = {
   enabled: true,
   strictness: 'strict', // 'strict' | 'balanced' | 'lenient'
   actionPolicy: 'auto_punish', // 'auto_punish' | 'block_only' | 'censor_warn'
-  model: 'llama-3.3-70b-versatile',
+  model: 'openai/gpt-oss-safeguard-20b',
   timeoutMs: 3500,
 
   // Flashcards & Study Tools

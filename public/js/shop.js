@@ -2,6 +2,7 @@
 import { getCurrentUser } from './auth.js';
 
 let activeCategory = 'all';
+let loadedShopItems = [];
 
 export function initShop() {
   // Bind category tabs
@@ -43,7 +44,28 @@ export async function loadShopData() {
   }
 
   const token = localStorage.getItem('nitro_jwt_token') || '';
-  if (!token) return;
+  if (!token || token === 'null' || token === 'undefined') {
+    const shopGrid = document.getElementById('shop-items-grid');
+    if (shopGrid) {
+      shopGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--text-muted);">
+          <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.2));">🔒</div>
+          <p style="font-weight: 800; color: #fff; margin-bottom: 6px; font-size: 1rem; letter-spacing: 0.5px;">AUTHENTICATION REQUIRED</p>
+          <p style="font-size: 0.85rem; max-width: 290px; margin: 0 auto 16px; line-height: 1.5; color: var(--text-muted);">Log in or create a student account to browse store items, customize name glows, and complete quests.</p>
+          <button class="btn-pill primary" onclick="document.getElementById('nav-brand-btn')?.click()" style="margin: 0 auto; font-size: 0.8rem; padding: 10px 20px; font-weight: 800;">Log In Now</button>
+        </div>
+      `;
+    }
+    const questsList = document.getElementById('quests-list-container');
+    if (questsList) {
+      questsList.innerHTML = `
+        <div style="text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 0.82rem; line-height: 1.5;">
+          🔑 Log in to track daily quests and claim rewards.
+        </div>
+      `;
+    }
+    return;
+  }
 
   try {
     // 1. Fetch shop items & inventory
@@ -53,11 +75,23 @@ export async function loadShopData() {
       fetch('/api/shop/quests', { headers: { 'Authorization': `Bearer ${token}` } })
     ]);
 
+    if (shopRes.status === 401 || invRes.status === 401 || questsRes.status === 401) {
+      console.warn('Unauthorized token found, logging out.');
+      if (typeof window.triggerClientLogout === 'function') {
+        window.triggerClientLogout();
+      } else {
+        localStorage.removeItem('nitro_jwt_token');
+        loadShopData();
+      }
+      return;
+    }
+
     const shopData = await shopRes.json();
     const invData = await invRes.json();
     const questsData = await questsRes.json();
 
     if (shopData.success && invData.success) {
+      loadedShopItems = shopData.items || [];
       renderStoreItems(shopData.items, invData.inventory);
     }
     if (questsData.success) {
@@ -159,7 +193,13 @@ window.buyShopItem = async function(itemId) {
   const token = localStorage.getItem('nitro_jwt_token') || '';
   if (!token) return alert('Please sign in to buy items.');
 
-  if (!confirm('Are you sure you want to purchase this item?')) return;
+  const item = loadedShopItems.find(i => i.id == itemId);
+  if (item && item.category === 'irl_reward') {
+    const receiveNote = item.delivery_note ? `\n\n⚠️ INSTRUCTIONS FOR CLAIMING:\n${item.delivery_note}` : '';
+    if (!confirm(`Are you sure you want to purchase "${item.name}" for ${item.price} Coins?${receiveNote}`)) return;
+  } else {
+    if (!confirm('Are you sure you want to purchase this item?')) return;
+  }
 
   try {
     const res = await fetch('/api/shop/buy', {

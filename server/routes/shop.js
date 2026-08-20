@@ -3,13 +3,17 @@ const router = express.Router();
 const db = require('../db');
 const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+
 // Helper to authenticate request and get DB user
 async function getAuthUser(req) {
+  if (req.user) return req.user;
+
   const authHeader = req.headers.authorization;
   if (!authHeader) return null;
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nitro-secret-key-1234');
+    const decoded = jwt.verify(token, JWT_SECRET);
     return await db.getUserByUsername(decoded.username);
   } catch (e) {
     return null;

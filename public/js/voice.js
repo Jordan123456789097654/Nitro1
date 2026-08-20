@@ -193,7 +193,7 @@ function fetchVoiceChannels() {
 let activeCategoryFilter = 'all';
 
 function renderVoiceChannelsList(channels) {
-  const container = document.getElementById('voice-channels-grid');
+  const container = document.getElementById('voice-channels-list');
   if (!container) return;
 
   if (!channels || channels.length === 0) {

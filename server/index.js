@@ -150,7 +150,8 @@ app.use('/api', (req, res, next) => {
   const openPaths = [
     '/auth', '/api/auth', '/status', '/api/status', '/visit', '/api/visit', '/gateway', '/api/gateway', '/admin', '/api/admin',
     '/games', '/api/games', '/polls', '/api/polls', '/voice', '/api/voice', '/updates', '/api/updates',
-    '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard', '/ai', '/api/ai'
+    '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard', '/ai', '/api/ai',
+    '/themes', '/api/themes'
   ];
   if (openPaths.some(p => req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
@@ -263,6 +264,7 @@ app.use('/api/ai', require('./routes/ai'));
 app.use('/api/appeals', require('./routes/appeals'));
 app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/shop', require('./routes/shop'));
+app.use('/api/themes', require('./routes/themes'));
 
 // GET /api/weather - Proxy wttr.in with curl user-agent to ensure clean plain-text return
 app.get('/api/weather', async (req, res) => {

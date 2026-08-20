@@ -91,7 +91,11 @@ export function renderThemeList(filter = '') {
         <span class="theme-orb" style="background: ${t.accent}; color: ${t.accent};"></span>
         <span>${t.name} ${t.isCustom ? '⭐' : ''}</span>
       </button>
-      ${t.isCustom ? `<button class="btn-small danger" style="padding: 4px 8px; flex-shrink: 0;" onclick="window.deleteCustomTheme('${t.id}')" title="Delete custom theme">✕</button>` : ''}
+      ${t.isCustom ? `
+        <button class="btn-small primary" style="padding: 4px 8px; flex-shrink: 0; background: linear-gradient(135deg, #10b981, #059669); border: none;" onclick="window.copyThemeCode('${t.id}')" title="Copy share code">📋</button>
+        <button class="btn-small primary" style="padding: 4px 8px; flex-shrink: 0; background: linear-gradient(135deg, #6366f1, #4f46e5); border: none;" onclick="window.shareCustomTheme('${t.id}')" title="Share theme to public gallery">🌐</button>
+        <button class="btn-small danger" style="padding: 4px 8px; flex-shrink: 0;" onclick="window.deleteCustomTheme('${t.id}')" title="Delete custom theme">✕</button>
+      ` : ''}
     </div>
   `).join('');
 
@@ -120,6 +124,184 @@ function setupThemeListeners() {
     applyTheme('cherry');
     renderThemeList();
   };
+
+  // Copy custom theme code
+  window.copyThemeCode = (themeId) => {
+    const custom = getCustomThemes();
+    const theme = custom.find(t => t.id === themeId);
+    if (!theme) return alert('Theme not found.');
+
+    const shareCode = `nitrotheme|${theme.name}|${theme.bg}|${theme.cardbg}|${theme.accent}|${theme.text}|${theme.muted}`;
+    navigator.clipboard.writeText(shareCode)
+      .then(() => alert(`📋 Share code copied to clipboard!\nShare this code with friends:\n${shareCode}`))
+      .catch(() => alert('Failed to copy code to clipboard.'));
+  };
+
+  // Share custom theme to public database
+  window.shareCustomTheme = async (themeId) => {
+    const custom = getCustomThemes();
+    const theme = custom.find(t => t.id === themeId);
+    if (!theme) return alert('Theme not found.');
+
+    if (!confirm(`Share your custom theme "${theme.name}" with the public community gallery?`)) return;
+
+    try {
+      const token = localStorage.getItem('nitro_jwt_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/themes/share', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(theme)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || 'Theme shared successfully!');
+      } else {
+        alert(data.error || 'Failed to share theme.');
+      }
+    } catch (e) {
+      alert('Error sharing theme.');
+    }
+  };
+
+  // Import Theme Code Button Listener
+  const importBtn = document.getElementById('import-theme-code-btn');
+  if (importBtn) {
+    importBtn.addEventListener('click', () => {
+      const code = prompt('Paste your shareable Nitro Theme Code below:\n(Format: nitrotheme|Name|BG|CardBG|Accent|Text|Muted)');
+      if (!code) return;
+
+      const parts = code.trim().split('|');
+      if (parts[0] !== 'nitrotheme' || parts.length < 7) {
+        alert('Invalid Nitro Theme Code format.');
+        return;
+      }
+
+      const name = parts[1];
+      const bg = parts[2];
+      const cardbg = parts[3];
+      const accent = parts[4];
+      const text = parts[5];
+      const muted = parts[6];
+
+      if (!name || !bg || !accent || !text || !cardbg || !muted) {
+        alert('Invalid theme parameters inside the code.');
+        return;
+      }
+
+      const id = 'custom-' + Date.now();
+      const newTheme = { id, name, desc: `Imported theme: ${name}`, bg, cardbg, accent, text, muted, isCustom: true };
+
+      const custom = getCustomThemes();
+      custom.push(newTheme);
+      saveCustomThemes(custom);
+
+      applyTheme(id);
+      renderThemeList();
+      alert(`✨ Custom theme "${name}" imported and applied!`);
+    });
+  }
+
+  // Public Themes Browser Handling
+  const publicBtn = document.getElementById('open-public-themes-btn');
+  const publicModal = document.getElementById('public-themes-modal');
+  const publicClose = document.getElementById('public-themes-close');
+  const publicContainer = document.getElementById('public-themes-container');
+
+  if (publicBtn && publicModal) {
+    publicBtn.addEventListener('click', async () => {
+      publicModal.style.display = 'flex';
+      publicModal.classList.add('active');
+      await window.fetchPublicThemes();
+    });
+  }
+
+  if (publicClose && publicModal) {
+    publicClose.addEventListener('click', () => {
+      publicModal.style.display = 'none';
+      publicModal.classList.remove('active');
+    });
+  }
+
+  window.fetchPublicThemes = async () => {
+    if (!publicContainer) return;
+    publicContainer.innerHTML = '<div style="text-align:center; grid-column:1/-1; color:var(--text-muted); padding:30px;">Loading public themes...</div>';
+    
+    try {
+      const token = localStorage.getItem('nitro_jwt_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/themes/public', { headers });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const themes = data.themes || [];
+
+      if (themes.length === 0) {
+        publicContainer.innerHTML = '<div style="text-align:center; grid-column:1/-1; color:var(--text-muted); padding:30px;">No public themes available yet. Be the first to share one!</div>';
+        return;
+      }
+
+      publicContainer.innerHTML = themes.map(t => {
+        return `
+          <div style="background: ${t.cardbg}; border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color: ${t.text}; font-size: 0.95rem;">${t.name}</strong>
+                <span style="font-size:0.7rem; color:var(--text-muted);">by @${t.author || 'Anonymous'}</span>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <span style="width:16px; height:16px; border-radius:50%; background:${t.bg}; border:1px solid rgba(255,255,255,0.15);" title="Background"></span>
+                <span style="width:16px; height:16px; border-radius:50%; background:${t.cardbg}; border:1px solid rgba(255,255,255,0.15);" title="Card BG"></span>
+                <span style="width:16px; height:16px; border-radius:50%; background:${t.accent}; border:1px solid rgba(255,255,255,0.15);" title="Accent"></span>
+                <span style="width:16px; height:16px; border-radius:50%; background:${t.text}; border:1px solid rgba(255,255,255,0.15);" title="Text"></span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-small primary" onclick="window.applyPublicTheme('${t.id}')" style="flex:1; background:${t.accent}; color:${getContrastColor(t.accent)}; font-weight:800; padding:6px 10px;">Select</button>
+              <button class="btn-small secondary" onclick="window.copyPublicThemeCode('${t.id}')" style="padding:6px; flex-shrink:0; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);" title="Copy Code">📋</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      publicContainer.innerHTML = '<div style="text-align:center; grid-column:1/-1; color:#ef4444; padding:30px;">Error loading public themes.</div>';
+    }
+  };
+
+  window.applyPublicTheme = (themeId) => {
+    applyTheme(themeId);
+    renderThemeList();
+    alert('✨ Theme successfully applied!');
+  };
+
+  window.copyPublicThemeCode = async (themeId) => {
+    try {
+      const res = await fetch('/api/themes/public');
+      const data = await res.json();
+      const theme = (data.themes || []).find(t => t.id === themeId);
+      if (!theme) return alert('Theme not found.');
+
+      const shareCode = `nitrotheme|${theme.name}|${theme.bg}|${theme.cardbg}|${theme.accent}|${theme.text}|${theme.muted}`;
+      navigator.clipboard.writeText(shareCode)
+        .then(() => alert(`📋 Community theme code copied to clipboard!\n${shareCode}`))
+        .catch(() => alert('Failed to copy to clipboard.'));
+    } catch (e) {
+      alert('Error fetching theme details.');
+    }
+  };
+}
+
+function getContrastColor(hex) {
+  if (!hex || hex.length < 6) return '#000000';
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16);
+  const g = parseInt(c.substr(2, 2), 16);
+  const b = parseInt(c.substr(4, 2), 16);
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 128) ? '#000000' : '#ffffff';
 }
 
 function setupCustomThemeCreator() {

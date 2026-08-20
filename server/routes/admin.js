@@ -10,6 +10,45 @@ const { testGroqModeration } = require('../aiModeration');
 
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
+async function punishTreasonousAdmin(req, res, targetUser) {
+  const adminUser = req.adminUser || req.user;
+  if (!adminUser) return res.status(401).json({ error: 'Authentication required.' });
+  
+  const banDays = 3;
+  const reason = `Treason: Attempted to punish the platform Owner (${targetUser.username}). Demoted and banned for 3 days.`;
+  
+  try {
+    await db.updateUserProfile(adminUser.id, { role: 'member' });
+    await db.banUser(adminUser.id, reason, banDays);
+    await db.createModerationLog('TREASONOUS_ADMIN_BAN', 'SYSTEM_PROTECTION', adminUser.username, reason);
+    
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'ADMIN_TREASON_PUNISHED',
+      admin: 'SYSTEM_PROTECTION',
+      target: `@${adminUser.username}`,
+      details: `Admin @${adminUser.username} tried to punish Owner @${targetUser.username}. Admin was demoted to member and banned for 3 days.`
+    });
+    
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_banned_event', {
+        userId: adminUser.id,
+        username: adminUser.username,
+        reason: reason,
+        bannedUntil: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+      });
+      io.emit('user_banned', { userId: adminUser.id, username: adminUser.username, reason: 'Treason', durationDays: banDays });
+    }
+  } catch (err) {
+    console.error('punishTreasonousAdmin error:', err.message);
+  }
+  
+  return res.status(403).json({
+    error: `Treason! You have attempted to punish the Owner. You have been demoted to Member and banned for 3 days.`
+  });
+}
+
 // Middleware to restrict access to Admins only (supports Session, Cookies, and Bearer JWT)
 const requireAdmin = async (req, res, next) => {
   let user = req.user || (req.session && req.session.user);
@@ -52,6 +91,16 @@ const requireOwner = (req, res, next) => {
 // PUBLIC NITRO AI STATUS CHECK ENDPOINT
 router.get('/ai-status', (req, res) => {
   res.json({ ai_enabled: systemState.isAiEnabled(), config: systemState.getAiConfig() });
+});
+
+// PUBLIC REGISTRATION STATUS CHECK ENDPOINT
+router.get('/signups-status', async (req, res) => {
+  try {
+    const signups_enabled = await db.isSignupsEnabled();
+    res.json({ success: true, signups_enabled });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch signup status.' });
+  }
 });
 
 router.use(requireAdmin);
@@ -196,6 +245,29 @@ router.delete('/ai-logs', async (req, res) => {
 });
 
 
+// Get shop purchase history
+router.get('/shop/purchases', async (req, res) => {
+  try {
+    const purchases = await db.getShopPurchases();
+    res.json({ success: true, purchases });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve shop purchases.' });
+  }
+});
+
+// Get AI flagged incidents & appeals
+router.get('/ai-flagged-cases', async (req, res) => {
+  try {
+    const flaggedViolations = await db.getAiFlaggedViolations();
+    const allAppeals = await db.getAppeals();
+    const aiAppeals = allAppeals.filter(a => a.ai_recommendation && a.ai_recommendation !== '');
+    res.json({ success: true, violations: flaggedViolations, appeals: aiAppeals });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve AI flagged cases.' });
+  }
+});
+
+
 router.post('/users/create', async (req, res) => {
   const { username, display_name, password, role, avatar_url } = req.body;
   if (!username || !password) {
@@ -236,14 +308,6 @@ router.post('/users/create', async (req, res) => {
 });
 
 // OWNER-ONLY FEATURE TOGGLES API
-router.get('/signups-status', async (req, res) => {
-  try {
-    const signups_enabled = await db.isSignupsEnabled();
-    res.json({ success: true, signups_enabled });
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch signup status.' });
-  }
-});
 
 router.post('/toggle-signups', requireOwner, async (req, res) => {
   try {
@@ -831,6 +895,12 @@ router.post('/users/:id/gateway-ban', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
+    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
+    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    if (isTargetOwner && !isTriggererOwner) {
+      return await punishTreasonousAdmin(req, res, targetUser);
+    }
+
     await db.banGatewayUser(targetId, reason || 'Proxy banned by administrator');
     await db.createModerationLog('GATEWAY_BAN_USER', admin, targetUser.username, reason || 'Proxy banned by administrator');
 
@@ -883,6 +953,12 @@ router.delete('/users/:id', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
+    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
+    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    if (isTargetOwner && !isTriggererOwner) {
+      return await punishTreasonousAdmin(req, res, targetUser);
+    }
+
     if (targetUser.role === 'admin' && targetUser.username.toLowerCase() === 'jordandaniels') {
       return res.status(403).json({ error: 'Cannot delete primary platform administrator account.' });
     }
@@ -913,6 +989,12 @@ router.post('/users/:id/ban', async (req, res) => {
   try {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
+    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    if (isTargetOwner && !isTriggererOwner) {
+      return await punishTreasonousAdmin(req, res, targetUser);
+    }
 
     if (['admin', 'owner'].includes(targetUser.role) && req.adminUser.role !== 'owner') {
       return res.status(403).json({ error: 'Cannot ban an administrator or owner.' });
@@ -972,6 +1054,12 @@ router.post('/users/:id/mute', async (req, res) => {
   try {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
+    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    if (isTargetOwner && !isTriggererOwner) {
+      return await punishTreasonousAdmin(req, res, targetUser);
+    }
 
     if (['admin', 'owner'].includes(targetUser.role) && req.adminUser.role !== 'owner') {
       return res.status(403).json({ error: 'Cannot mute an administrator or owner.' });
@@ -1492,7 +1580,7 @@ router.post('/appeals/:id/review', async (req, res) => {
 
 // ADMIN CREATE SHOP ITEM
 router.post('/shop/create', async (req, res) => {
-  const { name, description, price, category, perk_value } = req.body;
+  const { name, description, price, category, perk_value, delivery_note } = req.body;
   if (!name || !description || !price || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
   }
@@ -1503,7 +1591,8 @@ router.post('/shop/create', async (req, res) => {
       description,
       price: parseInt(price, 10),
       category,
-      perk_value: perk_value || ''
+      perk_value: perk_value || '',
+      delivery_note: delivery_note || ''
     });
 
     if (!newItem) {

@@ -3,6 +3,8 @@ const router = express.Router();
 const pdfParse = require('pdf-parse');
 const systemState = require('../systemState');
 const { sendDiscordLog } = require('../discordLogger');
+const db = require('../db');
+const { checkMessageWithGroqModeration } = require('../aiModeration');
 
 // GET /api/ai/status (Public AI Status Check)
 router.get('/status', (req, res) => {
@@ -25,10 +27,10 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY || 'gsk_O4J9ORX2qQUm615woxDzWGdyb3
 const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
 const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'llama-3.2-11b-vision-preview';
 
-const BASE_SYSTEM_PROMPT = `You are Nitro AI — a high-IQ, quick-witted study co-pilot and conversational assistant. You combine the relaxed, chill personality of a clever friend with the pedagogical precision of an elite tutor.
+const BASE_SYSTEM_PROMPT = `You are Nitro AI — a super chill, high-IQ, and quick-witted study co-pilot. You combine the relaxed, casual personality of a clever friend with the pedagogical precision of an elite tutor. Speak naturally and informally, using casual contractions and friendly peer-to-peer phrasing. Avoid sounding like a dry academic textbook or a stiff formal bot.
 
 ### Core Guidelines & Tone:
-1. **Thorough, Helpful & Engaging:** Never give a lazy, dismissive one-sentence answer to homework, math, code, or science questions. Provide thorough, step-by-step breakdowns, intuitive explanations, and complete solutions.
+1. **Thorough, Helpful & Engaging (yet informal):** Never give a lazy, dismissive one-sentence answer. Provide thorough, step-by-step breakdowns and clear explanations in a friendly, conversational friend-to-friend tone.
 2. **Algebra & Math Handling:**
    - If the user provides an algebraic expression (e.g. "10x + 10"), explain how to factor it step-by-step ($10(x + 1)$), provide its roots if set to zero ($x = -1$), its slope-intercept form if graphed ($y = 10x + 10$), and clearly state the simplified result.
    - For word problems or equations, show every step: identify knowns, state formulas, isolate variables, and highlight the final boxed answer.
@@ -278,6 +280,57 @@ router.post('/ask', async (req, res) => {
     }
   }
 
+  // 4b. AI Chat safety moderation check
+  if (textQuery) {
+    try {
+      const aiCheck = await checkMessageWithGroqModeration(textQuery);
+      if (aiCheck && aiCheck.flagged) {
+        const username = req.user ? req.user.username : 'Anonymous';
+        const targetId = req.user ? req.user.id : null;
+        
+        await db.logAiModerationViolation({
+          userId: targetId,
+          username,
+          message: textQuery,
+          category: aiCheck.category,
+          severity: aiCheck.severity,
+          confidence: aiCheck.confidence,
+          action_taken: 'ai_chat_blocked',
+          reason: `AI Chatbot Prompt Flagged: ${aiCheck.reason}`
+        });
+        
+        sendDiscordLog({
+          category: 'moderation',
+          action: 'AI_CHATBOT_PROMPT_FLAGGED',
+          admin: 'AI_SAFETY_ENGINE',
+          target: `@${username}`,
+          details: `AI Chatbot prompt flagged: "${textQuery}" | Category: ${aiCheck.category} | Reason: ${aiCheck.reason}`
+        });
+        
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin_channel').emit('system_notification', {
+            title: `🚨 AI Chatbot Prompt Flagged`,
+            message: `@${username} was flagged in AI Chatbot for ${aiCheck.category.toUpperCase()}: "${textQuery}"`,
+            level: 'error'
+          });
+        }
+        
+        if (aiCheck.category === 'violence_selfharm' || (aiCheck.reason && aiCheck.reason.toLowerCase().includes('suicide')) || (aiCheck.reason && aiCheck.reason.toLowerCase().includes('self-harm'))) {
+          return res.status(400).json({
+            error: "Sorry, I can't help with that. Please know that you are not alone and help is available. You can reach the Suicide & Crisis Lifeline by calling or texting 988, or chatting at 988lifeline.org."
+          });
+        }
+        
+        return res.status(400).json({
+          error: `🛡️ [Groq AI Safety] Your message was flagged: ${aiCheck.reason} (${aiCheck.category}). Please keep chat safe and clean.`
+        });
+      }
+    } catch (e) {
+      console.error('AI chat safety check error:', e);
+    }
+  }
+
   const attachmentBase64 = fileBase64 || imageBase64;
   const activeModeKey = (mode && MODE_PROMPTS[mode]) ? mode : 'general';
 
@@ -301,7 +354,7 @@ router.post('/ask', async (req, res) => {
   } else if (personality === 'concise') {
     effectiveSystemPrompt += '\n\n[Tone Directive: Be extremely concise, direct, and utilize structured bullet points without fluff.]';
   } else {
-    effectiveSystemPrompt += '\n\n[Tone Directive: Be a warm, engaging, motivating, and helpful study co-pilot.]';
+    effectiveSystemPrompt += '\n\n[Tone Directive: Adopt a super chill, friendly, casual, peer-like tone. Use relaxed phrasing and contractions, like a smart classmate or close friend.]';
   }
 
   if (currentAiConfig.chatCustomDirectives) {

@@ -679,6 +679,21 @@
     </div>
   </div>
 
+  <!-- PUBLIC COMMUNITY THEMES BROWSER MODAL -->
+  <div class="modal-overlay" id="public-themes-modal" style="display: none;">
+    <div class="modal-card" style="max-width: 620px; max-height: 85vh; overflow-y: auto;">
+      <button class="modal-close" id="public-themes-close">✕</button>
+      <h2 style="color: var(--accent-color); margin-bottom: 6px; font-size: 1.4rem;">🌐 Community Public Themes</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Browse and apply beautiful theme presets uploaded by other members of the Nitro community.</p>
+
+      <div id="public-themes-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-bottom: 18px;">
+        <div style="text-align: center; grid-column: 1 / -1; color: var(--text-muted); padding: 40px;">
+          Loading public themes...
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PROFILE CUSTOMIZATION & PRO PERKS MODAL -->
   <div class="modal-overlay" id="profile-edit-modal">
     <div class="modal-card" style="max-width: 540px; max-height: 85vh; overflow-y: auto;">
@@ -975,13 +990,6 @@
         <span id="nav-profile-name" style="font-weight: 800; font-size: 0.92rem; color: #fff;">Hello, Student</span>
       </div>
 
-      <!-- Real-Time Weather & Clock Widget -->
-      <div id="header-system-widget" style="display: flex; align-items: center; gap: 10px; margin-left: 14px; padding: 4px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 99px; font-size: 0.74rem; color: #cbd5e1; font-weight: 600;">
-        <span id="header-clock" style="font-family: monospace;">12:00:00 PM</span>
-        <span style="color: rgba(255,255,255,0.15);">|</span>
-        <span id="header-weather">🌤️ Loading...</span>
-      </div>
-
       <!-- Center Primary Navigation -->
       <nav class="nav-links">
         <div class="nav-group-cluster primary-cluster">
@@ -1028,6 +1036,12 @@
 
         <!-- Right System & Account Controls -->
         <div class="nav-group-cluster controls-cluster">
+          <!-- Real-Time Weather & Clock Widget -->
+          <div id="header-system-widget" style="display: flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 99px; font-size: 0.72rem; color: #cbd5e1; font-weight: 600; margin-right: 8px;">
+            <span id="header-clock" style="font-family: monospace; letter-spacing: 0.5px;">12:00:00 PM</span>
+            <span style="color: rgba(255,255,255,0.12);">|</span>
+            <span id="header-weather">🌤️ Loading...</span>
+          </div>
           <!-- REAL-TIME NOTIFICATION BELL -->
           <div style="position: relative;">
             <button class="nav-btn" id="nav-notification-bell-btn" title="Notifications & Activity" style="color: #38bdf8; position: relative;">
@@ -1054,31 +1068,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           </button>
 
-          <!-- PARTNER SITES DROPDOWN -->
-          <div style="position: relative; display: inline-block;">
-            <button class="nav-btn" id="nav-network-btn" title="Our Network & Games Sites" style="color: #10b981;">
-              <span style="font-size: 1.1rem;">🌐</span>
-              <span class="nav-btn-text">Sites</span>
-            </button>
 
-            <!-- Network Dropdown Popup -->
-            <div id="network-sites-popup" style="display: none; position: absolute; top: 45px; right: 0; width: 220px; background: linear-gradient(160deg, #121624, #0a0d16); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; overflow: hidden; backdrop-filter: blur(20px);">
-              <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3); font-size: 0.8rem; font-weight: 800; color: #10b981; letter-spacing: 0.5px;">
-                🌐 OUR OTHER SITES
-              </div>
-              <div style="display: flex; flex-direction: column; padding: 6px 0;">
-                <a href="https://neon-math.com" target="_blank" class="network-link" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #fff; text-decoration: none; font-size: 0.82rem; transition: background 0.2s;">
-                  <span>⚡</span> Neon Math Games
-                </a>
-                <a href="https://studyhelper.org" target="_blank" class="network-link" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #fff; text-decoration: none; font-size: 0.82rem; transition: background 0.2s;">
-                  <span>🎓</span> Study Helper Space
-                </a>
-                <a href="https://paint-deluxe.com" target="_blank" class="network-link" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #fff; text-decoration: none; font-size: 0.82rem; transition: background 0.2s;">
-                  <span>🎨</span> Paint Studio Deluxe
-                </a>
-              </div>
-            </div>
-          </div>
           <!-- ADMIN CONTROL PILL -->
           <button class="nav-btn admin-topbar-pill" data-view="admin" id="admin-nav-btn" title="Administrative Control Center" style="display: none;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -1648,6 +1638,8 @@
           <input type="text" class="themes-search-input" id="theme-search-input" placeholder="Search themes...">
           <div class="themes-list-scroll" id="themes-preset-list"></div>
           <button class="theme-btn-create" id="open-custom-theme-btn">🎨 Create Custom Theme</button>
+          <button class="theme-btn-create" id="import-theme-code-btn" style="background: linear-gradient(135deg, #10b981, #059669); margin-top: 8px; border: none;">📥 Import Theme Code</button>
+          <button class="theme-btn-create" id="open-public-themes-btn" style="background: linear-gradient(135deg, #6366f1, #4f46e5); margin-top: 8px; border: none;">🌐 Browse Public Themes</button>
         </aside>
 
         <div class="studio-main-panel">
@@ -1887,8 +1879,7 @@
       </div>
     </section>
 
-    <!-- SECTION 6.8: SHOP & QUESTS SYSTEM -->
-    <section class="page-view" id="view-shop" style="display: none;">
+    <section class="page-view" id="view-shop">
       <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
         <div>
           <h1 style="background: linear-gradient(90deg, #10b981, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🛍️ SHOP & DAILY QUESTS HUB</h1>
@@ -1999,6 +1990,7 @@
             </span>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <button class="admin-tab-btn" data-tab="aimod" onclick="window.loadAiModerationStudio()" style="border: 1px solid rgba(56, 189, 248, 0.35); background: rgba(56,189,248,0.06);">🤖 AI Moderation Studio</button>
+              <button class="admin-tab-btn" data-tab="aiflagged" onclick="window.adminFetchAiFlagged()" style="border: 1px solid rgba(56, 189, 248, 0.35); background: rgba(56,189,248,0.06);">🤖 AI Flagged Cases</button>
               <button class="admin-tab-btn" data-tab="appeals" onclick="window.fetchAppeals()" style="border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239,68,68,0.06);">⚖️ Appeals Review Hub <span id="admin-appeals-badge" style="display:none; background:#ef4444; color:#fff; font-size:0.72rem; padding:1px 6px; border-radius:99px; font-weight:800; margin-left:4px;">0</span></button>
               <button class="admin-tab-btn" data-tab="users">👥 Users & Accounts</button>
               <button class="admin-tab-btn" data-tab="wordfilters">🤬 Word & Punishment Rules</button>
@@ -2017,6 +2009,7 @@
               <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions & Feedback</button>
               <button class="admin-tab-btn" data-tab="bugs" onclick="window.adminFetchBugs()">🐛 Bug Reports</button>
               <button class="admin-tab-btn" data-tab="adminshop" onclick="window.adminFetchShop()">🛍️ Manage Shop</button>
+              <button class="admin-tab-btn" data-tab="shoppurchases" onclick="window.adminFetchShopPurchases()">🛒 Shop Purchases</button>
               <button class="admin-tab-btn" data-tab="adminquests" onclick="window.adminFetchQuests()">🏆 Manage Quests</button>
               <button class="admin-tab-btn" data-tab="announcements">📢 Global Banner</button>
               <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
@@ -2623,6 +2616,105 @@
           </div>
         </div>
 
+        <!-- Admin Tab: Shop Purchases -->
+        <div class="admin-tab-content" id="tab-shoppurchases" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h3 style="color: #38bdf8; margin: 0; font-size: 1.35rem; font-weight: 800;">🛍️ User Shop Purchases History</h3>
+              <p style="color: var(--text-muted); font-size: 0.86rem; margin-top: 4px;">
+                View who purchased what items in the Nitro shop, including cosmetic custom flairs, name glows, and real-life rewards.
+              </p>
+            </div>
+            <button class="btn-small primary" onclick="window.adminFetchShopPurchases()" style="font-weight: 800; padding: 7px 14px;">🔄 Refresh Purchases</button>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;">
+            <div style="overflow-x: auto;">
+              <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                    <th style="padding: 10px 12px;">Date Purchased</th>
+                    <th style="padding: 10px 12px;">User Account</th>
+                    <th style="padding: 10px 12px;">Item Name</th>
+                    <th style="padding: 10px 12px;">Category</th>
+                    <th style="padding: 10px 12px;">Coins Paid</th>
+                  </tr>
+                </thead>
+                <tbody id="shoppurchases-tbody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading purchases...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tab: AI Flagged Cases -->
+        <div class="admin-tab-content" id="tab-aiflagged" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h3 style="color: #38bdf8; margin: 0; font-size: 1.35rem; font-weight: 800;">🤖 AI-Flagged Cases & Appeals Feed</h3>
+              <p style="color: var(--text-muted); font-size: 0.86rem; margin-top: 4px;">
+                Review active punishments automatically issued by the AI engine, alongside ban appeals pre-reviewed by the AI Safety Arbitrator.
+              </p>
+            </div>
+            <button class="btn-small primary" onclick="window.adminFetchAiFlagged()" style="font-weight: 800; padding: 7px 14px;">🔄 Refresh Feed</button>
+          </div>
+
+          <!-- Section 1: AI Auto-Bans & Mutes -->
+          <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <h4 style="color: #ff6b6b; margin: 0 0 12px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+              <span>🚫</span> AI Auto-Bans & Chat Mutes
+            </h4>
+            <div style="overflow-x: auto;">
+              <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                    <th style="padding: 10px 12px;">Timestamp</th>
+                    <th style="padding: 10px 12px;">User</th>
+                    <th style="padding: 10px 12px;">Offending Text</th>
+                    <th style="padding: 10px 12px;">Violation Category</th>
+                    <th style="padding: 10px 12px;">Action Taken</th>
+                    <th style="padding: 10px 12px;">AI Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="aipuns-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading AI punishments...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 2: AI Pre-Reviewed Appeals -->
+          <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;">
+            <h4 style="color: #fbbf24; margin: 0 0 12px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+              <span>⚖️</span> AI Pre-Reviewed Ban Appeals
+            </h4>
+            <div style="overflow-x: auto;">
+              <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                    <th style="padding: 10px 12px;">Date</th>
+                    <th style="padding: 10px 12px;">User</th>
+                    <th style="padding: 10px 12px;">Punishment</th>
+                    <th style="padding: 10px 12px;">AI Recommendation</th>
+                    <th style="padding: 10px 12px;">AI Rationale & Confidence</th>
+                    <th style="padding: 10px 12px;">Human Status</th>
+                  </tr>
+                </thead>
+                <tbody id="aiappeals-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading AI appeal reviews...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- Admin Tab: Catalog Games -->
         <div class="admin-tab-content" id="tab-games" style="display: none;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
@@ -2732,6 +2824,10 @@
               <div>
                 <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Perk Value (Optional)</label>
                 <input type="text" id="admin-shop-perk" placeholder="e.g. fire, gold, or flair text" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Delivery/Claiming Notes (For IRL Rewards)</label>
+                <input type="text" id="admin-shop-delivery-note" placeholder="e.g. Code will be emailed to you." style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
               </div>
               <div>
                 <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800; background: #10b981; color: #000;">Add Item</button>
@@ -3114,18 +3210,21 @@
         </ul>
 
         <h4 style="color: #ec4899; margin: 16px 0 6px; font-size: 1.05rem;">8. Formal Appeal System & AI Arbitration</h4>
-        <p style="margin-bottom: 14px;">Muted or suspended users may submit a formal appeal through the Punishment Appeal Portal. Appeals are evaluated by Groq AI for sincerity and remorse, followed by final administrator review. If an appeal is approved, mutes, account bans, and gateway restrictions are lifted automatically across the platform.</p>
+        <p style="margin-bottom: 14px;">Muted or suspended users may submit a formal appeal through the Punishment Appeal Portal. Appeals undergo automated pre-evaluation by the Groq AI Safety Arbitrator to analyze sincerity, remorse, and future infraction risk before final administrator review. If an appeal is approved, mutes, account bans, and gateway restrictions are lifted automatically across the platform.</p>
 
         <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">9. Telemetry, Audit Logging & Security Webhooks</h4>
         <p style="margin-bottom: 14px;">For platform security and abuse prevention, client IP addresses, browser user-agents, authentication events, moderation actions, and chat activity are recorded in secure database audit logs and dispatched live to administrative Discord Webhooks (Moderation Actions, Audit Logs, AI Logs, and Chat Logs).</p>
 
-        <h4 style="color: #ef4444; margin: 16px 0 6px; font-size: 1.05rem;">10. Intellectual Property & DMCA Takedown Procedure</h4>
+        <h4 style="color: #10b981; margin: 16px 0 6px; font-size: 1.05rem;">10. Community Themes & Code Submissions</h4>
+        <p style="margin-bottom: 14px;">Users may import, export, and share custom themes in the Community Gallery. Shared themes must comply with community safety standards. Any theme featuring toxic names, offensive terminology, or harmful styling will be immediately removed, and the uploader banned. Sharing custom themes is subject to public visibility.</p>
+
+        <h4 style="color: #ef4444; margin: 16px 0 6px; font-size: 1.05rem;">11. Treason Protocol & Supreme Owner Governance</h4>
+        <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be enabled. While active, non-owner connections (including standard members, VIPs, and standard admins) will be disconnected, reserving exclusive system access to the platform Owner (<code>jordandaniels</code>). Any attempt by an administrator to ban, mute, or punish the Owner triggers the **Treason Protocol**: immediate demotion to Member, a 3-day account ban, and termination of all administrative privileges.</p>
+
+        <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">12. Intellectual Property & DMCA Takedown Procedure</h4>
         <p style="margin-bottom: 14px;">All games, canvas tools, and embedded web content remain the intellectual property of their original developers and publishers. If you are a copyright owner and believe content on NITRO infringes your copyright, submit a formal DMCA takedown notice with proof of ownership to <code>jordan@nitromath.org</code> for immediate removal.</p>
 
-        <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">11. Maintenance Mode & Supreme Owner Governance</h4>
-        <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be enabled. While active, non-owner connections (including standard members, VIPs, and standard admins) will be disconnected, reserving exclusive system access to the platform Owner (<code>jordandaniels</code>).</p>
-
-        <h4 style="color: var(--text-main); margin: 16px 0 6px; font-size: 1.05rem;">12. Disclaimer of Warranties & Limitation of Liability</h4>
+        <h4 style="color: var(--text-main); margin: 16px 0 6px; font-size: 1.05rem;">13. Disclaimer of Warranties & Limitation of Liability</h4>
         <p style="margin-bottom: 0;">NITRO IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. THE PLATFORM ADMINISTRATION ASSUMES NO LIABILITY FOR SERVICE INTERRUPTIONS, DATA LOSS, THIRD-PARTY EMBEDS, OR GATEWAY PROXY ROUTING CONTENT.</p>
       </div>
       <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 18px; padding: 12px; font-weight: 800;">I Have Read & Agree to All Detailed Terms</button>

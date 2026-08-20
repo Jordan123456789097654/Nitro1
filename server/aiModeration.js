@@ -4,7 +4,7 @@ const { sendDiscordLog } = require('./discordLogger');
 
 const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-const DEFAULT_PRIMARY_MODEL = 'llama-3.3-70b-versatile';
+const DEFAULT_PRIMARY_MODEL = 'openai/gpt-oss-safeguard-20b';
 const DEFAULT_FALLBACK_MODEL = 'llama-3.1-8b-instant';
 
 // In-memory LRU-style decision cache (15-minute TTL, max 2000 entries)
@@ -138,13 +138,13 @@ async function checkMessageWithGroqModeration(text, options = {}) {
   if (strictness === 'lenient') {
     strictnessInstructions = `STRICTNESS: LENIENT. Flag severe threats, slurs, sexual content, and doxxing.`;
   } else {
-    strictnessInstructions = `STRICTNESS: STRICT & UNCOMPROMISING (School Gaming Community). Zero tolerance.
-Any vulgarity, cursing, profanity, insults, sexual content, slurs, threats, death wishes, or toxicity MUST BE FLAGGED IMMEDIATELY.
-DO NOT downplay threats of violence or profanity as 'low' severity.`;
+    strictnessInstructions = `STRICTNESS: STRICT & UNCOMPROMISING (School Gaming Community). Zero tolerance safety policy.
+Any vulgarity, cursing, profanity, swearing, insults, toxicity, bullying, sexual content, slurs, threats, self-harm, depression, or suicide mentions MUST BE FLAGGED IMMEDIATELY.
+DO NOT downplay threats of violence, self-harm, or profanity. Flag immediately.`;
   }
 
   const systemPrompt = `You are an advanced, uncompromising AI safety moderation engine for "Nitro Games", a student gaming and chat community.
-Analyze the user's message for safety, toxicity, profanity, predatory behavior, threats, and appropriateness.
+Analyze the user's message for safety, toxicity, profanity, predatory behavior, threats, self-harm, suicide, and appropriateness.
 You have FULL AUTONOMOUS AUTHORITY to determine the exact punishment and duration (ranging from 1 day to permanent ban, or temporary mute) based on context and severity.
 
 ${strictnessInstructions}
@@ -155,7 +155,8 @@ MANDATORY SEVERITY & AUTONOMOUS PUNISHMENT RULES:
    - Punishment MUST BE an immediate ACCOUNT BAN (action_type: "ban", duration_days: 7 to 30 days, or 0 for permanent ban). DO NOT just mute for sexual predation or harassment!
 2. "violence_selfharm":
    - ANY direct/indirect threats of physical violence, death wishes ("im going to kill you", "die", "kys", "shoot", "stab", "beat you up") MUST BE RATED "extreme" severity.
-   - Punishment MUST BE an ACCOUNT BAN (action_type: "ban", duration_days: 7, 14, 30, or 0 for permanent ban).
+   - ANY mentions, expressions, jokes, or suggestions of suicide, wanting to die, wanting to self-harm, wanting to end life, or self-harm actions (e.g. "im going to kill myself", "i want to cut", "i want to die") MUST BE RATED "extreme" severity and categorized as "violence_selfharm".
+   - Punishment MUST BE an ACCOUNT BAN (action_type: "ban", duration_days: 3, 7, 14, 30, or 0 for permanent ban).
 3. "hate_speech":
    - Dehumanizing hate speech, racial slurs, homophobic slurs MUST BE RATED "extreme" severity.
    - Punishment: PERMANENT BAN (action_type: "ban", duration_days: 0, recommended_action: "perm_ban").
@@ -325,7 +326,7 @@ Respond ONLY with valid JSON.`;
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(GROQ_ENDPOINT, {
       method: 'POST',
@@ -372,7 +373,7 @@ Respond ONLY with valid JSON.`;
     sincerity_rating: 'medium',
     repeat_offense_risk: 'medium',
     confidence: 0.7,
-    rationale: 'Appeal submitted for administrative review.',
+    rationale: 'Pending manual review - Automated safety evaluation bypassed or timed out. Requires human staff decision.',
     latencyMs: Date.now() - startTime
   };
 }

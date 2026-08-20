@@ -390,7 +390,21 @@ const db = {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY (user_id, quest_id)
         );
+
+        CREATE TABLE IF NOT EXISTS public_themes (
+          id VARCHAR(100) PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          bg VARCHAR(20) NOT NULL,
+          accent VARCHAR(20) NOT NULL,
+          text VARCHAR(20) NOT NULL,
+          cardbg VARCHAR(20) NOT NULL,
+          muted VARCHAR(20) NOT NULL,
+          author VARCHAR(100) DEFAULT 'Community',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
       `);
+
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -418,6 +432,19 @@ const db = {
           ('🦉 Night Study Session', 'Record 5 minutes of study or gaming playtime', 'playtime', 300, 150, 200),
           ('🎨 Paint Masterpiece', 'Load Paint Studio Deluxe to unlock', 'load_paint', 1, 50, 80),
           ('🔊 Sound Mixer DJ', 'Load Soundboard Deluxe to unlock', 'load_soundboard', 1, 50, 80)
+        `);
+      }
+
+      // Seed default public themes
+      const themesCount = await pool.query('SELECT COUNT(*) FROM public_themes');
+      if (parseInt(themesCount.rows[0].count, 10) === 0) {
+        await pool.query(`
+          INSERT INTO public_themes (id, name, bg, accent, text, cardbg, muted, author) VALUES
+          ('cherry', 'Cherry Red', '#090a0f', '#eb2f5f', '#ffffff', '#12141d', '#94a3b8', 'System'),
+          ('cyberpunk', 'Cyberpunk Neon', '#0b0c10', '#66fcf1', '#ffffff', '#1f2833', '#c5c6c7', 'System'),
+          ('emerald', 'Matrix Emerald', '#020d04', '#00ff41', '#e0ffe0', '#0a1a0f', '#558855', 'System'),
+          ('synthwave', 'Synthwave Purple', '#140526', '#ff007f', '#ffffff', '#220b3b', '#8b5cf6', 'System'),
+          ('classic-dark', 'Retro Classic', '#181818', '#38bdf8', '#ffffff', '#242424', '#a3a3a3', 'System')
         `);
       }
 
@@ -2772,13 +2799,13 @@ JSON Format Example:
     }
   },
 
-  async createShopItem({ name, description, price, category, perk_value }) {
+  async createShopItem({ name, description, price, category, perk_value, delivery_note }) {
     try {
       const res = await pool.query(`
-        INSERT INTO shop_items (name, description, price, category, perk_value)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
-      `, [name, description, price, category, perk_value]);
+      `, [name, description, price, category, perk_value, delivery_note || '']);
       return res.rows[0];
     } catch (e) {
       console.error('createShopItem error:', e.message);
@@ -2830,6 +2857,63 @@ JSON Format Example:
     } catch (e) {
       console.error('removeFriend error:', e.message);
       return { success: false };
+    }
+  },
+
+  async getShopPurchases() {
+    try {
+      const res = await pool.query(`
+        SELECT ui.purchased_at, u.username, s.name as item_name, s.category, s.price
+        FROM user_inventory ui
+        JOIN users u ON ui.user_id = u.id
+        JOIN shop_items s ON ui.item_id = s.id
+        ORDER BY ui.purchased_at DESC
+      `);
+      return res.rows;
+    } catch (e) {
+      console.error('getShopPurchases error:', e.message);
+      return [];
+    }
+  },
+
+  async getAiFlaggedViolations() {
+    try {
+      const res = await pool.query(`
+        SELECT * FROM ai_moderation_logs 
+        WHERE action_taken = 'ban' OR action_taken LIKE 'ban%' OR action_taken = 'mute' OR action_taken LIKE 'mute%' OR action_taken = 'BAN_3_DAYS' OR action_taken = 'banned_3d'
+        ORDER BY id DESC
+      `);
+      return res.rows;
+    } catch (e) {
+      console.error('getAiFlaggedViolations error:', e.message);
+      return [];
+    }
+  },
+
+  async getPublicThemes() {
+    try {
+      const res = await pool.query('SELECT * FROM public_themes ORDER BY created_at DESC');
+      return res.rows;
+    } catch (e) {
+      console.error('getPublicThemes error:', e.message);
+      return [];
+    }
+  },
+
+  async sharePublicTheme({ id, name, bg, accent, text, cardbg, muted, author }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO public_themes (id, name, bg, accent, text, cardbg, muted, author)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (id) DO UPDATE 
+        SET name = EXCLUDED.name, bg = EXCLUDED.bg, accent = EXCLUDED.accent, 
+            text = EXCLUDED.text, cardbg = EXCLUDED.cardbg, muted = EXCLUDED.muted, author = EXCLUDED.author
+        RETURNING *
+      `, [id, name, bg, accent, text, cardbg, muted, author || 'Community']);
+      return res.rows[0];
+    } catch (e) {
+      console.error('sharePublicTheme error:', e.message);
+      return null;
     }
   }
 };

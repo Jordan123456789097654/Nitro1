@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { sendDiscordLog } = require('../discordLogger');
+const { evaluateAppealWithGroq } = require('../aiModeration');
 
 // POST /api/appeals/submit or /api/auth/submit-appeal - Submit Detailed Appeal
 router.post('/submit', async (req, res) => {
@@ -53,6 +54,31 @@ async function handleAppealSubmission(req, res) {
 
     const appealText = `Category: ${incidentCategory || 'General'}\nWhat Happened: ${incidentDescription || ''}\nWhy Second Chance: ${whySecondChance || ''}\nPrevention Plan: ${preventionCommitment || ''}`;
 
+    let aiRecommendation = 'review';
+    let aiRationale = 'Pending manual review - Student submitted an appeal requesting access restoration.';
+    let aiConfidence = 0.95;
+
+    try {
+      const aiResult = await evaluateAppealWithGroq({
+        username: cleanUsername,
+        punishmentType: punishment,
+        originalReason,
+        appealText,
+        incidentCategory,
+        incidentDescription,
+        whySecondChance,
+        preventionCommitment,
+        rulesAgreed
+      });
+      if (aiResult) {
+        aiRecommendation = aiResult.recommendation || 'review';
+        aiRationale = aiResult.rationale || 'AI evaluation complete.';
+        aiConfidence = typeof aiResult.confidence === 'number' ? aiResult.confidence : 0.95;
+      }
+    } catch (e) {
+      console.error('AI appeal evaluation failed:', e.message);
+    }
+
     const appeal = await db.createAppeal({
       userId,
       username: cleanUsername,
@@ -64,9 +90,9 @@ async function handleAppealSubmission(req, res) {
       whySecondChance: whySecondChance || '',
       preventionCommitment: preventionCommitment || '',
       rulesAgreed: Boolean(rulesAgreed),
-      aiRecommendation: 'review',
-      aiRationale: 'Submitted for manual staff review.',
-      aiConfidence: 0.95
+      aiRecommendation,
+      aiRationale,
+      aiConfidence
     });
 
     sendDiscordLog({

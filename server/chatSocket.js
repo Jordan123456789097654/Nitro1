@@ -223,6 +223,13 @@ function initChatSocket(io) {
       details: `[${context}] Flagged message: "${cleanText}" | Category: ${aiCheck.category} (${aiCheck.severity} severity, ${Math.round((aiCheck.confidence || 0.95) * 100)}% conf) | Action: ${action} | Reason: ${aiCheck.reason}`
     });
 
+    // 3. Emit real-time notification to all connected admins/mods
+    io.to('admin_channel').emit('system_notification', {
+      title: `🚨 AI Flag: ${aiCheck.reason || aiCheck.category}`,
+      message: `@${username} was flagged for ${aiCheck.category.toUpperCase()} (${aiCheck.severity} severity): "${cleanText}"`,
+      level: 'error'
+    });
+
     if (action === 'censor' || aiCheck.action_type === 'censor') {
       const censored = aiCheck.censored_text || '***';
       return { allowed: true, cleanText: censored };
@@ -530,6 +537,12 @@ function initChatSocket(io) {
               details: `3-Day Account Ban applied for NSFW Image Upload | Reason: ${imgCheck.reason}`
             });
 
+            io.to('admin_channel').emit('system_notification', {
+              title: `🚨 AI Vision: NSFW Ban`,
+              message: `@${username} was banned for 3 days for NSFW image upload: "${imgCheck.reason}"`,
+              level: 'error'
+            });
+
             socket.emit('banned', { reason: banReason, durationDays: banDurationDays });
             return socket.emit('error_message', `⛔ [Groq AI Vision] You have been issued a 3-Day Account Ban for uploading NSFW content.`);
           }
@@ -551,6 +564,12 @@ function initChatSocket(io) {
             admin: 'AI_VISION_ENGINE',
             target: `@${username}`,
             details: `Flagged Image Attachment | Reason: ${imgCheck.reason} (${imgCheck.category || 'Inappropriate Image'})`
+          });
+
+          io.to('admin_channel').emit('system_notification', {
+            title: `🚨 AI Vision: Image Blocked`,
+            message: `@${username} uploaded flagged content: "${imgCheck.reason}"`,
+            level: 'error'
           });
 
           return socket.emit('error_message', `🛡️ [Groq AI Vision] Image blocked: ${imgCheck.reason} (${imgCheck.category || 'Inappropriate'}).`);
@@ -742,12 +761,11 @@ function initChatSocket(io) {
         await db.logAiModerationViolation({
           userId: targetId || null,
           username: user.username,
-          context: `Private Room #${roomCode}`,
+          message: `[Image Attachment in Room #${roomCode}]: ${imgCheck.reason || 'NSFW'}`,
           category: imgCheck.category || 'NSFW Content',
           severity: 'HIGH',
           confidence: imgCheck.confidence || 0.99,
-          violationText: '[Image Attachment]',
-          actionTaken: 'BAN_3_DAYS',
+          action_taken: 'BAN_3_DAYS',
           reason: imgCheck.reason
         });
 
@@ -757,6 +775,12 @@ function initChatSocket(io) {
           admin: 'AI_VISION_ENGINE',
           target: `@${user.username}`,
           details: `3-Day Account Ban applied for NSFW Image in Private Room | Reason: ${imgCheck.reason}`
+        });
+
+        io.to('admin_channel').emit('system_notification', {
+          title: `🚨 AI Vision: Private NSFW`,
+          message: `@${user.username} was banned for 3 days for NSFW image upload in Room #${roomCode}: "${imgCheck.reason}"`,
+          level: 'error'
         });
 
         return socket.emit('error_message', `❌ [Groq AI Vision] You have been issued a 3-Day Account Ban for uploading NSFW content.`);
