@@ -1,0 +1,230 @@
+// Client-side Shop & Quests Module
+import { getCurrentUser } from './auth.js';
+
+let activeCategory = 'all';
+
+export function initShop() {
+  // Bind category tabs
+  const tabs = document.querySelectorAll('.shop-cat-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.style.background = 'rgba(255,255,255,0.05)';
+        t.style.borderColor = 'rgba(255,255,255,0.1)';
+        t.style.color = '#cbd5e1';
+      });
+      tab.classList.add('active');
+      tab.style.background = 'rgba(16, 185, 129, 0.15)';
+      tab.style.borderColor = '#10b981';
+      tab.style.color = '#10b981';
+
+      activeCategory = tab.dataset.cat;
+      loadShopData();
+    });
+  });
+
+  // Watch for page view switches
+  const navShopBtn = document.querySelector('.nav-btn[data-view="shop"]');
+  if (navShopBtn) {
+    navShopBtn.addEventListener('click', () => {
+      loadShopData();
+    });
+  }
+}
+
+export async function loadShopData() {
+  const coinsEl = document.getElementById('shop-user-coins');
+  const xpEl = document.getElementById('shop-user-xp');
+  const user = getCurrentUser();
+  if (user) {
+    if (coinsEl) coinsEl.textContent = user.coins || 0;
+    if (xpEl) xpEl.textContent = user.xp || 0;
+  }
+
+  const token = localStorage.getItem('nitro_jwt_token') || '';
+  if (!token) return;
+
+  try {
+    // 1. Fetch shop items & inventory
+    const [shopRes, invRes, questsRes] = await Promise.all([
+      fetch('/api/shop/items', { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('/api/shop/inventory', { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('/api/shop/quests', { headers: { 'Authorization': `Bearer ${token}` } })
+    ]);
+
+    const shopData = await shopRes.json();
+    const invData = await invRes.json();
+    const questsData = await questsRes.json();
+
+    if (shopData.success && invData.success) {
+      renderStoreItems(shopData.items, invData.inventory);
+    }
+    if (questsData.success) {
+      renderQuests(questsData.quests);
+    }
+  } catch (err) {
+    console.error('Error loading shop/quest data:', err);
+  }
+}
+
+function renderStoreItems(items, inventory) {
+  const container = document.getElementById('shop-items-grid');
+  if (!container) return;
+
+  const ownedItemIds = new Set((inventory || []).map(i => i.item_id));
+
+  // Filter by category
+  let filtered = items;
+  if (activeCategory !== 'all') {
+    filtered = items.filter(item => item.category === activeCategory);
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem;">No items available in this category.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => {
+    const isOwned = ownedItemIds.has(item.id);
+    const actionBtn = isOwned 
+      ? `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`
+      : `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for 🪙 ${item.price}</button>`;
+
+    return `
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
+        <div>
+          <span style="font-size: 0.7rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">${item.category.replace('_', ' ')}</span>
+          <strong style="color: #fff; font-size: 0.88rem; display: block;">${escapeHtml(item.name)}</strong>
+          <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.3;">${escapeHtml(item.description)}</p>
+        </div>
+        <div>
+          ${actionBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderQuests(quests) {
+  const container = document.getElementById('quests-list-container');
+  if (!container) return;
+
+  if (quests.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">No active quests today. Check back later!</div>';
+    return;
+  }
+
+  container.innerHTML = quests.map(q => {
+    const pct = Math.min(100, Math.round((q.current_value / q.target_value) * 100));
+    
+    let actionArea = '';
+    if (q.is_claimed) {
+      actionArea = `<span style="font-size: 0.78rem; color: #64748b; font-weight: 700;">Claimed ✔</span>`;
+    } else if (q.is_completed) {
+      actionArea = `<button onclick="window.claimQuestReward(${q.id})" style="padding: 6px 14px; background: #38bdf8; border: none; color: #000; border-radius: 6px; font-weight: 800; font-size: 0.76rem; cursor: pointer;">Claim Reward</button>`;
+    } else {
+      actionArea = `<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">In Progress (${pct}%)</span>`;
+    }
+
+    return `
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="flex: 1;">
+          <strong style="color: #fff; font-size: 0.88rem; display: block;">${escapeHtml(q.title)}</strong>
+          <p style="margin: 2px 0 6px; color: var(--text-muted); font-size: 0.78rem;">${escapeHtml(q.description)}</p>
+          
+          <!-- Progress Bar -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden;">
+              <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #38bdf8, #10b981); border-radius: 99px;"></div>
+            </div>
+            <span style="font-size: 0.72rem; color: #38bdf8; font-weight: 700; min-width: 32px; text-align: right;">${q.current_value}/${q.target_value}</span>
+          </div>
+          
+          <!-- Rewards Indicator -->
+          <div style="display: flex; gap: 8px; margin-top: 6px; font-size: 0.7rem; font-weight: 700;">
+            <span style="color: #fbbf24;">🪙 +${q.reward_coins} Coins</span>
+            <span style="color: #38bdf8;">🏆 +${q.reward_xp} XP</span>
+          </div>
+        </div>
+        <div style="flex-shrink: 0;">
+          ${actionArea}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.buyShopItem = async function(itemId) {
+  const token = localStorage.getItem('nitro_jwt_token') || '';
+  if (!token) return alert('Please sign in to buy items.');
+
+  if (!confirm('Are you sure you want to purchase this item?')) return;
+
+  try {
+    const res = await fetch('/api/shop/buy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ itemId })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      
+      // Update local profile data if we bought cosmetic flairs
+      if (data.item.category === 'custom_flair') {
+        alert(`✨ Go to Profile Settings to equip your new "${data.item.name}" prefix flair!`);
+      } else if (data.item.category === 'chat_glow') {
+        alert(`✨ Go to Profile Settings to equip your new "${data.item.name}"!`);
+      }
+      
+      // Re-fetch current user to sync points
+      if (window.fetchUserProfile) {
+        await window.fetchUserProfile();
+      }
+      loadShopData();
+    } else {
+      alert(data.error || 'Failed to buy shop item.');
+    }
+  } catch (err) {
+    console.error('Error purchasing item:', err);
+    alert('Network error purchasing item.');
+  }
+};
+
+window.claimQuestReward = async function(questId) {
+  const token = localStorage.getItem('nitro_jwt_token') || '';
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/shop/quests/${questId}/claim`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      if (window.fetchUserProfile) {
+        await window.fetchUserProfile();
+      }
+      loadShopData();
+    } else {
+      alert(data.error || 'Failed to claim quest reward.');
+    }
+  } catch (err) {
+    console.error('Error claiming quest:', err);
+    alert('Network error claiming reward.');
+  }
+};
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}

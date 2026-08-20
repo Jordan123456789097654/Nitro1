@@ -183,6 +183,13 @@ router.post('/profile', async (req, res) => {
 
     const isPro = ['pro', 'vip', 'premium_vip', 'elite_patron', 'early_member', 'moderator', 'admin', 'owner'].includes(user.role);
 
+    const inventory = await db.getUserInventory(userId);
+    const ownedGlows = inventory.filter(i => i.category === 'chat_glow').map(i => i.perk_value);
+    const ownedFlairs = inventory.filter(i => i.category === 'custom_flair').map(i => i.perk_value);
+
+    const hasGlowPermission = isPro || (pro_chat_glow && ownedGlows.includes(pro_chat_glow.trim()));
+    const hasFlairPermission = isPro || (pro_custom_flair && ownedFlairs.includes(pro_custom_flair.trim()));
+
     const updated = await db.updateUserProfile(userId, {
       avatar_url: avatar_url !== undefined ? avatar_url.trim() : user.avatar_url,
       banner_url: isPro && banner_url !== undefined ? banner_url.trim() : user.banner_url,
@@ -190,8 +197,8 @@ router.post('/profile', async (req, res) => {
       vip_particle_effect: isPro && vip_particle_effect !== undefined ? vip_particle_effect.trim() : user.vip_particle_effect,
       display_name: display_name !== undefined ? display_name.trim().slice(0, 50) : user.display_name,
       bio: bio !== undefined ? bio.trim().slice(0, 200) : user.bio,
-      pro_chat_glow: isPro && pro_chat_glow !== undefined ? pro_chat_glow.trim() : user.pro_chat_glow,
-      pro_custom_flair: isPro && pro_custom_flair !== undefined ? pro_custom_flair.trim().slice(0, 30) : user.pro_custom_flair
+      pro_chat_glow: pro_chat_glow !== undefined ? (hasGlowPermission ? pro_chat_glow.trim() : '') : user.pro_chat_glow,
+      pro_custom_flair: pro_custom_flair !== undefined ? (hasFlairPermission ? pro_custom_flair.trim().slice(0, 30) : '') : user.pro_custom_flair
     });
 
     sendDiscordLog({

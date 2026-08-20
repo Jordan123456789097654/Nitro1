@@ -504,4 +504,46 @@ You MUST respond strictly with valid JSON conforming to this exact structure and
   }
 });
 
+// POST /api/ai/generate-image - AI Image Generator via Pollinations.ai
+router.post('/generate-image', async (req, res) => {
+  if (!systemState.isAiEnabled()) {
+    return res.status(503).json({
+      error: '⚠️ Nitro AI is currently under maintenance. Please try again later.',
+      maintenance: true
+    });
+  }
+
+  const { prompt, width, height, enhance } = req.body;
+  if (!prompt || !prompt.trim()) {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
+
+  try {
+    const cleanPrompt = encodeURIComponent(prompt.trim());
+    const w = parseInt(width, 10) || 512;
+    const h = parseInt(height, 10) || 512;
+    const isEnhanced = enhance !== false;
+
+    const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=${w}&height=${h}&nologo=true&private=true${isEnhanced ? '&enhance=true' : ''}`;
+
+    const fetch = require('node-fetch');
+    const response = await fetch(imageUrl, { timeout: 15000 });
+    if (!response.ok) {
+      throw new Error('Failed to generate image from upstream provider.');
+    }
+    const buffer = await response.buffer();
+    const base64 = buffer.toString('base64');
+    const dataUri = `data:image/jpeg;base64,${base64}`;
+
+    res.json({
+      success: true,
+      imageUrl: dataUri
+    });
+  } catch (err) {
+    console.error('Image generation error:', err);
+    res.status(500).json({ error: 'Failed to generate image. Please try again.' });
+  }
+});
+
 module.exports = router;
+

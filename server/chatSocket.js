@@ -624,6 +624,11 @@ function initChatSocket(io) {
 
       const newDm = await db.createDM(sender.id || authCheck.dbUser?.id || null, receiverUser.id, sender.username, receiverUser.username, cleanText, imageUrl, audioUrl);
 
+      const senderId = sender.id || authCheck.dbUser?.id;
+      if (senderId) {
+        await db.updateQuestProgress(senderId, 'send_messages', 1);
+      }
+
       sendDiscordLog({
         category: 'chat',
         action: 'DIRECT_MESSAGE_SENT',
@@ -695,8 +700,11 @@ function initChatSocket(io) {
     });
   });
 
-  socket.on('send_private_room_msg', async ({ roomCode, user, text }) => {
-    if (!roomCode || !user || !text) return;
+  socket.on('send_private_room_msg', async ({ roomCode, user, text, imageUrl }) => {
+    if (!roomCode || !user) return;
+    const hasText = Boolean(text && String(text).trim());
+    const hasImg = Boolean(imageUrl && String(imageUrl).trim());
+    if (!hasText && !hasImg) return;
 
     const authCheck = await checkUserMutedOrBanned(user);
     if (authCheck.isBanned) {
@@ -706,7 +714,7 @@ function initChatSocket(io) {
       return socket.emit('error_message', `🔇 You are temporarily muted for ${authCheck.remainingMins} more minute(s).`);
     }
 
-    let cleanText = text.trim().slice(0, 300);
+    let cleanText = text ? text.trim().slice(0, 300) : '';
     const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
 
     // 1. Run Manual Database Word & Punishment Filter Rules
@@ -719,11 +727,48 @@ function initChatSocket(io) {
     if (!aiEnforce.allowed) return;
     cleanText = aiEnforce.cleanText;
 
+    // 3. AI Vision Image Moderation (if image is present in private room)
+    if (imageUrl && imageUrl.trim()) {
+      const imgCheck = await checkImageWithGroqModeration(imageUrl);
+      if (imgCheck && imgCheck.flagged) {
+        // Block image just like in global chat
+        const targetId = user.id;
+        const banReason = 'Groq AI Vision: Uploaded NSFW Image in Private Room (3-day ban)';
+        const banDurationDays = 3;
+        if (targetId) {
+          await db.banUser(targetId, banReason, banDurationDays);
+          io.emit('user_banned', { userId: targetId, username: user.username, reason: imgCheck.reason, durationDays: banDurationDays });
+        }
+        await db.logAiModerationViolation({
+          userId: targetId || null,
+          username: user.username,
+          context: `Private Room #${roomCode}`,
+          category: imgCheck.category || 'NSFW Content',
+          severity: 'HIGH',
+          confidence: imgCheck.confidence || 0.99,
+          violationText: '[Image Attachment]',
+          actionTaken: 'BAN_3_DAYS',
+          reason: imgCheck.reason
+        });
+
+        sendDiscordLog({
+          category: 'moderation',
+          action: 'GROQ_VISION_BAN_3_DAYS',
+          admin: 'AI_VISION_ENGINE',
+          target: `@${user.username}`,
+          details: `3-Day Account Ban applied for NSFW Image in Private Room | Reason: ${imgCheck.reason}`
+        });
+
+        return socket.emit('error_message', `❌ [Groq AI Vision] You have been issued a 3-Day Account Ban for uploading NSFW content.`);
+      }
+    }
+
     io.to(cleanRoom).emit('private_room_message', {
       roomCode,
       username: user.username,
       role: user.role,
       message: cleanText,
+      imageUrl: imageUrl || '',
       created_at: new Date().toISOString()
     });
   });

@@ -13,6 +13,7 @@ import { initVoiceRooms } from './voice.js';
 import { initFriends, fetchFriends, sendFriendRequest } from './friends.js';
 import { initEmbedStudio } from './embed.js';
 import { initNotifications } from './notifications.js';
+import { initShop } from './shop.js';
 
 export const FAVICON_MAP = {
   default: '/favicon.svg',
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemes();
   initNavigation();
   initNotifications();
+  initShop();
   initGames();
   initChat();
   initAdmin();
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFriends();
   initEmbedStudio();
   initToolsDropdown();
+  initNetworkDropdown();
   initCloakMode();
   initPersonalBranding();
   initPresetDisguiseSwitcher();
@@ -61,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupBadgesModal();
   setupAppealModal();
   initSuggestAndBugModals();
+  initWeatherClock();
   window.openPublicProfile = openPublicProfile;
 
   initAuth((user) => {
@@ -247,6 +251,24 @@ function initToolsDropdown() {
       item.addEventListener('click', () => {
         menu.style.display = 'none';
       });
+    });
+  }
+}
+
+function initNetworkDropdown() {
+  const btn = document.getElementById('nav-network-btn');
+  const popup = document.getElementById('network-sites-popup');
+
+  if (btn && popup) {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!btn.contains(e.target) && !popup.contains(e.target)) {
+        popup.style.display = 'none';
+      }
     });
   }
 }
@@ -660,8 +682,29 @@ window.switchView = function(targetView) {
     loadAdminData();
     fetchUsers();
   }
-  if (targetView === 'paint') initPaintCanvas();
+  if (targetView === 'paint') {
+    initPaintCanvas();
+    triggerQuestProgress('load_paint');
+  }
+  if (targetView === 'soundboard') {
+    triggerQuestProgress('load_soundboard');
+  }
 };
+
+async function triggerQuestProgress(questType) {
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || '';
+    if (!token) return;
+    await fetch('/api/shop/quests/trigger', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ questType })
+    });
+  } catch (e) {}
+}
 
 function initNavigation() {
   const navBtns = document.querySelectorAll('.nav-btn[data-view]');
@@ -1333,3 +1376,33 @@ function initDevToolsProtection() {
     }
   }, 1200);
 }
+
+async function initWeatherClock() {
+  const clockEl = document.getElementById('header-clock');
+  const weatherEl = document.getElementById('header-weather');
+
+  if (clockEl) {
+    const updateTime = () => {
+      const now = new Date();
+      clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    updateTime();
+    setInterval(updateTime, 1000);
+  }
+
+  if (weatherEl) {
+    try {
+      // Fetch via wttr.in with %c for emoji and %t for temperature (e.g. ⛅️ +72°F)
+      const res = await fetch('https://wttr.in/?format=%c+%t');
+      if (res.ok) {
+        const text = await res.text();
+        weatherEl.textContent = text.trim() || '🌤️ 72°F';
+      } else {
+        weatherEl.textContent = '🌤️ 72°F';
+      }
+    } catch (e) {
+      weatherEl.textContent = '🌤️ 72°F';
+    }
+  }
+}
+

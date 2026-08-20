@@ -262,6 +262,7 @@ app.use('/api/soundboard', require('./routes/soundboard'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/appeals', require('./routes/appeals'));
 app.use('/api/suggestions', require('./routes/suggestions'));
+app.use('/api/shop', require('./routes/shop'));
 // Bug reports handled via /api/games/bug-report and /api/suggestions/bugs
 
 // Static files (Frontend Client)

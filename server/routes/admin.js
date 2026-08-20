@@ -196,11 +196,18 @@ router.delete('/ai-logs', async (req, res) => {
 });
 
 
-// ADMIN/OWNER CREATE USER ACCOUNT
 router.post('/users/create', async (req, res) => {
   const { username, display_name, password, role, avatar_url } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and Password are required.' });
+  }
+
+  const cleanRole = (role || 'member').toLowerCase().trim();
+  const actorWeight = ROLE_WEIGHTS[req.adminUser.role] || 1;
+  const targetWeight = ROLE_WEIGHTS[cleanRole] || 1;
+
+  if (targetWeight > actorWeight) {
+    return res.status(403).json({ error: 'Access denied. You cannot create a user with a role higher than your own.' });
   }
 
   try {
@@ -209,7 +216,7 @@ router.post('/users/create', async (req, res) => {
       return res.status(400).json({ error: 'Username is already taken.' });
     }
 
-    const newUser = await db.createUserAdmin({ username, display_name, password, role: role || 'member', avatar_url });
+    const newUser = await db.createUserAdmin({ username, display_name, password, role: cleanRole, avatar_url });
     if (!newUser) {
       return res.status(500).json({ error: 'Failed to create user account.' });
     }
@@ -590,6 +597,19 @@ const ALLOWED_ROLES = [
   'owner'
 ];
 
+const ROLE_WEIGHTS = {
+  member: 1,
+  early_member: 2,
+  student_plus: 2,
+  pro: 3,
+  vip: 3,
+  premium_vip: 4,
+  elite_patron: 5,
+  moderator: 6,
+  admin: 7,
+  owner: 8
+};
+
 // Update Role (Promote / Demote to any tiered role)
 router.post('/users/:id/role', async (req, res) => {
   const { role } = req.body;
@@ -601,10 +621,22 @@ router.post('/users/:id/role', async (req, res) => {
   }
 
   const cleanRole = role.toLowerCase().trim();
+  const actorWeight = ROLE_WEIGHTS[req.adminUser.role] || 1;
+  const targetWeight = ROLE_WEIGHTS[cleanRole] || 1;
+
+  if (targetWeight > actorWeight) {
+    return res.status(403).json({ error: 'Access denied. You cannot promote any user to a role higher than your own.' });
+  }
 
   try {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    const currentWeight = ROLE_WEIGHTS[targetUser.role] || 1;
+    // Allow modifying equal/higher roles ONLY if modifying their own account (e.g. self-demotion)
+    if (currentWeight >= actorWeight && targetUser.id !== req.adminUser.id) {
+      return res.status(403).json({ error: 'Access denied. You cannot modify a user with equal or higher privileges.' });
+    }
 
     await db.updateUserRole(targetId, cleanRole);
     await db.createModerationLog('UPDATE_ROLE', admin, targetUser.username, `Role changed to: ${cleanRole.toUpperCase()}`);
@@ -632,6 +664,21 @@ router.post('/users/:id/profile', async (req, res) => {
   try {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    const currentWeight = ROLE_WEIGHTS[targetUser.role] || 1;
+    const actorWeight = ROLE_WEIGHTS[req.adminUser.role] || 1;
+
+    if (currentWeight >= actorWeight && targetUser.id !== req.adminUser.id) {
+      return res.status(403).json({ error: 'Access denied. You cannot edit the profile of a user with equal or higher privileges.' });
+    }
+
+    if (role) {
+      const cleanRole = role.trim().toLowerCase();
+      const targetWeight = ROLE_WEIGHTS[cleanRole] || 1;
+      if (targetWeight > actorWeight) {
+        return res.status(403).json({ error: 'Access denied. You cannot promote any user to a role higher than your own.' });
+      }
+    }
 
     const updated = await db.updateUserProfile(targetId, {
       display_name: display_name ? display_name.trim() : targetUser.username,
@@ -1294,6 +1341,42 @@ router.post('/suggestions/:id/deny', async (req, res) => {
   }
 });
 
+// List Bug Reports
+router.get('/bugs', async (req, res) => {
+  try {
+    const reports = await db.getBugReports();
+    res.json({ success: true, reports });
+  } catch (err) {
+    console.error('Fetch bug reports error:', err);
+    res.status(500).json({ error: 'Failed to fetch bug reports.' });
+  }
+});
+
+// Delete / Resolve Bug Report
+router.post('/bugs/:id/delete', async (req, res) => {
+  const admin = req.adminUser.username;
+  const bugId = req.params.id;
+
+  try {
+    await db.deleteBugReport(bugId);
+    await db.createModerationLog('RESOLVE_BUG', admin, `Bug #${bugId}`, `Removed bug report #${bugId}`);
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'BUG_REPORT_RESOLVED',
+      admin,
+      target: `Bug #${bugId}`,
+      details: `Bug report #${bugId} resolved/deleted by administrator`
+    });
+
+    res.json({ success: true, message: 'Bug report marked as resolved/deleted.' });
+  } catch (err) {
+    console.error('Delete bug report error:', err);
+    res.status(500).json({ error: 'Failed to delete bug report.' });
+  }
+});
+
+
 
 // ==========================================
 // 🛡️ PUNISHMENT APPEALS MANAGEMENT
@@ -1404,6 +1487,121 @@ router.post('/appeals/:id/review', async (req, res) => {
   } catch (err) {
     console.error('Review appeal error:', err);
     res.status(500).json({ error: 'Failed to review appeal.' });
+  }
+});
+
+// ADMIN CREATE SHOP ITEM
+router.post('/shop/create', async (req, res) => {
+  const { name, description, price, category, perk_value } = req.body;
+  if (!name || !description || !price || !category) {
+    return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
+  }
+
+  try {
+    const newItem = await db.createShopItem({
+      name,
+      description,
+      price: parseInt(price, 10),
+      category,
+      perk_value: perk_value || ''
+    });
+
+    if (!newItem) {
+      return res.status(500).json({ error: 'Failed to create shop item.' });
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'SHOP_ITEM_CREATED',
+      admin: req.adminUser.username,
+      target: name,
+      details: `Created shop item "${name}" in category "${category}" for 🪙 ${price}`
+    });
+
+    res.json({ success: true, message: `Shop item "${name}" created successfully!`, item: newItem });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error creating shop item.' });
+  }
+});
+
+// ADMIN DELETE SHOP ITEM
+router.post('/shop/:id/delete', async (req, res) => {
+  const itemId = req.params.id;
+  try {
+    const success = await db.deleteShopItem(itemId);
+    if (!success) {
+      return res.status(500).json({ error: 'Failed to delete shop item.' });
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'SHOP_ITEM_DELETED',
+      admin: req.adminUser.username,
+      target: `Item ID: ${itemId}`,
+      details: `Deleted shop item ID ${itemId}`
+    });
+
+    res.json({ success: true, message: 'Shop item deleted successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error deleting shop item.' });
+  }
+});
+
+// ADMIN CREATE QUEST
+router.post('/quests/create', async (req, res) => {
+  const { title, description, type, target_value, reward_coins, reward_xp } = req.body;
+  if (!title || !description || !type || !target_value) {
+    return res.status(400).json({ error: 'Title, Description, Type, and Target Value are required.' });
+  }
+
+  try {
+    const newQuest = await db.createQuest({
+      title,
+      description,
+      type,
+      target_value: parseInt(target_value, 10),
+      reward_coins: parseInt(reward_coins, 10) || 50,
+      reward_xp: parseInt(reward_xp, 10) || 100
+    });
+
+    if (!newQuest) {
+      return res.status(500).json({ error: 'Failed to create quest.' });
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'QUEST_CREATED',
+      admin: req.adminUser.username,
+      target: title,
+      details: `Created quest "${title}" (Type: ${type}, Target: ${target_value})`
+    });
+
+    res.json({ success: true, message: `Quest "${title}" created successfully!`, quest: newQuest });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error creating quest.' });
+  }
+});
+
+// ADMIN DELETE QUEST
+router.post('/quests/:id/delete', async (req, res) => {
+  const questId = req.params.id;
+  try {
+    const success = await db.deleteQuest(questId);
+    if (!success) {
+      return res.status(500).json({ error: 'Failed to delete quest.' });
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'QUEST_DELETED',
+      admin: req.adminUser.username,
+      target: `Quest ID: ${questId}`,
+      details: `Deleted quest ID ${questId}`
+    });
+
+    res.json({ success: true, message: 'Quest deleted successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error deleting quest.' });
   }
 });
 

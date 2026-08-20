@@ -975,6 +975,13 @@
         <span id="nav-profile-name" style="font-weight: 800; font-size: 0.92rem; color: #fff;">Hello, Student</span>
       </div>
 
+      <!-- Real-Time Weather & Clock Widget -->
+      <div id="header-system-widget" style="display: flex; align-items: center; gap: 10px; margin-left: 14px; padding: 4px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 99px; font-size: 0.74rem; color: #cbd5e1; font-weight: 600;">
+        <span id="header-clock" style="font-family: monospace;">12:00:00 PM</span>
+        <span style="color: rgba(255,255,255,0.15);">|</span>
+        <span id="header-weather">🌤️ Loading...</span>
+      </div>
+
       <!-- Center Primary Navigation -->
       <nav class="nav-links">
         <div class="nav-group-cluster primary-cluster">
@@ -994,6 +1001,10 @@
           <button class="nav-btn" data-view="pro" title="PRO Exclusive Lounge" style="color: #fbbf24; position: relative;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
             <span class="nav-btn-text">PRO</span>
+          </button>
+          <button class="nav-btn" data-view="shop" title="Shop & Daily Quests Hub" style="color: #cbd5e1;">
+            <span style="font-size: 1.1rem;">🛍️</span>
+            <span class="nav-btn-text">Shop</span>
           </button>
         </div>
 
@@ -1042,6 +1053,32 @@
           <button class="nav-btn" data-view="settings" title="Settings & Custom Themes">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           </button>
+
+          <!-- PARTNER SITES DROPDOWN -->
+          <div style="position: relative; display: inline-block;">
+            <button class="nav-btn" id="nav-network-btn" title="Our Network & Games Sites" style="color: #10b981;">
+              <span style="font-size: 1.1rem;">🌐</span>
+              <span class="nav-btn-text">Sites</span>
+            </button>
+
+            <!-- Network Dropdown Popup -->
+            <div id="network-sites-popup" style="display: none; position: absolute; top: 45px; right: 0; width: 220px; background: linear-gradient(160deg, #121624, #0a0d16); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; overflow: hidden; backdrop-filter: blur(20px);">
+              <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3); font-size: 0.8rem; font-weight: 800; color: #10b981; letter-spacing: 0.5px;">
+                🌐 OUR OTHER SITES
+              </div>
+              <div style="display: flex; flex-direction: column; padding: 6px 0;">
+                <a href="https://neon-math.com" target="_blank" class="network-link" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #fff; text-decoration: none; font-size: 0.82rem; transition: background 0.2s;">
+                  <span>⚡</span> Neon Math Games
+                </a>
+                <a href="https://studyhelper.org" target="_blank" class="network-link" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #fff; text-decoration: none; font-size: 0.82rem; transition: background 0.2s;">
+                  <span>🎓</span> Study Helper Space
+                </a>
+                <a href="https://paint-deluxe.com" target="_blank" class="network-link" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #fff; text-decoration: none; font-size: 0.82rem; transition: background 0.2s;">
+                  <span>🎨</span> Paint Studio Deluxe
+                </a>
+              </div>
+            </div>
+          </div>
           <!-- ADMIN CONTROL PILL -->
           <button class="nav-btn admin-topbar-pill" data-view="admin" id="admin-nav-btn" title="Administrative Control Center" style="display: none;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -1850,6 +1887,52 @@
       </div>
     </section>
 
+    <!-- SECTION 6.8: SHOP & QUESTS SYSTEM -->
+    <section class="page-view" id="view-shop" style="display: none;">
+      <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <div>
+          <h1 style="background: linear-gradient(90deg, #10b981, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🛍️ SHOP & DAILY QUESTS HUB</h1>
+          <p>Complete daily challenges to earn Coins and XP, then redeem rewards!</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.08);">
+          <span style="font-size: 0.9rem; color: #fbbf24; font-weight: 800;">🪙 <span id="shop-user-coins">0</span> Coins</span>
+          <span style="width: 1px; height: 16px; background: rgba(255,255,255,0.15);"></span>
+          <span style="font-size: 0.9rem; color: #38bdf8; font-weight: 800;">🏆 <span id="shop-user-xp">0</span> XP</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+        <!-- Quests Segment -->
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;">
+          <h2 style="color: #38bdf8; font-size: 1.2rem; margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+            <span>🏆</span> Daily Challenges & Quests
+          </h2>
+          <div id="quests-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading quests...</div>
+          </div>
+        </div>
+
+        <!-- Shop Segment -->
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;">
+          <h2 style="color: #10b981; font-size: 1.2rem; margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+            <span>🛍️</span> Coins Rewards Store
+          </h2>
+          
+          <!-- Category Tabs -->
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button class="shop-cat-tab active" data-cat="all" style="padding: 6px 14px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; border-radius: 99px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">All</button>
+            <button class="shop-cat-tab" data-cat="custom_flair" style="padding: 6px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 99px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">Flairs</button>
+            <button class="shop-cat-tab" data-cat="chat_glow" style="padding: 6px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 99px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">Glows</button>
+            <button class="shop-cat-tab" data-cat="irl_reward" style="padding: 6px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 99px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">IRL</button>
+          </div>
+
+          <div id="shop-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
+            <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading store...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- SECTION 7: ADMIN DASHBOARD & MODERATION HUB -->
     <section class="page-view" id="view-admin">
       <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -1932,6 +2015,9 @@
               <button class="admin-tab-btn" data-tab="games">🎮 Catalog Manager</button>
               <button class="admin-tab-btn" data-tab="bulk">📥 Bulk Importer</button>
               <button class="admin-tab-btn" data-tab="suggestions">💡 Suggestions & Feedback</button>
+              <button class="admin-tab-btn" data-tab="bugs" onclick="window.adminFetchBugs()">🐛 Bug Reports</button>
+              <button class="admin-tab-btn" data-tab="adminshop" onclick="window.adminFetchShop()">🛍️ Manage Shop</button>
+              <button class="admin-tab-btn" data-tab="adminquests" onclick="window.adminFetchQuests()">🏆 Manage Quests</button>
               <button class="admin-tab-btn" data-tab="announcements">📢 Global Banner</button>
               <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
               <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
@@ -1993,8 +2079,42 @@
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
               <input type="text" id="admin-user-search" placeholder="🔍 Search users by name, role or ID..." style="padding: 8px 14px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-size: 0.88rem; width: 280px;">
+              <button class="btn-small secondary" onclick="document.getElementById('admin-create-user-card').style.display = document.getElementById('admin-create-user-card').style.display === 'none' ? 'block' : 'none'" style="font-weight: 800; padding: 8px 14px; color: #10b981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">➕ Create Account</button>
               <button class="btn-small primary" onclick="window.fetchUsers()" style="font-weight: 800; padding: 8px 14px;">🔄 Refresh List</button>
             </div>
+          </div>
+
+          <!-- Create User Form Card -->
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: none;" id="admin-create-user-card">
+            <h4 style="margin: 0 0 12px; color: #38bdf8; font-size: 0.95rem;">➕ Create New Student/Staff Account</h4>
+            <form id="admin-create-user-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end;">
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Username *</label>
+                <input type="text" id="admin-create-username" required placeholder="e.g. jsmith" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Display Name</label>
+                <input type="text" id="admin-create-displayname" placeholder="e.g. Jane Smith" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Password *</label>
+                <input type="password" id="admin-create-password" required placeholder="••••••••" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Assign Role</label>
+                <select id="admin-create-role" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem; height: 34px;">
+                  <option value="member">Member</option>
+                  <option value="early_member">Early Supporter</option>
+                  <option value="pro">PRO</option>
+                  <option value="vip">VIP</option>
+                  <option value="moderator">Moderator</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+              <div>
+                <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800;">Create Account</button>
+              </div>
+            </form>
           </div>
 
           <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">
@@ -2544,6 +2664,160 @@
             </thead>
             <tbody id="admin-suggestions-tbody"></tbody>
           </table>
+        </div>
+
+        <!-- Admin Tab: Bug Reports -->
+        <div class="admin-tab-content" id="tab-bugs" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="color: #ef4444; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <span>🐛</span> Student Bug & Exploit Reports
+            </h3>
+            <button class="btn-small primary" onclick="window.adminFetchBugs()" style="font-weight: 700;">🔄 Refresh Bugs</button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+            Incoming platform bugs, chat issues, WebRTC signaling failures, and student-reported security concerns.
+          </p>
+          <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: rgba(255,255,255,0.05); text-align: left; border-bottom: 1px solid var(--card-border);">
+                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">ID</th>
+                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Title / Category</th>
+                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Description</th>
+                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Reporter</th>
+                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Submitted At</th>
+                  <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-bugs-tbody">
+                <tr>
+                  <td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Click Refresh to load reports.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Manage Shop -->
+        <div class="admin-tab-content" id="tab-adminshop" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="color: #10b981; margin: 0;">🛍️ Shop Store Items Manager</h3>
+            <button class="btn-small secondary" onclick="document.getElementById('admin-create-shop-card').style.display = document.getElementById('admin-create-shop-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Add Store Item</button>
+          </div>
+
+          <!-- Create Shop Item Form -->
+          <div id="admin-create-shop-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: none;">
+            <h4 style="margin: 0 0 12px; color: #10b981;">➕ Create New Shop Item</h4>
+            <form id="admin-create-shop-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Item Name *</label>
+                <input type="text" id="admin-shop-name" required placeholder="e.g. Neon Title Flair" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Description *</label>
+                <input type="text" id="admin-shop-desc" required placeholder="Short description..." style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Price (Coins) *</label>
+                <input type="number" id="admin-shop-price" required value="100" min="1" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Category *</label>
+                <select id="admin-shop-cat" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem; height: 34px;">
+                  <option value="custom_flair">Chat Flair Prefix</option>
+                  <option value="chat_glow">Username Text Glow</option>
+                  <option value="irl_reward">Real-Life / Physical Reward</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Perk Value (Optional)</label>
+                <input type="text" id="admin-shop-perk" placeholder="e.g. fire, gold, or flair text" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800; background: #10b981; color: #000;">Add Item</button>
+              </div>
+            </form>
+          </div>
+
+          <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: rgba(255,255,255,0.05); text-align: left;">
+                  <th style="padding: 12px 14px;">ID</th>
+                  <th style="padding: 12px 14px;">Name</th>
+                  <th style="padding: 12px 14px;">Category</th>
+                  <th style="padding: 12px 14px;">Price</th>
+                  <th style="padding: 12px 14px;">Perk Value</th>
+                  <th style="padding: 12px 14px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-shop-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Manage Quests -->
+        <div class="admin-tab-content" id="tab-adminquests" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="color: #38bdf8; margin: 0;">🏆 Quests & Challenges Manager</h3>
+            <button class="btn-small secondary" onclick="document.getElementById('admin-create-quest-card').style.display = document.getElementById('admin-create-quest-card').style.display === 'none' ? 'block' : 'none'" style="color: #38bdf8;">➕ Add Quest</button>
+          </div>
+
+          <!-- Create Quest Form -->
+          <div id="admin-create-quest-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: none;">
+            <h4 style="margin: 0 0 12px; color: #38bdf8;">➕ Create New Quest</h4>
+            <form id="admin-create-quest-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Quest Title *</label>
+                <input type="text" id="admin-quest-title" required placeholder="e.g. Study Master" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Description *</label>
+                <input type="text" id="admin-quest-desc" required placeholder="Complete study sessions..." style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Type *</label>
+                <select id="admin-quest-type" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem; height: 34px;">
+                  <option value="play_games">Play Arcade Games (Count)</option>
+                  <option value="send_messages">Send Chat Messages (Count)</option>
+                  <option value="playtime">Gaming Playtime (Seconds)</option>
+                  <option value="load_paint">Load Paint Studio (Trigger)</option>
+                  <option value="load_soundboard">Load Soundboard Hub (Trigger)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Value *</label>
+                <input type="number" id="admin-quest-target" required value="3" min="1" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Reward Coins</label>
+                <input type="number" id="admin-quest-coins" value="100" min="0" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Reward XP</label>
+                <input type="number" id="admin-quest-xp" value="150" min="0" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800; background: #38bdf8; color: #000;">Add Quest</button>
+              </div>
+            </form>
+          </div>
+
+          <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: rgba(255,255,255,0.05); text-align: left;">
+                  <th style="padding: 12px 14px;">ID</th>
+                  <th style="padding: 12px 14px;">Title</th>
+                  <th style="padding: 12px 14px;">Type</th>
+                  <th style="padding: 12px 14px;">Target</th>
+                  <th style="padding: 12px 14px;">Rewards</th>
+                  <th style="padding: 12px 14px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-quests-tbody"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Admin Tab: Searchable Logs -->

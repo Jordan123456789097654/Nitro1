@@ -456,6 +456,7 @@ function setupChatTabs() {
         const user = getCurrentUser();
         if (socket && user) {
           socket.emit('user_connected', { user, activity: 'Global Chat' });
+          socket.emit('get_initial_messages');
         }
       } else if (activeChatMode === 'dm') {
         if (globalHeader) globalHeader.style.display = 'none';
@@ -813,6 +814,12 @@ function setupChatForm() {
     const imageUrl = pendingChatImageBase64 || '';
     if (!text && !imageUrl) return;
 
+    if (text.startsWith('/image ') || text.startsWith('/imagine ')) {
+      generateAndSendAiImage(text, activeChatMode, activeDmRecipient, activeRoomCode);
+      input.value = '';
+      return;
+    }
+
     let user = getCurrentUser();
     if (!user) {
       user = { id: null, username: 'Guest_' + Math.floor(Math.random() * 8999 + 1000), role: 'member' };
@@ -836,6 +843,61 @@ function setupChatForm() {
     if (fileInput) fileInput.value = '';
     if (previewBar) previewBar.style.display = 'none';
   });
+}
+
+async function generateAndSendAiImage(text, mode, recipient, roomCode) {
+  const prompt = text.replace(/^\/(image|imagine)\s+/, '').trim();
+  if (!prompt) return;
+
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  const tempRow = document.createElement('div');
+  tempRow.className = 'chat-message-row system-msg';
+  tempRow.style.cssText = 'color: #10b981; font-style: italic; background: rgba(16,185,129,0.05); padding: 8px 14px; border-radius: 8px; border-left: 3px solid #10b981; margin: 6px 0;';
+  tempRow.innerHTML = `🤖 Generating AI Image for: "<strong>${escapeHtml(prompt)}</strong>"... please wait (may take 5-10s)...`;
+  container.appendChild(tempRow);
+  container.scrollTop = container.scrollHeight;
+
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || '';
+    const res = await fetch('/api/ai/generate-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      },
+      body: JSON.stringify({ prompt, width: 512, height: 512 })
+    });
+
+    const data = await res.json();
+    tempRow.remove();
+
+    if (res.ok && data.success && data.imageUrl) {
+      let user = getCurrentUser();
+      if (!user) {
+        user = { id: null, username: 'Guest_' + Math.floor(Math.random() * 8999 + 1000), role: 'member' };
+      }
+      const activeSocket = socket || getSharedSocket();
+      if (!activeSocket) return alert('Chat connection lost. Failed to send generated image.');
+
+      const captionText = `🎨 Generated: "${prompt}"`;
+
+      if (mode === 'global') {
+        activeSocket.emit('send_message', { user, text: captionText, imageUrl: data.imageUrl });
+      } else if (mode === 'dm') {
+        activeSocket.emit('send_dm', { sender: user, recipientUsername: recipient, text: captionText, imageUrl: data.imageUrl });
+      } else if (mode === 'room') {
+        activeSocket.emit('send_private_room_msg', { roomCode, user, text: captionText, imageUrl: data.imageUrl });
+      }
+    } else {
+      alert(data.error || 'Failed to generate AI image.');
+    }
+  } catch (err) {
+    if (tempRow) tempRow.remove();
+    console.error('Error generating AI image:', err);
+    alert('Network error generating AI image.');
+  }
 }
 
 function formatMessageText(text, imageUrl, audioUrl, gifUrl) {

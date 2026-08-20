@@ -350,7 +350,76 @@ const db = {
           author VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS shop_items (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          description TEXT NOT NULL,
+          price INT DEFAULT 100,
+          category VARCHAR(50) NOT NULL,
+          perk_value VARCHAR(100) DEFAULT '',
+          image_url VARCHAR(255) DEFAULT '',
+          is_active BOOLEAN DEFAULT true
+        );
+
+        CREATE TABLE IF NOT EXISTS user_inventory (
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          item_id INT REFERENCES shop_items(id) ON DELETE CASCADE,
+          purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          is_equipped BOOLEAN DEFAULT false,
+          PRIMARY KEY (user_id, item_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS quests (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(100) NOT NULL,
+          description TEXT NOT NULL,
+          type VARCHAR(50) NOT NULL,
+          target_value INT DEFAULT 1,
+          reward_coins INT DEFAULT 50,
+          reward_xp INT DEFAULT 100,
+          is_active BOOLEAN DEFAULT true
+        );
+
+        CREATE TABLE IF NOT EXISTS user_quests (
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          quest_id INT REFERENCES quests(id) ON DELETE CASCADE,
+          current_value INT DEFAULT 0,
+          is_completed BOOLEAN DEFAULT false,
+          is_claimed BOOLEAN DEFAULT false,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (user_id, quest_id)
+        );
       `);
+
+      // Seed default shop items
+      const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
+      if (parseInt(shopItemsCount.rows[0].count, 10) === 0) {
+        await pool.query(`
+          INSERT INTO shop_items (name, description, price, category, perk_value) VALUES
+          ('🌱 Early Supporter Flair', 'Add "🌱 OG" flair prefix in global chat', 150, 'custom_flair', '🌱 OG'),
+          ('⚡ VIP Spark Glow', 'Gold glowing name animated effect in chat', 300, 'chat_glow', 'gold'),
+          ('🔥 Firebrand Chat Glow', 'Orangey-red glowing animated effect in chat', 300, 'chat_glow', 'fire'),
+          ('🎓 Honor Roll Diploma', 'A shiny academic medal next to your username', 100, 'custom_flair', '🎓 HONOR'),
+          ('☕ Cafe Lo-Fi Badge', 'Claim a study break badge on your profile', 80, 'custom_flair', '☕ COFFEE'),
+          ('🎁 Amazon $5 Gift Card', 'Claim a real-life $5 Amazon Gift Card code!', 1000, 'irl_reward', 'AMZN5'),
+          ('🎁 Amazon $10 Gift Card', 'Claim a real-life $10 Amazon Gift Card code!', 1800, 'irl_reward', 'AMZN10'),
+          ('🕹️ Classic Gamer Mug', 'Physical Nitro platform retro coffee mug sent to you!', 2500, 'irl_reward', 'MUG')
+        `);
+      }
+
+      // Seed default quests
+      const questsCount = await pool.query('SELECT COUNT(*) FROM quests');
+      if (parseInt(questsCount.rows[0].count, 10) === 0) {
+        await pool.query(`
+          INSERT INTO quests (title, description, type, target_value, reward_coins, reward_xp) VALUES
+          ('🕹️ Arcade Explorer', 'Play any game in the unblocked library 3 times', 'play_games', 3, 100, 150),
+          ('💬 Active Communicator', 'Send 5 direct messages to classmates', 'send_messages', 5, 80, 100),
+          ('🦉 Night Study Session', 'Record 5 minutes of study or gaming playtime', 'playtime', 300, 150, 200),
+          ('🎨 Paint Masterpiece', 'Load Paint Studio Deluxe to unlock', 'load_paint', 1, 50, 80),
+          ('🔊 Sound Mixer DJ', 'Load Soundboard Deluxe to unlock', 'load_soundboard', 1, 50, 80)
+        `);
+      }
 
       // Seed / Update owner and default admin accounts
       const b64AdminPass = Buffer.from('admin123').toString('base64');
@@ -734,6 +803,15 @@ const db = {
       return res.rows;
     } catch (e) {
       return [];
+    }
+  },
+
+  async deleteBugReport(id) {
+    try {
+      await pool.query('DELETE FROM bug_reports WHERE id = $1', [id]);
+      return true;
+    } catch (e) {
+      return false;
     }
   },
 
@@ -1508,6 +1586,12 @@ JSON Format Example:
           updated_at = CURRENT_TIMESTAMP
         RETURNING *
       `, [userId, username, seconds, gamePlayed ? 1 : 0, earnedXp, earnedCoins]);
+      // Update quests progress
+      await this.updateQuestProgress(userId, 'playtime', seconds);
+      if (gamePlayed) {
+        await this.updateQuestProgress(userId, 'play_games', 1);
+      }
+
       return res.rows[0];
     } catch (e) {
       console.error('recordGamePlaytime error:', e.message);
@@ -2545,6 +2629,194 @@ JSON Format Example:
     } catch (e) {
       console.error('respondFriendRequest error:', e.message);
       return { success: false, error: 'Database error.' };
+    }
+  },
+
+  async getShopItems() {
+    try {
+      const res = await pool.query('SELECT * FROM shop_items WHERE is_active = true ORDER BY price ASC');
+      return res.rows;
+    } catch (e) {
+      console.error('getShopItems error:', e.message);
+      return [];
+    }
+  },
+
+  async purchaseShopItem(userId, itemId) {
+    try {
+      const itemRes = await pool.query('SELECT * FROM shop_items WHERE id = $1 AND is_active = true', [itemId]);
+      if (!itemRes.rows.length) return { error: 'Item not found.' };
+      const item = itemRes.rows[0];
+
+      const userRes = await pool.query('SELECT coins FROM users WHERE id = $1', [userId]);
+      if (!userRes.rows.length) return { error: 'User not found.' };
+      const coins = userRes.rows[0].coins || 0;
+
+      if (coins < item.price) {
+        return { error: `Insufficient coins. You need ${item.price - coins} more coins.` };
+      }
+
+      // Check if already purchased
+      const invCheck = await pool.query('SELECT * FROM user_inventory WHERE user_id = $1 AND item_id = $2', [userId, itemId]);
+      if (invCheck.rows.length) {
+        return { error: 'You already own this item.' };
+      }
+
+      // Deduct coins and add to inventory
+      await pool.query('UPDATE users SET coins = COALESCE(coins, 0) - $1 WHERE id = $2', [item.price, userId]);
+      await pool.query('INSERT INTO user_inventory (user_id, item_id) VALUES ($1, $2)', [userId, itemId]);
+
+      return { success: true, item };
+    } catch (e) {
+      console.error('purchaseShopItem error:', e.message);
+      return { error: 'Database transaction error.' };
+    }
+  },
+
+  async getUserInventory(userId) {
+    try {
+      const res = await pool.query(`
+        SELECT i.*, s.name, s.description, s.category, s.perk_value, s.image_url 
+        FROM user_inventory i
+        JOIN shop_items s ON i.item_id = s.id
+        WHERE i.user_id = $1
+      `, [userId]);
+      return res.rows;
+    } catch (e) {
+      console.error('getUserInventory error:', e.message);
+      return [];
+    }
+  },
+
+  async getQuests(userId) {
+    try {
+      const questsRes = await pool.query('SELECT * FROM quests WHERE is_active = true ORDER BY id ASC');
+      const userQuestsRes = await pool.query('SELECT * FROM user_quests WHERE user_id = $1', [userId]);
+
+      const uqMap = new Map(userQuestsRes.rows.map(q => [q.quest_id, q]));
+
+      return questsRes.rows.map(q => {
+        const uq = uqMap.get(q.id) || { current_value: 0, is_completed: false, is_claimed: false };
+        return {
+          id: q.id,
+          title: q.title,
+          description: q.description,
+          type: q.type,
+          target_value: q.target_value,
+          reward_coins: q.reward_coins,
+          reward_xp: q.reward_xp,
+          current_value: uq.current_value,
+          is_completed: uq.is_completed,
+          is_claimed: uq.is_claimed
+        };
+      });
+    } catch (e) {
+      console.error('getQuests error:', e.message);
+      return [];
+    }
+  },
+
+  async updateQuestProgress(userId, questType, incrementBy = 1) {
+    try {
+      const activeQuests = await pool.query('SELECT * FROM quests WHERE type = $1 AND is_active = true', [questType]);
+      for (const q of activeQuests.rows) {
+        const uqRes = await pool.query('SELECT * FROM user_quests WHERE user_id = $1 AND quest_id = $2', [userId, q.id]);
+        if (!uqRes.rows.length) {
+          const isCompleted = incrementBy >= q.target_value;
+          await pool.query(`
+            INSERT INTO user_quests (user_id, quest_id, current_value, is_completed)
+            VALUES ($1, $2, $3, $4)
+          `, [userId, q.id, Math.min(q.target_value, incrementBy), isCompleted]);
+        } else {
+          const uq = uqRes.rows[0];
+          if (uq.is_completed) continue;
+
+          const newValue = Math.min(q.target_value, uq.current_value + incrementBy);
+          const isCompleted = newValue >= q.target_value;
+          await pool.query(`
+            UPDATE user_quests 
+            SET current_value = $1, is_completed = $2, updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = $3 AND quest_id = $4
+          `, [newValue, isCompleted, userId, q.id]);
+        }
+      }
+      return true;
+    } catch (e) {
+      console.error('updateQuestProgress error:', e.message);
+      return false;
+    }
+  },
+
+  async claimQuestReward(userId, questId) {
+    try {
+      const uqRes = await pool.query(`
+        SELECT uq.*, q.reward_coins, q.reward_xp 
+        FROM user_quests uq
+        JOIN quests q ON uq.quest_id = q.id
+        WHERE uq.user_id = $1 AND uq.quest_id = $2
+      `, [userId, questId]);
+
+      if (!uqRes.rows.length) return { error: 'Quest progress not found.' };
+      const uq = uqRes.rows[0];
+
+      if (!uq.is_completed) return { error: 'Quest is not completed yet.' };
+      if (uq.is_claimed) return { error: 'Reward has already been claimed.' };
+
+      await pool.query('UPDATE user_quests SET is_claimed = true WHERE user_id = $1 AND quest_id = $2', [userId, questId]);
+      await pool.query('UPDATE users SET coins = COALESCE(coins, 0) + $1, xp = COALESCE(xp, 0) + $2 WHERE id = $3', [uq.reward_coins, uq.reward_xp, userId]);
+
+      return { success: true, reward_coins: uq.reward_coins, reward_xp: uq.reward_xp };
+    } catch (e) {
+      console.error('claimQuestReward error:', e.message);
+      return { error: 'Database transaction error.' };
+    }
+  },
+
+  async createShopItem({ name, description, price, category, perk_value }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO shop_items (name, description, price, category, perk_value)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [name, description, price, category, perk_value]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createShopItem error:', e.message);
+      return null;
+    }
+  },
+
+  async deleteShopItem(id) {
+    try {
+      await pool.query('DELETE FROM shop_items WHERE id = $1', [id]);
+      return true;
+    } catch (e) {
+      console.error('deleteShopItem error:', e.message);
+      return false;
+    }
+  },
+
+  async createQuest({ title, description, type, target_value, reward_coins, reward_xp }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO quests (title, description, type, target_value, reward_coins, reward_xp)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
+      `, [title, description, type, target_value, reward_coins, reward_xp]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createQuest error:', e.message);
+      return null;
+    }
+  },
+
+  async deleteQuest(id) {
+    try {
+      await pool.query('DELETE FROM quests WHERE id = $1', [id]);
+      return true;
+    } catch (e) {
+      console.error('deleteQuest error:', e.message);
+      return false;
     }
   },
 

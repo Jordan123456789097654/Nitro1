@@ -48,10 +48,12 @@ export function initAdmin() {
   setupUpdateLogForm();
   setupPollCreateForm();
   setupSlowmodeControls();
+  setupCreateUserForm();
+  setupCreateShopForm();
+  setupCreateQuestForm();
   setupAnnouncementDisableControls();
   setupUpdateDisableControls();
   setupBulkImporter();
-  setupCreateUserForm();
   setupAiModerationStudio();
   setupEditFilterModal();
   setupAppealsReviewStudio();
@@ -1293,6 +1295,15 @@ function setupAdminTabs() {
       }
       if (targetTab === 'suggestions') {
         if (window.adminFetchSuggestions) window.adminFetchSuggestions();
+      }
+      if (targetTab === 'bugs') {
+        if (window.adminFetchBugs) window.adminFetchBugs();
+      }
+      if (targetTab === 'adminshop') {
+        if (window.adminFetchShop) window.adminFetchShop();
+      }
+      if (targetTab === 'adminquests') {
+        if (window.adminFetchQuests) window.adminFetchQuests();
       }
       if (targetTab === 'logs') fetchLogs();
       if (targetTab === 'webhooks') fetchAdminWebhooks();
@@ -2545,4 +2556,305 @@ function setupAppealsReviewStudio() {
       alert('Network error reviewing appeal.');
     }
   };
+}
+
+function setupCreateUserForm() {
+  const form = document.getElementById('admin-create-user-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('admin-create-username').value.trim();
+      const display_name = document.getElementById('admin-create-displayname').value.trim();
+      const password = document.getElementById('admin-create-password').value.trim();
+      const role = document.getElementById('admin-create-role').value;
+
+      if (!username || !password) {
+        return alert('Username and Password are required.');
+      }
+
+      try {
+        const res = await authFetch('/api/admin/users/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, display_name, password, role })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(data.message);
+          form.reset();
+          document.getElementById('admin-create-user-card').style.display = 'none';
+          if (typeof fetchUsers === 'function') fetchUsers();
+        } else {
+          alert(data.error || 'Failed to create user account.');
+        }
+      } catch (err) {
+        console.error('Error creating user:', err);
+        alert('Network error creating user.');
+      }
+    });
+  }
+}
+
+window.adminFetchBugs = async function() {
+  const tbody = document.getElementById('admin-bugs-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading bug reports...</td></tr>`;
+
+  try {
+    const res = await authFetch('/api/admin/bugs');
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (data.bugs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">🎉 No bug reports found. Good job!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.bugs.map(b => {
+        const dateStr = b.created_at ? new Date(b.created_at).toLocaleString() : 'N/A';
+        return `
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 12px 14px; font-weight: 700; color: #ef4444;">#${b.id}</td>
+            <td style="padding: 12px 14px; color: #fff;">
+              <strong style="display: block;">${escapeHtml(b.title)}</strong>
+              <span style="font-size: 0.72rem; padding: 2px 6px; background: rgba(239,68,68,0.15); color: #ef4444; border-radius: 4px; font-weight: 800; text-transform: uppercase;">${escapeHtml(b.category)}</span>
+            </td>
+            <td style="padding: 12px 14px; color: var(--text-muted); font-size: 0.8rem; line-height: 1.4; max-width: 320px; overflow-wrap: break-word;">${escapeHtml(b.description)}</td>
+            <td style="padding: 12px 14px; color: #38bdf8; font-weight: 600;">@${escapeHtml(b.username || 'anonymous')}</td>
+            <td style="padding: 12px 14px; color: var(--text-muted); font-size: 0.75rem;">${dateStr}</td>
+            <td style="padding: 12px 14px;">
+              <button class="btn-small primary" onclick="window.adminDeleteBug(${b.id})" style="background: #ef4444; color: #fff; font-weight: 800; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;">Resolve & Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Failed to load bugs: ${data.error || 'Server error'}</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Error fetching bugs:', err);
+    tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Network error fetching bugs.</td></tr>`;
+  }
+};
+
+window.adminDeleteBug = async function(id) {
+  if (!confirm(`Are you sure you want to delete and resolve bug report #${id}?`)) return;
+
+  try {
+    const res = await authFetch(`/api/admin/bugs/${id}/delete`, {
+      method: 'POST'
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('Bug report deleted successfully!');
+      window.adminFetchBugs();
+    } else {
+      alert(data.error || 'Failed to delete bug report.');
+    }
+  } catch (err) {
+    console.error('Error deleting bug:', err);
+    alert('Network error deleting bug report.');
+  }
+};
+
+window.adminFetchShop = async function() {
+  const tbody = document.getElementById('admin-shop-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading store items...</td></tr>`;
+
+  try {
+    const res = await authFetch('/api/shop/items');
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (data.items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No shop items found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.items.map(item => {
+        return `
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 12px 14px; font-weight: 700; color: #10b981;">#${item.id}</td>
+            <td style="padding: 12px 14px; color: #fff;">
+              <strong style="display: block;">${escapeHtml(item.name)}</strong>
+              <span style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(item.description)}</span>
+            </td>
+            <td style="padding: 12px 14px; text-transform: uppercase; font-size: 0.75rem; color: #38bdf8; font-weight: 700;">${item.category.replace('_', ' ')}</td>
+            <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">🪙 ${item.price}</td>
+            <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${escapeHtml(item.perk_value || 'None')}</td>
+            <td style="padding: 12px 14px;">
+              <button class="btn-small primary" onclick="window.adminDeleteShopItem(${item.id})" style="background: #ef4444; border: none; color: #fff; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Failed to load items: ${data.error || 'Server error'}</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Error fetching shop:', err);
+    tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Network error fetching items.</td></tr>`;
+  }
+};
+
+window.adminDeleteShopItem = async function(id) {
+  if (!confirm(`Are you sure you want to delete shop item #${id}?`)) return;
+
+  try {
+    const res = await authFetch(`/api/admin/shop/${id}/delete`, {
+      method: 'POST'
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('Shop item deleted successfully!');
+      window.adminFetchShop();
+    } else {
+      alert(data.error || 'Failed to delete shop item.');
+    }
+  } catch (err) {
+    console.error('Error deleting shop item:', err);
+    alert('Network error deleting shop item.');
+  }
+};
+
+window.adminFetchQuests = async function() {
+  const tbody = document.getElementById('admin-quests-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading quests...</td></tr>`;
+
+  try {
+    const res = await authFetch('/api/shop/quests');
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (data.quests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No quests found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.quests.map(q => {
+        return `
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 12px 14px; font-weight: 700; color: #38bdf8;">#${q.id}</td>
+            <td style="padding: 12px 14px; color: #fff;">
+              <strong style="display: block;">${escapeHtml(q.title)}</strong>
+              <span style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(q.description)}</span>
+            </td>
+            <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #a855f7;">${q.type}</td>
+            <td style="padding: 12px 14px; color: #cbd5e1; font-weight: 700;">${q.target_value}</td>
+            <td style="padding: 12px 14px; font-size: 0.75rem; font-weight: 700;">
+              <span style="color: #fbbf24; display: block;">🪙 +${q.reward_coins} Coins</span>
+              <span style="color: #38bdf8; display: block;">🏆 +${q.reward_xp} XP</span>
+            </td>
+            <td style="padding: 12px 14px;">
+              <button class="btn-small primary" onclick="window.adminDeleteQuest(${q.id})" style="background: #ef4444; border: none; color: #fff; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Failed to load quests: ${data.error || 'Server error'}</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Error fetching quests:', err);
+    tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Network error fetching quests.</td></tr>`;
+  }
+};
+
+window.adminDeleteQuest = async function(id) {
+  if (!confirm(`Are you sure you want to delete quest #${id}?`)) return;
+
+  try {
+    const res = await authFetch(`/api/admin/quests/${id}/delete`, {
+      method: 'POST'
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('Quest deleted successfully!');
+      window.adminFetchQuests();
+    } else {
+      alert(data.error || 'Failed to delete quest.');
+    }
+  } catch (err) {
+    console.error('Error deleting quest:', err);
+    alert('Network error deleting quest.');
+  }
+};
+
+function setupCreateShopForm() {
+  const form = document.getElementById('admin-create-shop-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('admin-shop-name').value.trim();
+      const description = document.getElementById('admin-shop-desc').value.trim();
+      const price = document.getElementById('admin-shop-price').value.trim();
+      const category = document.getElementById('admin-shop-cat').value;
+      const perk_value = document.getElementById('admin-shop-perk').value.trim();
+
+      try {
+        const res = await authFetch('/api/admin/shop/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, price, category, perk_value })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(data.message);
+          form.reset();
+          document.getElementById('admin-create-shop-card').style.display = 'none';
+          window.adminFetchShop();
+        } else {
+          alert(data.error || 'Failed to create shop item.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error creating shop item.');
+      }
+    });
+  }
+}
+
+function setupCreateQuestForm() {
+  const form = document.getElementById('admin-create-quest-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('admin-quest-title').value.trim();
+      const description = document.getElementById('admin-quest-desc').value.trim();
+      const type = document.getElementById('admin-quest-type').value;
+      const target_value = document.getElementById('admin-quest-target').value.trim();
+      const reward_coins = document.getElementById('admin-quest-coins').value.trim();
+      const reward_xp = document.getElementById('admin-quest-xp').value.trim();
+
+      try {
+        const res = await authFetch('/api/admin/quests/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description, type, target_value, reward_coins, reward_xp })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(data.message);
+          form.reset();
+          document.getElementById('admin-create-quest-card').style.display = 'none';
+          window.adminFetchQuests();
+        } else {
+          alert(data.error || 'Failed to create quest.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error creating quest.');
+      }
+    });
+  }
 }
