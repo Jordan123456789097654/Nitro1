@@ -991,11 +991,32 @@ export async function openGame(slug) {
 
   activeGame = gameData;
   titleEl.textContent = activeGame.title;
-    vipBadge.style.display = activeGame.is_vip ? 'inline-flex' : 'none';
-    vipBadge.textContent = 'PRO';
+  vipBadge.style.display = activeGame.is_vip ? 'inline-flex' : 'none';
+  vipBadge.textContent = 'PRO';
 
-    // Clear previous player content
-    frameWrapper.innerHTML = '';
+  // Clear previous player content
+  frameWrapper.innerHTML = '';
+
+  if (activeGame.is_taken_down) {
+    frameWrapper.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; padding: 40px; text-align: center; color: #fff; background: radial-gradient(120% 120% at 50% 0%, #151829 0%, #0a0b12 100%); border-radius: 12px;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 50%; font-size: 2.5rem; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);">🚫</div>
+        <h2 style="font-size: 1.8rem; font-weight: 900; color: #ef4444; margin-bottom: 12px; letter-spacing: -0.02em;">Content Temporarily Restricted</h2>
+        <p style="font-size: 0.95rem; color: #94a3b8; max-width: 540px; line-height: 1.6; margin: 0 0 24px;">
+          Access to the item <strong style="color: #fff;">"${activeGame.title}"</strong> has been suspended in compliance with copyright guidelines or administrative policies.
+        </p>
+        <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 18px 24px; max-width: 540px; text-align: left; margin-bottom: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.3); width: 100%; box-sizing: border-box;">
+          <strong style="display: block; font-size: 0.82rem; color: #ef4444; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Official Policy / Takedown Notice</strong>
+          <span style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5; font-family: monospace; display: block; word-break: break-word;">
+            ${activeGame.takedown_reason || 'This content is temporarily suspended due to copyright compliance or administrative safety concerns.'}
+          </span>
+        </div>
+        <button class="btn-pill" onclick="document.getElementById('player-modal').classList.remove('active');" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-weight: 700; padding: 10px 24px; cursor: pointer; border-radius: 8px;">Return to Library</button>
+      </div>
+    `;
+    modal.classList.add('active');
+    return;
+  }
 
     const iframe = document.createElement('iframe');
     iframe.className = 'player-iframe';

@@ -984,6 +984,10 @@ window.adminOpenAddGameModal = () => {
   if (typeSelect) typeSelect.value = 'iframe_url';
   if (contentInput) contentInput.value = '';
   if (clicksInput) clicksInput.value = '0';
+  const takedownInput = document.getElementById('admin-edit-game-takedown');
+  const takedownReasonInput = document.getElementById('admin-edit-game-takedown-reason');
+  if (takedownInput) takedownInput.checked = false;
+  if (takedownReasonInput) takedownReasonInput.value = '';
 
   modal.classList.add('active');
 };
@@ -1015,6 +1019,10 @@ window.adminEditGame = (gameId) => {
   if (typeSelect) typeSelect.value = game.embed_type || 'iframe_url';
   if (contentInput) contentInput.value = game.embed_content || '';
   if (clicksInput) clicksInput.value = game.clicks || 0;
+  const takedownInput = document.getElementById('admin-edit-game-takedown');
+  const takedownReasonInput = document.getElementById('admin-edit-game-takedown-reason');
+  if (takedownInput) takedownInput.checked = Boolean(game.is_taken_down);
+  if (takedownReasonInput) takedownReasonInput.value = game.takedown_reason || '';
 
   modal.classList.add('active');
 };
@@ -1925,13 +1933,15 @@ function setupAdminActions() {
       const embed_type = document.getElementById('admin-edit-game-embed-type')?.value;
       const embed_content = document.getElementById('admin-edit-game-embed-content')?.value;
       const clicks = document.getElementById('admin-edit-game-clicks')?.value;
+      const is_taken_down = document.getElementById('admin-edit-game-takedown')?.checked || false;
+      const takedown_reason = document.getElementById('admin-edit-game-takedown-reason')?.value || '';
 
       try {
         if (gameId) {
           const res = await authFetch(`/api/admin/games/${gameId}/update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, category, thumbnail_url, author, embed_type, embed_content, clicks })
+            body: JSON.stringify({ title, category, thumbnail_url, author, embed_type, embed_content, clicks, is_taken_down, takedown_reason })
           });
           const data = await res.json();
           if (res.ok) {

@@ -69,12 +69,14 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: #94a3b8;
-      padding: 8px 16px;
+      padding: 8px 14px;
       font-size: 0.8rem;
       font-weight: 700;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .legal-tab-btn:hover {
       background: rgba(255, 255, 255, 0.08);
@@ -3329,52 +3331,48 @@
         <!-- 1. Terms of Service Panel -->
         <div id="legal-tos" class="legal-tab-content active">
           <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; color: #fff; font-size: 0.84rem;">
-            <strong style="color: #38bdf8;">📌 Important Legal Notice:</strong> Please read these Terms of Service thoroughly before utilizing NITRO platform features, web proxies, community chat, or games. Continued use of the platform signifies explicit agreement to all clauses below.
+            <strong style="color: #38bdf8;">📌 IMPORTANT LEGAL NOTICE:</strong> Please read these Terms of Service thoroughly before utilizing NITRO platform features, web proxies, community chat, or games. Continued use of the platform signifies explicit agreement to all clauses below.
           </div>
-          <h4 style="color: #fff; margin: 16px 0 6px; font-size: 1.05rem;">1. Acceptance of Terms & Service Scope</h4>
-          <p style="margin-bottom: 14px;">By accessing, registering an account, or interacting with NITRO, you enter into a legally binding contract with the platform administration. Services provided include sandboxed web proxies, educational study tools, AI copilot assistants, real-time community chat, WebRTC voice channels, and unblocked arcade games. If you do not agree with any portion of these terms, you must immediately terminate your session and cease platform usage.</p>
-          <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">2. User Account Integrity, Security & Credential Protection</h4>
-          <p style="margin-bottom: 14px;">Users are solely responsible for maintaining the confidentiality of their credentials (usernames and passwords). Account sharing, credential reselling, brute-force authorization attempts, or attempting unauthorized rank elevation to Administrator or Owner roles is strictly prohibited. Activity originating from your account or IP address is deemed your legal responsibility.</p>
-          <h4 style="color: #fbbf24; margin: 16px 0 6px; font-size: 1.05rem;">3. Zero-Tolerance Content Moderation & Anti-Hate Speech Policy</h4>
-          <p style="margin-bottom: 14px;">NITRO maintains a strict <strong>Zero-Tolerance Policy</strong> regarding hate speech, racial or homophobic slurs, harassment, sexual content, NSFW media, self-harm, or illegal material. All chat messages, usernames, and gateway requests pass through live <strong>Groq AI Moderation</strong> and the <strong>Word Filter Shield Engine</strong>. Violators are subject to immediate automated mutes, account bans, and IP bans without prior notice.</p>
-          <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">4. Anti-Spam, Anti-Raid & Automated Bot Restrictions</h4>
-          <p style="margin-bottom: 14px;">To preserve chat quality and system stability, the <strong>Automated Raid Shield System</strong> monitors message frequency and content similarity. Spamming identical messages, rapid message flooding, or deploying automated chat bots will trigger an automatic 5-minute mute or suspension. Continued flooding results in permanent account bans.</p>
-          <h4 style="color: #10b981; margin: 16px 0 6px; font-size: 1.05rem;">5. Sandboxed Web Gateway Proxy Disclaimer & Usage Boundaries</h4>
-          <p style="margin-bottom: 14px;">The Nitro Shield Browser relay is provided strictly for educational asset testing and discreet research. Utilizing the gateway proxy to bypass local network security policies, conduct cyber attacks, access illegal materials, or scrape third-party websites is strictly forbidden. The system automatically blocks restricted domain keywords and logs gateway activity for security compliance.</p>
-          <h4 style="color: #ec4899; margin: 16px 0 6px; font-size: 1.05rem;">6. Nitro AI Assistant & Multimodal Safety Protocols</h4>
-          <p style="margin-bottom: 14px;">Nitro AI provides academic assistance and STEM problem solving. Users must not attempt to prompt-inject, jailbreak, or extract system instructions. In compliance with safety standards, any queries involving self-harm, suicide, weapons, or illegal exploits are blocked automatically, with emergency crisis hotline information provided where appropriate.</p>
+          <h4 style="color: #fff; margin: 16px 0 6px; font-size: 1.05rem;">SECTION 1: CONTRACTUAL RELATIONSHIP & SCOPE</h4>
+          <p style="margin-bottom: 14px;">These Terms of Service constitute a legally binding agreement between you ("User") and Nitro ("Platform", "we", "us", or "our"). By registering, accessing, browsing, or utilizing the services (including sandboxed gateway browsers, WebRTC communication channels, arcade catalogs, and AI tutor features), you represent that you have read, understood, and agreed to be bound by these Terms. If you do not agree to these Terms, you are prohibited from utilizing the platform.</p>
+          <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">SECTION 2: REGISTRATION, CREDENTIAL SECURITY & DATA MANAGEMENT</h4>
+          <p style="margin-bottom: 14px;">To access certain features, you must register a unique account. You agree to (a) provide accurate information, (b) safeguard your password credentials, and (c) accept all liability for activities occurring under your credentials. Sharing account credentials, attempting unauthorized privilege escalation to Administrator or Owner roles, or exploiting database interfaces is strictly prohibited and constitutes a material breach of this agreement.</p>
+          <h4 style="color: #fbbf24; margin: 16px 0 6px; font-size: 1.05rem;">SECTION 3: PROHIBITED UTILITY & SYSTEM INTERFERENCE</h4>
+          <p style="margin-bottom: 14px;">You shall not: (a) deploy automated web crawlers, scrapers, indexers, or bots; (b) launch Denial of Service (DoS) or distributed attacks against our servers; (c) attempt to bypass proxy restrictions or administrative gateway filters; (d) execute prompt injections or jailbreaks against the integrated AI safety models; or (e) transmit malware, spyware, or malicious payloads.</p>
+          <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">SECTION 4: VIRTUAL STORE & IN-GAME CURRENCY</h4>
+          <p style="margin-bottom: 14px;">Any points, badges, custom flairs, or virtual goods acquired in the Shop are strictly virtual amenities. They hold no real-world value, cannot be redeemed for legal tender, and are non-refundable and non-transferable. The administration reserves the right to regulate, modify, or eliminate virtual goods at any time.</p>
         </div>
 
         <!-- 2. Privacy Policy Panel -->
         <div id="legal-privacy" class="legal-tab-content">
-          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">🔒 Platform Privacy & Data Protection Policy</h4>
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">🔒 Platform Privacy & Data Security Regulation</h4>
           <p style="margin-bottom: 14px;">We are committed to maintaining the privacy and security of all users. This Privacy Policy details the data collected, its utilization, and security safeguards.</p>
-          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">1. Data Collection Scope</h5>
-          <p style="margin-bottom: 12px;">We collect minimal personal details required to support safe platform operations. This includes account credentials (usernames and cryptographically hashed passwords), and profile metadata (custom titles, flairs, display colors, avatars, and cover banners).</p>
-          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">2. Security, IP & Connection Logs</h5>
-          <p style="margin-bottom: 12px;">For platform security and abuse prevention, client IP addresses, browser user-agents, authentication events, and gateway requests are recorded in secure audit databases. Community chat text logs are permanently archived to maintain a safe environment and enable moderation review.</p>
-          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">3. Third-Party Disclosures & Security</h5>
-          <p style="margin-bottom: 12px;">No user logs, traffic telemetry, or personal identifiers are shared or sold to commercial third parties. Data is restricted to platform administrators and our secure servers. We employ industry-standard encryption protocols (including hashed database credentials) to secure transmission channels.</p>
+          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 1: INFORMATION WE COLLECT</h5>
+          <p style="margin-bottom: 12px;">To maintain platform integrity and security, we collect: Authentication Data (encrypted password hashes and usernames), Preference Configurations (custom themes, flairs, and layout specifications), Connection Data (IP addresses, gateway navigation queries, and HTTP referers), and Communication Records (chat room transcripts and WebRTC voice metadata).</p>
+          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 2: DATA PROCESSING PURPOSE</h5>
+          <p style="margin-bottom: 12px;">We utilize the collected information to: (a) authenticate user sessions; (b) operate safety engines (including real-time Groq AI Moderation); (c) prevent system abuse and rate limit violations; and (d) distribute alerts to administrative Discord webhooks for real-time security compliance.</p>
+          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 3: INFORMATION SECURITY & RETENTION</h5>
+          <p style="margin-bottom: 12px;">We implement advanced cryptographic hashing for sensitive data. Chat records and IP logs are permanently stored to ensure accountability. No personal metadata or proxy tracking telemetry is sold, licensed, or shared with commercial entities.</p>
         </div>
 
         <!-- 3. Disclaimer & Liability Panel -->
         <div id="legal-disclaimer" class="legal-tab-content">
-          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">⚠️ Disclaimer of Warranties & Limitation of Liability</h4>
-          <p style="margin-bottom: 14px;">THE PLATFORM AND ALL OF ITS INCLUDED FEATURES, INCLUDING THE WEB GATEWAY PROXY, GAMES, AND AI CHATBOTS, ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED.</p>
-          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">1. No Warranty & Service Continuity</h5>
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">⚠️ Comprehensive Warranties Disclaimer & Liability Limits</h4>
+          <p style="margin-bottom: 14px;">THE NITRO PLATFORM AND ALL OF ITS COMPONENT FEATURES, INCLUDING THE WEB GATEWAY PROXY, GAMES, AND AI CHATBOTS, ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED.</p>
+          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 1: AS-IS WARRANTY EXCLUSIONS</h5>
           <p style="margin-bottom: 12px;">We do not guarantee that the web proxy or arcade catalogs will be uninterrupted, error-free, secure, or free from viruses or other harmful code. The administration assumes no liability for local school or network disciplinary actions resulting from proxy usage.</p>
-          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">2. Limitation of Damages</h5>
-          <p style="margin-bottom: 12px;">IN NO EVENT SHALL THE PLATFORM CREATOR (INCLUDING OWNER JORDANDANIELS AND THE ADMIN TEAM) BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOSS OF PROFITS, DATA LOSS, LOST GAME PROGRESS SAVES, OR SYSTEM DOWNTIME, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
-          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">3. Indemnification Clause</h5>
+          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 2: EXCLUSION OF CONSEQUENTIAL DAMAGES</h5>
+          <p style="margin-bottom: 12px;">IN NO EVENT SHALL THE PLATFORM CREATOR (INCLUDING OWNER JORDANDANIELS AND THE ADMIN TEAM) BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES, INCLUDING LOSS OF PROFITS, DATA LOSS, LOST GAME PROGRESS SAVES, OR SYSTEM DOWNTIME, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 3: INDEMNIFICATION AGREEMENT</h5>
           <p style="margin-bottom: 12px;">By accessing the services, you agree to indemnify and hold harmless the platform administration, developers, and hosts from any claims, regulatory penalties, or legal fees resulting from your use, misuse, or violation of these community terms.</p>
         </div>
 
         <!-- 4. DMCA Takedown Procedure Panel -->
         <div id="legal-dmca" class="legal-tab-content">
-          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">📄 Digital Millennium Copyright Act (DMCA) Takedown Policy</h4>
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">📄 Copyright Infringement & DMCA Complaint Procedure</h4>
           <p style="margin-bottom: 14px;">We respect the intellectual property of others and expect our users to do the same. All embedded games, assets, and tools are copyright of their respective owners. We will respond expeditiously to claims of copyright infringement committed using our platform.</p>
-          <h5 style="color: #a855f7; margin: 12px 0 4px; font-size: 0.95rem;">1. How to File an Infringement Claim (Takedown Notice)</h5>
-          <p style="margin-bottom: 12px;">If you are a copyright owner or authorized agent, you may submit a formal DMCA Notice containing the following information to <code>legal@nitromath.org</code>:</p>
+          <h5 style="color: #a855f7; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 1: COPYRIGHT NOTICE PROCEDURE</h5>
+          <p style="margin-bottom: 12px;">If you believe that any material embedded, hosted, or indexed on this platform violates your copyright, you may submit a formal notification pursuant to the Digital Millennium Copyright Act (DMCA) 17 U.S.C. § 512. The notice must be sent to <code>legal@nitromath.org</code> and contain:</p>
           <ul style="margin: 0 0 12px 20px; padding: 0;">
             <li style="margin-bottom: 4px;">A physical or electronic signature of the copyright owner or person authorized to act on their behalf.</li>
             <li style="margin-bottom: 4px;">Identification of the copyrighted work claimed to have been infringed.</li>
@@ -3383,15 +3381,15 @@
             <li style="margin-bottom: 4px;">A statement that you have a good faith belief that use of the material is not authorized by the copyright owner.</li>
             <li style="margin-bottom: 4px;">A statement, under penalty of perjury, that the information in the notification is accurate and that you are authorized to act on behalf of the owner.</li>
           </ul>
-          <h5 style="color: #a855f7; margin: 12px 0 4px; font-size: 0.95rem;">2. Counter-Notification Process</h5>
+          <h5 style="color: #a855f7; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 2: COUNTER-NOTIFICATION AND RESTORATION</h5>
           <p style="margin-bottom: 12px;">If your content was removed via a DMCA Notice and you believe this was in error, you may file a counter-notice containing your identification, signature, consent to federal court jurisdiction, and a statement under penalty of perjury explaining the mistake.</p>
         </div>
 
         <!-- 5. Moderation & Appeal Policy Panel -->
         <div id="legal-moderation" class="legal-tab-content">
-          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">🛡️ Moderation Enforcement & Appeal Policy</h4>
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">🛡️ Moderation Guidelines & AI Arbitration Protocol</h4>
           <p style="margin-bottom: 14px;">We enforce community standards to ensure a safe, supportive, and clean platform for all users. Moderation is conducted via an automated AI-shield and live administrators.</p>
-          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">1. Disciplinary Action Matrix</h5>
+          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 1: ENFORCEMENT HIERARCHY</h5>
           <ul style="margin: 0 0 12px 20px; padding: 0;">
             <li style="margin-bottom: 4px;"><strong>Censoring:</strong> Low-level profanity is automatically replaced with asterisk filters.</li>
             <li style="margin-bottom: 4px;"><strong>Warning Strikes:</strong> Recorded against accounts for toxicity or spam, displaying warnings.</li>
@@ -3399,9 +3397,9 @@
             <li style="margin-bottom: 4px;"><strong>Account Review Hold:</strong> Automatically locks the profile and holds it in suspension pending administrator review.</li>
             <li style="margin-bottom: 4px;"><strong>Suspensions & IP Bans:</strong> Banishment from community features or total IP-gateway bans for severe hate speech or attempts to exploit the platform.</li>
           </ul>
-          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">2. Appeals & AI Arbitration</h5>
+          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 2: AUTOMATED AI EVALUATION & APPEALS</h5>
           <p style="margin-bottom: 12px;">Banned or muted students may submit an appeal. Appeals undergo initial screening by the Groq AI Arbitrator which evaluates the text for remorse and sincerity. Sincere appeals are queued for final administrator review, while insincere or sarcastic appeals are auto-rejected.</p>
-          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">3. Treason Protocol Override</h5>
+          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">SECTION 3: TREASON PROTOCOL PROTECTIONS</h5>
           <p style="margin-bottom: 12px;">The platform Owner (<code>jordandaniels</code>) is protected by system governance. Any administrative attempt to ban or restrict the Owner triggers the Treason Protocol, resulting in the immediate demotion, suspension, and ban of the offending administrator.</p>
         </div>
 
