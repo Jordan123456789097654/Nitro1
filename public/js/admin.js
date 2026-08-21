@@ -2193,7 +2193,7 @@ function setupAiModerationStudio() {
       e.preventDefault();
       const strictness = document.getElementById('simple-mod-strictness')?.value || 'strict';
       const actionPolicy = document.getElementById('simple-mod-policy')?.value || 'auto_punish';
-      const model = document.getElementById('simple-mod-model')?.value || 'llama-3.3-70b-versatile';
+      const model = document.getElementById('simple-mod-model')?.value || 'openai/gpt-oss-safeguard-20b';
       const threshold = document.getElementById('simple-mod-review-threshold')?.value || '10d';
 
       try {
@@ -2258,7 +2258,7 @@ function setupAiModerationStudio() {
 
       const strictness = document.getElementById('simple-mod-strictness')?.value || document.getElementById('aimod-strictness-select')?.value || 'balanced';
       const actionPolicy = document.getElementById('simple-mod-policy')?.value || document.getElementById('aimod-policy-select')?.value || 'auto_punish';
-      const model = document.getElementById('simple-mod-model')?.value || document.getElementById('aimod-model-select')?.value || 'llama-3.3-70b-versatile';
+      const model = document.getElementById('simple-mod-model')?.value || document.getElementById('aimod-model-select')?.value || 'openai/gpt-oss-safeguard-20b';
 
       try {
         const res = await authFetch('/api/admin/ai-test', {

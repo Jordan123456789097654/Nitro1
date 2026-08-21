@@ -15,7 +15,7 @@ const DEFAULT_AI_CONFIG = {
   strictness: 'strict', // 'strict' | 'balanced' | 'lenient'
   actionPolicy: 'auto_punish', // 'auto_punish' | 'block_only' | 'censor_warn'
   model: 'openai/gpt-oss-safeguard-20b',
-  timeoutMs: 3500,
+  timeoutMs: 5000,
 
   // Flashcards & Study Tools
   flashcardCount: 8,
@@ -35,7 +35,23 @@ async function loadPersistedAiConfig() {
         ...parsed,
         enabled: true
       };
-      console.log('⚡ [AI] Persisted AI config loaded successfully.');
+      
+      let needsSave = false;
+      if (currentAiConfig.model === 'llama-3.1-8b-instant') {
+        currentAiConfig.model = 'openai/gpt-oss-safeguard-20b';
+        needsSave = true;
+      }
+      if (!currentAiConfig.timeoutMs || currentAiConfig.timeoutMs < 4000) {
+        currentAiConfig.timeoutMs = 5000;
+        needsSave = true;
+      }
+
+      if (needsSave) {
+        await db.setSetting('nitro_ai_config', JSON.stringify(currentAiConfig));
+        console.log('⚡ [AI] Persisted AI config repaired and saved.');
+      } else {
+        console.log('⚡ [AI] Persisted AI config loaded successfully.');
+      }
     }
   } catch (e) {
     console.warn('⚠️ [AI] Could not load persisted AI config:', e.message);

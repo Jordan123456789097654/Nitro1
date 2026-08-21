@@ -5,7 +5,7 @@ const { sendDiscordLog } = require('./discordLogger');
 const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
 const DEFAULT_PRIMARY_MODEL = 'openai/gpt-oss-safeguard-20b';
-const DEFAULT_FALLBACK_MODEL = 'llama-3.1-8b-instant';
+const DEFAULT_FALLBACK_MODEL = 'groq/compound-mini';
 
 // In-memory LRU-style decision cache (15-minute TTL, max 2000 entries)
 const aiDecisionCache = new Map();
@@ -230,8 +230,12 @@ Respond ONLY with valid JSON.`;
 
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (!response.ok) {
+        const errPayload = await response.text();
+        throw new Error(`API status ${response.status}: ${errPayload}`);
+      }
+
+      const data = await response.json();
         const rawContent = data?.choices?.[0]?.message?.content;
         if (rawContent) {
           const parsed = JSON.parse(rawContent);
@@ -264,7 +268,6 @@ Respond ONLY with valid JSON.`;
           setCachedDecision(clean, strictness, result);
           return result;
         }
-      }
     } catch (err) {
       console.warn(`[AI Moderation] Model ${modelName} attempt error:`, err.message);
     }
