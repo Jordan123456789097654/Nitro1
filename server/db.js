@@ -2447,7 +2447,7 @@ JSON Format Example:
       else if (threshold === '10d' && (days >= 10 || days === 0)) isDisabledForReview = true;
       else if (threshold === 'disabled') isDisabledForReview = false;
 
-      const reviewReason = isDisabledForReview ? `${days > 0 ? days + '-Day' : 'Permanent'} Account Suspension (Pending Admin Review)` : '';
+      const reviewReason = isDisabledForReview ? `${days > 0 ? days + '-Day' : 'Permanent'} Suspension pending Admin Review. Reason: ${reason}` : '';
 
       await pool.query(
         'UPDATE users SET is_banned = true, ban_reason = $1, banned_until = $2, is_disabled_for_review = $3, review_disable_reason = $4 WHERE id = $5',
