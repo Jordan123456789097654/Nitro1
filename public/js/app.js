@@ -530,8 +530,15 @@ function initTosModal() {
   const closeBtn = document.getElementById('tos-modal-close');
   const acceptBtn = document.getElementById('tos-accept-btn');
 
-  if (openBtn) openBtn.addEventListener('click', () => modal.classList.add('active'));
-  if (gateTosBtn) gateTosBtn.addEventListener('click', (e) => { e.preventDefault(); modal.classList.add('active'); });
+  if (openBtn) openBtn.addEventListener('click', () => {
+    modal.classList.add('active');
+    if (window.switchLegalTab) window.switchLegalTab(null, 'legal-tos');
+  });
+  if (gateTosBtn) gateTosBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    modal.classList.add('active');
+    if (window.switchLegalTab) window.switchLegalTab(null, 'legal-tos');
+  });
   if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('active'));
   if (acceptBtn) acceptBtn.addEventListener('click', () => modal.classList.remove('active'));
 }

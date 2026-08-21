@@ -24,6 +24,79 @@
   <link rel="stylesheet" href="/css/admin.css">
   <link rel="stylesheet" href="/css/browser.css">
   <link rel="stylesheet" href="/css/upgrades.css">
+  
+  <style>
+    /* Premium Login & Signup Card Theme */
+    .auth-gate-card {
+      background: radial-gradient(120% 120% at 50% 0%, rgba(20, 24, 45, 0.9) 0%, rgba(10, 12, 22, 0.98) 100%) !important;
+      border: 1px solid rgba(56, 189, 248, 0.18) !important;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.12), 0 24px 60px rgba(0, 0, 0, 0.9) !important;
+      border-radius: 20px !important;
+      transition: all 0.3s ease-in-out;
+    }
+    .auth-gate-card:hover {
+      box-shadow: 0 0 50px rgba(225, 29, 72, 0.15), 0 24px 60px rgba(0, 0, 0, 0.9) !important;
+      border-color: rgba(225, 29, 72, 0.25) !important;
+    }
+    #gate-username, #gate-password, #auth-username, #auth-password {
+      background: rgba(0, 0, 0, 0.5) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #fff !important;
+      border-radius: 8px !important;
+      transition: all 0.25s ease-in-out !important;
+    }
+    #gate-username:focus, #gate-password:focus, #auth-username:focus, #auth-password:focus {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3) !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+    }
+    #gate-submit-btn, #auth-submit-btn {
+      background: linear-gradient(135deg, #e11d48, #be123c) !important;
+      color: #fff !important;
+      font-weight: 800 !important;
+      border: none !important;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35) !important;
+      transition: all 0.25s ease !important;
+    }
+    #gate-submit-btn:hover, #auth-submit-btn:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 6px 16px rgba(225, 29, 72, 0.5) !important;
+      filter: brightness(1.1) !important;
+    }
+
+    /* Tabbed Legal Policies Modal Styles */
+    .legal-tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .legal-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .legal-tab-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+    .legal-tab-content {
+      display: none;
+      animation: fadeInLegal 0.3s ease-in-out forwards;
+    }
+    .legal-tab-content.active {
+      display: block;
+    }
+    @keyframes fadeInLegal {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <!-- UN-BYPASSABLE ACCOUNT BANNED OVERLAY -->
@@ -246,8 +319,9 @@
   <div id="mandatory-login-gate" style="display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #07090e; z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
     <div class="auth-gate-card" style="background: #111522; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: 0 16px 40px rgba(0,0,0,0.7); text-align: center; position: relative;">
       
-      <div style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; color: #f8fafc; margin-bottom: 4px;">Study Helper Workspace</div>
-      <h3 id="gate-form-title" style="color: #94a3b8; font-size: 0.88rem; font-weight: 600; margin-bottom: 18px;">Sign in to your account</h3>
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 50%; font-size: 2.2rem; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(56, 189, 248, 0.15);">⚡</div>
+      <div style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.03em; background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px;">NITRO WORKSPACE</div>
+      <h3 id="gate-form-title" style="color: #94a3b8; font-size: 0.88rem; font-weight: 600; margin-bottom: 24px;">Sign in to unlock gaming & co-pilot tools</h3>
 
       <form id="gate-auth-form" style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
         <div class="form-group" style="margin: 0;">
@@ -1196,7 +1270,7 @@
               <button class="dropdown-item" id="open-suggest-modal-btn">💡 Suggest Game</button>
               <button class="dropdown-item" id="open-bug-modal-btn">🐛 Report Bug</button>
               <button class="dropdown-item" id="launch-site-blank-btn">🚀 about:blank Cloak</button>
-              <button class="dropdown-item" id="open-tos-btn">📜 Terms of Service</button>
+              <button class="dropdown-item" id="open-tos-btn">⚖️ Legal & Policies</button>
             </div>
           </div>
         </div>
@@ -3223,64 +3297,106 @@
 
   <!-- TERMS OF SERVICE MODAL -->
   <div class="modal-overlay" id="tos-modal">
-    <div class="modal-card" style="max-width: 860px;">
+    <div class="modal-card" style="max-width: 860px; display: flex; flex-direction: column; max-height: 85vh;">
       <button class="modal-close" id="tos-modal-close">✕</button>
-      <h2 style="color: var(--accent-color); margin-bottom: 14px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-        <span>📜</span> Detailed Terms of Service & Acceptable Use Policy (AUP)
+      
+      <h2 style="color: var(--accent-color); margin-bottom: 6px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+        <span>⚖️</span> Nitro Legal & Policies Center
       </h2>
-      <div style="font-size: 0.88rem; line-height: 1.7; color: var(--text-muted); max-height: 540px; overflow-y: auto; padding-right: 14px; background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); padding: 22px; border-radius: 12px;">
+      <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">Please review our platform legal policies, guidelines, and procedures.</p>
+
+      <!-- Navigation Tabs -->
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--card-border);">
+        <button type="button" class="legal-tab-btn active" onclick="switchLegalTab(event, 'legal-tos')">📜 Terms of Service</button>
+        <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-privacy')">🔒 Privacy Policy</button>
+        <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-disclaimer')">⚠️ Disclaimer & Liability</button>
+        <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-dmca')">📄 DMCA Procedure</button>
+        <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-moderation')">🛡️ Moderation & Appeal</button>
+      </div>
+
+      <div style="font-size: 0.88rem; line-height: 1.7; color: var(--text-muted); flex: 1; overflow-y: auto; padding-right: 10px; background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); padding: 22px; border-radius: 12px;">
         
-        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; color: #fff; font-size: 0.84rem;">
-          <strong style="color: #38bdf8;">📌 Important Legal Notice:</strong> Please read these Terms of Service thoroughly before utilizing NITRO platform features, web proxies, community chat, or games. Continued use of the platform signifies explicit agreement to all clauses below.
+        <!-- 1. Terms of Service Panel -->
+        <div id="legal-tos" class="legal-tab-content active">
+          <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; color: #fff; font-size: 0.84rem;">
+            <strong style="color: #38bdf8;">📌 Important Legal Notice:</strong> Please read these Terms of Service thoroughly before utilizing NITRO platform features, web proxies, community chat, or games. Continued use of the platform signifies explicit agreement to all clauses below.
+          </div>
+          <h4 style="color: #fff; margin: 16px 0 6px; font-size: 1.05rem;">1. Acceptance of Terms & Service Scope</h4>
+          <p style="margin-bottom: 14px;">By accessing, registering an account, or interacting with NITRO, you enter into a legally binding contract with the platform administration. Services provided include sandboxed web proxies, educational study tools, AI copilot assistants, real-time community chat, WebRTC voice channels, and unblocked arcade games. If you do not agree with any portion of these terms, you must immediately terminate your session and cease platform usage.</p>
+          <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">2. User Account Integrity, Security & Credential Protection</h4>
+          <p style="margin-bottom: 14px;">Users are solely responsible for maintaining the confidentiality of their credentials (usernames and passwords). Account sharing, credential reselling, brute-force authorization attempts, or attempting unauthorized rank elevation to Administrator or Owner roles is strictly prohibited. Activity originating from your account or IP address is deemed your legal responsibility.</p>
+          <h4 style="color: #fbbf24; margin: 16px 0 6px; font-size: 1.05rem;">3. Zero-Tolerance Content Moderation & Anti-Hate Speech Policy</h4>
+          <p style="margin-bottom: 14px;">NITRO maintains a strict <strong>Zero-Tolerance Policy</strong> regarding hate speech, racial or homophobic slurs, harassment, sexual content, NSFW media, self-harm, or illegal material. All chat messages, usernames, and gateway requests pass through live <strong>Groq AI Moderation</strong> and the <strong>Word Filter Shield Engine</strong>. Violators are subject to immediate automated mutes, account bans, and IP bans without prior notice.</p>
+          <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">4. Anti-Spam, Anti-Raid & Automated Bot Restrictions</h4>
+          <p style="margin-bottom: 14px;">To preserve chat quality and system stability, the <strong>Automated Raid Shield System</strong> monitors message frequency and content similarity. Spamming identical messages, rapid message flooding, or deploying automated chat bots will trigger an automatic 5-minute mute or suspension. Continued flooding results in permanent account bans.</p>
+          <h4 style="color: #10b981; margin: 16px 0 6px; font-size: 1.05rem;">5. Sandboxed Web Gateway Proxy Disclaimer & Usage Boundaries</h4>
+          <p style="margin-bottom: 14px;">The Nitro Shield Browser relay is provided strictly for educational asset testing and discreet research. Utilizing the gateway proxy to bypass local network security policies, conduct cyber attacks, access illegal materials, or scrape third-party websites is strictly forbidden. The system automatically blocks restricted domain keywords and logs gateway activity for security compliance.</p>
+          <h4 style="color: #ec4899; margin: 16px 0 6px; font-size: 1.05rem;">6. Nitro AI Assistant & Multimodal Safety Protocols</h4>
+          <p style="margin-bottom: 14px;">Nitro AI provides academic assistance and STEM problem solving. Users must not attempt to prompt-inject, jailbreak, or extract system instructions. In compliance with safety standards, any queries involving self-harm, suicide, weapons, or illegal exploits are blocked automatically, with emergency crisis hotline information provided where appropriate.</p>
         </div>
 
-        <h4 style="color: #fff; margin: 16px 0 6px; font-size: 1.05rem;">1. Acceptance of Terms & Service Scope</h4>
-        <p style="margin-bottom: 14px;">By accessing, registering an account, or interacting with NITRO, you enter into a legally binding contract with the platform administration. Services provided include sandboxed web proxies, educational study tools, AI copilot assistants, real-time community chat, WebRTC voice channels, and unblocked arcade games. If you do not agree with any portion of these terms, you must immediately terminate your session and cease platform usage.</p>
+        <!-- 2. Privacy Policy Panel -->
+        <div id="legal-privacy" class="legal-tab-content">
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">🔒 Platform Privacy & Data Protection Policy</h4>
+          <p style="margin-bottom: 14px;">We are committed to maintaining the privacy and security of all users. This Privacy Policy details the data collected, its utilization, and security safeguards.</p>
+          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">1. Data Collection Scope</h5>
+          <p style="margin-bottom: 12px;">We collect minimal personal details required to support safe platform operations. This includes account credentials (usernames and cryptographically hashed passwords), and profile metadata (custom titles, flairs, display colors, avatars, and cover banners).</p>
+          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">2. Security, IP & Connection Logs</h5>
+          <p style="margin-bottom: 12px;">For platform security and abuse prevention, client IP addresses, browser user-agents, authentication events, and gateway requests are recorded in secure audit databases. Community chat text logs are permanently archived to maintain a safe environment and enable moderation review.</p>
+          <h5 style="color: #38bdf8; margin: 12px 0 4px; font-size: 0.95rem;">3. Third-Party Disclosures & Security</h5>
+          <p style="margin-bottom: 12px;">No user logs, traffic telemetry, or personal identifiers are shared or sold to commercial third parties. Data is restricted to platform administrators and our secure servers. We employ industry-standard encryption protocols (including hashed database credentials) to secure transmission channels.</p>
+        </div>
 
-        <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">2. User Account Integrity, Security & Credential Protection</h4>
-        <p style="margin-bottom: 14px;">Users are solely responsible for maintaining the confidentiality of their credentials (usernames and passwords). Account sharing, credential reselling, brute-force authorization attempts, or attempting unauthorized rank elevation to Administrator or Owner roles is strictly prohibited. Activity originating from your account or IP address is deemed your legal responsibility.</p>
+        <!-- 3. Disclaimer & Liability Panel -->
+        <div id="legal-disclaimer" class="legal-tab-content">
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">⚠️ Disclaimer of Warranties & Limitation of Liability</h4>
+          <p style="margin-bottom: 14px;">THE PLATFORM AND ALL OF ITS INCLUDED FEATURES, INCLUDING THE WEB GATEWAY PROXY, GAMES, AND AI CHATBOTS, ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED.</p>
+          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">1. No Warranty & Service Continuity</h5>
+          <p style="margin-bottom: 12px;">We do not guarantee that the web proxy or arcade catalogs will be uninterrupted, error-free, secure, or free from viruses or other harmful code. The administration assumes no liability for local school or network disciplinary actions resulting from proxy usage.</p>
+          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">2. Limitation of Damages</h5>
+          <p style="margin-bottom: 12px;">IN NO EVENT SHALL THE PLATFORM CREATOR (INCLUDING OWNER JORDANDANIELS AND THE ADMIN TEAM) BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOSS OF PROFITS, DATA LOSS, LOST GAME PROGRESS SAVES, OR SYSTEM DOWNTIME, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+          <h5 style="color: #fbbf24; margin: 12px 0 4px; font-size: 0.95rem;">3. Indemnification Clause</h5>
+          <p style="margin-bottom: 12px;">By accessing the services, you agree to indemnify and hold harmless the platform administration, developers, and hosts from any claims, regulatory penalties, or legal fees resulting from your use, misuse, or violation of these community terms.</p>
+        </div>
 
-        <h4 style="color: #ef4444; margin: 16px 0 6px; font-size: 1.05rem;">3. Zero-Tolerance Content Moderation & Anti-Hate Speech Policy</h4>
-        <p style="margin-bottom: 14px;">NITRO maintains a strict <strong>Zero-Tolerance Policy</strong> regarding hate speech, racial or homophobic slurs, harassment, sexual content, NSFW media, self-harm, or illegal material. All chat messages, usernames, and gateway requests pass through live <strong>Groq AI Moderation</strong> and the <strong>Word Filter Shield Engine</strong>. Violators are subject to immediate automated mutes, account bans, and IP bans without prior notice.</p>
+        <!-- 4. DMCA Takedown Procedure Panel -->
+        <div id="legal-dmca" class="legal-tab-content">
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">📄 Digital Millennium Copyright Act (DMCA) Takedown Policy</h4>
+          <p style="margin-bottom: 14px;">We respect the intellectual property of others and expect our users to do the same. All embedded games, assets, and tools are copyright of their respective owners. We will respond expeditiously to claims of copyright infringement committed using our platform.</p>
+          <h5 style="color: #a855f7; margin: 12px 0 4px; font-size: 0.95rem;">1. How to File an Infringement Claim (Takedown Notice)</h5>
+          <p style="margin-bottom: 12px;">If you are a copyright owner or authorized agent, you may submit a formal DMCA Notice containing the following information to <code>legal@nitromath.org</code>:</p>
+          <ul style="margin: 0 0 12px 20px; padding: 0;">
+            <li style="margin-bottom: 4px;">A physical or electronic signature of the copyright owner or person authorized to act on their behalf.</li>
+            <li style="margin-bottom: 4px;">Identification of the copyrighted work claimed to have been infringed.</li>
+            <li style="margin-bottom: 4px;">Identification of the material that is claimed to be infringing and its exact URL link or location.</li>
+            <li style="margin-bottom: 4px;">Your contact information, including address, telephone number, and email.</li>
+            <li style="margin-bottom: 4px;">A statement that you have a good faith belief that use of the material is not authorized by the copyright owner.</li>
+            <li style="margin-bottom: 4px;">A statement, under penalty of perjury, that the information in the notification is accurate and that you are authorized to act on behalf of the owner.</li>
+          </ul>
+          <h5 style="color: #a855f7; margin: 12px 0 4px; font-size: 0.95rem;">2. Counter-Notification Process</h5>
+          <p style="margin-bottom: 12px;">If your content was removed via a DMCA Notice and you believe this was in error, you may file a counter-notice containing your identification, signature, consent to federal court jurisdiction, and a statement under penalty of perjury explaining the mistake.</p>
+        </div>
 
-        <h4 style="color: #fbbf24; margin: 16px 0 6px; font-size: 1.05rem;">4. Anti-Spam, Anti-Raid & Automated Bot Restrictions</h4>
-        <p style="margin-bottom: 14px;">To preserve chat quality and system stability, the <strong>Automated Raid Shield System</strong> monitors message frequency and content similarity. Spamming identical messages, rapid message flooding, or deploying automated chat bots will trigger an automatic 5-minute mute or suspension. Continued flooding results in permanent account bans.</p>
+        <!-- 5. Moderation & Appeal Policy Panel -->
+        <div id="legal-moderation" class="legal-tab-content">
+          <h4 style="color: #fff; margin: 0 0 8px; font-size: 1.1rem;">🛡️ Moderation Enforcement & Appeal Policy</h4>
+          <p style="margin-bottom: 14px;">We enforce community standards to ensure a safe, supportive, and clean platform for all users. Moderation is conducted via an automated AI-shield and live administrators.</p>
+          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">1. Disciplinary Action Matrix</h5>
+          <ul style="margin: 0 0 12px 20px; padding: 0;">
+            <li style="margin-bottom: 4px;"><strong>Censoring:</strong> Low-level profanity is automatically replaced with asterisk filters.</li>
+            <li style="margin-bottom: 4px;"><strong>Warning Strikes:</strong> Recorded against accounts for toxicity or spam, displaying warnings.</li>
+            <li style="margin-bottom: 4px;"><strong>Muting:</strong> Restricts chat ability for durations ranging from 15 minutes to 24 hours.</li>
+            <li style="margin-bottom: 4px;"><strong>Account Review Hold:</strong> Automatically locks the profile and holds it in suspension pending administrator review.</li>
+            <li style="margin-bottom: 4px;"><strong>Suspensions & IP Bans:</strong> Banishment from community features or total IP-gateway bans for severe hate speech or attempts to exploit the platform.</li>
+          </ul>
+          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">2. Appeals & AI Arbitration</h5>
+          <p style="margin-bottom: 12px;">Banned or muted students may submit an appeal. Appeals undergo initial screening by the Groq AI Arbitrator which evaluates the text for remorse and sincerity. Sincere appeals are queued for final administrator review, while insincere or sarcastic appeals are auto-rejected.</p>
+          <h5 style="color: #10b981; margin: 12px 0 4px; font-size: 0.95rem;">3. Treason Protocol Override</h5>
+          <p style="margin-bottom: 12px;">The platform Owner (<code>jordandaniels</code>) is protected by system governance. Any administrative attempt to ban or restrict the Owner triggers the Treason Protocol, resulting in the immediate demotion, suspension, and ban of the offending administrator.</p>
+        </div>
 
-        <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">5. Sandboxed Web Gateway Proxy Disclaimer & Usage Boundaries</h4>
-        <p style="margin-bottom: 14px;">The Nitro Shield Browser relay is provided strictly for educational asset testing and discreet research. Utilizing the gateway proxy to bypass local network security policies, conduct cyber attacks, access illegal materials, or scrape third-party websites is strictly forbidden. The system automatically blocks restricted domain keywords and logs gateway activity for security compliance.</p>
-
-        <h4 style="color: #10b981; margin: 16px 0 6px; font-size: 1.05rem;">6. Nitro AI Assistant & Multimodal Safety Protocols</h4>
-        <p style="margin-bottom: 14px;">Nitro AI provides academic assistance and STEM problem solving. Users must not attempt to prompt-inject, jailbreak, or extract system instructions. In compliance with safety standards, any queries involving self-harm, suicide, weapons, or illegal exploits are blocked automatically, with emergency crisis hotline information provided where appropriate.</p>
-
-        <h4 style="color: #f59e0b; margin: 16px 0 6px; font-size: 1.05rem;">7. Automated Disciplinary Escalation Framework</h4>
-        <p style="margin-bottom: 14px;">Platform infractions are handled through a 5-tier automated enforcement system:</p>
-        <ul style="margin: 0 0 14px 20px; padding: 0;">
-          <li style="margin-bottom: 4px;"><strong>*** Censor:</strong> Mild profanity is sanitized with asterisk masking.</li>
-          <li style="margin-bottom: 4px;"><strong>⚠️ Warning Strike:</strong> Message blocked and strike issued to account.</li>
-          <li style="margin-bottom: 4px;"><strong>🔇 5m / 1h Mute:</strong> Repeated chat flooding or toxicity results in chat mute.</li>
-          <li style="margin-bottom: 4px;"><strong>⛔ 1d / 3d Suspension:</strong> Severe profanity or NSFW uploads trigger temporary bans.</li>
-          <li style="margin-bottom: 4px;"><strong>💀 Permanent Ban:</strong> Extreme slurs, hate speech, or malicious exploits trigger permanent account and IP bans.</li>
-        </ul>
-
-        <h4 style="color: #ec4899; margin: 16px 0 6px; font-size: 1.05rem;">8. Formal Appeal System & AI Arbitration</h4>
-        <p style="margin-bottom: 14px;">Muted or suspended users may submit a formal appeal through the Punishment Appeal Portal. Appeals undergo automated pre-evaluation by the Groq AI Safety Arbitrator to analyze sincerity, remorse, and future infraction risk before final administrator review. If an appeal is approved, mutes, account bans, and gateway restrictions are lifted automatically across the platform.</p>
-
-        <h4 style="color: #38bdf8; margin: 16px 0 6px; font-size: 1.05rem;">9. Telemetry, Audit Logging & Security Webhooks</h4>
-        <p style="margin-bottom: 14px;">For platform security and abuse prevention, client IP addresses, browser user-agents, authentication events, moderation actions, and chat activity are recorded in secure database audit logs and dispatched live to administrative Discord Webhooks (Moderation Actions, Audit Logs, AI Logs, and Chat Logs).</p>
-
-        <h4 style="color: #10b981; margin: 16px 0 6px; font-size: 1.05rem;">10. Community Themes & Code Submissions</h4>
-        <p style="margin-bottom: 14px;">Users may import, export, and share custom themes in the Community Gallery. Shared themes must comply with community safety standards. Any theme featuring toxic names, offensive terminology, or harmful styling will be immediately removed, and the uploader banned. Sharing custom themes is subject to public visibility.</p>
-
-        <h4 style="color: #ef4444; margin: 16px 0 6px; font-size: 1.05rem;">11. Treason Protocol & Supreme Owner Governance</h4>
-        <p style="margin-bottom: 14px;">During system updates or security maintenance, Maintenance Mode may be enabled. While active, non-owner connections (including standard members, VIPs, and standard admins) will be disconnected, reserving exclusive system access to the platform Owner (<code>jordandaniels</code>). Any attempt by an administrator to ban, mute, or punish the Owner triggers the **Treason Protocol**: immediate demotion to Member, a 3-day account ban, and termination of all administrative privileges.</p>
-
-        <h4 style="color: #a855f7; margin: 16px 0 6px; font-size: 1.05rem;">12. Intellectual Property & DMCA Takedown Procedure</h4>
-        <p style="margin-bottom: 14px;">All games, canvas tools, and embedded web content remain the intellectual property of their original developers and publishers. If you are a copyright owner and believe content on NITRO infringes your copyright, submit a formal DMCA takedown notice with proof of ownership to <code>jordan@nitromath.org</code> for immediate removal.</p>
-
-        <h4 style="color: var(--text-main); margin: 16px 0 6px; font-size: 1.05rem;">13. Disclaimer of Warranties & Limitation of Liability</h4>
-        <p style="margin-bottom: 0;">NITRO IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. THE PLATFORM ADMINISTRATION ASSUMES NO LIABILITY FOR SERVICE INTERRUPTIONS, DATA LOSS, THIRD-PARTY EMBEDS, OR GATEWAY PROXY ROUTING CONTENT.</p>
       </div>
-      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 18px; padding: 12px; font-weight: 800;">I Have Read & Agree to All Detailed Terms</button>
+      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 16px; padding: 12px; font-weight: 800;">I Accept and Acknowledge Policies</button>
     </div>
   </div>
 
@@ -3630,6 +3746,31 @@
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="/js/app.js"></script>
+  <script>
+    window.switchLegalTab = function(event, tabId) {
+      if (event) event.preventDefault();
+      
+      // Deactivate all tab buttons
+      const buttons = document.querySelectorAll('.legal-tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      // Deactivate all tab panels
+      const panels = document.querySelectorAll('.legal-tab-content');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      // Activate clicked tab
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      } else {
+        const matchingBtn = Array.from(buttons).find(b => b.getAttribute('onclick')?.includes(tabId));
+        if (matchingBtn) matchingBtn.classList.add('active');
+      }
+      
+      // Activate target panel
+      const targetPanel = document.getElementById(tabId);
+      if (targetPanel) targetPanel.classList.add('active');
+    };
+  </script>
   <!-- LIGHTBOX IMAGE MODAL -->
   <div class="modal-overlay" id="chat-image-lightbox-modal" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); z-index: 999999;">
     <div style="position: relative; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center;">
