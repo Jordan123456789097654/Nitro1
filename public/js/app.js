@@ -980,6 +980,20 @@ export async function openPublicProfile(username) {
   const role = (targetUser.role || 'member').toLowerCase();
   const cfg = ROLE_BADGE_CONFIG[role] || ROLE_BADGE_CONFIG.member;
 
+  const bannerEl = document.getElementById('pub-profile-banner');
+  if (bannerEl) {
+    const val = targetUser.banner_url || '';
+    if (!val) {
+      bannerEl.style.background = 'linear-gradient(135deg, #1e293b, #0f172a)';
+    } else if (val.startsWith('#') || val.startsWith('rgb') || val.startsWith('hsl') || val.startsWith('linear-gradient')) {
+      bannerEl.style.background = val;
+    } else {
+      bannerEl.style.background = `url(${val})`;
+      bannerEl.style.backgroundSize = 'cover';
+      bannerEl.style.backgroundPosition = 'center';
+    }
+  }
+
   nameEl.textContent = targetUser.display_name || username;
   handleEl.textContent = `@${username}`;
   bioEl.textContent = targetUser.bio || 'Nitro Platform Member';

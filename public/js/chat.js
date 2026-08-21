@@ -1066,7 +1066,7 @@ function appendChatMessage(msg) {
 
   row.innerHTML = `
     <div style="display: flex; gap: 10px; width: 100%;">
-      <div class="chat-msg-avatar" id="msg-avatar-${msg.id || Date.now()}" onclick="window.showUserProfileModal('${escapeHtml(msg.username || '')}')" style="width: 34px; height: 34px; flex-shrink: 0; font-size: 1.1rem; border-radius: 50%; cursor: pointer;" title="Click to view @${escapeHtml(msg.username || '')}'s profile">👤</div>
+      <div class="chat-msg-avatar" id="msg-avatar-${msg.id || Date.now()}" onclick="window.openPublicProfile('${escapeHtml(msg.username || '')}')" style="width: 34px; height: 34px; flex-shrink: 0; font-size: 1.1rem; border-radius: 50%; cursor: pointer;" title="Click to view @${escapeHtml(msg.username || '')}'s profile">👤</div>
       <div style="flex: 1;">
         <div class="chat-msg-header">
           <div onclick="window.openPublicProfile('${msg.username || ''}')" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Click to view @${msg.username || ''}'s profile">
@@ -1184,8 +1184,8 @@ window.setReplyMessageContext = (username, snippet) => {
 };
 
 window.showUserProfileModal = (username) => {
-  if (window.openDirectMessageWithUser) {
-    window.openDirectMessageWithUser(username);
+  if (window.openPublicProfile) {
+    window.openPublicProfile(username);
   }
 };
 

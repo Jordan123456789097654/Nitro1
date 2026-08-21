@@ -514,6 +514,50 @@ function setupProfileModal(onUserChange) {
   const proCustomFlairInput = document.getElementById('profile-pro-custom-flair');
 
   let selectedAvatar = '';
+  let selectedBanner = '';
+
+  const bannerUrlInput = document.getElementById('profile-banner-url');
+  const bannerFileInput = document.getElementById('profile-banner-file-input');
+  const uploadBannerBtn = document.getElementById('profile-upload-banner-btn');
+  const bannerFileNameLabel = document.getElementById('profile-banner-file-name-label');
+  const previewBanner = document.getElementById('profile-preview-banner');
+
+  function updateBannerPreview(el, val) {
+    if (!el) return;
+    if (!val) {
+      el.style.background = 'linear-gradient(135deg, #1e293b, #0f172a)';
+    } else if (val.startsWith('#') || val.startsWith('rgb') || val.startsWith('hsl') || val.startsWith('linear-gradient')) {
+      el.style.background = val;
+    } else {
+      el.style.background = `url(${val})`;
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+    }
+  }
+
+  if (bannerUrlInput) {
+    bannerUrlInput.addEventListener('input', () => {
+      selectedBanner = bannerUrlInput.value.trim();
+      updateBannerPreview(previewBanner, selectedBanner);
+    });
+  }
+
+  if (uploadBannerBtn && bannerFileInput) {
+    uploadBannerBtn.addEventListener('click', () => bannerFileInput.click());
+    bannerFileInput.addEventListener('change', () => {
+      if (bannerFileInput.files && bannerFileInput.files[0]) {
+        const file = bannerFileInput.files[0];
+        if (bannerFileNameLabel) bannerFileNameLabel.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          selectedBanner = ev.target.result;
+          if (bannerUrlInput) bannerUrlInput.value = '';
+          updateBannerPreview(previewBanner, selectedBanner);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
   if (presetsContainer) {
     presetsContainer.innerHTML = AVATAR_PRESETS.map(p => `
@@ -574,9 +618,13 @@ function setupProfileModal(onUserChange) {
   function populateProfileForm(inventory = []) {
     if (!currentUser) return;
     selectedAvatar = currentUser.avatar_url || '';
+    selectedBanner = currentUser.banner_url || '';
     if (displayNameInput) displayNameInput.value = currentUser.display_name || currentUser.username;
     if (bioInput) bioInput.value = currentUser.bio || '';
     if (customUrlInput) customUrlInput.value = (selectedAvatar.startsWith('http') && !selectedAvatar.startsWith('data:')) ? selectedAvatar : '';
+    if (bannerUrlInput) bannerUrlInput.value = (selectedBanner.startsWith('http') || selectedBanner.startsWith('#') || selectedBanner.startsWith('linear-gradient')) ? selectedBanner : '';
+    if (bannerFileNameLabel) bannerFileNameLabel.textContent = (selectedBanner.startsWith('data:')) ? 'Uploaded Custom Image' : 'No file chosen';
+    updateBannerPreview(previewBanner, selectedBanner);
     if (previewName) previewName.textContent = currentUser.display_name || currentUser.username;
     
     if (previewRole) {
@@ -771,6 +819,7 @@ function setupProfileModal(onUserChange) {
       const display_name = displayNameInput ? displayNameInput.value.trim() : '';
       const bio = bioInput ? bioInput.value.trim() : '';
       const avatar_url = selectedAvatar;
+      const banner_url = selectedBanner;
       const pro_chat_glow = proChatGlowSelect ? proChatGlowSelect.value : '';
       const pro_custom_flair = (proCustomFlairInput && proCustomFlairInput.style.display !== 'none')
         ? proCustomFlairInput.value.trim()
@@ -784,6 +833,7 @@ function setupProfileModal(onUserChange) {
           headers,
           body: JSON.stringify({
             avatar_url,
+            banner_url,
             display_name,
             bio,
             pro_chat_glow,

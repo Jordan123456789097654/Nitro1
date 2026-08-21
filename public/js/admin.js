@@ -1712,6 +1712,74 @@ function setupAdminActions() {
     document.getElementById('admin-edit-user-flair').value = user.pro_custom_flair || '';
     document.getElementById('admin-edit-user-new-password').value = '';
 
+    // Fetch and render moderation history timeline
+    const timelineEl = document.getElementById('admin-user-mod-timeline');
+    if (timelineEl) {
+      timelineEl.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 12px;">Loading moderation history...</div>';
+      
+      authFetch(`/api/admin/users/${encodeURIComponent(user.username)}/mod-history`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success || !data.history) {
+            timelineEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 12px;">Failed to load history.</div>';
+            return;
+          }
+          const history = data.history;
+          if (history.length === 0) {
+            timelineEl.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No moderation actions recorded for this student.</div>';
+            return;
+          }
+          
+          timelineEl.innerHTML = history.map(item => {
+            let badgeBg = '#3b82f6';
+            let badgeText = item.source.toUpperCase();
+            
+            if (item.source === 'manual') {
+              badgeBg = '#ef4444';
+              badgeText = item.action || 'PUNISH';
+            } else if (item.source === 'ai') {
+              badgeBg = '#eab308';
+              badgeText = `AI FLAG (${item.action})`;
+            } else if (item.source === 'appeal') {
+              badgeBg = item.action === 'approved' ? '#10b981' : item.action === 'rejected' ? '#ef4444' : '#6366f1';
+              badgeText = `APPEAL (${item.action.toUpperCase()})`;
+            }
+            
+            const reasonStr = item.reason ? `<div style="margin-top: 4px; color: #cbd5e1; line-height: 1.4;">${escapeHtml(item.reason)}</div>` : '';
+            const adminStr = item.admin_username ? `<span style="color: var(--text-muted); margin-left: auto; font-size: 0.72rem;">by @${item.admin_username}</span>` : '';
+            
+            let extraStr = '';
+            if (item.extra) {
+              if (item.source === 'ai') {
+                extraStr = `<div style="font-size: 0.7rem; color: #a855f7; margin-top: 2px;">Category: ${item.extra.category} | Severity: ${item.extra.severity} (Confidence: ${Math.round(item.extra.confidence * 100)}%)</div>`;
+              } else if (item.source === 'appeal') {
+                extraStr = `<div style="font-size: 0.72rem; border-left: 2px solid rgba(255,255,255,0.15); padding-left: 8px; margin-top: 4px; color: #94a3b8;">
+                  <strong>Type:</strong> ${item.extra.punishment_type} | <strong>AI Recommendation:</strong> ${item.extra.ai_recommendation}<br>
+                  <strong>AI Rationale:</strong> ${item.extra.ai_rationale || 'N/A'}<br>
+                  <strong>Admin Notes:</strong> ${item.extra.admin_notes || 'None'}
+                </div>`;
+              }
+            }
+            
+            return `
+              <div style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 4px; display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="background: ${badgeBg}; color: #000; font-weight: 800; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px;">${badgeText}</span>
+                  <span style="color: var(--text-muted); font-size: 0.7rem;">${new Date(item.created_at).toLocaleString()}</span>
+                  ${adminStr}
+                </div>
+                ${reasonStr}
+                ${extraStr}
+              </div>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          console.error(err);
+          timelineEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 12px;">Connection error loading timeline.</div>';
+        });
+    }
+
     modal.classList.add('active');
   };
 

@@ -405,6 +405,7 @@ const db = {
       `);
 
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '';");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -2896,6 +2897,45 @@ JSON Format Example:
       return res.rows;
     } catch (e) {
       console.error('getPublicThemes error:', e.message);
+      return [];
+    }
+  },
+
+  async getUserModHistory(username) {
+    try {
+      const modLogsRes = await pool.query(`
+        SELECT 'manual' as source, action, admin_username, reason, created_at, NULL::jsonb as extra
+        FROM moderation_logs
+        WHERE LOWER(target) = LOWER($1)
+        ORDER BY created_at DESC
+      `, [username]);
+
+      const aiLogsRes = await pool.query(`
+        SELECT 'ai' as source, action_taken as action, 'System (AI)' as admin_username, message as reason, created_at, 
+               json_build_object('category', category, 'severity', severity, 'confidence', confidence)::jsonb as extra
+        FROM ai_moderation_logs
+        WHERE LOWER(username) = LOWER($1)
+        ORDER BY created_at DESC
+      `, [username]);
+
+      const appealsRes = await pool.query(`
+        SELECT 'appeal' as source, status as action, COALESCE(reviewed_by, 'System') as admin_username, 
+               appeal_text as reason, created_at,
+               json_build_object('punishment_type', punishment_type, 'ai_recommendation', ai_recommendation, 'ai_rationale', ai_rationale, 'admin_notes', admin_notes)::jsonb as extra
+        FROM appeals
+        WHERE LOWER(username) = LOWER($1)
+        ORDER BY created_at DESC
+      `, [username]);
+
+      const combined = [
+        ...modLogsRes.rows,
+        ...aiLogsRes.rows,
+        ...appealsRes.rows
+      ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      return combined;
+    } catch (e) {
+      console.error('getUserModHistory error:', e.message);
       return [];
     }
   },

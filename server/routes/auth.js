@@ -192,7 +192,7 @@ router.post('/profile', async (req, res) => {
 
     const updated = await db.updateUserProfile(userId, {
       avatar_url: avatar_url !== undefined ? avatar_url.trim() : user.avatar_url,
-      banner_url: isPro && banner_url !== undefined ? banner_url.trim() : user.banner_url,
+      banner_url: banner_url !== undefined ? banner_url.trim() : user.banner_url,
       chat_bubble_theme: isPro && chat_bubble_theme !== undefined ? chat_bubble_theme.trim() : user.chat_bubble_theme,
       vip_particle_effect: isPro && vip_particle_effect !== undefined ? vip_particle_effect.trim() : user.vip_particle_effect,
       display_name: display_name !== undefined ? display_name.trim().slice(0, 50) : user.display_name,

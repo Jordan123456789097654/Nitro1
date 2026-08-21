@@ -648,6 +648,17 @@ router.get('/users', async (req, res) => {
   }
 });
 
+router.get('/users/:username/mod-history', async (req, res) => {
+  const { username } = req.params;
+  try {
+    const history = await db.getUserModHistory(username);
+    res.json({ success: true, history });
+  } catch (err) {
+    console.error('mod-history error:', err);
+    res.status(500).json({ error: 'Failed to fetch moderation history.' });
+  }
+});
+
 const ALLOWED_ROLES = [
   'member',
   'early_member',

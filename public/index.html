@@ -702,14 +702,17 @@
       <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Customize your avatar PFP, display nickname, bio status, PRO glows, and account security.</p>
       
       <!-- Live Profile Preview Card -->
-      <div style="display: flex; align-items: center; gap: 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 16px;">
-        <div id="profile-preview-avatar" style="width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 2px solid var(--accent-color); box-shadow: 0 0 14px rgba(235, 47, 95, 0.35); flex-shrink: 0;">👤</div>
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <strong id="profile-preview-name" style="font-size: 1.05rem; color: #fff;">Student</strong>
-            <span class="chat-badge member" id="profile-preview-role">MEMBER</span>
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: var(--radius-md); margin-bottom: 16px; overflow: hidden; position: relative;">
+        <div id="profile-preview-banner" style="height: 60px; background: linear-gradient(135deg, #1e293b, #0f172a); background-size: cover; background-position: center; border-bottom: 1px solid var(--card-border);"></div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-top: -30px; position: relative; z-index: 2;">
+          <div id="profile-preview-avatar" style="width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 2px solid var(--accent-color); box-shadow: 0 0 14px rgba(235, 47, 95, 0.35); flex-shrink: 0; background: #000; overflow: hidden;">👤</div>
+          <div style="flex: 1; padding-top: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong id="profile-preview-name" style="font-size: 1.05rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Student</strong>
+              <span class="chat-badge member" id="profile-preview-role">MEMBER</span>
+            </div>
+            <p id="profile-preview-bio" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">No status bio set yet.</p>
           </div>
-          <p id="profile-preview-bio" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">No status bio set yet.</p>
         </div>
       </div>
 
@@ -741,6 +744,20 @@
         <div class="form-group">
           <label style="font-size: 0.8rem; font-weight: 700;">Bio / Status Quote</label>
           <input type="text" id="profile-bio" placeholder="e.g. Grinding Slope highscores 🚀" maxlength="200">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Profile Cover Banner (Color Hex or Image URL)</label>
+          <input type="text" id="profile-banner-url" placeholder="e.g. #38bdf8, linear-gradient(135deg, red, blue), or https://..." style="width: 100%; padding: 8px 12px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Or Upload Local Banner Image File</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="file" id="profile-banner-file-input" accept="image/*" style="display: none;">
+            <button type="button" class="btn-pill" id="profile-upload-banner-btn" style="padding: 8px 14px; font-size: 0.82rem; background: rgba(16, 185, 129, 0.15); border-color: #10b981; color: #10b981;">📁 Choose Banner File...</button>
+            <span id="profile-banner-file-name-label" style="font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">No file chosen</span>
+          </div>
         </div>
 
         <!-- PRO EXCLUSIVE PERKS CUSTOMIZER -->
@@ -3042,6 +3059,15 @@
 
         <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px; font-weight: 800; background: #38bdf8; color: #000;">💾 Save Student Profile Changes</button>
       </form>
+
+      <div style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 16px;">
+        <h4 style="color: #ef4444; margin: 0 0 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+          <span>📋 Student Moderation & Appeal Timeline</span>
+        </h4>
+        <div id="admin-user-mod-timeline" style="max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); padding: 12px; border-radius: 8px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px;">
+          <div style="text-align: center; color: var(--text-muted); padding: 12px;">Loading moderation history...</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3378,32 +3404,38 @@
 
   <!-- PUBLIC PLAYER PROFILE & BADGES CARD MODAL -->
   <div class="modal-overlay" id="public-profile-modal">
-    <div class="modal-card" style="max-width: 580px; text-align: left;">
-      <button class="modal-close" id="public-profile-modal-close">✕</button>
-      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-        <div id="pub-profile-avatar" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; background: linear-gradient(135deg, #38bdf8, #6366f1); border: 2px solid var(--accent-color);">👤</div>
-        <div style="flex: 1;">
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <strong id="pub-profile-name" style="font-size: 1.3rem; color: #fff;">Student</strong>
-            <span id="pub-profile-role-badge" class="chat-badge owner">MEMBER</span>
-            <span id="pub-profile-flair-badge"></span>
+    <div class="modal-card" style="max-width: 580px; text-align: left; padding: 0; overflow: hidden; position: relative;">
+      <!-- Profile Banner -->
+      <div id="pub-profile-banner" style="height: 120px; background: linear-gradient(135deg, #1e293b, #0f172a); background-size: cover; background-position: center; border-bottom: 2px solid var(--accent-color); position: relative;"></div>
+      
+      <div style="padding: 20px;">
+        <button class="modal-close" id="public-profile-modal-close" style="top: 12px; right: 12px; z-index: 10;">✕</button>
+        <div style="display: flex; align-items: flex-end; gap: 16px; margin-top: -60px; margin-bottom: 16px; position: relative; z-index: 2;">
+          <div id="pub-profile-avatar" style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, #38bdf8, #6366f1); border: 4px solid var(--bg-color, #090a0f); flex-shrink: 0; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">👤</div>
+          <div style="flex: 1; padding-bottom: 4px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <strong id="pub-profile-name" style="font-size: 1.3rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Student</strong>
+              <span id="pub-profile-role-badge" class="chat-badge owner">MEMBER</span>
+              <span id="pub-profile-flair-badge"></span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="pub-profile-handle">@student</div>
           </div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="pub-profile-handle">@student</div>
-          <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 4px; font-style: italic;" id="pub-profile-bio">No bio set.</div>
         </div>
-      </div>
 
-      <div style="margin-bottom: 16px;">
-        <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
-          <span>🏆 Unlocked Player Badges</span>
-          <span id="pub-profile-badge-count" style="font-size: 0.75rem; background: rgba(251,191,36,0.2); color: #fbbf24; padding: 2px 8px; border-radius: 10px;">3 Unlocked</span>
-        </h4>
-        <div id="pub-profile-badges-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 240px; overflow-y: auto;"></div>
-      </div>
+        <div style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px; border-radius: 8px; font-style: italic;" id="pub-profile-bio">No bio set.</div>
 
-      <div style="display: flex; gap: 10px; margin-top: 16px;">
-        <button class="btn-pill primary" id="pub-profile-dm-btn" style="flex: 1; justify-content: center;">💬 Send Direct Message</button>
-        <button class="btn-pill secondary" id="pub-profile-add-friend-btn" style="flex: 1; justify-content: center; background: #10b981; color: #000; font-weight: 700; border: none;">➕ Add Friend</button>
+        <div style="margin-bottom: 16px;">
+          <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+            <span>🏆 Unlocked Player Badges</span>
+            <span id="pub-profile-badge-count" style="font-size: 0.75rem; background: rgba(251,191,36,0.2); color: #fbbf24; padding: 2px 8px; border-radius: 10px;">3 Unlocked</span>
+          </h4>
+          <div id="pub-profile-badges-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 240px; overflow-y: auto;"></div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button class="btn-pill primary" id="pub-profile-dm-btn" style="flex: 1; justify-content: center;">💬 Send Direct Message</button>
+          <button class="btn-pill secondary" id="pub-profile-add-friend-btn" style="flex: 1; justify-content: center; background: #10b981; color: #000; font-weight: 700; border: none;">➕ Add Friend</button>
+        </div>
       </div>
     </div>
   </div>
