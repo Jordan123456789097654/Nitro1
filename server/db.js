@@ -4,8 +4,29 @@ require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres.xulngyyikaymnmxitzto:ZgrsG1hhXsOuv4ac@aws-0-ca-central-1.pooler.supabase.com:6543/postgres',
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  max: 6,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
 });
+
+const userCache = new Map();
+
+function clearUserCache(userId) {
+  if (userId) {
+    userCache.delete(Number(userId));
+    userCache.delete(String(userId));
+  }
+}
+
+const originalQuery = pool.query;
+pool.query = function(text, params) {
+  const sql = (typeof text === 'string') ? text : (text && text.text) || '';
+  if (sql.toUpperCase().includes('UPDATE USERS') || sql.toUpperCase().includes('DELETE FROM USERS') || sql.toUpperCase().includes('INSERT INTO USERS')) {
+    userCache.clear();
+  }
+  return originalQuery.apply(pool, arguments);
+};
 
 pool.on('error', (err) => {
   console.error('Unexpected Supabase PostgreSQL pool error:', err.message);
@@ -854,9 +875,19 @@ const db = {
   },
 
   async getUserById(id) {
+    if (!id) return null;
+    const now = Date.now();
+    const cached = userCache.get(id);
+    if (cached && cached.expires > now) {
+      return cached.user;
+    }
     try {
       const res = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-      if (res.rows && res.rows[0]) return res.rows[0];
+      if (res.rows && res.rows[0]) {
+        const user = res.rows[0];
+        userCache.set(id, { user, expires: now + 3000 }); // cache for 3 seconds
+        return user;
+      }
     } catch (e) {
       console.error('getUserById error:', e.message);
     }
