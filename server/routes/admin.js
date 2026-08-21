@@ -1216,7 +1216,7 @@ router.post('/users/:id/gateway-ban', async (req, res) => {
 router.post('/games/:id/update', async (req, res) => {
   const gameId = req.params.id;
   const admin = req.adminUser.username;
-  const { title, category, author, thumbnail_url, embed_type, embed_content, clicks } = req.body;
+  const { title, category, author, thumbnail_url, embed_type, embed_content, clicks, is_taken_down, takedown_reason } = req.body;
 
   if (!title || !title.trim()) {
     return res.status(400).json({ error: 'Game title is required.' });
@@ -1230,10 +1230,12 @@ router.post('/games/:id/update', async (req, res) => {
       thumbnail_url: thumbnail_url ? thumbnail_url.trim() : '',
       embed_type: embed_type || 'iframe_url',
       embed_content: embed_content ? embed_content.trim() : '',
-      clicks: clicks !== undefined ? parseInt(clicks, 10) : undefined
+      clicks: clicks !== undefined ? parseInt(clicks, 10) : undefined,
+      is_taken_down: is_taken_down !== undefined ? Boolean(is_taken_down) : false,
+      takedown_reason: takedown_reason !== undefined ? String(takedown_reason).trim() : ''
     });
 
-    await db.createModerationLog('UPDATE_GAME', admin, title.trim(), `Game #${gameId} updated by admin`);
+    await db.createModerationLog('UPDATE_GAME', admin, title.trim(), `Game #${gameId} updated by admin (Takedown: ${Boolean(is_taken_down)})`);
     res.json({ success: true, game: updated });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update game.' });

@@ -94,6 +94,8 @@ const db = {
           is_vip BOOLEAN DEFAULT false,
           category VARCHAR(50) DEFAULT 'Action',
           clicks INT DEFAULT 0,
+          is_taken_down BOOLEAN DEFAULT false,
+          takedown_reason TEXT DEFAULT '',
           created_by VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -429,6 +431,8 @@ const db = {
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_flair_locked BOOLEAN DEFAULT false;");
+      await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS is_taken_down BOOLEAN DEFAULT false;");
+      await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS takedown_reason TEXT DEFAULT '';");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -1324,7 +1328,7 @@ const db = {
     }
   },
 
-  async updateGameDetails(id, { title, category, author, thumbnail_url, embed_type, embed_content, clicks }) {
+  async updateGameDetails(id, { title, category, author, thumbnail_url, embed_type, embed_content, clicks, is_taken_down, takedown_reason }) {
     try {
       const res = await pool.query(`
         UPDATE games
@@ -1334,10 +1338,12 @@ const db = {
             thumbnail_url = COALESCE($4, thumbnail_url),
             embed_type = COALESCE($5, embed_type),
             embed_content = COALESCE($6, embed_content),
-            clicks = COALESCE($7, clicks)
-        WHERE id = $8
+            clicks = COALESCE($7, clicks),
+            is_taken_down = COALESCE($8, is_taken_down),
+            takedown_reason = COALESCE($9, takedown_reason)
+        WHERE id = $10
         RETURNING *
-      `, [title, category, author, thumbnail_url, embed_type, embed_content, clicks, id]);
+      `, [title, category, author, thumbnail_url, embed_type, embed_content, clicks, is_taken_down, takedown_reason, id]);
       return res.rows[0];
     } catch (e) {
       console.error('updateGameDetails error:', e.message);

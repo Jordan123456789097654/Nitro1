@@ -3238,6 +3238,16 @@
           <input type="number" id="admin-edit-game-clicks" placeholder="0">
         </div>
 
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+          <input type="checkbox" id="admin-edit-game-takedown" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+          <label for="admin-edit-game-takedown" style="font-size: 0.8rem; font-weight: 700; color: #ef4444; cursor: pointer; user-select: none;">⚠️ Taken Down (Show warning notice instead of launching)</label>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700; color: #ef4444;">Takedown Reason / Copyright Notice</label>
+          <input type="text" id="admin-edit-game-takedown-reason" placeholder="e.g. DMCA Copyright Notice from Nintendo of America">
+        </div>
+
         <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px; font-weight: 800; background: #38bdf8; color: #000;">💾 Save Game Changes</button>
       </form>
     </div>
