@@ -1,5 +1,35 @@
 const db = require('./db');
 const { sendDiscordLog } = require('./discordLogger');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+function saveChatAttachment(base64Data, type) {
+  if (!base64Data || !base64Data.trim().startsWith('data:')) {
+    return base64Data;
+  }
+  try {
+    const uploadDir = path.join(__dirname, '../public/uploads/chat');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const matches = base64Data.match(/^data:([A-Za-z-+\/0-9]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return base64Data;
+    }
+
+    const ext = matches[1].split('/')[1] || (type === 'image' ? 'png' : 'webm');
+    const filename = `chat-${type}-${crypto.randomBytes(8).toString('hex')}-${Date.now()}.${ext}`;
+    const filepath = path.join(uploadDir, filename);
+
+    fs.writeFileSync(filepath, Buffer.from(matches[2], 'base64'));
+    return `/uploads/chat/${filename}`;
+  } catch (e) {
+    console.error('Error saving chat attachment:', e);
+    return base64Data;
+  }
+}
 const { checkMessageWithGroqModeration, checkImageWithGroqModeration, getSafetyHotlineText } = require('./aiModeration');
 
 // Active Connection Registry & State
@@ -615,7 +645,9 @@ function initChatSocket(io) {
         cleanText = aiEnforce.cleanText;
       }
 
-      const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, audioUrl, imageUrl);
+      const savedAudioUrl = saveChatAttachment(audioUrl, 'audio');
+      const savedImageUrl = saveChatAttachment(imageUrl, 'image');
+      const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, savedAudioUrl, savedImageUrl);
       io.emit('new_message', newMsg);
 
       sendDiscordLog({
@@ -666,7 +698,9 @@ function initChatSocket(io) {
       if (!aiEnforce.allowed) return;
       cleanText = aiEnforce.cleanText;
 
-      const newDm = await db.createDM(sender.id || authCheck.dbUser?.id || null, receiverUser.id, sender.username, receiverUser.username, cleanText, imageUrl, audioUrl);
+      const savedAudioUrl = saveChatAttachment(audioUrl, 'audio');
+      const savedImageUrl = saveChatAttachment(imageUrl, 'image');
+      const newDm = await db.createDM(sender.id || authCheck.dbUser?.id || null, receiverUser.id, sender.username, receiverUser.username, cleanText, savedImageUrl, savedAudioUrl);
 
       const senderId = sender.id || authCheck.dbUser?.id;
       if (senderId) {
@@ -678,13 +712,13 @@ function initChatSocket(io) {
         action: 'DIRECT_MESSAGE_SENT',
         admin: sender.username,
         target: `@${receiverUser.username}`,
-        details: cleanText || (imageUrl ? '[Image Attachment]' : '[Audio Attachment]')
+        details: cleanText || (savedImageUrl ? '[Image Attachment]' : '[Audio Attachment]')
       });
 
       for (const [sId, c] of activeConnections.entries()) {
         if (c.username && c.username.toLowerCase() === recipientUsername.toLowerCase()) {
           io.to(sId).emit('new_dm', newDm);
-          io.to(sId).emit('new_direct_message', { sender, message: cleanText, imageUrl, audioUrl });
+          io.to(sId).emit('new_direct_message', { sender, message: cleanText, imageUrl: savedImageUrl, audioUrl: savedAudioUrl });
           io.to(sId).emit('open_dms_update');
         }
       }
@@ -959,12 +993,13 @@ function initChatSocket(io) {
       }
     }
 
+    const savedImageUrl = saveChatAttachment(imageUrl, 'image');
     io.to(cleanRoom).emit('private_room_message', {
       roomCode,
       username: user.username,
       role: user.role,
       message: cleanText,
-      imageUrl: imageUrl || '',
+      imageUrl: savedImageUrl || '',
       created_at: new Date().toISOString()
     });
   });

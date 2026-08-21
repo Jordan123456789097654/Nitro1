@@ -7,6 +7,7 @@ const router = express.Router();
 const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 const zlib = require('zlib');
+const dns = require('dns');
 const db = require('../db');
 const { sendDiscordLog } = require('../discordLogger');
 
@@ -120,6 +121,25 @@ function isForbiddenPrivateHost(hostname) {
     if (parts[0] === 127) return true;
   }
   return false;
+}
+
+async function isSafeHost(hostname) {
+  if (isForbiddenPrivateHost(hostname)) return false;
+  try {
+    return new Promise((resolve) => {
+      dns.lookup(hostname, (err, address) => {
+        if (err) {
+          resolve(true);
+        } else if (address) {
+          resolve(!isForbiddenPrivateHost(address));
+        } else {
+          resolve(true);
+        }
+      });
+    });
+  } catch (err) {
+    return true;
+  }
 }
 
 const AD_TRACKER_PATTERNS = [
@@ -434,7 +454,7 @@ router.all('/', async (req, res) => {
   }
 
   // SSRF Check
-  if (isForbiddenPrivateHost(urlObj.hostname)) {
+  if (!(await isSafeHost(urlObj.hostname))) {
     return res.status(403).send('Private network access restricted.');
   }
 
@@ -469,6 +489,15 @@ router.all('/', async (req, res) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
     if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
       fetchOptions.body = req.body;
+    } else if (typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+      const contentType = req.headers['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        fetchOptions.body = JSON.stringify(req.body);
+      } else if (contentType.includes('application/x-www-form-urlencoded')) {
+        fetchOptions.body = new URLSearchParams(req.body).toString();
+      } else {
+        fetchOptions.body = JSON.stringify(req.body);
+      }
     }
   }
 

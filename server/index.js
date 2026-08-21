@@ -157,6 +157,14 @@ app.use('/api', (req, res, next) => {
     '/admin/signups-status', '/api/admin/signups-status'
   ];
   if (openPaths.some(p => req.path === p || req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
+
+  // Allow public GET endpoints for games, reviews, leaderboards, and tournaments
+  if (req.method === 'GET') {
+    const isPublicGameRoute = req.path === '/games' || req.path.startsWith('/games/') || req.originalUrl.startsWith('/api/games') || req.path === '/tournaments' || req.path.startsWith('/tournaments/') || req.originalUrl.startsWith('/api/tournaments');
+    const isPrivateGameRoute = req.path.includes('/favorites') || req.path.includes('/playlists') || req.path.includes('/cloud-save');
+    if (isPublicGameRoute && !isPrivateGameRoute) return next();
+  }
+
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
   next();
 });
@@ -268,6 +276,7 @@ app.use('/api/appeals', require('./routes/appeals'));
 app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/shop', require('./routes/shop'));
 app.use('/api/themes', require('./routes/themes'));
+app.use('/api/tournaments', require('./routes/tournaments'));
 
 // GET /api/weather - Proxy wttr.in with curl user-agent to ensure clean plain-text return
 app.get('/api/weather', async (req, res) => {

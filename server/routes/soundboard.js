@@ -2,6 +2,33 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+function saveBase64Audio(base64Data) {
+  try {
+    const uploadDir = path.join(__dirname, '../../public/uploads/soundboard');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const matches = base64Data.match(/^data:([A-Za-z-+\/0-9]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return null;
+    }
+
+    const ext = matches[1].split('/')[1] || 'mp3';
+    const filename = `sound-${crypto.randomBytes(8).toString('hex')}-${Date.now()}.${ext}`;
+    const filepath = path.join(uploadDir, filename);
+
+    fs.writeFileSync(filepath, Buffer.from(matches[2], 'base64'));
+    return `/uploads/soundboard/${filename}`;
+  } catch (e) {
+    console.error('Error saving audio file:', e);
+    return null;
+  }
+}
 
 const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
 
@@ -79,10 +106,20 @@ router.post('/upload', async (req, res) => {
 
     const setGlobal = isOwnerOrAdmin ? (isGlobal === true || isGlobal === 'true') : false;
 
+    let finalAudioUrl = audioUrl.trim();
+    if (finalAudioUrl.startsWith('data:audio/')) {
+      const savedPath = saveBase64Audio(finalAudioUrl);
+      if (savedPath) {
+        finalAudioUrl = savedPath;
+      } else {
+        return res.status(400).json({ success: false, error: 'Failed to process uploaded audio file.' });
+      }
+    }
+
     const newSound = await db.createSoundboardSound({
       title: title.trim().slice(0, 100),
       icon: (icon || '🎵').slice(0, 10),
-      audioUrl: audioUrl.trim(),
+      audioUrl: finalAudioUrl,
       isGlobal: setGlobal,
       uploadedBy: username
     });

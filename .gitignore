@@ -1,10 +1,9 @@
 node_modules/
-data/*.db
-data/*.db-journal
 .env
-.DS_Store
+public/uploads/*
+!public/uploads/.gitkeep
 *.log
+.system_generated/
+.gemini/
 temp_comic_relief/
 temp_games_repo/
-do_direct_restore.js
-restore_backup_script.js

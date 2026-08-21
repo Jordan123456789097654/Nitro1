@@ -6,12 +6,42 @@ const router = express.Router();
 const fetch = require('node-fetch');
 
 // Invidious / Piped public instance fallbacks for zero-API-key YouTube search
-const SEARCH_INSTANCES = [
+const SEARCH_INSTANCES_FALLBACK = [
   'https://invidious.nerdvpn.de/api/v1/search',
   'https://invidious.drgns.space/api/v1/search',
   'https://inv.tux.pizza/api/v1/search',
   'https://invidious.no-name-given.de/api/v1/search'
 ];
+
+let cachedSearchUrls = null;
+let lastFetchTime = 0;
+
+async function getSearchUrls() {
+  const now = Date.now();
+  if (cachedSearchUrls && (now - lastFetchTime < 600000)) { // 10 minutes cache
+    return cachedSearchUrls;
+  }
+
+  try {
+    const response = await fetch('https://api.invidious.io/instances.json', { timeout: 3000 });
+    if (response.ok) {
+      const data = await response.json();
+      const active = data
+        .filter(([name, info]) => info.type === 'https' && info.api && info.monitor && !info.monitor.down)
+        .map(([name, info]) => `${info.uri}/api/v1/search`);
+      
+      if (active.length > 0) {
+        cachedSearchUrls = active;
+        lastFetchTime = now;
+        return active;
+      }
+    }
+  } catch (err) {
+    // Network error or timeout, will fall back
+  }
+
+  return SEARCH_INSTANCES_FALLBACK;
+}
 
 router.get('/search', async (req, res) => {
   const query = (req.query.q || '').trim();
@@ -19,8 +49,10 @@ router.get('/search', async (req, res) => {
     return res.json({ success: true, results: [] });
   }
 
+  const searchUrls = await getSearchUrls();
+
   // 1. Try Invidious Public API instances for structured video search
-  for (const instanceUrl of SEARCH_INSTANCES) {
+  for (const instanceUrl of searchUrls) {
     try {
       const searchUrl = `${instanceUrl}?q=${encodeURIComponent(query)}&type=video`;
       const response = await fetch(searchUrl, { timeout: 4000 });

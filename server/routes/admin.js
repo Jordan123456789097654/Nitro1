@@ -1431,11 +1431,23 @@ router.post('/suggestions/:id/approve', async (req, res) => {
 
     const category = sug.category || 'Action';
     const slug = sug.title.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 80) + '-' + Date.now().toString().slice(-4);
-    const embed_type = sug.game_url?.startsWith('http') ? 'iframe_url' : 'html_code';
-    const embed_content = sug.game_url || sug.description || '';
+    
+    // Resolve URL from game_url, details, or description (supporting both old/new schemas & test payloads)
+    let gameUrl = '';
+    if (sug.game_url && sug.game_url.trim().startsWith('http')) {
+      gameUrl = sug.game_url.trim();
+    } else if (sug.details && sug.details.trim().startsWith('http')) {
+      gameUrl = sug.details.trim();
+    } else if (sug.description && sug.description.trim().startsWith('http')) {
+      gameUrl = sug.description.trim();
+    }
 
-    const hasGameUrl = sug.game_url && sug.game_url.trim().startsWith('http');
-    const hasEmbedContent = sug.description && (sug.description.includes('<iframe') || sug.description.includes('<script'));
+    const hasGameUrl = !!gameUrl;
+    const hasEmbedContent = (sug.description && (sug.description.includes('<iframe') || sug.description.includes('<script'))) ||
+                             (sug.details && (sug.details.includes('<iframe') || sug.details.includes('<script')));
+
+    const embed_type = hasGameUrl ? 'iframe_url' : 'html_code';
+    const embed_content = gameUrl || sug.description || sug.details || '';
 
     if (hasGameUrl || hasEmbedContent) {
       await db.pool.query(`
@@ -1763,6 +1775,184 @@ router.post('/quests/:id/delete', async (req, res) => {
     res.json({ success: true, message: 'Quest deleted successfully!' });
   } catch (err) {
     res.status(500).json({ error: 'Error deleting quest.' });
+  }
+});
+
+// ==========================================
+// 🏆 TOURNAMENTS MANAGEMENT
+// ==========================================
+
+// Create new tournament
+router.post('/tournaments', async (req, res) => {
+  const admin = req.adminUser.username;
+  const { gameId, title, description, rewardCoins, rewardXp, rewardFlair, endAt } = req.body;
+
+  if (!gameId || !title || !endAt) {
+    return res.status(400).json({ error: 'Game ID, Title, and End Date/Time are required.' });
+  }
+
+  try {
+    const tour = await db.createTournament({
+      gameId: parseInt(gameId, 10),
+      title: title.trim(),
+      description: description || '',
+      rewardCoins: parseInt(rewardCoins, 10) || 0,
+      rewardXp: parseInt(rewardXp, 10) || 0,
+      rewardFlair: rewardFlair || '',
+      endAt
+    });
+
+    if (!tour) {
+      return res.status(500).json({ error: 'Failed to create tournament in database.' });
+    }
+
+    await db.createModerationLog('CREATE_TOURNAMENT', admin, title, `Game ID: ${gameId}, Rewards: ${rewardCoins}c/${rewardXp}xp`);
+
+    sendDiscordLog({
+      category: 'updates',
+      action: 'TOURNAMENT_CREATED',
+      admin,
+      target: title,
+      details: `Created score tournament for game ID ${gameId}. Ends at ${endAt}`
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('tournament_created', { tournament: tour });
+      const systemMessage = {
+        id: Date.now() + Math.random(),
+        username: 'System',
+        message: `🏆 **A new High Score Tournament has started: ${title}!** Submit your screenshot proof to win prizes! 🪙`,
+        created_at: new Date(),
+        role: 'admin',
+        is_system: true
+      };
+      io.emit('new_message', systemMessage);
+    }
+
+    res.json({ success: true, message: 'Tournament created successfully!', tournament: tour });
+  } catch (err) {
+    console.error('Create tournament error:', err);
+    res.status(500).json({ error: 'Failed to create tournament.' });
+  }
+});
+
+// List all pending tournament submissions
+router.get('/tournaments/submissions', async (req, res) => {
+  try {
+    const subs = await db.getPendingSubmissions();
+    res.json({ success: true, submissions: subs });
+  } catch (err) {
+    console.error('Fetch tournament submissions error:', err);
+    res.status(500).json({ error: 'Failed to fetch pending submissions.' });
+  }
+});
+
+// Review tournament submission (Approve / Reject)
+router.post('/tournaments/submissions/:id/review', async (req, res) => {
+  const admin = req.adminUser.username;
+  const submissionId = parseInt(req.params.id, 10);
+  const { decision, adminNotes } = req.body;
+
+  if (!['approved', 'rejected'].includes(decision)) {
+    return res.status(400).json({ error: 'Decision must be approved or rejected.' });
+  }
+
+  try {
+    const { pool } = require('../db');
+    const checkSub = await pool.query('SELECT * FROM tournament_submissions WHERE id = $1', [submissionId]);
+    const submission = checkSub.rows[0];
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found.' });
+    }
+
+    const updated = await db.reviewSubmission(submissionId, decision, admin, adminNotes);
+    if (!updated) {
+      return res.status(500).json({ error: 'Failed to update submission status.' });
+    }
+
+    await db.createModerationLog('REVIEW_TOURNAMENT_SUBMISSION', admin, submission.username, `Decision: ${decision}, Score: ${submission.score}`);
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: `TOURNAMENT_SUBMISSION_${decision.toUpperCase()}`,
+      admin,
+      target: `@${submission.username}`,
+      details: `Submission #${submissionId} ${decision} by admin. Score: ${submission.score}`
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('tournament_submission_reviewed', {
+        submissionId,
+        tournamentId: submission.tournament_id,
+        status: decision
+      });
+
+      if (decision === 'approved') {
+        const systemMessage = {
+          id: Date.now() + Math.random(),
+          username: 'System',
+          message: `🎉 **@${submission.username}** had their score of **${submission.score}** approved on the leaderboard!`,
+          created_at: new Date(),
+          role: 'admin',
+          is_system: true
+        };
+        io.emit('new_message', systemMessage);
+      }
+    }
+
+    res.json({ success: true, message: `Submission successfully ${decision}!`, submission: updated });
+  } catch (err) {
+    console.error('Review submission error:', err);
+    res.status(500).json({ error: 'Failed to review submission.' });
+  }
+});
+
+// Close a tournament
+router.post('/tournaments/:id/close', async (req, res) => {
+  const admin = req.adminUser.username;
+  const tournamentId = parseInt(req.params.id, 10);
+
+  try {
+    const closed = await db.closeTournament(tournamentId);
+    if (!closed) {
+      return res.status(404).json({ error: 'Tournament not found.' });
+    }
+
+    await db.createModerationLog('CLOSE_TOURNAMENT', admin, closed.title, `Tournament #${tournamentId} closed`);
+
+    sendDiscordLog({
+      category: 'updates',
+      action: 'TOURNAMENT_CLOSED',
+      admin,
+      target: closed.title,
+      details: `Closed tournament ID ${tournamentId}`
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('tournament_closed', { tournamentId });
+      
+      const topRows = await db.getTournamentLeaderboard(tournamentId);
+      if (topRows && topRows.length > 0) {
+        const winner = topRows[0];
+        const systemMessage = {
+          id: Date.now() + Math.random(),
+          username: 'System',
+          message: `👑 **Tournament Over!** Congratulations to **@${winner.username}** for winning "${closed.title}" with a high score of **${winner.score}**! 🏆`,
+          created_at: new Date(),
+          role: 'admin',
+          is_system: true
+        };
+        io.emit('new_message', systemMessage);
+      }
+    }
+
+    res.json({ success: true, message: 'Tournament closed successfully.', tournament: closed });
+  } catch (err) {
+    console.error('Close tournament error:', err);
+    res.status(500).json({ error: 'Failed to close tournament.' });
   }
 });
 

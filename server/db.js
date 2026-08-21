@@ -242,13 +242,6 @@ const db = {
           PRIMARY KEY(user_id, game_id)
         );
 
-        CREATE TABLE IF NOT EXISTS game_favorites (
-          id SERIAL PRIMARY KEY,
-          user_id INT NOT NULL,
-          game_id INT NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-
         CREATE TABLE IF NOT EXISTS user_playlists (
           id SERIAL PRIMARY KEY,
           user_id INT NOT NULL,
@@ -310,19 +303,6 @@ const db = {
           subject VARCHAR(200) NOT NULL,
           message TEXT NOT NULL,
           is_resolved BOOLEAN DEFAULT false,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-
-        CREATE TABLE IF NOT EXISTS ai_moderation_logs (
-          id SERIAL PRIMARY KEY,
-          user_id INT,
-          username VARCHAR(100) NOT NULL,
-          message TEXT NOT NULL,
-          category VARCHAR(50) DEFAULT 'general',
-          severity VARCHAR(50) DEFAULT 'medium',
-          confidence FLOAT DEFAULT 1.0,
-          action_taken VARCHAR(50) DEFAULT 'blocked',
-          reason TEXT DEFAULT '',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -426,6 +406,34 @@ const db = {
           author VARCHAR(100) DEFAULT 'Community',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS tournaments (
+          id SERIAL PRIMARY KEY,
+          game_id INT REFERENCES games(id) ON DELETE CASCADE,
+          title VARCHAR(200) NOT NULL,
+          description TEXT DEFAULT '',
+          reward_coins INT DEFAULT 0,
+          reward_xp INT DEFAULT 0,
+          reward_flair VARCHAR(100) DEFAULT '',
+          start_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          end_at TIMESTAMP NOT NULL,
+          is_active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS tournament_submissions (
+          id SERIAL PRIMARY KEY,
+          tournament_id INT REFERENCES tournaments(id) ON DELETE CASCADE,
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          username VARCHAR(100) NOT NULL,
+          score INT NOT NULL,
+          proof_image_url TEXT NOT NULL,
+          status VARCHAR(50) DEFAULT 'pending',
+          admin_notes TEXT DEFAULT '',
+          reviewed_by VARCHAR(100) DEFAULT '',
+          reviewed_at TIMESTAMP,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
@@ -506,6 +514,14 @@ const db = {
       try {
         await this.autoCategorizeFilterWordPunishments();
       } catch (e) {}
+
+      // Ensure cloud_game_saves has unique constraint on (user_id, game_slug)
+      try {
+        await pool.query('DELETE FROM cloud_game_saves a USING cloud_game_saves b WHERE a.id < b.id AND a.user_id = b.user_id AND a.game_slug = b.game_slug;');
+        await pool.query('ALTER TABLE cloud_game_saves ADD CONSTRAINT unique_user_game_slug UNIQUE (user_id, game_slug);');
+      } catch (e) {
+        // Constraint might already exist
+      }
 
       console.log('✅ [DB] Supabase tables, Base64 passwords, force-reset flags, PRO games, and Classic collection synchronized successfully.');
     } catch (err) {
@@ -783,53 +799,7 @@ const db = {
     }
   },
 
-  // Blocked Domains
-  async getBlockedDomains() {
-    try {
-      const res = await pool.query('SELECT * FROM blocked_domains ORDER BY domain ASC');
-      return res.rows;
-    } catch (e) {
-      return [];
-    }
-  },
-
-  async addBlockedDomain(domain, reason) {
-    try {
-      const res = await pool.query(`
-        INSERT INTO blocked_domains (domain, reason)
-        VALUES ($1, $2)
-        ON CONFLICT (domain) DO UPDATE SET reason = $2
-        RETURNING *
-      `, [domain.toLowerCase().trim(), reason]);
-      return res.rows[0];
-    } catch (e) {
-      return null;
-    }
-  },
-
-  async deleteBlockedDomain(id) {
-    try {
-      await pool.query('DELETE FROM blocked_domains WHERE id = $1', [id]);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  },
-
   // Suggestions & Bug Reports
-  async createGameSuggestion(title, details, username) {
-    try {
-      const res = await pool.query(`
-        INSERT INTO game_suggestions (title, details, username)
-        VALUES ($1, $2, $3)
-        RETURNING *
-      `, [title, details, username]);
-      return res.rows[0];
-    } catch (e) {
-      return null;
-    }
-  },
-
   async createBugReport(title, category, description, username) {
     try {
       const res = await pool.query(`
@@ -840,15 +810,6 @@ const db = {
       return res.rows[0];
     } catch (e) {
       return null;
-    }
-  },
-
-  async getGameSuggestions() {
-    try {
-      const res = await pool.query('SELECT * FROM game_suggestions ORDER BY id DESC LIMIT 50');
-      return res.rows;
-    } catch (e) {
-      return [];
     }
   },
 
@@ -1140,26 +1101,7 @@ const db = {
     return await this.setSetting('signups_enabled', Boolean(enabled) ? 'true' : 'false');
   },
 
-  async getFeatureSettings() {
-    try {
-      const signupsEnabled = await this.isSignupsEnabled();
-      return {
-        signups_enabled: signupsEnabled
-      };
-    } catch (e) {
-      return { signups_enabled: true };
-    }
-  },
 
-  async updateFeatureSetting(key, enabled) {
-    if (key === 'signups_enabled' || key === 'disable_signups' || key === 'signups') {
-      const isEnabled = key === 'disable_signups' ? !enabled : Boolean(enabled);
-      await this.setSignupsEnabled(isEnabled);
-      return { key: 'signups_enabled', enabled: isEnabled };
-    }
-    await this.setSetting(key, enabled ? 'true' : 'false');
-    return { key, enabled: Boolean(enabled) };
-  },
 
   async deleteUser(userId) {
     try {
@@ -2090,15 +2032,35 @@ JSON Format Example:
     }
   },
 
-  async createGameSuggestion(userId, username, title, description, gameUrl) {
+  async createGameSuggestion(...args) {
+    let userId = null;
+    let username = 'Guest';
+    let title = '';
+    let description = '';
+    let gameUrl = '';
+
+    if (args.length === 3) {
+      // 3-argument signature: (title, details, username)
+      title = args[0];
+      description = args[1];
+      username = args[2] || 'Guest';
+    } else {
+      // 5-argument signature: (userId, username, title, description, gameUrl)
+      userId = parseInt(args[0], 10) || null;
+      username = args[1] || 'Guest';
+      title = args[2];
+      description = args[3] || args[2];
+      gameUrl = args[4] || '';
+    }
+
     try {
-      const uId = parseInt(userId, 10) || null;
+      const uId = userId;
       const descText = description || title;
       const res = await pool.query(`
         INSERT INTO game_suggestions (user_id, username, title, description, details, game_url, upvotes, voters)
         VALUES ($1, $2, $3, $4, $4, $5, 1, $6)
         RETURNING *
-      `, [uId, username, title, descText, gameUrl || '', JSON.stringify([username])]);
+      `, [uId, username, title, descText, gameUrl, JSON.stringify([username])]);
       return res.rows[0];
     } catch (e) {
       console.error('createGameSuggestion error:', e.message);
@@ -2322,82 +2284,7 @@ JSON Format Example:
     }
   },
 
-  // Friend System
-  async sendFriendRequest(userId, friendUsername) {
-    try {
-      const friend = await this.getUserByUsername(friendUsername);
-      if (!friend) return { error: 'User not found.' };
-      if (friend.id === userId) return { error: 'Cannot add yourself as a friend.' };
 
-      const existing = await pool.query(
-        "SELECT * FROM friendships WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)",
-        [userId, friend.id]
-      );
-      if (existing.rows.length) {
-        return { error: 'Friend request or relationship already exists.' };
-      }
-
-      const res = await pool.query(
-        "INSERT INTO friendships (user_id, friend_id, status) VALUES ($1, $2, 'pending') RETURNING *",
-        [userId, friend.id]
-      );
-      return { success: true, friendship: res.rows[0], friend };
-    } catch (e) {
-      console.error('sendFriendRequest error:', e.message);
-      return { error: 'Failed to send friend request.' };
-    }
-  },
-
-  async respondFriendRequest(userId, requestId, status) {
-    try {
-      if (!['accepted', 'declined'].includes(status)) return false;
-
-      if (status === 'declined') {
-        await pool.query("DELETE FROM friendships WHERE id = $1 AND friend_id = $2", [requestId, userId]);
-        return { success: true, status: 'declined' };
-      }
-
-      const res = await pool.query(
-        "UPDATE friendships SET status = 'accepted' WHERE id = $1 AND friend_id = $2 RETURNING *",
-        [requestId, userId]
-      );
-      return { success: Boolean(res.rows.length), status: 'accepted' };
-    } catch (e) {
-      return false;
-    }
-  },
-
-  async getUserFriends(userId) {
-    try {
-      const res = await pool.query(`
-        SELECT f.id as friendship_id, f.status, f.created_at,
-               u.id as user_id, u.username, u.display_name, u.role, u.avatar_url
-        FROM friendships f
-        JOIN users u ON (CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END) = u.id
-        WHERE (f.user_id = $1 OR f.friend_id = $1) AND f.status = 'accepted'
-        ORDER BY u.username ASC
-      `, [userId]);
-      return res.rows;
-    } catch (e) {
-      return [];
-    }
-  },
-
-  async getPendingFriendRequests(userId) {
-    try {
-      const res = await pool.query(`
-        SELECT f.id as request_id, f.created_at,
-               u.id as sender_id, u.username as sender_username, u.display_name as sender_display_name, u.avatar_url
-        FROM friendships f
-        JOIN users u ON f.user_id = u.id
-        WHERE f.friend_id = $1 AND f.status = 'pending'
-        ORDER BY f.id DESC
-      `, [userId]);
-      return res.rows;
-    } catch (e) {
-      return [];
-    }
-  },
 
   async createUserAdmin({ username, display_name, password, role = 'member', avatar_url = '' }) {
     try {
@@ -2995,6 +2882,130 @@ JSON Format Example:
       return res.rows[0];
     } catch (e) {
       console.error('sharePublicTheme error:', e.message);
+      return null;
+    }
+  },
+
+  async createTournament({ gameId, title, description, rewardCoins, rewardXp, rewardFlair, endAt }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO tournaments (game_id, title, description, reward_coins, reward_xp, reward_flair, end_at, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+        RETURNING *
+      `, [gameId, title, description || '', rewardCoins || 0, rewardXp || 0, rewardFlair || '', endAt]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createTournament error:', e.message);
+      return null;
+    }
+  },
+
+  async getActiveTournaments() {
+    try {
+      const res = await pool.query(`
+        SELECT t.*, g.title as game_title, g.thumbnail_url as game_thumbnail
+        FROM tournaments t
+        LEFT JOIN games g ON t.game_id = g.id
+        WHERE t.is_active = true AND t.end_at > CURRENT_TIMESTAMP
+        ORDER BY t.end_at ASC
+      `);
+      return res.rows;
+    } catch (e) {
+      console.error('getActiveTournaments error:', e.message);
+      return [];
+    }
+  },
+
+  async getTournamentLeaderboard(tournamentId) {
+    try {
+      const res = await pool.query(`
+        SELECT ts.id, ts.user_id, ts.username, ts.score, ts.created_at, u.display_name, u.avatar_url, u.role
+        FROM tournament_submissions ts
+        LEFT JOIN users u ON ts.user_id = u.id
+        WHERE ts.tournament_id = $1 AND ts.status = 'approved'
+        ORDER BY ts.score DESC, ts.created_at ASC
+        LIMIT 50
+      `, [tournamentId]);
+      return res.rows;
+    } catch (e) {
+      console.error('getTournamentLeaderboard error:', e.message);
+      return [];
+    }
+  },
+
+  async createTournamentSubmission(userId, username, tournamentId, score, proofImageUrl) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO tournament_submissions (user_id, username, tournament_id, score, proof_image_url, status)
+        VALUES ($1, $2, $3, $4, $5, 'pending')
+        RETURNING *
+      `, [userId, username, tournamentId, parseInt(score, 10), proofImageUrl]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createTournamentSubmission error:', e.message);
+      return null;
+    }
+  },
+
+  async getPendingSubmissions() {
+    try {
+      const res = await pool.query(`
+        SELECT ts.*, t.title as tournament_title, g.title as game_title
+        FROM tournament_submissions ts
+        JOIN tournaments t ON ts.tournament_id = t.id
+        LEFT JOIN games g ON t.game_id = g.id
+        WHERE ts.status = 'pending'
+        ORDER BY ts.created_at ASC
+      `);
+      return res.rows;
+    } catch (e) {
+      console.error('getPendingSubmissions error:', e.message);
+      return [];
+    }
+  },
+
+  async reviewSubmission(submissionId, status, adminUsername, adminNotes) {
+    try {
+      const res = await pool.query(`
+        UPDATE tournament_submissions
+        SET status = $1, reviewed_by = $2, reviewed_at = CURRENT_TIMESTAMP, admin_notes = $3
+        WHERE id = $4
+        RETURNING *
+      `, [status, adminUsername, adminNotes || '', submissionId]);
+      
+      const sub = res.rows[0];
+      if (!sub) return null;
+
+      if (status === 'approved') {
+        const tRes = await pool.query('SELECT reward_coins, reward_xp, reward_flair FROM tournaments WHERE id = $1', [sub.tournament_id]);
+        const tour = tRes.rows[0];
+        if (tour) {
+          await pool.query(`
+            UPDATE users 
+            SET coins = COALESCE(coins, 0) + $1, xp = COALESCE(xp, 0) + $2 
+            WHERE id = $3
+          `, [tour.reward_coins || 0, tour.reward_xp || 0, sub.user_id]);
+        }
+      }
+
+      return sub;
+    } catch (e) {
+      console.error('reviewSubmission error:', e.message);
+      return null;
+    }
+  },
+
+  async closeTournament(tournamentId) {
+    try {
+      const res = await pool.query(`
+        UPDATE tournaments
+        SET is_active = false
+        WHERE id = $1
+        RETURNING *
+      `, [tournamentId]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('closeTournament error:', e.message);
       return null;
     }
   }

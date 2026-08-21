@@ -90,7 +90,12 @@ async function runTests() {
 
     // 4. User Favorites & Playlists
     console.log('\n4. Testing Favorites & Custom Playlists...');
-    const favToggleRes = await request('POST', '/api/games/favorites/toggle', { gameId: 1 }, authHeaders);
+    // Lookup a valid game ID dynamically to avoid hardcoding ID 1 which may not exist
+    const getGamesRes = await request('GET', '/api/games', null, authHeaders);
+    const validGameId = getGamesRes.body.games && getGamesRes.body.games.length > 0 ? getGamesRes.body.games[0].id : 1;
+    console.log('   Resolved valid game ID for favorites test:', validGameId);
+
+    const favToggleRes = await request('POST', '/api/games/favorites/toggle', { gameId: validGameId }, authHeaders);
     console.log('   POST /api/games/favorites/toggle => Status:', favToggleRes.status, 'isFavorite:', favToggleRes.body.isFavorite);
 
     const favListRes = await request('GET', '/api/games/favorites', null, authHeaders);

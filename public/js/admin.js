@@ -1294,6 +1294,9 @@ function setupAdminTabs() {
       if (targetTab === 'polls') {
         if (window.loadPolls) window.loadPolls();
       }
+      if (targetTab === 'admintournaments') {
+        if (window.adminFetchTournaments) window.adminFetchTournaments();
+      }
     });
   });
 
@@ -3018,3 +3021,145 @@ window.adminFetchAiFlagged = async () => {
     appealsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching appeals.</td></tr>';
   }
 };
+
+// ==========================================
+// 🏆 TOURNAMENTS (JAMS) MANAGEMENT
+// ==========================================
+
+window.adminFetchTournaments = async function() {
+  const tbody = document.getElementById('admin-tour-submissions-tbody');
+  const gameSelect = document.getElementById('admin-tour-game-select');
+
+  if (gameSelect && gameSelect.options.length <= 1) {
+    try {
+      const res = await authFetch('/api/games');
+      const data = await res.json();
+      if (data.success && data.games) {
+        gameSelect.innerHTML = '<option value="">Select Game...</option>' + 
+          data.games.map(g => `<option value="${g.id}">${g.title}</option>`).join('');
+      }
+    } catch(e) {
+      console.error('Failed to fetch games for select dropdown:', e);
+    }
+  }
+
+  try {
+    const res = await authFetch('/api/admin/tournaments/submissions');
+    const data = await res.json();
+
+    if (!tbody) return;
+
+    if (data.success && data.submissions && data.submissions.length > 0) {
+      tbody.innerHTML = data.submissions.map(sub => {
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 10px 12px;"><strong style="color: #38bdf8;">@${escapeHtml(sub.username)}</strong></td>
+            <td style="padding: 10px 12px;">
+              <strong>${escapeHtml(sub.tournament_title)}</strong>
+              <span style="font-size: 0.72rem; color: var(--text-muted); display: block;">Game: ${escapeHtml(sub.game_title || 'N/A')}</span>
+            </td>
+            <td style="padding: 10px 12px; font-weight: 800; color: #fbbf24; font-size: 1rem;">${sub.score.toLocaleString()}</td>
+            <td style="padding: 10px 12px;">
+              <img src="${sub.proof_image_url}" style="width: 70px; height: 42px; border-radius: 4px; object-fit: cover; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" onclick="window.adminShowLightbox('${sub.proof_image_url}')" title="Click to view full size screenshot proof">
+            </td>
+            <td style="padding: 10px 12px; text-align: center;">
+              <div style="display: flex; gap: 6px; justify-content: center;">
+                <button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;" onclick="window.adminReviewSubmission(${sub.id}, 'approved')">✅ Approve</button>
+                <button class="btn-small danger" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444;" onclick="window.adminReviewSubmission(${sub.id}, 'rejected')">✕ Reject</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="padding: 24px; text-align: center; color: var(--text-muted);">
+            No pending scores to verify. Queue is empty!
+          </td>
+        </tr>
+      `;
+    }
+  } catch (err) {
+    console.error('adminFetchTournaments error:', err);
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 20px;">Connection error fetching queue.</td></tr>';
+    }
+  }
+};
+
+window.adminReviewSubmission = async function(submissionId, decision) {
+  const notes = decision === 'rejected' ? prompt('Please enter rejection notes/reason (optional):') : '';
+  if (decision === 'rejected' && notes === null) return;
+
+  try {
+    const res = await authFetch(`/api/admin/tournaments/submissions/${submissionId}/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ decision, adminNotes: notes || '' })
+    });
+    
+    const data = await res.json();
+    if (res.ok) {
+      alert(`Score submission successfully ${decision}!`);
+      window.adminFetchTournaments();
+    } else {
+      alert(data.error || 'Failed to review submission.');
+    }
+  } catch (e) {
+    alert('Network error reviewing submission.');
+  }
+};
+
+window.adminShowLightbox = function(url) {
+  const modal = document.getElementById('tour-lightbox-modal');
+  const img = document.getElementById('tour-lightbox-img');
+  if (modal && img) {
+    img.src = url;
+    modal.style.display = 'flex';
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tourForm = document.getElementById('admin-tournament-form');
+  if (tourForm) {
+    tourForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('admin-tour-title').value.trim();
+      const gameId = document.getElementById('admin-tour-game-select').value;
+      const description = document.getElementById('admin-tour-desc').value.trim();
+      const rewardCoins = document.getElementById('admin-tour-coins').value;
+      const rewardXp = document.getElementById('admin-tour-xp').value;
+      const rewardFlair = document.getElementById('admin-tour-flair').value.trim();
+      const endAt = document.getElementById('admin-tour-end').value;
+
+      try {
+        const res = await authFetch('/api/admin/tournaments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameId: parseInt(gameId, 10),
+            title,
+            description,
+            rewardCoins: parseInt(rewardCoins, 10),
+            rewardXp: parseInt(rewardXp, 10),
+            rewardFlair,
+            endAt
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert('🏆 Tournament successfully started and broadcasted!');
+          tourForm.reset();
+          window.adminFetchTournaments();
+        } else {
+          alert(data.error || 'Failed to launch tournament.');
+        }
+      } catch (err) {
+        alert('Network error launching tournament.');
+      }
+    });
+  }
+});
