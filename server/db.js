@@ -415,6 +415,7 @@ const db = {
           reward_coins INT DEFAULT 0,
           reward_xp INT DEFAULT 0,
           reward_flair VARCHAR(100) DEFAULT '',
+          reward_custom VARCHAR(255) DEFAULT '',
           start_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           end_at TIMESTAMP NOT NULL,
           is_active BOOLEAN DEFAULT true,
@@ -441,6 +442,7 @@ const db = {
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_flair_locked BOOLEAN DEFAULT false;");
       await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS is_taken_down BOOLEAN DEFAULT false;");
       await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS takedown_reason TEXT DEFAULT '';");
+      await pool.query("ALTER TABLE tournaments ADD COLUMN IF NOT EXISTS reward_custom VARCHAR(255) DEFAULT '';");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -2886,13 +2888,13 @@ JSON Format Example:
     }
   },
 
-  async createTournament({ gameId, title, description, rewardCoins, rewardXp, rewardFlair, endAt }) {
+  async createTournament({ gameId, title, description, rewardCoins, rewardXp, rewardFlair, rewardCustom, endAt }) {
     try {
       const res = await pool.query(`
-        INSERT INTO tournaments (game_id, title, description, reward_coins, reward_xp, reward_flair, end_at, is_active)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+        INSERT INTO tournaments (game_id, title, description, reward_coins, reward_xp, reward_flair, reward_custom, end_at, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
         RETURNING *
-      `, [gameId, title, description || '', rewardCoins || 0, rewardXp || 0, rewardFlair || '', endAt]);
+      `, [gameId, title, description || '', rewardCoins || 0, rewardXp || 0, rewardFlair || '', rewardCustom || '', endAt]);
       return res.rows[0];
     } catch (e) {
       console.error('createTournament error:', e.message);

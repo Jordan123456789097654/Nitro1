@@ -3034,7 +3034,7 @@ window.adminFetchTournaments = async function() {
     try {
       const res = await authFetch('/api/games');
       const data = await res.json();
-      if (data.success && data.games) {
+      if (data.games) {
         gameSelect.innerHTML = '<option value="">Select Game...</option>' + 
           data.games.map(g => `<option value="${g.id}">${g.title}</option>`).join('');
       }
@@ -3132,6 +3132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const rewardCoins = document.getElementById('admin-tour-coins').value;
       const rewardXp = document.getElementById('admin-tour-xp').value;
       const rewardFlair = document.getElementById('admin-tour-flair').value.trim();
+      const rewardCustom = document.getElementById('admin-tour-custom-reward') ? document.getElementById('admin-tour-custom-reward').value.trim() : '';
       const endAt = document.getElementById('admin-tour-end').value;
 
       try {
@@ -3145,6 +3146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rewardCoins: parseInt(rewardCoins, 10),
             rewardXp: parseInt(rewardXp, 10),
             rewardFlair,
+            rewardCustom,
             endAt
           })
         });

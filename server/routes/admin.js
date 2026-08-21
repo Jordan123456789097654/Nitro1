@@ -1785,7 +1785,7 @@ router.post('/quests/:id/delete', async (req, res) => {
 // Create new tournament
 router.post('/tournaments', async (req, res) => {
   const admin = req.adminUser.username;
-  const { gameId, title, description, rewardCoins, rewardXp, rewardFlair, endAt } = req.body;
+  const { gameId, title, description, rewardCoins, rewardXp, rewardFlair, rewardCustom, endAt } = req.body;
 
   if (!gameId || !title || !endAt) {
     return res.status(400).json({ error: 'Game ID, Title, and End Date/Time are required.' });
@@ -1799,6 +1799,7 @@ router.post('/tournaments', async (req, res) => {
       rewardCoins: parseInt(rewardCoins, 10) || 0,
       rewardXp: parseInt(rewardXp, 10) || 0,
       rewardFlair: rewardFlair || '',
+      rewardCustom: rewardCustom || '',
       endAt
     });
 

@@ -212,6 +212,9 @@ function renderTournamentDetails(tour) {
   if (tour.reward_flair) {
     rewardsStr += ` + 🏆 "${tour.reward_flair}" Flair`;
   }
+  if (tour.reward_custom) {
+    rewardsStr += ` + 🎁 ${tour.reward_custom}`;
+  }
   if (prizesEl) prizesEl.textContent = rewardsStr;
 
   startCountdown(tour.end_at);

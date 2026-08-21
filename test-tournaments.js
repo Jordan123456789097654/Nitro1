@@ -27,19 +27,19 @@ async function runTests() {
     adminToken = adminLoginData.token;
     console.log('   Admin jordandaniels authenticated successfully.');
 
-    // Register/Login regular user
-    const username = `testuser_${Date.now().toString().slice(-4)}`;
-    const userRegRes = await fetch(`${BASE_URL}/api/auth/register`, {
+    // Login seeded regular user
+    const username = '67sawyer';
+    const userLoginRes = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password: 'testpassword' })
+      body: JSON.stringify({ username, password: '67sawyer' })
     });
-    const userRegData = await userRegRes.json();
-    if (!userRegData.token) {
-      throw new Error(`User registration failed: ${JSON.stringify(userRegData)}`);
+    const userLoginData = await userLoginRes.json();
+    if (!userLoginData.token) {
+      throw new Error(`User login failed: ${JSON.stringify(userLoginData)}`);
     }
-    userToken = userRegData.token;
-    console.log(`   User @${username} registered and authenticated successfully.`);
+    userToken = userLoginData.token;
+    console.log(`   User @${username} authenticated successfully.`);
 
     const adminHeaders = { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' };
     const userHeaders = { 'Authorization': `Bearer ${userToken}`, 'Content-Type': 'application/json' };
@@ -74,6 +74,7 @@ async function runTests() {
         rewardCoins: 500,
         rewardXp: 1000,
         rewardFlair: 'Math Wizard',
+        rewardCustom: 'Discord Nitro',
         endAt: new Date(Date.now() + 3600000).toISOString() // 1 hour from now
       })
     });
