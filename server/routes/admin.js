@@ -88,6 +88,14 @@ const requireOwner = (req, res, next) => {
   next();
 };
 
+const requireStrictAdmin = (req, res, next) => {
+  const user = req.adminUser || req.user;
+  if (!user || (user.role !== 'admin' && user.role !== 'owner' && user.username?.toLowerCase() !== 'jordandaniels')) {
+    return res.status(403).json({ error: 'Access denied. Strict Admin privileges required.' });
+  }
+  next();
+};
+
 // PUBLIC NITRO AI STATUS CHECK ENDPOINT
 router.get('/ai-status', (req, res) => {
   res.json({ ai_enabled: systemState.isAiEnabled(), config: systemState.getAiConfig() });
@@ -128,7 +136,7 @@ router.post('/toggle-ai', async (req, res) => {
 });
 
 // Get AI Power Matrix Configuration
-router.get('/ai-config', (req, res) => {
+router.get('/ai-config', requireStrictAdmin, (req, res) => {
   res.json({
     success: true,
     config: systemState.getAiConfig(),
@@ -137,7 +145,7 @@ router.get('/ai-config', (req, res) => {
 });
 
 // Update AI Power Matrix Configuration
-router.post('/ai-config', async (req, res) => {
+router.post('/ai-config', requireStrictAdmin, async (req, res) => {
   try {
     const updated = await systemState.updateAiConfig(req.body);
 
@@ -162,7 +170,7 @@ router.post('/ai-config', async (req, res) => {
 });
 
 // Reset AI Power Matrix to Factory Defaults
-router.post('/ai-config/reset', async (req, res) => {
+router.post('/ai-config/reset', requireStrictAdmin, async (req, res) => {
   try {
     const defaults = await systemState.resetAiConfigToDefaults();
     await db.createModerationLog('RESET_AI_CONFIG', req.adminUser.username, 'AI Power Matrix', 'Reset all 90+ options to factory defaults');
@@ -1395,7 +1403,7 @@ router.get('/radar-stats', async (req, res) => {
 });
 
 // Searchable & Filtered Moderation Audit Logs
-router.get('/logs', async (req, res) => {
+router.get('/logs', requireStrictAdmin, async (req, res) => {
   try {
     const { username, action, startDate, endDate } = req.query;
     if (username || action || startDate || endDate) {
