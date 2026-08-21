@@ -167,11 +167,21 @@ MANDATORY SEVERITY & AUTONOMOUS PUNISHMENT RULES:
    - Leetspeak/spacing bypasses concealing restricted words: action_type: "mute" or "block".
 6. "eating_disorders":
    - Mentions, expressions, promotion, or suggestions of eating disorders, anorexia, bulimia, purging, extreme starvation, or self-harm eating behaviors MUST BE CLASSIFIED as "eating_disorders" with severity "high" or "extreme" and action_type: "block" or "warn".
+7. "substance_abuse":
+   - Mentions, promotion, or suggestions of drug abuse, illicit substances, overdose, addiction, or alcoholism MUST BE CLASSIFIED as "substance_abuse" and action_type: "block" or "warn".
+8. "mental_health":
+   - Mentions or expressions of extreme depression, severe anxiety, panic attacks, or requesting mental health resources MUST BE CLASSIFIED as "mental_health" and action_type: "block" or "warn".
+9. "domestic_abuse":
+   - Mentions, expressions, or disclosures of domestic violence, relationship abuse, dating violence, or family physical threats MUST BE CLASSIFIED as "domestic_abuse" and action_type: "block" or "warn".
+10. "lgbtq_crisis":
+   - Identity-based crisis, gender identity distress, bullying, or distress related to sexual orientation MUST BE CLASSIFIED as "lgbtq_crisis" and action_type: "block" or "warn".
+11. "sexual_assault":
+   - Mentions, expressions, or disclosures of sexual assault, rape, or sexual abuse MUST BE CLASSIFIED as "sexual_assault" and action_type: "block" or "warn".
 
 Return a valid JSON object matching EXACTLY this schema:
 {
   "flagged": true | false,
-  "category": "hate_speech" | "harassment_bullying" | "sexual_content" | "violence_selfharm" | "severe_toxicity" | "obfuscation_bypass" | "eating_disorders" | "none",
+  "category": "hate_speech" | "harassment_bullying" | "sexual_content" | "violence_selfharm" | "severe_toxicity" | "obfuscation_bypass" | "eating_disorders" | "substance_abuse" | "mental_health" | "domestic_abuse" | "lgbtq_crisis" | "sexual_assault" | "none",
   "severity": "low" | "medium" | "high" | "extreme" | "none",
   "confidence": 0.0 to 1.0,
   "reason": "Short 2 to 4 word summary (e.g. 'Eating Disorder', 'Suicide Threat', 'Hate Speech', 'Severe Toxicity')",
@@ -497,14 +507,37 @@ function getSafetyHotlineText(category, reason, text) {
   const lowerReason = (reason || '').toLowerCase();
   const lowerText = (text || '').toLowerCase();
 
-  if (lowerCat === 'violence_selfharm' || lowerReason.includes('suicide') || lowerReason.includes('self-harm') || lowerText.includes('suicide') || lowerText.includes('kill myself') || lowerText.includes('end my life')) {
+  // 1. Suicide & Self-Harm
+  if (lowerCat === 'violence_selfharm' || lowerReason.includes('suicide') || lowerReason.includes('self-harm') || lowerText.includes('suicide') || lowerText.includes('kill myself') || lowerText.includes('end my life') || lowerText.includes('self-harm')) {
     return "Please know that you are not alone and help is available. You can reach the Suicide & Crisis Lifeline by calling or texting 988, or chatting at 988lifeline.org.";
   }
-  if (lowerCat === 'eating_disorders' || lowerReason.includes('eating disorder') || lowerReason.includes('anorexia') || lowerReason.includes('bulimia') || lowerText.includes('anorexia') || lowerText.includes('bulimia') || lowerText.includes('purge food')) {
+  // 2. Eating Disorders
+  if (lowerCat === 'eating_disorders' || lowerReason.includes('eating disorder') || lowerReason.includes('anorexia') || lowerReason.includes('bulimia') || lowerText.includes('anorexia') || lowerText.includes('bulimia') || lowerText.includes('purge food') || lowerText.includes('eating disorder')) {
     return "Recovery is possible and support is available. You can reach the National Eating Disorders Association (NEDA) Helpline by calling or texting (800) 931-2237, or text NEDA to 741741 for 24/7 crisis support.";
   }
-  if (lowerCat === 'harassment_bullying' || lowerReason.includes('bullying') || lowerReason.includes('harassment') || lowerText.includes('bully') || lowerText.includes('harass')) {
+  // 3. Bullying & Cyberbullying
+  if (lowerCat === 'harassment_bullying' || lowerReason.includes('bullying') || lowerReason.includes('harassment') || lowerText.includes('bully') || lowerText.includes('harass') || lowerText.includes('cyberbully')) {
     return "Bullying and harassment are strictly prohibited on this platform. You can text HOME to 741741 to connect with the Crisis Text Line, or visit StopBullying.org for resources.";
+  }
+  // 4. Substance Abuse
+  if (lowerCat === 'substance_abuse' || lowerReason.includes('substance abuse') || lowerReason.includes('drug') || lowerReason.includes('overdose') || lowerText.includes('drug abuse') || lowerText.includes('overdose') || lowerText.includes('cocaine') || lowerText.includes('heroin') || lowerText.includes('addiction')) {
+    return "Support for substance use and addiction is available. You can reach SAMHSA’s National Helpline at 1-800-662-HELP (4357) for 24/7, free, and confidential treatment referral and information.";
+  }
+  // 5. Mental Health (Depression / Anxiety)
+  if (lowerCat === 'mental_health' || lowerReason.includes('depression') || lowerReason.includes('anxiety') || lowerText.includes('depression') || lowerText.includes('panic attack') || lowerText.includes('severe anxiety')) {
+    return "If you are experiencing depression, anxiety, or distress, support is here. You can call the NAMI Helpline at 1-800-950-NAMI (6264), or text 'NAMI' to 741741 for free, 24/7 crisis support.";
+  }
+  // 6. Domestic Abuse / Violence
+  if (lowerCat === 'domestic_abuse' || lowerReason.includes('abuse') || lowerReason.includes('domestic violence') || lowerText.includes('abuse at home') || lowerText.includes('domestic abuse') || lowerText.includes('abuse me')) {
+    return "If you are experiencing abuse or feel unsafe at home, help is available. You can call the National Domestic Violence Hotline at 1-800-799-SAFE (7233) or text 'START' to 88788.";
+  }
+  // 7. LGBTQ+ Crisis Support
+  if (lowerCat === 'lgbtq_crisis' || lowerReason.includes('lgbtq') || lowerReason.includes('transgender') || lowerText.includes('lgbtq') || lowerText.includes('gender identity distress')) {
+    return "Safe, confidential support for LGBTQ+ youth is available. You can reach The Trevor Project by calling 1-866-488-7386 or texting START to 678-678.";
+  }
+  // 8. Sexual Assault
+  if (lowerCat === 'sexual_assault' || lowerReason.includes('rape') || lowerReason.includes('sexual assault') || lowerText.includes('rape') || lowerText.includes('sexual abuse')) {
+    return "Support for survivors of sexual assault and abuse is available. You can reach the RAINN National Sexual Assault Hotline at 1-800-656-4673 or chat online at rainn.org.";
   }
   return null;
 }
