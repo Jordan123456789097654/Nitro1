@@ -4,7 +4,7 @@ const pdfParse = require('pdf-parse');
 const systemState = require('../systemState');
 const { sendDiscordLog } = require('../discordLogger');
 const db = require('../db');
-const { checkMessageWithGroqModeration } = require('../aiModeration');
+const { checkMessageWithGroqModeration, getSafetyHotlineText } = require('../aiModeration');
 
 // GET /api/ai/status (Public AI Status Check)
 router.get('/status', (req, res) => {
@@ -286,6 +286,7 @@ router.post('/ask', async (req, res) => {
       const aiCheck = await checkMessageWithGroqModeration(textQuery);
       if (aiCheck && aiCheck.flagged) {
         const username = req.user ? req.user.username : 'Anonymous';
+        const display_name = req.user ? (req.user.display_name || req.user.username) : 'Guest';
         const targetId = req.user ? req.user.id : null;
         
         await db.logAiModerationViolation({
@@ -311,14 +312,15 @@ router.post('/ask', async (req, res) => {
         if (io) {
           io.to('admin_channel').emit('system_notification', {
             title: `🚨 AI Chatbot Prompt Flagged`,
-            message: `@${username} was flagged in AI Chatbot for ${aiCheck.category.toUpperCase()}: "${textQuery}"`,
+            message: `@${username} (${display_name}) was flagged in AI Chatbot for ${aiCheck.category.toUpperCase()}: "${textQuery}"`,
             level: 'error'
           });
         }
         
-        if (aiCheck.category === 'violence_selfharm' || (aiCheck.reason && aiCheck.reason.toLowerCase().includes('suicide')) || (aiCheck.reason && aiCheck.reason.toLowerCase().includes('self-harm'))) {
+        const hotlineMsg = getSafetyHotlineText(aiCheck.category, aiCheck.reason, textQuery);
+        if (hotlineMsg) {
           return res.status(400).json({
-            error: "Sorry, I can't help with that. Please know that you are not alone and help is available. You can reach the Suicide & Crisis Lifeline by calling or texting 988, or chatting at 988lifeline.org."
+            error: `Sorry, I can't help with that. ${hotlineMsg}`
           });
         }
         

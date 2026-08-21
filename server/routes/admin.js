@@ -1444,7 +1444,7 @@ router.post('/suggestions/:id/deny', async (req, res) => {
 router.get('/bugs', async (req, res) => {
   try {
     const reports = await db.getBugReports();
-    res.json({ success: true, reports });
+    res.json({ success: true, bugs: reports });
   } catch (err) {
     console.error('Fetch bug reports error:', err);
     res.status(500).json({ error: 'Failed to fetch bug reports.' });

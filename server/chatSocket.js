@@ -1,6 +1,6 @@
 const db = require('./db');
 const { sendDiscordLog } = require('./discordLogger');
-const { checkMessageWithGroqModeration, checkImageWithGroqModeration } = require('./aiModeration');
+const { checkMessageWithGroqModeration, checkImageWithGroqModeration, getSafetyHotlineText } = require('./aiModeration');
 
 // Active Connection Registry & State
 const activeConnections = new Map(); // socket.id -> connection details
@@ -224,11 +224,17 @@ function initChatSocket(io) {
     });
 
     // 3. Emit real-time notification to all connected admins/mods
+    const displayName = user ? (user.display_name || user.username) : 'Guest';
     io.to('admin_channel').emit('system_notification', {
       title: `🚨 AI Flag: ${aiCheck.reason || aiCheck.category}`,
-      message: `@${username} was flagged for ${aiCheck.category.toUpperCase()} (${aiCheck.severity} severity): "${cleanText}"`,
+      message: `@${username} (${displayName}) was flagged for ${aiCheck.category.toUpperCase()} (${aiCheck.severity} severity): "${cleanText}"`,
       level: 'error'
     });
+
+    const hotlineMsg = getSafetyHotlineText(aiCheck.category, aiCheck.reason, cleanText);
+    if (hotlineMsg) {
+      socket.emit('error_message', `🛡️ [Safety Notice] ${hotlineMsg}`);
+    }
 
     if (action === 'censor' || aiCheck.action_type === 'censor') {
       const censored = aiCheck.censored_text || '***';
@@ -537,9 +543,10 @@ function initChatSocket(io) {
               details: `3-Day Account Ban applied for NSFW Image Upload | Reason: ${imgCheck.reason}`
             });
 
+            const displayName = user ? (user.display_name || user.username) : 'Guest';
             io.to('admin_channel').emit('system_notification', {
               title: `🚨 AI Vision: NSFW Ban`,
-              message: `@${username} was banned for 3 days for NSFW image upload: "${imgCheck.reason}"`,
+              message: `@${username} (${displayName}) was banned for 3 days for NSFW image upload: "${imgCheck.reason}"`,
               level: 'error'
             });
 
@@ -566,9 +573,10 @@ function initChatSocket(io) {
             details: `Flagged Image Attachment | Reason: ${imgCheck.reason} (${imgCheck.category || 'Inappropriate Image'})`
           });
 
+          const displayName = user ? (user.display_name || user.username) : 'Guest';
           io.to('admin_channel').emit('system_notification', {
             title: `🚨 AI Vision: Image Blocked`,
-            message: `@${username} uploaded flagged content: "${imgCheck.reason}"`,
+            message: `@${username} (${displayName}) uploaded flagged content: "${imgCheck.reason}"`,
             level: 'error'
           });
 
@@ -777,9 +785,10 @@ function initChatSocket(io) {
           details: `3-Day Account Ban applied for NSFW Image in Private Room | Reason: ${imgCheck.reason}`
         });
 
+        const displayName = user ? (user.display_name || user.username) : 'Guest';
         io.to('admin_channel').emit('system_notification', {
           title: `🚨 AI Vision: Private NSFW`,
-          message: `@${user.username} was banned for 3 days for NSFW image upload in Room #${roomCode}: "${imgCheck.reason}"`,
+          message: `@${user.username} (${displayName}) was banned for 3 days for NSFW image upload in Room #${roomCode}: "${imgCheck.reason}"`,
           level: 'error'
         });
 

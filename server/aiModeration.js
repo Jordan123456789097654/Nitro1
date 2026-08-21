@@ -165,14 +165,16 @@ MANDATORY SEVERITY & AUTONOMOUS PUNISHMENT RULES:
    - Non-targeted general cursing/swearing ("fuck", "bitch", "shit"): action_type: "mute" (duration_minutes: 15 to 60) or "censor".
 5. "obfuscation_bypass":
    - Leetspeak/spacing bypasses concealing restricted words: action_type: "mute" or "block".
+6. "eating_disorders":
+   - Mentions, expressions, promotion, or suggestions of eating disorders, anorexia, bulimia, purging, extreme starvation, or self-harm eating behaviors MUST BE CLASSIFIED as "eating_disorders" with severity "high" or "extreme" and action_type: "block" or "warn".
 
 Return a valid JSON object matching EXACTLY this schema:
 {
   "flagged": true | false,
-  "category": "hate_speech" | "harassment_bullying" | "sexual_content" | "violence_selfharm" | "severe_toxicity" | "obfuscation_bypass" | "none",
+  "category": "hate_speech" | "harassment_bullying" | "sexual_content" | "violence_selfharm" | "severe_toxicity" | "obfuscation_bypass" | "eating_disorders" | "none",
   "severity": "low" | "medium" | "high" | "extreme" | "none",
   "confidence": 0.0 to 1.0,
-  "reason": "Short 2 to 4 word summary (e.g. 'Sexual Harassment', 'Death Threat', 'Hate Speech', 'Severe Toxicity')",
+  "reason": "Short 2 to 4 word summary (e.g. 'Eating Disorder', 'Suicide Threat', 'Hate Speech', 'Severe Toxicity')",
   "action_type": "ban" | "mute" | "warn" | "censor" | "block" | "allow",
   "duration_days": <number: 0 for permanent, 1 for 1d, 3 for 3d, 7 for 7d, 14 for 14d, 30 for 30d, or null if mute/censor>,
   "duration_minutes": <number: 5, 15, 60, 1440 if action_type is mute, or null if ban/censor>,
@@ -490,10 +492,28 @@ async function testGroqModeration(text, customOptions = {}) {
   return result;
 }
 
+function getSafetyHotlineText(category, reason, text) {
+  const lowerCat = (category || '').toLowerCase();
+  const lowerReason = (reason || '').toLowerCase();
+  const lowerText = (text || '').toLowerCase();
+
+  if (lowerCat === 'violence_selfharm' || lowerReason.includes('suicide') || lowerReason.includes('self-harm') || lowerText.includes('suicide') || lowerText.includes('kill myself') || lowerText.includes('end my life')) {
+    return "Please know that you are not alone and help is available. You can reach the Suicide & Crisis Lifeline by calling or texting 988, or chatting at 988lifeline.org.";
+  }
+  if (lowerCat === 'eating_disorders' || lowerReason.includes('eating disorder') || lowerReason.includes('anorexia') || lowerReason.includes('bulimia') || lowerText.includes('anorexia') || lowerText.includes('bulimia') || lowerText.includes('purge food')) {
+    return "Recovery is possible and support is available. You can reach the National Eating Disorders Association (NEDA) Helpline by calling or texting (800) 931-2237, or text NEDA to 741741 for 24/7 crisis support.";
+  }
+  if (lowerCat === 'harassment_bullying' || lowerReason.includes('bullying') || lowerReason.includes('harassment') || lowerText.includes('bully') || lowerText.includes('harass')) {
+    return "Bullying and harassment are strictly prohibited on this platform. You can text HOME to 741741 to connect with the Crisis Text Line, or visit StopBullying.org for resources.";
+  }
+  return null;
+}
+
 module.exports = {
   checkMessageWithGroqModeration,
   checkImageWithGroqModeration,
   testGroqModeration,
   evaluateAppealWithGroq,
-  normalizeObfuscatedText
+  normalizeObfuscatedText,
+  getSafetyHotlineText
 };
