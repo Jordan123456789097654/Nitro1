@@ -261,7 +261,8 @@ router.get('/ai-flagged-cases', async (req, res) => {
     const flaggedViolations = await db.getAiFlaggedViolations();
     const allAppeals = await db.getAppeals();
     const aiAppeals = allAppeals.filter(a => a.ai_recommendation && a.ai_recommendation !== '');
-    res.json({ success: true, violations: flaggedViolations, appeals: aiAppeals });
+    const audits = await db.getAiAdminAudits();
+    res.json({ success: true, violations: flaggedViolations, appeals: aiAppeals, audits });
   } catch (err) {
     res.status(500).json({ error: 'Failed to retrieve AI flagged cases.' });
   }

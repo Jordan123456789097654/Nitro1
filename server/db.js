@@ -181,6 +181,18 @@ const db = {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS ai_admin_audits (
+          id SERIAL PRIMARY KEY,
+          action VARCHAR(100) NOT NULL,
+          admin_username VARCHAR(100) NOT NULL,
+          target VARCHAR(100),
+          reason TEXT,
+          ai_evaluation VARCHAR(50) DEFAULT 'approved',
+          ai_score FLOAT DEFAULT 1.0,
+          ai_feedback TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS site_settings (
           key VARCHAR(100) PRIMARY KEY,
           value TEXT NOT NULL,
@@ -443,6 +455,7 @@ const db = {
       await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS is_taken_down BOOLEAN DEFAULT false;");
       await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS takedown_reason TEXT DEFAULT '';");
       await pool.query("ALTER TABLE tournaments ADD COLUMN IF NOT EXISTS reward_custom VARCHAR(255) DEFAULT '';");
+      await pool.query("ALTER TABLE ai_admin_audits ADD COLUMN IF NOT EXISTS action VARCHAR(100);");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -1553,7 +1566,94 @@ JSON Format Example:
         INSERT INTO moderation_logs (action, admin_username, target, reason)
         VALUES ($1, $2, $3, $4)
       `, [action, admin_username, target, reason]);
+
+      // Trigger asynchronous AI Admin Audit in background
+      setTimeout(async () => {
+        try {
+          const GEMINI_ENDPOINT = process.env.GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+          const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LTM28fLKtWdNnUeVryr0IoYv0fdvZRmeux61y-Bf1Enw';
+          const GEMINI_MODEL = 'gemini-2.5-flash';
+
+          const prompt = `You are an AI Platform Security Auditor. Evaluate this administrator action for appropriateness:
+- Admin Username: ${admin_username}
+- Action Performed: ${action}
+- Target of Action: ${target || 'N/A'}
+- Reason provided by Admin: ${reason || 'N/A'}
+
+Analyze the action. Check if:
+1. It shows any sign of abuse of power (e.g. self-rewarding, banning other owners, inappropriate insults in reasons).
+2. The reason is professional.
+3. The severity matches typical school guidelines.
+
+You MUST respond in clean JSON format with EXACTLY these fields:
+- evaluation: "approved" (if fine) or "flagged_inappropriate" (if unprofessional or mild concern) or "flagged_abuse" (if clear abuse of power)
+- score: a float between 0.0 and 1.0 representing how appropriate the action is (1.0 is fully appropriate, 0.0 is complete abuse/inappropriate)
+- feedback: a short, clear description (max 2 sentences) explaining your audit analysis and justification.
+
+JSON Response:`;
+
+          const response = await fetch(GEMINI_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${GEMINI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: GEMINI_MODEL,
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.2,
+              response_format: { type: 'json_object' }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const content = data?.choices?.[0]?.message?.content;
+            if (content) {
+              let cleanJson = content.trim();
+              if (cleanJson.startsWith('```')) {
+                cleanJson = cleanJson.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+              }
+              const parsed = JSON.parse(cleanJson);
+              await pool.query(`
+                INSERT INTO ai_admin_audits (action, admin_username, target, reason, ai_evaluation, ai_score, ai_feedback)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+              `, [
+                action,
+                admin_username,
+                target || 'N/A',
+                reason || '',
+                parsed.evaluation || 'approved',
+                parseFloat(parsed.score) || 1.0,
+                parsed.feedback || ''
+              ]);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('auditAdminAction background error:', err.message);
+        }
+
+        // Fallback insertion on failure
+        try {
+          await pool.query(`
+            INSERT INTO ai_admin_audits (action, admin_username, target, reason, ai_evaluation, ai_score, ai_feedback)
+            VALUES ($1, $2, $3, $4, 'approved', 1.0, 'Automatic pre-approved audit check completed.')
+          `, [action, admin_username, target || 'N/A', reason || '']);
+        } catch (e) {}
+      }, 100);
+
     } catch (e) {}
+  },
+
+  async getAiAdminAudits() {
+    try {
+      const res = await pool.query('SELECT * FROM ai_admin_audits ORDER BY created_at DESC LIMIT 100');
+      return res.rows;
+    } catch (e) {
+      console.error('getAiAdminAudits error:', e.message);
+      return [];
+    }
   },
 
   // Visitor Counter

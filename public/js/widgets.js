@@ -235,9 +235,19 @@ export function initStudyTimer() {
 
 
 // Paint Canvas Deluxe Logic
+let isPaintCanvasInitialized = false;
 export function initPaintCanvas() {
   const canvas = document.getElementById('paint-canvas');
   if (!canvas) return;
+  if (isPaintCanvasInitialized) {
+    const parent = canvas.parentElement;
+    if (parent) {
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+    }
+    return;
+  }
+  isPaintCanvasInitialized = true;
 
   const ctx = canvas.getContext('2d');
   let drawing = false;

@@ -1288,6 +1288,9 @@ function setupAdminTabs() {
       if (targetTab === 'aiflagged') {
         if (window.adminFetchAiFlagged) window.adminFetchAiFlagged();
       }
+      if (targetTab === 'admintournaments') {
+        if (window.adminFetchTournaments) window.adminFetchTournaments();
+      }
       if (targetTab === 'logs') fetchLogs();
       if (targetTab === 'webhooks') fetchAdminWebhooks();
       if (targetTab === 'radar') fetchActivityRadar();
@@ -2960,6 +2963,7 @@ window.adminFetchShopPurchases = async () => {
 window.adminFetchAiFlagged = async () => {
   const punsTbody = document.getElementById('aipuns-tbody');
   const appealsTbody = document.getElementById('aiappeals-tbody');
+  const auditsTbody = document.getElementById('aiaudits-tbody');
   if (!punsTbody || !appealsTbody) return;
 
   try {
@@ -2967,11 +2971,13 @@ window.adminFetchAiFlagged = async () => {
     if (!res.ok) {
       punsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Failed to load cases.</td></tr>';
       appealsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Failed to load appeals.</td></tr>';
+      if (auditsTbody) auditsTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:20px;">Failed to load audits.</td></tr>';
       return;
     }
     const data = await res.json();
     const violations = data.violations || [];
     const appeals = data.appeals || [];
+    const audits = data.audits || [];
 
     // Render violations (auto-bans/mutes)
     if (violations.length === 0) {
@@ -3015,10 +3021,40 @@ window.adminFetchAiFlagged = async () => {
         `;
       }).join('');
     }
+
+    // Render AI admin audits (Watchdog)
+    if (auditsTbody) {
+      if (audits.length === 0) {
+        auditsTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No AI admin audits recorded yet.</td></tr>';
+      } else {
+        auditsTbody.innerHTML = audits.map(au => {
+          const evalColor = au.ai_evaluation === 'approved' ? '#10b981' : au.ai_evaluation === 'flagged_inappropriate' ? '#fbbf24' : '#ef4444';
+          const scoreColor = au.ai_score >= 0.8 ? '#10b981' : au.ai_score >= 0.5 ? '#fbbf24' : '#ef4444';
+          
+          return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 10px 12px; font-size: 0.8rem; color: #94a3b8; white-space: nowrap;">${formatEstDateTime(au.created_at)}</td>
+              <td style="padding: 10px 12px;"><strong style="color: #a855f7;">@${escapeHtml(au.admin_username)}</strong></td>
+              <td style="padding: 10px 12px;"><span style="color:#cbd5e1; font-weight:700; font-size:0.82rem;">${escapeHtml(au.action)}</span></td>
+              <td style="padding: 10px 12px; color: #38bdf8; font-weight: 700;">${escapeHtml(au.target || 'N/A')}</td>
+              <td style="padding: 10px 12px; max-width: 250px; font-size: 0.82rem; color: var(--text-muted);">${escapeHtml(au.reason || 'N/A')}</td>
+              <td style="padding: 10px 12px;"><strong style="color:${scoreColor};">${Math.round((au.ai_score || 1.0) * 100)}%</strong></td>
+              <td style="padding: 10px 12px;">
+                <span style="display:inline-block; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.4); color:${evalColor}; margin-bottom:4px;">
+                  ${au.ai_evaluation.replace(/_/g, ' ').toUpperCase()}
+                </span>
+                <div style="font-size:0.78rem; color:#fff;">${escapeHtml(au.ai_feedback || 'Passed audit')}</div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
   } catch (err) {
     console.error('adminFetchAiFlagged error:', err);
     punsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching cases.</td></tr>';
     appealsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching appeals.</td></tr>';
+    if (auditsTbody) auditsTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:20px;">Connection error fetching audits.</td></tr>';
   }
 };
 

@@ -3033,6 +3033,36 @@
               </table>
             </div>
           </div>
+
+          <!-- Section 3: AI Admin Audits (Watchdog) -->
+          <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-top: 24px;">
+            <h4 style="color: #38bdf8; margin: 0 0 12px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+              <span>🤖</span> AI Admin Audits (Watchdog)
+            </h4>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin: -4px 0 14px 0;">
+              AI analyzes and audits admin actions in real-time, checking for appropriateness, policy violations, or potential power abuse.
+            </p>
+            <div style="overflow-x: auto;">
+              <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.04); text-align: left;">
+                    <th style="padding: 10px 12px;">Timestamp</th>
+                    <th style="padding: 10px 12px;">Admin</th>
+                    <th style="padding: 10px 12px;">Action</th>
+                    <th style="padding: 10px 12px;">Target</th>
+                    <th style="padding: 10px 12px;">Reason / Notes</th>
+                    <th style="padding: 10px 12px;">AI Audit Score</th>
+                    <th style="padding: 10px 12px;">AI Evaluation Feedback</th>
+                  </tr>
+                </thead>
+                <tbody id="aiaudits-tbody">
+                  <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading AI audits...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <!-- Admin Tab: Catalog Games -->
