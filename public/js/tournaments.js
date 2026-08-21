@@ -225,11 +225,20 @@ function renderTournamentDetails(tour) {
         const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
         const nameGlow = item.role === 'owner' ? 'color:#ef4444;font-weight:900;' : item.role === 'admin' ? 'color:#a855f7;font-weight:800;' : 'color:#fff;';
         
+        let avatarHtml = `<span style="font-size: 1.2rem;">👤</span>`;
+        if (item.avatar_url) {
+          if (item.avatar_url.startsWith('data:') || item.avatar_url.startsWith('http') || item.avatar_url.startsWith('/')) {
+            avatarHtml = `<img src="${item.avatar_url}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.1);" onerror="this.outerHTML='<span style=\x22font-size: 1.2rem;\x22>👤</span>'">`;
+          } else {
+            avatarHtml = `<span style="font-size: 1.2rem;">${item.avatar_url}</span>`;
+          }
+        }
+        
         return `
           <tr style="border-bottom: 1px solid var(--card-border);">
             <td style="padding: 10px; font-weight: 800; font-size: 1rem; color: #fbbf24;">${medal}</td>
             <td style="padding: 10px; display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.2rem;">${item.avatar_url || '👤'}</span>
+              ${avatarHtml}
               <span style="${nameGlow}">${item.display_name || item.username}</span>
             </td>
             <td style="padding: 10px; text-align: right; font-weight: 900; color: #38bdf8; font-size: 0.95rem;">${item.score.toLocaleString()}</td>
