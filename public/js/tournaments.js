@@ -10,16 +10,28 @@ export function initTournaments() {
   const closeModalBtn = document.getElementById('tournaments-modal-close');
   const modal = document.getElementById('tournaments-modal');
 
-  if (openModalBtn) {
-    openModalBtn.addEventListener('click', () => {
+  window.openTournamentsModal = () => {
+    if (modal) {
       modal.classList.add('active');
       fetchTournaments();
+    }
+  };
+
+  window.closeTournamentsModal = () => {
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  };
+
+  if (openModalBtn) {
+    openModalBtn.addEventListener('click', () => {
+      window.openTournamentsModal();
     });
   }
 
   if (closeModalBtn) {
     closeModalBtn.addEventListener('click', () => {
-      modal.classList.remove('active');
+      window.closeTournamentsModal();
     });
   }
 
