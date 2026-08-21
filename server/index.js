@@ -154,7 +154,11 @@ app.use('/api', (req, res, next) => {
     '/status', '/api/status',
     '/visit', '/api/visit',
     '/contact', '/api/contact',
-    '/admin/signups-status', '/api/admin/signups-status'
+    '/admin/signups-status', '/api/admin/signups-status',
+    '/updates/latest', '/api/updates/latest',
+    '/ai/status', '/api/ai/status',
+    '/weather', '/api/weather',
+    '/gateway', '/api/gateway'
   ];
   if (openPaths.some(p => req.path === p || req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
 
