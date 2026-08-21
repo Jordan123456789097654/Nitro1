@@ -148,12 +148,15 @@ app.use(async (req, res, next) => {
 // Authentication Enforcement Middleware for API routes
 app.use('/api', (req, res, next) => {
   const openPaths = [
-    '/auth', '/api/auth', '/status', '/api/status', '/visit', '/api/visit', '/gateway', '/api/gateway', '/admin', '/api/admin',
-    '/games', '/api/games', '/polls', '/api/polls', '/voice', '/api/voice', '/updates', '/api/updates',
-    '/contact', '/api/contact', '/friends', '/api/friends', '/soundboard', '/api/soundboard', '/ai', '/api/ai',
-    '/themes', '/api/themes'
+    '/auth/login', '/api/auth/login',
+    '/auth/register', '/api/auth/register',
+    '/auth/me', '/api/auth/me',
+    '/status', '/api/status',
+    '/visit', '/api/visit',
+    '/contact', '/api/contact',
+    '/admin/signups-status', '/api/admin/signups-status'
   ];
-  if (openPaths.some(p => req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
+  if (openPaths.some(p => req.path === p || req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
   next();
 });

@@ -357,6 +357,62 @@ function setupSocketListeners() {
     const onlineEl = document.getElementById('chat-online-count');
     if (onlineEl) onlineEl.textContent = `${count} Online`;
   });
+
+  socket.on('private_room_members_update', ({ roomCode, owner, members, hasPassword }) => {
+    if (activeChatMode !== 'room' || activeRoomCode !== roomCode) return;
+
+    const controlsPanel = document.getElementById('chat-room-controls');
+    if (controlsPanel) controlsPanel.style.display = 'flex';
+
+    const ownerName = document.getElementById('chat-room-owner-name');
+    if (ownerName) ownerName.textContent = `@${owner}`;
+
+    const lockStatus = document.getElementById('chat-room-lock-status');
+    if (lockStatus) {
+      lockStatus.textContent = hasPassword ? '🔒 Protected' : '🔓 Public';
+      lockStatus.style.color = hasPassword ? '#ef4444' : '#10b981';
+    }
+
+    const actionsRow = document.getElementById('chat-room-actions-row');
+    const user = getCurrentUser();
+    const isOwner = user && user.username === owner;
+    if (actionsRow) {
+      actionsRow.style.display = isOwner ? 'flex' : 'none';
+    }
+
+    const pillsContainer = document.getElementById('chat-room-members-pills');
+    if (pillsContainer) {
+      pillsContainer.innerHTML = members.map(m => `
+        <span style="font-size: 0.68rem; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); color: ${m === owner ? '#fbbf24' : '#fff'}; font-weight: ${m === owner ? '800' : 'normal'};">
+          ${m === owner ? '👑 ' : ''}@${m}
+        </span>
+      `).join('');
+    }
+  });
+
+  socket.on('private_room_auth_challenge', ({ roomCode, error }) => {
+    const pw = prompt(`${error || 'This room is password-protected.'} Enter room password:`);
+    if (pw !== null) {
+      const user = getCurrentUser();
+      socket.emit('join_private_room', { roomCode, user, password: pw });
+    } else {
+      activeRoomCode = '';
+      const activeLabel = document.getElementById('chat-room-active-label');
+      if (activeLabel) activeLabel.textContent = '';
+      const controlsPanel = document.getElementById('chat-room-controls');
+      if (controlsPanel) controlsPanel.style.display = 'none';
+    }
+  });
+
+  socket.on('kicked_from_private_room', ({ roomCode }) => {
+    alert(`👢 You were kicked from private room #${roomCode} by the host.`);
+    activeRoomCode = '';
+    const activeLabel = document.getElementById('chat-room-active-label');
+    if (activeLabel) activeLabel.textContent = '';
+    document.getElementById('chat-messages').innerHTML = '<div style="color: var(--text-muted); padding: 20px; text-align: center;">You were kicked from this room.</div>';
+    const controlsPanel = document.getElementById('chat-room-controls');
+    if (controlsPanel) controlsPanel.style.display = 'none';
+  });
 }
 
 function renderOpenDmsPills(conversations) {
@@ -394,6 +450,13 @@ function setupChatTabs() {
   const tabs = document.querySelectorAll('.chat-mode-tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
+      if (activeRoomCode && tab.dataset.mode !== 'room' && tab.dataset.mode !== 'whiteboard') {
+        socket.emit('leave_private_room', { roomCode: activeRoomCode });
+        activeRoomCode = '';
+        const controlsPanel = document.getElementById('chat-room-controls');
+        if (controlsPanel) controlsPanel.style.display = 'none';
+      }
+
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
 
@@ -652,6 +715,10 @@ function setupPrivateRoomForm() {
   const joinBtn = document.getElementById('chat-join-room-btn');
   const codeInput = document.getElementById('chat-room-code-input');
 
+  const setPwBtn = document.getElementById('chat-room-set-pw-btn');
+  const kickBtn = document.getElementById('chat-room-kick-btn');
+  const transferBtn = document.getElementById('chat-room-transfer-btn');
+
   if (joinBtn && codeInput) {
     joinBtn.addEventListener('click', () => {
       const code = codeInput.value.trim();
@@ -662,6 +729,36 @@ function setupPrivateRoomForm() {
       socket.emit('join_private_room', { roomCode: code, user });
       document.getElementById('chat-messages').innerHTML = '';
       document.getElementById('chat-room-active-label').textContent = `🔒 Room: #${code}`;
+    });
+  }
+
+  if (setPwBtn) {
+    setPwBtn.addEventListener('click', () => {
+      if (!activeRoomCode) return;
+      const pw = prompt('Enter a new password for this room (leave blank to remove password protection):');
+      if (pw !== null) {
+        socket.emit('set_room_password', { roomCode: activeRoomCode, password: pw });
+      }
+    });
+  }
+
+  if (kickBtn) {
+    kickBtn.addEventListener('click', () => {
+      if (!activeRoomCode) return;
+      const target = prompt('Enter username of the student you want to kick:');
+      if (target && target.trim()) {
+        socket.emit('kick_room_user', { roomCode: activeRoomCode, targetUsername: target.trim() });
+      }
+    });
+  }
+
+  if (transferBtn) {
+    transferBtn.addEventListener('click', () => {
+      if (!activeRoomCode) return;
+      const target = prompt('Enter username of the student to transfer host ownership to:');
+      if (target && target.trim()) {
+        socket.emit('transfer_room_ownership', { roomCode: activeRoomCode, targetUsername: target.trim() });
+      }
     });
   }
 }

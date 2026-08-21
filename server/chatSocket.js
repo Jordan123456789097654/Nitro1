@@ -7,7 +7,24 @@ const activeConnections = new Map(); // socket.id -> connection details
 const userLastMessageTime = new Map(); // userId/ip -> timestamp
 const userMessageHistory = new Map(); // userId/ip -> [{ text, time }]
 const whiteboardRooms = new Map(); // roomCode -> [stroke]
+const privateRooms = new Map(); // roomCode -> { owner, password, members: Map(socket.id -> username) }
 let chatSlowmodeSeconds = 0; // 0 = off
+
+function broadcastRoomUpdate(roomCode, io) {
+  const roomKey = roomCode.toLowerCase().trim();
+  const room = privateRooms.get(roomKey);
+  if (!room) return;
+
+  const cleanRoom = 'room_' + roomKey;
+  const membersList = Array.from(room.members.values());
+
+  io.to(cleanRoom).emit('private_room_members_update', {
+    roomCode,
+    owner: room.owner,
+    members: membersList,
+    hasPassword: !!room.password
+  });
+}
 
 function getActiveConnectionsList() {
   const unique = new Map();
@@ -716,15 +733,161 @@ function initChatSocket(io) {
   });
 
   // Private Rooms
-  socket.on('join_private_room', ({ roomCode, user }) => {
+  socket.on('join_private_room', ({ roomCode, user, password }) => {
     if (!roomCode) return;
-    const cleanRoom = 'room_' + roomCode.toLowerCase().trim();
+    const roomKey = roomCode.toLowerCase().trim();
+    const cleanRoom = 'room_' + roomKey;
+    const username = user ? user.username : ('Guest_' + Math.floor(Math.random() * 8999 + 1000));
+
+    let room = privateRooms.get(roomKey);
+    if (!room) {
+      room = {
+        owner: username,
+        password: password ? password.trim() : '',
+        members: new Map([[socket.id, username]])
+      };
+      privateRooms.set(roomKey, room);
+    } else {
+      if (room.password && room.password !== (password || '').trim()) {
+        return socket.emit('private_room_auth_challenge', { roomCode, error: 'Incorrect room password.' });
+      }
+      room.members.set(socket.id, username);
+    }
+
     socket.join(cleanRoom);
-    socket.emit('joined_private_room', { roomCode });
+    socket.emit('joined_private_room', { roomCode, owner: room.owner });
     io.to(cleanRoom).emit('private_room_system_msg', {
       roomCode,
-      message: `👋 ${user ? user.username : 'A student'} joined room #${roomCode}.`
+      message: `👤 ${username} joined room #${roomCode}.`
     });
+
+    broadcastRoomUpdate(roomCode, io);
+  });
+
+  socket.on('leave_private_room', ({ roomCode }) => {
+    if (!roomCode) return;
+    const roomKey = roomCode.toLowerCase().trim();
+    const room = privateRooms.get(roomKey);
+    if (room) {
+      const username = room.members.get(socket.id);
+      room.members.delete(socket.id);
+      socket.leave('room_' + roomKey);
+
+      if (username) {
+        const cleanRoom = 'room_' + roomKey;
+        io.to(cleanRoom).emit('private_room_system_msg', {
+          roomCode,
+          message: `👤 ${username} left the room.`
+        });
+
+        if (room.members.size === 0) {
+          privateRooms.delete(roomKey);
+        } else {
+          if (room.owner === username) {
+            const nextSocketId = room.members.keys().next().value;
+            room.owner = room.members.get(nextSocketId);
+            io.to(cleanRoom).emit('private_room_system_msg', {
+              roomCode,
+              message: `👑 @${room.owner} is the new room owner.`
+            });
+          }
+          broadcastRoomUpdate(roomCode, io);
+        }
+      }
+    }
+  });
+
+  socket.on('set_room_password', ({ roomCode, password }) => {
+    if (!roomCode) return;
+    const roomKey = roomCode.toLowerCase().trim();
+    const room = privateRooms.get(roomKey);
+    if (!room) return;
+
+    const conn = activeConnections.get(socket.id);
+    const username = conn ? conn.username : null;
+    if (!username || room.owner !== username) {
+      return socket.emit('error_message', 'Only the room owner can set a password.');
+    }
+
+    room.password = password ? password.trim() : '';
+    broadcastRoomUpdate(roomCode, io);
+
+    const cleanRoom = 'room_' + roomKey;
+    io.to(cleanRoom).emit('private_room_system_msg', {
+      roomCode,
+      message: password ? '🔒 Room password has been set/updated.' : '🔓 Room password has been removed.'
+    });
+  });
+
+  socket.on('kick_room_user', ({ roomCode, targetUsername }) => {
+    if (!roomCode || !targetUsername) return;
+    const roomKey = roomCode.toLowerCase().trim();
+    const room = privateRooms.get(roomKey);
+    if (!room) return;
+
+    const conn = activeConnections.get(socket.id);
+    const username = conn ? conn.username : null;
+    if (!username || room.owner !== username) {
+      return socket.emit('error_message', 'Only the room owner can kick users.');
+    }
+
+    let kickedAny = false;
+    for (const [sId, uName] of room.members.entries()) {
+      if (uName.toLowerCase() === targetUsername.toLowerCase().trim()) {
+        room.members.delete(sId);
+        const targetSocket = io.sockets.sockets.get(sId);
+        if (targetSocket) {
+          targetSocket.leave('room_' + roomKey);
+          targetSocket.emit('kicked_from_private_room', { roomCode });
+          kickedAny = true;
+        }
+      }
+    }
+
+    if (kickedAny) {
+      const cleanRoom = 'room_' + roomKey;
+      io.to(cleanRoom).emit('private_room_system_msg', {
+        roomCode,
+        message: `👢 @${targetUsername} was kicked from the room.`
+      });
+      broadcastRoomUpdate(roomCode, io);
+    } else {
+      socket.emit('error_message', `User @${targetUsername} is not in this room.`);
+    }
+  });
+
+  socket.on('transfer_room_ownership', ({ roomCode, targetUsername }) => {
+    if (!roomCode || !targetUsername) return;
+    const roomKey = roomCode.toLowerCase().trim();
+    const room = privateRooms.get(roomKey);
+    if (!room) return;
+
+    const conn = activeConnections.get(socket.id);
+    const username = conn ? conn.username : null;
+    if (!username || room.owner !== username) {
+      return socket.emit('error_message', 'Only the room owner can transfer ownership.');
+    }
+
+    const inRoom = Array.from(room.members.values()).some(u => u.toLowerCase() === targetUsername.toLowerCase().trim());
+    if (!inRoom) {
+      return socket.emit('error_message', `Cannot transfer ownership: @${targetUsername} is not in this room.`);
+    }
+
+    let actualTargetUsername = targetUsername;
+    for (const u of room.members.values()) {
+      if (u.toLowerCase() === targetUsername.toLowerCase().trim()) {
+        actualTargetUsername = u;
+        break;
+      }
+    }
+
+    room.owner = actualTargetUsername;
+    const cleanRoom = 'room_' + roomKey;
+    io.to(cleanRoom).emit('private_room_system_msg', {
+      roomCode,
+      message: `👑 Ownership has been transferred to @${actualTargetUsername}.`
+    });
+    broadcastRoomUpdate(roomCode, io);
   });
 
   socket.on('send_private_room_msg', async ({ roomCode, user, text, imageUrl }) => {
@@ -918,6 +1081,34 @@ function initChatSocket(io) {
     socket.on('disconnect', () => {
       activeConnections.delete(socket.id);
       broadcastLiveConnections();
+
+      // Clean up private rooms
+      for (const [roomKey, room] of privateRooms.entries()) {
+        if (room.members.has(socket.id)) {
+          const username = room.members.get(socket.id);
+          room.members.delete(socket.id);
+          
+          const cleanRoom = 'room_' + roomKey;
+          io.to(cleanRoom).emit('private_room_system_msg', {
+            roomCode: roomKey.toUpperCase(),
+            message: `👤 ${username} disconnected.`
+          });
+
+          if (room.members.size === 0) {
+            privateRooms.delete(roomKey);
+          } else {
+            if (room.owner === username) {
+              const nextSocketId = room.members.keys().next().value;
+              room.owner = room.members.get(nextSocketId);
+              io.to(cleanRoom).emit('private_room_system_msg', {
+                roomCode: roomKey.toUpperCase(),
+                message: `👑 @${room.owner} is the new room owner.`
+              });
+            }
+            broadcastRoomUpdate(roomKey, io);
+          }
+        }
+      }
     });
   });
 }

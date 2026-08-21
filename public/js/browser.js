@@ -35,6 +35,7 @@ export function initBrowser() {
   setupToolbarControls();
   setupSplitViewUI();
   setupSpeedDialUI();
+  setupIframeLoadListeners();
   renderTabs();
   renderActiveTab();
 }
@@ -438,4 +439,48 @@ function launchAboutBlankCloak() {
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function setupIframeLoadListeners() {
+  const primaryIframe = document.getElementById('browser-iframe');
+  const secondaryIframe = document.getElementById('browser-iframe-secondary');
+
+  function syncIframeUrl(iframeEl, isSecondary = false) {
+    if (!iframeEl) return;
+    try {
+      const currentLoc = iframeEl.contentWindow.location.href;
+      if (!currentLoc) return;
+      
+      const urlObj = new URL(currentLoc);
+      const targetUrl = urlObj.searchParams.get('url');
+      if (targetUrl) {
+        const targetTabId = isSecondary ? secondarySplitTabId : activeTabId;
+        const targetTab = tabs.find(t => t.id === targetTabId);
+        if (targetTab && targetTab.url !== targetUrl) {
+          targetTab.url = targetUrl;
+          try {
+            const host = new URL(targetUrl).hostname;
+            targetTab.title = host.replace('www.', '');
+            targetTab.favicon = getFaviconEmojiForUrl(targetUrl);
+          } catch (e) {}
+
+          const urlInput = document.getElementById('browser-url-input');
+          if (!isSecondary && urlInput && activeTabId === targetTabId) {
+            urlInput.value = targetUrl;
+            updateBookmarkStarUI(targetUrl);
+          }
+          renderTabs();
+        }
+      }
+    } catch (e) {
+      // CORS block might happen if proxy redirects directly, keep calm
+    }
+  }
+
+  if (primaryIframe) {
+    primaryIframe.addEventListener('load', () => syncIframeUrl(primaryIframe, false));
+  }
+  if (secondaryIframe) {
+    secondaryIframe.addEventListener('load', () => syncIframeUrl(secondaryIframe, true));
+  }
 }
