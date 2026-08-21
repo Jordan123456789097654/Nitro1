@@ -61,7 +61,8 @@ export async function fetchFriends() {
 
     const data = await res.json();
     const friends = data.friends || [];
-    const pending = data.pending || [];
+    const pendingObj = data.pending || [];
+    const pending = Array.isArray(pendingObj) ? pendingObj : (pendingObj.incoming || []);
 
     if (pendingSection) pendingSection.style.display = 'block';
 

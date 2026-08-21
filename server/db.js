@@ -2610,6 +2610,7 @@ JSON Format Example:
           f.id as request_id,
           u.id as sender_id,
           u.username as sender_username,
+          u.display_name as sender_display_name,
           u.role as sender_role,
           u.avatar_url as sender_avatar,
           f.created_at
@@ -2624,6 +2625,7 @@ JSON Format Example:
           f.id as request_id,
           u.id as receiver_id,
           u.username as receiver_username,
+          u.display_name as receiver_display_name,
           u.role as receiver_role,
           u.avatar_url as receiver_avatar,
           f.created_at
