@@ -19,6 +19,9 @@ let onUserChangeCallback = null;
 
 export function initAuth(onUserChange) {
   onUserChangeCallback = onUserChange;
+  window.handleMandatoryPasswordReset = handleMandatoryPasswordReset;
+  window.handleMandatoryProfileFix = handleMandatoryProfileFix;
+  window.checkSession = () => checkSession(onUserChange);
   setupConsoleTokenAuth(onUserChange);
   checkSession(onUserChange);
   setupAuthModal(onUserChange);

@@ -581,18 +581,9 @@ router.post('/generate-image', async (req, res) => {
 
     const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=${w}&height=${h}&nologo=true&private=true${isEnhanced ? '&enhance=true' : ''}`;
 
-    const fetch = require('node-fetch');
-    const response = await fetch(imageUrl, { timeout: 15000 });
-    if (!response.ok) {
-      throw new Error('Failed to generate image from upstream provider.');
-    }
-    const buffer = await response.buffer();
-    const base64 = buffer.toString('base64');
-    const dataUri = `data:image/jpeg;base64,${base64}`;
-
     res.json({
       success: true,
-      imageUrl: dataUri
+      imageUrl: imageUrl
     });
   } catch (err) {
     console.error('Image generation error:', err);

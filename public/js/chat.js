@@ -358,6 +358,27 @@ function setupSocketListeners() {
     if (onlineEl) onlineEl.textContent = `${count} Online`;
   });
 
+  socket.on('user_profile_updated', (data) => {
+    const user = getCurrentUser();
+    if (!user) return;
+    if (user.id === data.userId || (user.username && user.username.toLowerCase() === data.username.toLowerCase())) {
+      if (data.forceLogout) {
+        alert('⚠️ Your session has been terminated by an administrator.');
+        document.cookie = 'nitro_jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+        localStorage.removeItem('nitro_jwt_token');
+        window.location.reload();
+      } else if (data.mustResetPassword) {
+        alert('⚠️ An administrator has flagged your account for a mandatory password reset.');
+        if (window.handleMandatoryPasswordReset) window.handleMandatoryPasswordReset();
+      } else if (data.requireProfileUpdate) {
+        alert(`⚠️ Compliance Alert: ${data.profileLockReason || 'Your profile details require verification.'}`);
+        if (window.handleMandatoryProfileFix) window.handleMandatoryProfileFix(data.profileLockReason);
+      } else {
+        if (window.checkSession) window.checkSession();
+      }
+    }
+  });
+
   socket.on('private_room_members_update', ({ roomCode, owner, members, hasPassword }) => {
     if (activeChatMode !== 'room' || activeRoomCode !== roomCode) return;
 

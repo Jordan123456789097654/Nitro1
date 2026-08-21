@@ -716,6 +716,15 @@ router.post('/users/:id/role', async (req, res) => {
     await db.updateUserRole(targetId, cleanRole);
     await db.createModerationLog('UPDATE_ROLE', admin, targetUser.username, `Role changed to: ${cleanRole.toUpperCase()}`);
 
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_profile_updated', {
+        userId: targetId,
+        username: targetUser.username,
+        role: cleanRole
+      });
+    }
+
     sendDiscordLog({
       category: 'moderation',
       action: 'UPDATE_ROLE',
@@ -734,7 +743,7 @@ router.post('/users/:id/role', async (req, res) => {
 router.post('/users/:id/profile', async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
-  const { display_name, bio, avatar_url, pro_chat_glow, pro_custom_flair, role, new_password } = req.body;
+  const { display_name, bio, avatar_url, pro_chat_glow, pro_custom_flair, role, new_password, is_flair_locked } = req.body;
 
   try {
     const targetUser = await db.getUserById(targetId);
@@ -762,8 +771,18 @@ router.post('/users/:id/profile', async (req, res) => {
       pro_chat_glow: pro_chat_glow || targetUser.pro_chat_glow,
       pro_custom_flair: pro_custom_flair !== undefined ? pro_custom_flair.trim() : targetUser.pro_custom_flair,
       role: role ? role.trim() : targetUser.role,
-      password: new_password
+      password: new_password,
+      is_flair_locked: is_flair_locked !== undefined ? Boolean(is_flair_locked) : targetUser.is_flair_locked
     });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_profile_updated', {
+        userId: targetId,
+        username: targetUser.username,
+        isFlairLocked: updated.is_flair_locked
+      });
+    }
 
     await db.createModerationLog('ADMIN_EDIT_USER_PROFILE', admin, targetUser.username, `Updated profile/settings for ${targetUser.username}`);
 
@@ -800,6 +819,15 @@ router.post('/users/:id/password', async (req, res) => {
     await db.updateUserPassword(targetId, base64Pass);
     await db.createModerationLog('RESET_PASSWORD', admin, targetUser.username, 'Password updated by administrator');
 
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_profile_updated', {
+        userId: targetId,
+        username: targetUser.username,
+        forceLogout: true
+      });
+    }
+
     sendDiscordLog({
       category: 'moderation',
       action: 'RESET_PASSWORD',
@@ -825,6 +853,15 @@ router.post('/users/:id/force-reset', async (req, res) => {
 
     await db.setForcePasswordReset(targetId, true);
     await db.createModerationLog('FORCE_PASSWORD_RESET', admin, targetUser.username, 'Flagged for mandatory password reset');
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_profile_updated', {
+        userId: targetId,
+        username: targetUser.username,
+        mustResetPassword: true
+      });
+    }
 
     sendDiscordLog({
       category: 'moderation',
@@ -853,6 +890,16 @@ router.post('/users/:id/require-profile-fix', async (req, res) => {
     const lockReason = reason && String(reason).trim() ? String(reason).trim() : 'Administrator requested profile compliance update.';
     await db.setProfileUpdateRequired(targetId, true, lockReason);
 
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_profile_updated', {
+        userId: targetId,
+        username: targetUser.username,
+        requireProfileUpdate: true,
+        profileLockReason: lockReason
+      });
+    }
+
     await db.createModerationLog('PROFILE_FIX_REQUIRED', admin, targetUser.username, lockReason);
 
     sendDiscordLog({
@@ -879,6 +926,15 @@ router.post('/users/:id/clear-profile-fix', async (req, res) => {
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
     await db.setProfileUpdateRequired(targetId, false, '');
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('user_profile_updated', {
+        userId: targetId,
+        username: targetUser.username,
+        requireProfileUpdate: false
+      });
+    }
 
     await db.createModerationLog('PROFILE_FIX_CLEARED', admin, targetUser.username, 'Unlocked by administrator');
 
@@ -1371,27 +1427,30 @@ router.post('/suggestions/:id/approve', async (req, res) => {
       return res.status(404).json({ error: 'Suggestion not found.' });
     }
 
-    // Determine category: default to 'Action' unless it matches apps or other types
     const category = sug.category || 'Action';
     const slug = sug.title.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 80) + '-' + Date.now().toString().slice(-4);
     const embed_type = sug.game_url?.startsWith('http') ? 'iframe_url' : 'html_code';
     const embed_content = sug.game_url || sug.description || '';
 
-    // Insert game
-    await db.pool.query(`
-      INSERT INTO games (title, slug, author, thumbnail_url, embed_type, embed_content, is_vip, category, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6, false, $7, $8)
-      ON CONFLICT (slug) DO UPDATE SET title = $1, embed_content = $6, category = $7
-    `, [
-      sug.title,
-      slug,
-      sug.username || 'Community',
-      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400',
-      embed_type,
-      embed_content,
-      category,
-      admin
-    ]);
+    const hasGameUrl = sug.game_url && sug.game_url.trim().startsWith('http');
+    const hasEmbedContent = sug.description && (sug.description.includes('<iframe') || sug.description.includes('<script'));
+
+    if (hasGameUrl || hasEmbedContent) {
+      await db.pool.query(`
+        INSERT INTO games (title, slug, author, thumbnail_url, embed_type, embed_content, is_vip, category, created_by)
+        VALUES ($1, $2, $3, $4, $5, $6, false, $7, $8)
+        ON CONFLICT (slug) DO UPDATE SET title = $1, embed_content = $6, category = $7
+      `, [
+        sug.title,
+        slug,
+        sug.username || 'Community',
+        'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400',
+        embed_type,
+        embed_content,
+        category,
+        admin
+      ]);
+    }
 
     await db.deleteGameSuggestion(suggestionId);
     await db.createModerationLog('APPROVE_SUGGESTION', admin, sug.title, `Moved suggestion #${suggestionId} to catalog`);

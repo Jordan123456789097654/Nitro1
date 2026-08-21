@@ -356,14 +356,19 @@ router.all('/', async (req, res) => {
     `);
   }
 
-  const isOwnerOrAdmin = ['owner', 'admin'].includes(user.role);
+  const isOwner = user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels');
 
-  // Blocked Domain Notice (Informational only, no auto-ban)
-  if (!isOwnerOrAdmin && rawUrl) {
+  // Blocked Domain Notice
+  if (!isOwner && rawUrl) {
     try {
       const blocked = await db.getBlockedDomains();
       const lowerUrl = rawUrl.toLowerCase();
-      const match = (blocked || []).find(b => b.domain && lowerUrl.includes(b.domain.toLowerCase().trim()));
+      const match = (blocked || []).find(b => {
+        if (!b.domain) return false;
+        const cleanRule = b.domain.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').trim();
+        if (!cleanRule) return false;
+        return lowerUrl.includes(cleanRule);
+      });
 
       if (match) {
         return res.status(200).send(`

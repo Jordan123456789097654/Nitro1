@@ -69,6 +69,7 @@ const db = {
           is_disabled_for_review BOOLEAN DEFAULT false,
           review_disable_reason TEXT DEFAULT '',
           force_password_reset BOOLEAN DEFAULT false,
+          is_flair_locked BOOLEAN DEFAULT false,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -427,6 +428,7 @@ const db = {
 
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_flair_locked BOOLEAN DEFAULT false;");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -894,7 +896,7 @@ const db = {
     return null;
   },
 
-  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password }) {
+  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password, is_flair_locked }) {
     try {
       const sets = [];
       const values = [];
@@ -909,6 +911,7 @@ const db = {
       if (chat_bubble_theme !== undefined) { sets.push(`chat_bubble_theme = $${idx++}`); values.push(chat_bubble_theme); }
       if (vip_particle_effect !== undefined) { sets.push(`vip_particle_effect = $${idx++}`); values.push(vip_particle_effect); }
       if (role !== undefined) { sets.push(`role = $${idx++}`); values.push(role); }
+      if (is_flair_locked !== undefined) { sets.push(`is_flair_locked = $${idx++}`); values.push(is_flair_locked); }
       if (password && password.trim().length > 0) {
         const b64 = Buffer.from(password.trim(), 'utf8').toString('base64');
         sets.push(`password_hash = $${idx++}`); values.push(b64);
@@ -919,7 +922,7 @@ const db = {
       if (sets.filter(s => s.includes('$')).length === 0) return true;
 
       values.push(userId);
-      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset`;
+      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset, is_flair_locked`;
       const res = await pool.query(query, values);
       return res.rows[0] || null;
     } catch (e) {

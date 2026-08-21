@@ -1711,6 +1711,10 @@ function setupAdminActions() {
     document.getElementById('admin-edit-user-glow').value = user.pro_chat_glow || 'gold';
     document.getElementById('admin-edit-user-flair').value = user.pro_custom_flair || '';
     document.getElementById('admin-edit-user-new-password').value = '';
+    const flairLockedCheck = document.getElementById('admin-edit-user-flair-locked');
+    if (flairLockedCheck) {
+      flairLockedCheck.checked = Boolean(user.is_flair_locked);
+    }
 
     // Fetch and render moderation history timeline
     const timelineEl = document.getElementById('admin-user-mod-timeline');
@@ -1803,6 +1807,7 @@ function setupAdminActions() {
       const pro_chat_glow = document.getElementById('admin-edit-user-glow').value;
       const pro_custom_flair = document.getElementById('admin-edit-user-flair').value.trim();
       const new_password = document.getElementById('admin-edit-user-new-password').value;
+      const is_flair_locked = document.getElementById('admin-edit-user-flair-locked')?.checked || false;
 
       try {
         const res = await authFetch(`/api/admin/users/${userId}/profile`, {
@@ -1815,7 +1820,8 @@ function setupAdminActions() {
             bio,
             pro_chat_glow,
             pro_custom_flair,
-            new_password
+            new_password,
+            is_flair_locked
           })
         });
         const data = await res.json();

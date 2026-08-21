@@ -139,8 +139,8 @@ async function checkMessageWithGroqModeration(text, options = {}) {
     strictnessInstructions = `STRICTNESS: LENIENT. Flag severe threats, slurs, sexual content, and doxxing.`;
   } else {
     strictnessInstructions = `STRICTNESS: STRICT & UNCOMPROMISING (School Gaming Community). Zero tolerance safety policy.
-Any vulgarity, cursing, profanity, swearing, insults, toxicity, bullying, sexual content, slurs, threats, self-harm, depression, or suicide mentions MUST BE FLAGGED IMMEDIATELY.
-DO NOT downplay threats of violence, self-harm, or profanity. Flag immediately.`;
+Any vulgarity, cursing, profanity, swearing, insults, toxicity, bullying, sexual content, slurs, threats, active self-harm, or active suicide mentions MUST BE FLAGGED IMMEDIATELY.
+DO NOT flag casual statements, everyday safe conversation, minor complaints, or normal safe remarks (e.g. "i cant sleep", "i am tired", "i'm sad", "hello", "i had a bad day"). Only flag active distress, active self-harm/suicide intent, bullying, or toxic behavior.`;
   }
 
   const systemPrompt = `You are an advanced, uncompromising AI safety moderation engine for "Nitro Games", a student gaming and chat community.

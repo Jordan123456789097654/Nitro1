@@ -1054,10 +1054,11 @@
         <!-- Right System & Account Controls -->
         <div class="nav-group-cluster controls-cluster">
           <!-- Real-Time Weather & Clock Widget -->
-          <div id="header-system-widget" style="display: flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 99px; font-size: 0.72rem; color: #cbd5e1; font-weight: 600; margin-right: 8px;">
-            <span id="header-clock" style="font-family: monospace; letter-spacing: 0.5px;">12:00:00 PM</span>
-            <span style="color: rgba(255,255,255,0.12);">|</span>
-            <span id="header-weather">🌤️ Loading...</span>
+          <div id="header-system-widget" style="display: flex; align-items: center; gap: 10px; padding: 6px 14px; background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: 99px; font-size: 0.78rem; color: #cbd5e1; font-weight: 600; margin-right: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.25); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+            <span style="color: #fbbf24; font-size: 0.85rem;">🕒</span>
+            <span id="header-clock" style="font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px; font-weight: 800; color: #38bdf8;">12:00:00 PM</span>
+            <span style="color: rgba(255,255,255,0.15);">|</span>
+            <span id="header-weather" style="display: flex; align-items: center; gap: 4px; color: #f8fafc; font-weight: 700;">🌤️ Loading...</span>
           </div>
           <!-- REAL-TIME NOTIFICATION BELL -->
           <div style="position: relative;">
@@ -3071,6 +3072,11 @@
         <div class="form-group">
           <label style="font-size: 0.8rem; font-weight: 700;">VIP Custom Title Flair</label>
           <input type="text" id="admin-edit-user-flair" placeholder="e.g. ⚡ VIP ELITE">
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+          <input type="checkbox" id="admin-edit-user-flair-locked" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+          <label for="admin-edit-user-flair-locked" style="font-size: 0.8rem; font-weight: 700; color: #ef4444; cursor: pointer; user-select: none;">🔒 Lock VIP Flair & Chat Glow Customization</label>
         </div>
 
         <div class="form-group">

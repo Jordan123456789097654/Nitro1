@@ -181,6 +181,13 @@ router.post('/profile', async (req, res) => {
       await db.updateUserPassword(userId, encoded);
     }
 
+    if (user.is_flair_locked && (
+      (pro_chat_glow !== undefined && pro_chat_glow.trim() !== (user.pro_chat_glow || '')) ||
+      (pro_custom_flair !== undefined && pro_custom_flair.trim() !== (user.pro_custom_flair || ''))
+    )) {
+      return res.status(403).json({ error: 'Your custom flair and chat glow privileges have been locked by an administrator.' });
+    }
+
     const isPro = ['pro', 'vip', 'premium_vip', 'elite_patron', 'early_member', 'moderator', 'admin', 'owner'].includes(user.role);
 
     const inventory = await db.getUserInventory(userId);
