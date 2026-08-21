@@ -206,18 +206,35 @@ body {
 }
 
 /* Responsive Floating Navigation Breakpoints to prevent overflow */
-@media (max-width: 1400px) {
-  /* Hide labels on secondary buttons to preserve horizontal space */
-  #open-ai-helper-btn .nav-btn-text,
-  [data-view="pro"] .nav-btn-text,
-  [data-view="shop"] .nav-btn-text,
-  #nav-tournaments-btn .nav-btn-text {
-    display: none !important;
+@media (max-width: 1420px) {
+  /* Compact font sizes and padding on Chromebooks to keep all labels visible */
+  .floating-nav {
+    gap: 8px !important;
+    padding: 4px 10px !important;
+  }
+  .nav-links {
+    gap: 4px !important;
+  }
+  .nav-btn {
+    padding: 0 6px !important;
+    gap: 4px !important;
+    font-size: 0.74rem !important;
+  }
+  #header-system-widget {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+  }
+  .nav-brand {
+    padding: 2px 8px !important;
+    gap: 6px !important;
+  }
+  #nav-profile-name {
+    font-size: 0.8rem !important;
   }
 }
 
-@media (max-width: 1220px) {
-  /* Hide labels on all navigation buttons for compact size */
+@media (max-width: 1180px) {
+  /* Hide labels on all navigation buttons for compact size on small screens */
   .nav-btn .nav-btn-text {
     display: none !important;
   }

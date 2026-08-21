@@ -469,7 +469,12 @@ const db = {
           ('💬 Active Communicator', 'Send 5 direct messages to classmates', 'send_messages', 5, 80, 100),
           ('🦉 Night Study Session', 'Record 5 minutes of study or gaming playtime', 'playtime', 300, 150, 200),
           ('🎨 Paint Masterpiece', 'Load Paint Studio Deluxe to unlock', 'load_paint', 1, 50, 80),
-          ('🔊 Sound Mixer DJ', 'Load Soundboard Deluxe to unlock', 'load_soundboard', 1, 50, 80)
+          ('🔊 Sound Mixer DJ', 'Load Soundboard Deluxe to unlock', 'load_soundboard', 1, 50, 80),
+          ('🎮 Game Enthusiast', 'Play any game in the unblocked library 10 times', 'play_games', 10, 250, 400),
+          ('🎮 Arcade Champion', 'Play any game in the unblocked library 25 times', 'play_games', 25, 600, 1000),
+          ('💬 Chat Room Regular', 'Send 30 messages in community chat or direct messages', 'send_messages', 30, 300, 500),
+          ('📚 Diligent Scholar', 'Record 15 minutes of study or gaming playtime', 'playtime', 900, 300, 500),
+          ('📚 Ultimate Grind', 'Record 1 hour of study or gaming playtime', 'playtime', 3600, 1000, 1500)
         `);
       }
 
