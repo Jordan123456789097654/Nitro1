@@ -205,13 +205,45 @@ body {
   border-radius: 50%;
 }
 
-@media (max-width: 900px) {
+/* Responsive Floating Navigation Breakpoints to prevent overflow */
+@media (max-width: 1400px) {
+  /* Hide labels on secondary buttons to preserve horizontal space */
+  #open-ai-helper-btn .nav-btn-text,
+  [data-view="pro"] .nav-btn-text,
+  [data-view="shop"] .nav-btn-text,
+  #nav-tournaments-btn .nav-btn-text {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1220px) {
+  /* Hide labels on all navigation buttons for compact size */
   .nav-btn .nav-btn-text {
-    display: none;
+    display: none !important;
   }
   .nav-btn {
-    padding: 0;
-    width: 34px;
+    padding: 0 !important;
+    width: 36px !important;
+  }
+  #nav-profile-name {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1040px) {
+  /* Hide system clock/weather widget entirely on mobile/tablet */
+  #header-system-widget {
+    display: none !important;
+  }
+  .nav-brand {
+    padding: 0 8px !important;
+  }
+  #nav-avatar-icon {
+    margin: 0 !important;
+  }
+  /* Remove section dividers to save space */
+  .nav-cluster-divider {
+    display: none !important;
   }
 }
 
