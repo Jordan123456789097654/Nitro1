@@ -9,6 +9,14 @@ let isPlaying = false;
 let isShuffle = false;
 let isRepeat = false;
 
+function authFetch(url, options = {}) {
+  const token = localStorage.getItem('nitro_jwt_token');
+  const headers = Object.assign({}, options.headers || {}, {
+    'Authorization': `Bearer ${token}`
+  });
+  return fetch(url, Object.assign({}, options, { headers }));
+}
+
 export function initMusicPlayer() {
   loadSavedQueue();
   setupMusicControls();
@@ -59,7 +67,7 @@ async function performMusicSearch(queryStr) {
   if (searchBtn) searchBtn.textContent = '⏳ Searching...';
 
   try {
-    const res = await fetch(`/api/music/search?q=${encodeURIComponent(query)}`);
+    const res = await authFetch(`/api/music/search?q=${encodeURIComponent(query)}`);
     const data = await res.json();
 
     if (searchBtn) searchBtn.textContent = '🔍 Search';
