@@ -140,7 +140,8 @@ async function checkMessageWithGroqModeration(text, options = {}) {
   } else {
     strictnessInstructions = `STRICTNESS: STRICT & UNCOMPROMISING (School Gaming Community). Zero tolerance safety policy.
 Any vulgarity, cursing, profanity, swearing, insults, toxicity, bullying, sexual content, slurs, threats, active self-harm, or active suicide mentions MUST BE FLAGGED IMMEDIATELY.
-DO NOT flag casual statements, everyday safe conversation, minor complaints, or normal safe remarks (e.g. "i cant sleep", "i am tired", "i'm sad", "hello", "i had a bad day"). Only flag active distress, active self-harm/suicide intent, bullying, or toxic behavior.`;
+DO NOT flag casual statements, everyday safe conversation, minor complaints, or normal safe remarks (e.g. "i cant sleep", "i am tired", "i'm sad", "hello", "i had a bad day"). Only flag active distress, active self-harm/suicide intent, bullying, or toxic behavior.
+DO NOT flag normal descriptions of food, eating, or minor general complaints like "i cant eat", "i am full", "what should I eat", or "i don't like broccoli". Only flag actual indicators of eating disorders like anorexia, bulimia, purging, extreme starvation, self-inflicted starvation, or self-harm eating behaviors.`;
   }
 
   const systemPrompt = `You are an advanced, uncompromising AI safety moderation engine for "Nitro Games", a student gaming and chat community.
@@ -166,7 +167,7 @@ MANDATORY SEVERITY & AUTONOMOUS PUNISHMENT RULES:
 5. "obfuscation_bypass":
    - Leetspeak/spacing bypasses concealing restricted words: action_type: "mute" or "block".
 6. "eating_disorders":
-   - Mentions, expressions, promotion, or suggestions of eating disorders, anorexia, bulimia, purging, extreme starvation, or self-harm eating behaviors MUST BE CLASSIFIED as "eating_disorders" with severity "high" or "extreme" and action_type: "block" or "warn".
+   - Mentions, expressions, promotion, or suggestions of eating disorders, anorexia, bulimia, purging, extreme starvation, or self-harm eating behaviors MUST BE CLASSIFIED as "eating_disorders" with severity "high" or "extreme" and action_type: "block" or "warn". DO NOT flag standard hunger comments, physical sickness/toothaches, or minor casual remarks like "i cant eat...".
 7. "substance_abuse":
    - Mentions, promotion, or suggestions of drug abuse, illicit substances, overdose, addiction, or alcoholism MUST BE CLASSIFIED as "substance_abuse" and action_type: "block" or "warn".
 8. "mental_health":
