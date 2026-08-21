@@ -291,11 +291,26 @@ function setupAiChat() {
         const headers = { 'Content-Type': 'application/json' };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
+        let guestNickname = '';
+        if (!token) {
+          guestNickname = localStorage.getItem('guest_nickname');
+          if (!guestNickname) {
+            guestNickname = prompt('Please enter your name/nickname to use the AI Assistant:');
+            if (!guestNickname || !guestNickname.trim()) {
+              guestNickname = 'Guest_' + Math.floor(Math.random() * 8999 + 1000);
+            } else {
+              guestNickname = guestNickname.trim().replace(/\s+/g, '_');
+            }
+            localStorage.setItem('guest_nickname', guestNickname);
+          }
+        }
+
         const requestBody = {
           message: query,
           userPrompt: query,
           mode: activeAiMode,
-          history: conversationHistory
+          history: conversationHistory,
+          guestNickname: guestNickname
         };
 
         if (attachedFile) {

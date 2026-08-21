@@ -285,8 +285,8 @@ router.post('/ask', async (req, res) => {
     try {
       const aiCheck = await checkMessageWithGroqModeration(textQuery);
       if (aiCheck && aiCheck.flagged) {
-        const username = req.user ? req.user.username : 'Anonymous';
-        const display_name = req.user ? (req.user.display_name || req.user.username) : 'Guest';
+        const username = req.user ? req.user.username : (req.body.guestNickname || 'Anonymous');
+        const display_name = req.user ? (req.user.display_name || req.user.username) : (req.body.guestNickname || 'Guest');
         const targetId = req.user ? req.user.id : null;
         
         await db.logAiModerationViolation({

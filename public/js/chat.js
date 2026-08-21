@@ -822,7 +822,17 @@ function setupChatForm() {
 
     let user = getCurrentUser();
     if (!user) {
-      user = { id: null, username: 'Guest_' + Math.floor(Math.random() * 8999 + 1000), role: 'member' };
+      let guestName = localStorage.getItem('guest_nickname');
+      if (!guestName) {
+        guestName = prompt('Please enter your name/nickname to chat:');
+        if (!guestName || !guestName.trim()) {
+          guestName = 'Guest_' + Math.floor(Math.random() * 8999 + 1000);
+        } else {
+          guestName = guestName.trim().replace(/\s+/g, '_');
+        }
+        localStorage.setItem('guest_nickname', guestName);
+      }
+      user = { id: null, username: guestName, display_name: guestName, role: 'member' };
     }
 
     const activeSocket = socket || getSharedSocket();
@@ -876,7 +886,8 @@ async function generateAndSendAiImage(text, mode, recipient, roomCode) {
     if (res.ok && data.success && data.imageUrl) {
       let user = getCurrentUser();
       if (!user) {
-        user = { id: null, username: 'Guest_' + Math.floor(Math.random() * 8999 + 1000), role: 'member' };
+        const guestName = localStorage.getItem('guest_nickname') || ('Guest_' + Math.floor(Math.random() * 8999 + 1000));
+        user = { id: null, username: guestName, display_name: guestName, role: 'member' };
       }
       const activeSocket = socket || getSharedSocket();
       if (!activeSocket) return alert('Chat connection lost. Failed to send generated image.');
