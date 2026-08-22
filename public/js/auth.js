@@ -112,6 +112,15 @@ export function setCookie(name, value, days = 365) {
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
 }
 
+export function authFetch(url, options = {}) {
+  const token = getCookie('nitro_jwt_token') || localStorage.getItem('nitro_jwt_token');
+  const headers = { ...(options.headers || {}) };
+  if (token && token !== 'null' && token !== 'undefined') {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return fetch(url, { ...options, headers, credentials: 'same-origin' });
+}
+
 export function getCookie(name) {
   const nameEQ = encodeURIComponent(name) + "=";
   const ca = document.cookie.split(';');

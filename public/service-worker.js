@@ -31,14 +31,21 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests and same-origin assets
+  if (
+    event.request.method !== 'GET' ||
+    !event.request.url.startsWith(self.location.origin)
+  ) {
+    return;
+  }
+
   const url = new URL(event.request.url);
   
   // Do not cache API endpoints, socket.io communication, or voice signalling
   if (
     url.pathname.startsWith('/api') || 
     url.pathname.startsWith('/socket.io') || 
-    url.pathname.startsWith('/voice') ||
-    event.request.method !== 'GET'
+    url.pathname.startsWith('/voice')
   ) {
     return;
   }
@@ -58,7 +65,9 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {});
         return cachedResponse;
       }
-      return fetch(event.request);
+      return fetch(event.request).catch(() => {
+        return new Response('Network error occurred.', { status: 408, statusText: 'Network Error' });
+      });
     })
   );
 });
