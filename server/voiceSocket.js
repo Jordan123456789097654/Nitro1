@@ -95,6 +95,13 @@ module.exports = function initVoiceSocket(io) {
       }
     });
 
+    // Study Lounge Board Games Sync
+    socket.on('voice_game_action', ({ channelId, action, data }) => {
+      if (channelId) {
+        socket.to(channelId).emit('voice_game_action', { from: socket.id, action, data });
+      }
+    });
+
     // Screen Share Controls
     socket.on('screen_share_start', ({ channelId }) => {
       if (!channelId) return;

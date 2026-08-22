@@ -458,6 +458,7 @@ const db = {
       await pool.query("ALTER TABLE ai_admin_audits ADD COLUMN IF NOT EXISTS action VARCHAR(100);");
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS stock_count INT DEFAULT -1;");
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_spin_at TIMESTAMP;");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -2725,6 +2726,74 @@ JSON Response:`;
     } catch (e) {
       console.error('getShopItems error:', e.message);
       return [];
+    }
+  },
+
+  async claimDailySpin(userId) {
+    try {
+      const userRes = await pool.query('SELECT last_spin_at, coins, xp FROM users WHERE id = $1', [userId]);
+      if (!userRes.rows.length) return { error: 'User not found.' };
+      const user = userRes.rows[0];
+
+      if (user.last_spin_at) {
+        const lastSpin = new Date(user.last_spin_at).getTime();
+        const diff = Date.now() - lastSpin;
+        if (diff < 24 * 60 * 60 * 1000) {
+          const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - diff) / (60 * 60 * 1000));
+          return { error: `Rewards wheel is on cooldown. Try again in ${hoursLeft} hour(s).` };
+        }
+      }
+
+      // Roll rewards (6 wedges on wheel)
+      // Index 0: 50 Coins
+      // Index 1: 100 Coins
+      // Index 2: 250 Coins
+      // Index 3: 500 XP
+      // Index 4: 1000 Coins (JACKPOT!)
+      // Index 5: 150 Coins
+      const roll = Math.random();
+      let index = 0;
+      let reward = { coins: 50, xp: 0, text: '50 Coins' };
+
+      if (roll < 0.05) {
+        index = 4;
+        reward = { coins: 1000, xp: 0, text: '1000 Coins (JACKPOT!)' };
+      } else if (roll < 0.15) {
+        index = 3;
+        reward = { coins: 0, xp: 500, text: '500 XP Boost' };
+      } else if (roll < 0.30) {
+        index = 2;
+        reward = { coins: 250, xp: 0, text: '250 Coins' };
+      } else if (roll < 0.50) {
+        index = 5;
+        reward = { coins: 150, xp: 0, text: '150 Coins' };
+      } else if (roll < 0.80) {
+        index = 1;
+        reward = { coins: 100, xp: 0, text: '100 Coins' };
+      } else {
+        index = 0;
+        reward = { coins: 50, xp: 0, text: '50 Coins' };
+      }
+
+      // Update user coins, XP and spin time
+      const newCoins = (user.coins || 0) + reward.coins;
+      const newXp = (user.xp || 0) + reward.xp;
+      const now = new Date();
+      await pool.query(
+        'UPDATE users SET coins = $1, xp = $2, last_spin_at = $3 WHERE id = $4',
+        [newCoins, newXp, now, userId]
+      );
+
+      return {
+        success: true,
+        index,
+        reward,
+        newCoins,
+        newXp
+      };
+    } catch (e) {
+      console.error('claimDailySpin error:', e.message);
+      return { error: 'Failed to process daily spin reward.' };
     }
   },
 

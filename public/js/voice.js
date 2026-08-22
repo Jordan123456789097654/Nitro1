@@ -1,6 +1,7 @@
 // Real-Time WebRTC Voice Mesh Engine with Spatial 3D Audio, Voice Changer FX, Screen Share & Active Speaker Glow Rings
 import { getCurrentUser } from './auth.js';
 import { getSharedSocket } from './socket.js';
+import { initBoardGames, cleanupBoardGames } from './boardgames.js';
 
 let voiceSocket = null;
 let activeChannelId = null;
@@ -703,6 +704,7 @@ window.joinVoiceChannel = async (channelId, channelName) => {
 
   if (voiceSocket) {
     voiceSocket.emit('voice_join', { channelId, user });
+    initBoardGames(voiceSocket, channelId);
   }
 
   const sharedSocket = getSharedSocket();
@@ -714,6 +716,7 @@ window.joinVoiceChannel = async (channelId, channelName) => {
 };
 
 window.leaveVoiceChannel = (channelId) => {
+  cleanupBoardGames();
   stopAudioLevelDetection();
   stopScreenSharing();
 

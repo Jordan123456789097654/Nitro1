@@ -123,4 +123,20 @@ router.post('/quests/trigger', async (req, res) => {
   }
 });
 
+// POST /api/shop/spin - Spin the daily rewards wheel
+router.post('/spin', async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
+
+  try {
+    const result = await db.claimDailySpin(user.id);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to process daily spin request.' });
+  }
+});
+
 module.exports = router;
