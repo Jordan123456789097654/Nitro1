@@ -1745,6 +1745,43 @@ router.post('/shop/bulk-create', async (req, res) => {
   }
 });
 
+// ADMIN UPDATE SHOP ITEM
+router.post('/shop/:id/update', async (req, res) => {
+  const itemId = req.params.id;
+  const { name, description, price, category, perk_value, delivery_note, stock_count } = req.body;
+  if (!name || !description || price === undefined || !category) {
+    return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
+  }
+
+  try {
+    const updated = await db.updateShopItem(itemId, {
+      name,
+      description,
+      price: parseInt(price, 10),
+      category,
+      perk_value: perk_value || '',
+      delivery_note: delivery_note || '',
+      stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1
+    });
+
+    if (!updated) {
+      return res.status(500).json({ error: 'Failed to update shop item.' });
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'SHOP_ITEM_UPDATED',
+      admin: req.adminUser.username,
+      target: name,
+      details: `Updated shop item ID ${itemId}: "${name}" in category "${category}" for 🪙 ${price} (Stock: ${updated.stock_count})`
+    });
+
+    res.json({ success: true, message: `Shop item "${name}" updated successfully!`, item: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error updating shop item.' });
+  }
+});
+
 // ADMIN DELETE SHOP ITEM
 router.post('/shop/:id/delete', async (req, res) => {
   const itemId = req.params.id;

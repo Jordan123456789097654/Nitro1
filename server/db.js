@@ -2930,6 +2930,21 @@ JSON Response:`;
     }
   },
 
+  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count }) {
+    try {
+      const res = await pool.query(`
+        UPDATE shop_items
+        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7
+        WHERE id = $8
+        RETURNING *
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, id]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('updateShopItem error:', e.message);
+      return null;
+    }
+  },
+
   async createQuest({ title, description, type, target_value, reward_coins, reward_xp }) {
     try {
       const res = await pool.query(`

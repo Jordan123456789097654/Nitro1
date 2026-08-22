@@ -2726,6 +2726,8 @@ window.adminDeleteBug = async function(id) {
   }
 };
 
+let adminShopItemsCache = [];
+
 window.adminFetchShop = async function() {
   const tbody = document.getElementById('admin-shop-tbody');
   if (!tbody) return;
@@ -2737,6 +2739,7 @@ window.adminFetchShop = async function() {
     const data = await res.json();
 
     if (res.ok && data.success) {
+      adminShopItemsCache = data.items || [];
       if (data.items.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No shop items found.</td></tr>`;
         return;
@@ -2758,7 +2761,8 @@ window.adminFetchShop = async function() {
             <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">🪙 ${item.price}</td>
             <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${escapeHtml(item.perk_value || 'None')}</td>
             <td style="padding: 12px 14px; font-weight: 700; font-size: 0.8rem; color: #fbbf24;">${stockStr}</td>
-            <td style="padding: 12px 14px;">
+            <td style="padding: 12px 14px; display: flex; gap: 6px;">
+              <button class="btn-small secondary" onclick="window.adminOpenEditShopModal(${item.id})" style="background: #10b981; border: none; color: #000; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Edit</button>
               <button class="btn-small primary" onclick="window.adminDeleteShopItem(${item.id})" style="background: #ef4444; border: none; color: #fff; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Delete</button>
             </td>
           </tr>
@@ -2771,6 +2775,23 @@ window.adminFetchShop = async function() {
     console.error('Error fetching shop:', err);
     tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Network error fetching items.</td></tr>`;
   }
+};
+
+window.adminOpenEditShopModal = function(id) {
+  const item = adminShopItemsCache.find(x => x.id === id);
+  if (!item) return;
+
+  document.getElementById('admin-edit-shop-id').value = item.id;
+  document.getElementById('admin-edit-shop-name').value = item.name;
+  document.getElementById('admin-edit-shop-desc').value = item.description;
+  document.getElementById('admin-edit-shop-price').value = item.price;
+  document.getElementById('admin-edit-shop-stock').value = item.stock_count !== undefined && item.stock_count !== null ? item.stock_count : -1;
+  document.getElementById('admin-edit-shop-cat').value = item.category;
+  document.getElementById('admin-edit-shop-perk').value = item.perk_value || '';
+  document.getElementById('admin-edit-shop-delivery-note').value = item.delivery_note || '';
+
+  const modal = document.getElementById('admin-edit-shop-modal');
+  if (modal) modal.style.display = 'flex';
 };
 
 window.adminDeleteShopItem = async function(id) {
@@ -2930,6 +2951,48 @@ function setupCreateShopForm() {
         console.error(err);
         alert('Invalid JSON format: ' + err.message);
       }
+    });
+  }
+
+  // Setup Edit Shop Product Modal Forms
+  const editForm = document.getElementById('admin-edit-shop-form');
+  if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('admin-edit-shop-id').value;
+      const name = document.getElementById('admin-edit-shop-name').value.trim();
+      const description = document.getElementById('admin-edit-shop-desc').value.trim();
+      const price = document.getElementById('admin-edit-shop-price').value.trim();
+      const category = document.getElementById('admin-edit-shop-cat').value;
+      const perk_value = document.getElementById('admin-edit-shop-perk').value.trim();
+      const delivery_note = document.getElementById('admin-edit-shop-delivery-note').value.trim();
+      const stock_count = document.getElementById('admin-edit-shop-stock').value.trim();
+
+      try {
+        const res = await authFetch(`/api/admin/shop/${id}/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(data.message);
+          document.getElementById('admin-edit-shop-modal').style.display = 'none';
+          window.adminFetchShop();
+        } else {
+          alert(data.error || 'Failed to update product.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error updating product.');
+      }
+    });
+  }
+
+  const closeBtn = document.getElementById('admin-edit-shop-modal-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      document.getElementById('admin-edit-shop-modal').style.display = 'none';
     });
   }
 }

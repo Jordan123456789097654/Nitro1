@@ -3506,6 +3506,61 @@
     </div>
   </div>
 
+  <!-- ADMIN EDIT SHOP MODAL -->
+  <div class="modal-overlay" id="admin-edit-shop-modal">
+    <div class="modal-card" style="max-width: 540px; max-height: 85vh; overflow-y: auto;">
+      <button class="modal-close" id="admin-edit-shop-modal-close">✕</button>
+      <h2 style="color: #10b981; margin-bottom: 4px; font-size: 1.35rem;">✏️ Edit Shop Product Details</h2>
+      <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Modify item name, price, stock, category, perk values, and delivery notes.</p>
+      
+      <form id="admin-edit-shop-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="admin-edit-shop-id">
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Item Name *</label>
+          <input type="text" id="admin-edit-shop-name" placeholder="e.g. Neon Title Flair" required>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Description *</label>
+          <input type="text" id="admin-edit-shop-desc" placeholder="Short description..." required>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div class="form-group" style="flex: 1;">
+            <label style="font-size: 0.8rem; font-weight: 700;">Price (Coins) *</label>
+            <input type="number" id="admin-edit-shop-price" required min="1">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label style="font-size: 0.8rem; font-weight: 700;">Stock Count (-1 for unlimited)</label>
+            <input type="number" id="admin-edit-shop-stock" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Category *</label>
+          <select id="admin-edit-shop-cat" class="custom-select-dropdown" style="width: 100%;">
+            <option value="custom_flair">Chat Flair Prefix</option>
+            <option value="chat_glow">Username Text Glow</option>
+            <option value="irl_reward">Real-Life / Physical Reward</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Perk Value (Optional)</label>
+          <input type="text" id="admin-edit-shop-perk" placeholder="e.g. fire, gold, or flair text">
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Delivery Notes</label>
+          <input type="text" id="admin-edit-shop-delivery-note" placeholder="e.g. Code will be emailed to you.">
+        </div>
+
+        <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px; font-weight: 800; background: #10b981; color: #000;">💾 Save Product Changes</button>
+      </form>
+    </div>
+  </div>
+
   <!-- SUGGEST GAME MODAL -->
   <div class="modal-overlay" id="suggest-modal">
     <div class="modal-card" style="max-width: 520px;">
