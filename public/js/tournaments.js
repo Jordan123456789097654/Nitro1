@@ -1,6 +1,8 @@
 import { getSharedSocket } from './socket.js';
 import { getCurrentUser } from './auth.js';
 
+const COIN_SVG = `<svg class="coin-icon" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:3px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="2"/><circle cx="12" cy="12" r="6" fill="#f59e0b" stroke="#b45309" stroke-width="1"/><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#78350f" font-size="9" font-weight="900" font-family="sans-serif">$</text></svg>`;
+
 let activeTournamentsList = [];
 let countdownInterval = null;
 let currentScreenshotBase64 = '';
@@ -208,14 +210,14 @@ function renderTournamentDetails(tour) {
   if (titleEl) titleEl.textContent = tour.title;
   if (descEl) descEl.textContent = tour.description || `Play ${tour.game_title} and upload screenshot proof of your high score!`;
   
-  let rewardsStr = `🪙 ${tour.reward_coins} Coins + ${tour.reward_xp} XP`;
+  let rewardsStr = `${COIN_SVG} ${tour.reward_coins} Coins + ${tour.reward_xp} XP`;
   if (tour.reward_flair) {
     rewardsStr += ` + 🏆 "${tour.reward_flair}" Flair`;
   }
   if (tour.reward_custom) {
     rewardsStr += ` + 🎁 ${tour.reward_custom}`;
   }
-  if (prizesEl) prizesEl.textContent = rewardsStr;
+  if (prizesEl) prizesEl.innerHTML = rewardsStr;
 
   startCountdown(tour.end_at);
 

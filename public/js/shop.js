@@ -1,6 +1,8 @@
 // Client-side Shop & Quests Module
 import { getCurrentUser } from './auth.js';
 
+const COIN_SVG = `<svg class="coin-icon" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:3px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="2"/><circle cx="12" cy="12" r="6" fill="#f59e0b" stroke="#b45309" stroke-width="1"/><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#78350f" font-size="9" font-weight="900" font-family="sans-serif">$</text></svg>`;
+
 let activeCategory = 'all';
 let loadedShopItems = [];
 
@@ -129,7 +131,7 @@ function renderStoreItems(items, inventory) {
     } else if (isSoldOut) {
       actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: not-allowed;">SOLD OUT</button>`;
     } else {
-      actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for 🪙 ${item.price}</button>`;
+      actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for ${COIN_SVG} ${item.price}</button>`;
     }
 
     const stockIndicator = item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0
@@ -189,7 +191,7 @@ function renderQuests(quests) {
           
           <!-- Rewards Indicator -->
           <div style="display: flex; gap: 8px; margin-top: 6px; font-size: 0.7rem; font-weight: 700;">
-            <span style="color: #fbbf24;">🪙 +${q.reward_coins} Coins</span>
+            <span style="color: #fbbf24; display: inline-flex; align-items: center; gap: 4px;">${COIN_SVG} +${q.reward_coins} Coins</span>
             <span style="color: #38bdf8;">🏆 +${q.reward_xp} XP</span>
           </div>
         </div>

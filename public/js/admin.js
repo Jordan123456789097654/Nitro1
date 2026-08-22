@@ -1,5 +1,7 @@
 // Admin Dashboard, Live Connections Monitor, Slowmode & Moderation
 import { getCurrentUser, applySignupsGateUI } from './auth.js';
+
+const COIN_SVG = `<svg class="coin-icon" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:3px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="2"/><circle cx="12" cy="12" r="6" fill="#f59e0b" stroke="#b45309" stroke-width="1"/><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#78350f" font-size="9" font-weight="900" font-family="sans-serif">$</text></svg>`;
 import { loadGames } from './games.js';
 import { checkStatusAndAnnouncements, checkUpdateLogs } from './app.js';
 import { loadPolls } from './polls.js';
@@ -2758,7 +2760,7 @@ window.adminFetchShop = async function() {
               <span style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(item.description)}</span>
             </td>
             <td style="padding: 12px 14px; text-transform: uppercase; font-size: 0.75rem; color: #38bdf8; font-weight: 700;">${item.category.replace('_', ' ')}</td>
-            <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">🪙 ${item.price}</td>
+            <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">${COIN_SVG} ${item.price}</td>
             <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${escapeHtml(item.perk_value || 'None')}</td>
             <td style="padding: 12px 14px; font-weight: 700; font-size: 0.8rem; color: #fbbf24;">${stockStr}</td>
             <td style="padding: 12px 14px; display: flex; gap: 6px;">
@@ -2842,7 +2844,7 @@ window.adminFetchQuests = async function() {
             <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #a855f7;">${q.type}</td>
             <td style="padding: 12px 14px; color: #cbd5e1; font-weight: 700;">${q.target_value}</td>
             <td style="padding: 12px 14px; font-size: 0.75rem; font-weight: 700;">
-              <span style="color: #fbbf24; display: block;">🪙 +${q.reward_coins} Coins</span>
+              <span style="color: #fbbf24; display: block;">${COIN_SVG} +${q.reward_coins} Coins</span>
               <span style="color: #38bdf8; display: block;">🏆 +${q.reward_xp} XP</span>
             </td>
             <td style="padding: 12px 14px;">
@@ -3057,7 +3059,7 @@ window.adminFetchShopPurchases = async () => {
           <td style="padding: 10px 12px;"><strong style="color: #38bdf8;">@${escapeHtml(p.username)}</strong></td>
           <td style="padding: 10px 12px; color: #fff; font-weight: 700;">${escapeHtml(p.item_name)}</td>
           <td style="padding: 10px 12px;"><span style="color:#cbd5e1; font-size:0.82rem; font-weight:700;">${escapeHtml(p.category)}</span></td>
-          <td style="padding: 10px 12px; color: #fbbf24; font-weight: 800;">🪙 ${p.price}</td>
+          <td style="padding: 10px 12px; color: #fbbf24; font-weight: 800;">${COIN_SVG} ${p.price}</td>
         </tr>
       `;
     }).join('');

@@ -390,7 +390,7 @@ const BUILTIN_ITEMS = [
   { key: 'bruh', label: '🗿 Bruh Sound', icon: '🗿', color: '#a855f7' },
   { key: 'victorychime', label: '🔔 Victory Chime', icon: '🔔', color: '#10b981' },
   { key: 'airhorn', label: '📢 Airhorn', icon: '📢', color: '#f59e0b' },
-  { key: 'coin', label: '🪙 Retro Coin', icon: '🪙', color: '#fbbf24' },
+  { key: 'coin', label: '💰 Retro Coin', icon: '💰', color: '#fbbf24' },
   { key: 'laser', label: '⚡ Laser Blast', icon: '⚡', color: '#38bdf8' },
   { key: 'gameover', label: '💀 Game Over', icon: '💀', color: '#ef4444' },
   { key: 'drumroll', label: '🥁 Drumroll', icon: '🥁', color: '#a855f7' },
