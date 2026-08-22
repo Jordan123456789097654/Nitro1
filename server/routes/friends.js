@@ -52,6 +52,10 @@ router.post('/request', authenticateToken, async (req, res) => {
     if (result.error) {
       return res.status(400).json({ error: result.error });
     }
+    if (result.autoAccepted && result.friend) {
+      await db.updateQuestProgress(req.user.id, 'add_friends');
+      await db.updateQuestProgress(result.friend.id, 'add_friends');
+    }
     res.json({ success: true, message: `Friend request sent to @${friendUsername}!`, result });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send request.' });
@@ -69,6 +73,12 @@ router.post('/respond', authenticateToken, async (req, res) => {
     const result = await db.respondFriendRequest(req.user.id, requestId, status);
     if (!result || !result.success) {
       return res.status(400).json({ error: 'Failed to process request.' });
+    }
+    if (result.status === 'accepted') {
+      await db.updateQuestProgress(req.user.id, 'add_friends');
+      if (result.senderId) {
+        await db.updateQuestProgress(result.senderId, 'add_friends');
+      }
     }
     res.json({ success: true, status: result.status });
   } catch (err) {

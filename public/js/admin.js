@@ -2730,7 +2730,7 @@ window.adminFetchShop = async function() {
   const tbody = document.getElementById('admin-shop-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading store items...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading store items...</td></tr>`;
 
   try {
     const res = await authFetch('/api/shop/items');
@@ -2738,11 +2738,15 @@ window.adminFetchShop = async function() {
 
     if (res.ok && data.success) {
       if (data.items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No shop items found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No shop items found.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = data.items.map(item => {
+        const stockStr = item.stock_count !== undefined && item.stock_count !== null && item.stock_count >= 0
+          ? (item.stock_count === 0 ? '<span style="color:#ef4444; font-weight:800;">SOLD OUT</span>' : `${item.stock_count} units`)
+          : 'Unlimited';
+
         return `
           <tr style="border-bottom: 1px solid var(--card-border);">
             <td style="padding: 12px 14px; font-weight: 700; color: #10b981;">#${item.id}</td>
@@ -2753,6 +2757,7 @@ window.adminFetchShop = async function() {
             <td style="padding: 12px 14px; text-transform: uppercase; font-size: 0.75rem; color: #38bdf8; font-weight: 700;">${item.category.replace('_', ' ')}</td>
             <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">🪙 ${item.price}</td>
             <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${escapeHtml(item.perk_value || 'None')}</td>
+            <td style="padding: 12px 14px; font-weight: 700; font-size: 0.8rem; color: #fbbf24;">${stockStr}</td>
             <td style="padding: 12px 14px;">
               <button class="btn-small primary" onclick="window.adminDeleteShopItem(${item.id})" style="background: #ef4444; border: none; color: #fff; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Delete</button>
             </td>
@@ -2760,11 +2765,11 @@ window.adminFetchShop = async function() {
         `;
       }).join('');
     } else {
-      tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Failed to load items: ${data.error || 'Server error'}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Failed to load items: ${data.error || 'Server error'}</td></tr>`;
     }
   } catch (err) {
     console.error('Error fetching shop:', err);
-    tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Network error fetching items.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.85rem;">Network error fetching items.</td></tr>`;
   }
 };
 
@@ -2866,12 +2871,13 @@ function setupCreateShopForm() {
       const category = document.getElementById('admin-shop-cat').value;
       const perk_value = document.getElementById('admin-shop-perk').value.trim();
       const delivery_note = document.getElementById('admin-shop-delivery-note')?.value.trim() || '';
+      const stock_count = document.getElementById('admin-shop-stock')?.value.trim() || '-1';
 
       try {
         const res = await authFetch('/api/admin/shop/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -2885,6 +2891,44 @@ function setupCreateShopForm() {
       } catch (err) {
         console.error(err);
         alert('Error creating shop item.');
+      }
+    });
+  }
+
+  // Bulk shop importer
+  const bulkBtn = document.getElementById('admin-bulk-shop-submit-btn');
+  if (bulkBtn) {
+    bulkBtn.addEventListener('click', async () => {
+      const textarea = document.getElementById('admin-bulk-shop-textarea');
+      if (!textarea) return;
+      
+      const raw = textarea.value.trim();
+      if (!raw) return alert('Please enter products JSON array.');
+
+      try {
+        const items = JSON.parse(raw);
+        if (!Array.isArray(items)) {
+          return alert('Input must be a valid JSON array of objects.');
+        }
+
+        const res = await authFetch('/api/admin/shop/bulk-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(`Successfully imported ${data.count} shop products!`);
+          textarea.value = '';
+          document.getElementById('admin-bulk-shop-card').style.display = 'none';
+          window.adminFetchShop();
+        } else {
+          alert(data.error || 'Failed to bulk import products.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Invalid JSON format: ' + err.message);
       }
     });
   }

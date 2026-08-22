@@ -44,6 +44,9 @@ router.post('/buy', async (req, res) => {
       return res.status(400).json({ error: result.error });
     }
 
+    // Update quest progress
+    await db.updateQuestProgress(user.id, 'buy_shop');
+
     res.json({
       success: true,
       message: `Successfully purchased "${result.item.name}"!`,

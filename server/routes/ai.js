@@ -461,6 +461,19 @@ router.post('/ask', async (req, res) => {
       });
     } catch (e) {}
 
+    // Update quest progress for AI Chat if user is authenticated
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026');
+        if (decoded.id) {
+          await db.updateQuestProgress(decoded.id, 'ai_chat');
+        }
+      }
+    } catch (e) {}
+
     return res.json({ answer, success: true });
   }
 

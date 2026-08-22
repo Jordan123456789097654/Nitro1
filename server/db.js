@@ -456,6 +456,8 @@ const db = {
       await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS takedown_reason TEXT DEFAULT '';");
       await pool.query("ALTER TABLE tournaments ADD COLUMN IF NOT EXISTS reward_custom VARCHAR(255) DEFAULT '';");
       await pool.query("ALTER TABLE ai_admin_audits ADD COLUMN IF NOT EXISTS action VARCHAR(100);");
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS stock_count INT DEFAULT -1;");
+      await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;");
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -487,8 +489,28 @@ const db = {
           ('🎮 Arcade Champion', 'Play any game in the unblocked library 25 times', 'play_games', 25, 600, 1000),
           ('💬 Chat Room Regular', 'Send 30 messages in community chat or direct messages', 'send_messages', 30, 300, 500),
           ('📚 Diligent Scholar', 'Record 15 minutes of study or gaming playtime', 'playtime', 900, 300, 500),
-          ('📚 Ultimate Grind', 'Record 1 hour of study or gaming playtime', 'playtime', 3600, 1000, 1500)
+          ('📚 Ultimate Grind', 'Record 1 hour of study or gaming playtime', 'playtime', 3600, 1000, 1500),
+          ('🏆 Quiz Master', 'Ask the AI Homework Helper tutor 5 questions', 'ai_chat', 5, 200, 300),
+          ('👥 Networking Star', 'Add 3 friends to your classmates list', 'add_friends', 3, 150, 250),
+          ('🎤 Voice Chatter', 'Join a class study voice notes channel', 'join_voice', 1, 100, 150),
+          ('⭐ Quality Critic', 'Write 3 detailed ratings/reviews for games you play', 'write_reviews', 3, 200, 300),
+          ('🛒 Smart Spender', 'Buy 2 items from the custom profile shop', 'buy_shop', 2, 250, 400)
         `);
+      } else {
+        const newQuests = [
+          ['🏆 Quiz Master', 'Ask the AI Homework Helper tutor 5 questions', 'ai_chat', 5, 200, 300],
+          ['👥 Networking Star', 'Add 3 friends to your classmates list', 'add_friends', 3, 150, 250],
+          ['🎤 Voice Chatter', 'Join a class study voice notes channel', 'join_voice', 1, 100, 150],
+          ['⭐ Quality Critic', 'Write 3 detailed ratings/reviews for games you play', 'write_reviews', 3, 200, 300],
+          ['🛒 Smart Spender', 'Buy 2 items from the custom profile shop', 'buy_shop', 2, 250, 400]
+        ];
+        for (const [title, desc, type, target, coins, xp] of newQuests) {
+          await pool.query(`
+            INSERT INTO quests (title, description, type, target_value, reward_coins, reward_xp)
+            SELECT $1::VARCHAR, $2::TEXT, $3::VARCHAR, $4::INTEGER, $5::INTEGER, $6::INTEGER
+            WHERE NOT EXISTS (SELECT 1 FROM quests WHERE title = $1::VARCHAR)
+          `, [title, desc, type, target, coins, xp]);
+        }
       }
 
       // Seed default public themes
@@ -2685,7 +2707,7 @@ JSON Response:`;
       }
       if (status === 'accepted') {
         await pool.query(`UPDATE friendships SET status = 'accepted' WHERE id = $1`, [requestId]);
-        return { success: true, status: 'accepted' };
+        return { success: true, status: 'accepted', senderId: req.rows[0].user_id };
       } else {
         await pool.query(`DELETE FROM friendships WHERE id = $1`, [requestId]);
         return { success: true, status: 'declined' };
@@ -2726,9 +2748,20 @@ JSON Response:`;
         return { error: 'You already own this item.' };
       }
 
+      // Check stock count
+      if (item.stock_count !== null && item.stock_count >= 0 && item.stock_count === 0) {
+        return { error: 'This item is sold out.' };
+      }
+
       // Deduct coins and add to inventory
       await pool.query('UPDATE users SET coins = COALESCE(coins, 0) - $1 WHERE id = $2', [item.price, userId]);
       await pool.query('INSERT INTO user_inventory (user_id, item_id) VALUES ($1, $2)', [userId, itemId]);
+
+      // Decrement stock if limited
+      if (item.stock_count !== null && item.stock_count > 0) {
+        await pool.query('UPDATE shop_items SET stock_count = stock_count - 1 WHERE id = $1', [itemId]);
+        item.stock_count -= 1;
+      }
 
       return { success: true, item };
     } catch (e) {
@@ -2757,7 +2790,29 @@ JSON Response:`;
       const questsRes = await pool.query('SELECT * FROM quests WHERE is_active = true ORDER BY id ASC');
       const userQuestsRes = await pool.query('SELECT * FROM user_quests WHERE user_id = $1', [userId]);
 
-      const uqMap = new Map(userQuestsRes.rows.map(q => [q.quest_id, q]));
+      const now = new Date();
+      const processedUqs = [];
+      for (const row of userQuestsRes.rows) {
+        if (row.is_claimed && row.updated_at) {
+          const claimedTime = new Date(row.updated_at);
+          const diffMs = now - claimedTime;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          if (diffHours >= 24) {
+            // Reset the quest progress
+            await pool.query(`
+              UPDATE user_quests
+              SET current_value = 0, is_completed = false, is_claimed = false, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = $1 AND quest_id = $2
+            `, [userId, row.quest_id]);
+            row.current_value = 0;
+            row.is_completed = false;
+            row.is_claimed = false;
+          }
+        }
+        processedUqs.push(row);
+      }
+
+      const uqMap = new Map(processedUqs.map(q => [q.quest_id, q]));
 
       return questsRes.rows.map(q => {
         const uq = uqMap.get(q.id) || { current_value: 0, is_completed: false, is_claimed: false };
@@ -2793,6 +2848,21 @@ JSON Response:`;
           `, [userId, q.id, Math.min(q.target_value, incrementBy), isCompleted]);
         } else {
           const uq = uqRes.rows[0];
+
+          // Check and reset if claimed > 24 hours ago
+          if (uq.is_claimed && uq.updated_at) {
+            const claimedTime = new Date(uq.updated_at);
+            if ((new Date() - claimedTime) / (1000 * 60 * 60) >= 24) {
+              const isCompleted = incrementBy >= q.target_value;
+              await pool.query(`
+                UPDATE user_quests 
+                SET current_value = $1, is_completed = $2, is_claimed = false, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = $3 AND quest_id = $4
+              `, [Math.min(q.target_value, incrementBy), isCompleted, userId, q.id]);
+              continue;
+            }
+          }
+
           if (uq.is_completed) continue;
 
           const newValue = Math.min(q.target_value, uq.current_value + incrementBy);
@@ -2826,7 +2896,7 @@ JSON Response:`;
       if (!uq.is_completed) return { error: 'Quest is not completed yet.' };
       if (uq.is_claimed) return { error: 'Reward has already been claimed.' };
 
-      await pool.query('UPDATE user_quests SET is_claimed = true WHERE user_id = $1 AND quest_id = $2', [userId, questId]);
+      await pool.query('UPDATE user_quests SET is_claimed = true, updated_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND quest_id = $2', [userId, questId]);
       await pool.query('UPDATE users SET coins = COALESCE(coins, 0) + $1, xp = COALESCE(xp, 0) + $2 WHERE id = $3', [uq.reward_coins, uq.reward_xp, userId]);
 
       return { success: true, reward_coins: uq.reward_coins, reward_xp: uq.reward_xp };
@@ -2836,13 +2906,13 @@ JSON Response:`;
     }
   },
 
-  async createShopItem({ name, description, price, category, perk_value, delivery_note }) {
+  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count }) {
     try {
       const res = await pool.query(`
-        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '']);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1]);
       return res.rows[0];
     } catch (e) {
       console.error('createShopItem error:', e.message);

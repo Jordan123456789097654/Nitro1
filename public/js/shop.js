@@ -121,9 +121,20 @@ function renderStoreItems(items, inventory) {
 
   container.innerHTML = filtered.map(item => {
     const isOwned = ownedItemIds.has(item.id);
-    const actionBtn = isOwned 
-      ? `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`
-      : `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for 🪙 ${item.price}</button>`;
+    const isSoldOut = item.stock_count !== undefined && item.stock_count !== null && item.stock_count >= 0 && item.stock_count === 0;
+
+    let actionBtn = '';
+    if (isOwned) {
+      actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`;
+    } else if (isSoldOut) {
+      actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: not-allowed;">SOLD OUT</button>`;
+    } else {
+      actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for 🪙 ${item.price}</button>`;
+    }
+
+    const stockIndicator = item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0
+      ? `<span style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; display: block; margin-top: 4px;">⏳ Only ${item.stock_count} left in stock!</span>`
+      : '';
 
     return `
       <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
@@ -131,6 +142,7 @@ function renderStoreItems(items, inventory) {
           <span style="font-size: 0.7rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">${item.category.replace('_', ' ')}</span>
           <strong style="color: #fff; font-size: 0.88rem; display: block;">${escapeHtml(item.name)}</strong>
           <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.3;">${escapeHtml(item.description)}</p>
+          ${stockIndicator}
         </div>
         <div>
           ${actionBtn}

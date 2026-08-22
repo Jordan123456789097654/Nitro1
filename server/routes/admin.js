@@ -1673,7 +1673,7 @@ router.post('/appeals/:id/review', async (req, res) => {
 
 // ADMIN CREATE SHOP ITEM
 router.post('/shop/create', async (req, res) => {
-  const { name, description, price, category, perk_value, delivery_note } = req.body;
+  const { name, description, price, category, perk_value, delivery_note, stock_count } = req.body;
   if (!name || !description || !price || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
   }
@@ -1685,7 +1685,8 @@ router.post('/shop/create', async (req, res) => {
       price: parseInt(price, 10),
       category,
       perk_value: perk_value || '',
-      delivery_note: delivery_note || ''
+      delivery_note: delivery_note || '',
+      stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1
     });
 
     if (!newItem) {
@@ -1697,12 +1698,50 @@ router.post('/shop/create', async (req, res) => {
       action: 'SHOP_ITEM_CREATED',
       admin: req.adminUser.username,
       target: name,
-      details: `Created shop item "${name}" in category "${category}" for 🪙 ${price}`
+      details: `Created shop item "${name}" in category "${category}" for 🪙 ${price} (Stock: ${newItem.stock_count})`
     });
 
     res.json({ success: true, message: `Shop item "${name}" created successfully!`, item: newItem });
   } catch (err) {
     res.status(500).json({ error: err.message || 'Error creating shop item.' });
+  }
+});
+
+// ADMIN BULK CREATE SHOP ITEMS
+router.post('/shop/bulk-create', async (req, res) => {
+  const { items } = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Valid array of items is required.' });
+  }
+
+  const created = [];
+  try {
+    for (const item of items) {
+      const { name, description, price, category, perk_value, delivery_note, stock_count } = item;
+      if (!name || !description || price === undefined || !category) continue;
+
+      const newItem = await db.createShopItem({
+        name,
+        description,
+        price: parseInt(price, 10),
+        category,
+        perk_value: perk_value || '',
+        delivery_note: delivery_note || '',
+        stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1
+      });
+      if (newItem) created.push(newItem);
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'SHOP_ITEMS_BULK_CREATED',
+      admin: req.adminUser.username,
+      details: `Bulk created ${created.length} shop items.`
+    });
+
+    res.json({ success: true, count: created.length, items: created });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to bulk create shop items.' });
   }
 });
 

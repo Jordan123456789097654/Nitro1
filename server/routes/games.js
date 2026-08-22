@@ -244,6 +244,8 @@ router.post('/:slug/reviews', async (req, res) => {
       details: `Rating: ${rating}/5 Stars. Review: "${review_text || 'No text'}"`
     });
 
+    // Update quest progress
+    await db.updateQuestProgress(user.id, 'write_reviews');
     res.status(201).json({ success: true, review });
   } catch (e) {
     res.status(500).json({ error: 'Failed to post review.' });

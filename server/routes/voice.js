@@ -24,11 +24,14 @@ router.post('/create', requireAuth, (req, res) => {
 });
 
 // Join a channel (adds participant, socket will join via socket.io later)
-router.post('/join', requireAuth, (req, res) => {
+router.post('/join', requireAuth, async (req, res) => {
   const { channelId } = req.body;
   if (!channelId) return res.status(400).json({ error: 'channelId required' });
   const channel = voiceManager.getChannel(channelId);
   if (!channel) return res.status(404).json({ error: 'Channel not found' });
+  // Update quest progress
+  const db = require('../db');
+  await db.updateQuestProgress(req.user.id, 'join_voice');
   // No socket join here; client will emit socket event after receiving OK.
   res.json({ success: true, channelId, name: channel.name });
 });

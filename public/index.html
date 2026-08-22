@@ -3144,7 +3144,10 @@
         <div class="admin-tab-content" id="tab-adminshop" style="display: none;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
             <h3 style="color: #10b981; margin: 0;">🛍️ Shop Store Items Manager</h3>
-            <button class="btn-small secondary" onclick="document.getElementById('admin-create-shop-card').style.display = document.getElementById('admin-create-shop-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Add Store Item</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-small secondary" onclick="document.getElementById('admin-create-shop-card').style.display = document.getElementById('admin-create-shop-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Add Store Item</button>
+              <button class="btn-small secondary" onclick="document.getElementById('admin-bulk-shop-card').style.display = document.getElementById('admin-bulk-shop-card').style.display === 'none' ? 'block' : 'none'" style="color: #fbbf24;">📤 Bulk Import Products</button>
+            </div>
           </div>
 
           <!-- Create Shop Item Form -->
@@ -3164,6 +3167,10 @@
                 <input type="number" id="admin-shop-price" required value="100" min="1" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
               </div>
               <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Stock Count (-1 for unlimited)</label>
+                <input type="number" id="admin-shop-stock" required value="-1" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
                 <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Category *</label>
                 <select id="admin-shop-cat" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem; height: 34px;">
                   <option value="custom_flair">Chat Flair Prefix</option>
@@ -3176,13 +3183,21 @@
                 <input type="text" id="admin-shop-perk" placeholder="e.g. fire, gold, or flair text" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
               </div>
               <div>
-                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Delivery/Claiming Notes (For IRL Rewards)</label>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Delivery notes</label>
                 <input type="text" id="admin-shop-delivery-note" placeholder="e.g. Code will be emailed to you." style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
               </div>
               <div>
                 <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800; background: #10b981; color: #000;">Add Item</button>
               </div>
             </form>
+          </div>
+
+          <!-- Bulk Import Shop Items Card -->
+          <div id="admin-bulk-shop-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: none;">
+            <h4 style="margin: 0 0 8px; color: #fbbf24;">📤 Mass Add Shop Products</h4>
+            <p style="color: var(--text-muted); font-size: 0.76rem; margin-bottom: 12px;">Paste a JSON array of products. Example: <code>[{"name": "Item 1", "description": "Desc", "price": 100, "category": "custom_flair", "stock_count": 10}]</code></p>
+            <textarea id="admin-bulk-shop-textarea" placeholder='[{"name": "Neon Username", "description": "Gives neon chat effect", "price": 250, "category": "chat_glow", "perk_value": "#ff00ea", "stock_count": 5}]' style="width: 100%; height: 120px; background: #000; border: 1px solid var(--card-border); color: #fbbf24; border-radius: 8px; font-family: monospace; font-size: 0.78rem; padding: 10px; resize: vertical; outline: none; margin-bottom: 12px;"></textarea>
+            <button id="admin-bulk-shop-submit-btn" class="btn-small" style="background: #fbbf24; color: #000; font-weight: 800; padding: 6px 16px;">Import Items</button>
           </div>
 
           <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">
@@ -3194,6 +3209,7 @@
                   <th style="padding: 12px 14px;">Category</th>
                   <th style="padding: 12px 14px;">Price</th>
                   <th style="padding: 12px 14px;">Perk Value</th>
+                  <th style="padding: 12px 14px;">Stock</th>
                   <th style="padding: 12px 14px;">Actions</th>
                 </tr>
               </thead>
