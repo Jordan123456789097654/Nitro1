@@ -138,12 +138,16 @@ function renderStoreItems(items, inventory) {
       ? `<span style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; display: block; margin-top: 4px;">⏳ Only ${item.stock_count} left in stock!</span>`
       : '';
 
+    const badgeClass = ['chat_glow', 'custom_flair', 'irl_reward'].includes(item.category)
+      ? `shop-badge-${item.category}`
+      : 'shop-badge-default';
+
     return `
-      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
+      <div class="shop-item-card">
         <div>
-          <span style="font-size: 0.7rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">${item.category.replace('_', ' ')}</span>
-          <strong style="color: #fff; font-size: 0.88rem; display: block;">${escapeHtml(item.name)}</strong>
-          <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.3;">${escapeHtml(item.description)}</p>
+          <span class="shop-badge ${badgeClass}">${item.category.replace('_', ' ')}</span>
+          <strong style="color: #fff; font-size: 0.88rem; display: block; margin-top: 4px;">${escapeHtml(item.name)}</strong>
+          <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.35;">${escapeHtml(item.description)}</p>
           ${stockIndicator}
         </div>
         <div>

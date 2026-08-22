@@ -99,6 +99,55 @@
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Premium Shop Card Styles */
+    .shop-item-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.25s, box-shadow 0.25s;
+    }
+    .shop-item-card:hover {
+      transform: translateY(-3px) scale(1.02);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.08);
+    }
+    .shop-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      width: fit-content;
+    }
+    .shop-badge-chat_glow {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid #a855f7;
+      color: #c084fc;
+    }
+    .shop-badge-custom_flair {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      color: #34d399;
+    }
+    .shop-badge-irl_reward {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid #f59e0b;
+      color: #fbbf24;
+    }
+    .shop-badge-default {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #cbd5e1;
+    }
   </style>
 </head>
 <body>
@@ -2181,17 +2230,17 @@
         <div style="display: flex; align-items: center; gap: 20px; flex-shrink: 0; margin: 0 auto;">
           <div style="position: relative; width: 140px; height: 140px;">
             <!-- Indicator Arrow -->
-            <div style="position: absolute; top: -10px; left: calc(50% - 10px); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 15px solid #ef4444; z-index: 10;"></div>
+            <div style="position: absolute; top: -12px; left: calc(50% - 10px); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 16px solid #fbbf24; z-index: 10; filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.85));"></div>
             
-            <svg id="wheel-svg" style="width: 100%; height: 100%; transform: rotate(0deg); transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="48" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+            <svg id="wheel-svg" style="width: 100%; height: 100%; transform: rotate(0deg); transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1); filter: drop-shadow(0 4px 15px rgba(0,0,0,0.6));" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="48" fill="#111827" stroke="#fbbf24" stroke-width="2.5"/>
               <!-- wedges -->
-              <path d="M50,50 L50,2 A48,48 0 0,1 91.5,26 Z" fill="#b45309" />
+              <path d="M50,50 L50,2 A48,48 0 0,1 91.5,26 Z" fill="#6d28d9" />
               <path d="M50,50 L91.5,26 A48,48 0 0,1 91.5,74 Z" fill="#047857" />
-              <path d="M50,50 L91.5,74 A48,48 0 0,1 50,98 Z" fill="#0369a1" />
-              <path d="M50,50 L50,98 A48,48 0 0,1 8.5,74 Z" fill="#7c2d12" />
-              <path d="M50,50 L8.5,74 A48,48 0 0,1 8.5,26 Z" fill="#1e1b4b" />
-              <path d="M50,50 L8.5,26 A48,48 0 0,1 50,2 Z" fill="#065f46" />
+              <path d="M50,50 L91.5,74 A48,48 0 0,1 50,98 Z" fill="#1d4ed8" />
+              <path d="M50,50 L50,98 A48,48 0 0,1 8.5,74 Z" fill="#be123c" />
+              <path d="M50,50 L8.5,74 A48,48 0 0,1 8.5,26 Z" fill="#b45309" />
+              <path d="M50,50 L8.5,26 A48,48 0 0,1 50,2 Z" fill="#0369a1" />
               
               <!-- Wedge text/value placeholders labels centered -->
               <text x="70" y="24" transform="rotate(30, 70, 24)" fill="#fff" font-size="5" font-weight="900" text-anchor="middle">50 🪙</text>
@@ -2208,6 +2257,20 @@
               <line x1="50" y1="50" x2="50" y2="98" stroke="#fbbf24" stroke-width="1.5"/>
               <line x1="50" y1="50" x2="8.5" y2="74" stroke="#fbbf24" stroke-width="1.5"/>
               <line x1="50" y1="50" x2="8.5" y2="26" stroke="#fbbf24" stroke-width="1.5"/>
+
+              <!-- Outer border bulbs -->
+              <circle cx="50" cy="5" r="1.5" fill="#fff" />
+              <circle cx="72.5" cy="11" r="1.5" fill="#fff" />
+              <circle cx="89" cy="27.5" r="1.5" fill="#fff" />
+              <circle cx="95" cy="50" r="1.5" fill="#fff" />
+              <circle cx="89" cy="72.5" r="1.5" fill="#fff" />
+              <circle cx="72.5" cy="89" r="1.5" fill="#fff" />
+              <circle cx="50" cy="95" r="1.5" fill="#fff" />
+              <circle cx="27.5" cy="89" r="1.5" fill="#fff" />
+              <circle cx="11" cy="72.5" r="1.5" fill="#fff" />
+              <circle cx="5" cy="50" r="1.5" fill="#fff" />
+              <circle cx="11" cy="27.5" r="1.5" fill="#fff" />
+              <circle cx="27.5" cy="11" r="1.5" fill="#fff" />
 
               <!-- Inner center hub -->
               <circle cx="50" cy="50" r="10" fill="#fbbf24" stroke="#fff" stroke-width="1.5"/>
@@ -4243,7 +4306,10 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-          .then((reg) => console.log('⚡ Service worker registered successfully:', reg.scope))
+          .then((reg) => {
+            console.log('⚡ Service worker registered successfully:', reg.scope);
+            reg.update();
+          })
           .catch((err) => console.warn('❌ Service worker registration failed:', err));
       });
     }

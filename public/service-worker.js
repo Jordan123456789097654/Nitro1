@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nitro-hub-v1';
+const CACHE_NAME = 'nitro-hub-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
