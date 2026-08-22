@@ -69,6 +69,13 @@ export function initVoiceRooms() {
   setupPttKeyListeners();
   setupStudyRoomModal();
   connectVoiceSocket();
+
+  // Resume Web Audio Context on click to bypass browser autoplay rules
+  window.addEventListener('click', () => {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  });
 }
 
 function connectVoiceSocket() {
@@ -471,7 +478,10 @@ function createPeerConnection(targetSocketId) {
   };
 
   pc.ontrack = (event) => {
-    const stream = event.streams[0];
+    let stream = event.streams[0];
+    if (!stream) {
+      stream = new MediaStream([event.track]);
+    }
     const isVideo = event.track.kind === 'video';
 
     if (isVideo) {
@@ -493,13 +503,17 @@ function createPeerConnection(targetSocketId) {
       document.body.appendChild(audioEl);
     }
     audioEl.srcObject = stream;
-    audioEl.muted = isDeafened;
-    audioEl.volume = Math.min(1.0, Math.max(0.0, peerVolumes[targetSocketId] ?? 1.0));
-    audioEl.play().catch(err => console.warn(`Peer audio playback deferred for ${targetSocketId}:`, err.message));
 
-    // Spatial 3D Panning
+    let routedToWebAudio = false;
     try {
-      if (audioCtx && isSpatialAudioEnabled) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (isSpatialAudioEnabled) {
         const peerSource = audioCtx.createMediaStreamSource(stream);
         const panner = audioCtx.createStereoPanner();
         const peerCount = Object.keys(peerConnections).length;
@@ -508,8 +522,20 @@ function createPeerConnection(targetSocketId) {
         peerSource.connect(panner);
         panner.connect(audioCtx.destination);
         peerPannerNodes[targetSocketId] = panner;
+        routedToWebAudio = true;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Web Audio spatial panning routing failed, falling back to direct HTML audio:', e);
+    }
+
+    if (routedToWebAudio) {
+      audioEl.muted = true;
+    } else {
+      audioEl.muted = isDeafened;
+      audioEl.volume = Math.min(1.0, Math.max(0.0, peerVolumes[targetSocketId] ?? 1.0));
+    }
+
+    audioEl.play().catch(err => console.warn(`Peer audio playback deferred for ${targetSocketId}:`, err.message));
   };
 
   return pc;
@@ -654,8 +680,12 @@ window.joinVoiceChannel = async (channelId, channelName) => {
     }
     startAudioLevelDetection(localStream);
   } catch (e) {
-    alert('🎤 Microphone permission is required for voice rooms.');
-    return;
+    console.warn('Microphone permission denied, joining in listen-only mode:', e.message);
+    localStream = null;
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    alert('🎙️ Joining in Listen-Only Mode (Microphone access was denied or unavailable).');
   }
 
   activeChannelId = channelId;
