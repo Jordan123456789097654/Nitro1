@@ -2042,4 +2042,101 @@ router.post('/tournaments/:id/close', async (req, res) => {
   }
 });
 
+// Create a new raffle
+router.post('/raffles/create', async (req, res) => {
+  const admin = req.adminUser.username;
+  const { title, description, ticket_cost, max_tickets_per_user, ends_at } = req.body;
+
+  if (!title || !ends_at) {
+    return res.status(400).json({ error: 'Title and Ends At timestamp are required.' });
+  }
+
+  try {
+    const raffle = await db.createRaffle({
+      title,
+      description,
+      ticket_cost: parseInt(ticket_cost, 10) || 50,
+      max_tickets_per_user: parseInt(max_tickets_per_user, 10) || -1,
+      ends_at: new Date(ends_at)
+    });
+
+    if (!raffle) {
+      return res.status(500).json({ error: 'Failed to create raffle.' });
+    }
+
+    await db.createModerationLog('CREATE_RAFFLE', admin, title, `Created raffle "${title}" ending at ${ends_at}`);
+
+    sendDiscordLog({
+      category: 'updates',
+      action: 'RAFFLE_CREATED',
+      admin,
+      target: title,
+      details: `Created raffle ID ${raffle.id} ending at ${ends_at}`
+    });
+
+    res.json({ success: true, raffle });
+  } catch (err) {
+    console.error('Create raffle error:', err);
+    res.status(500).json({ error: 'Failed to create raffle.' });
+  }
+});
+
+// Draw a winner for a raffle manually
+router.post('/raffles/:id/draw', async (req, res) => {
+  const admin = req.adminUser.username;
+  const raffleId = parseInt(req.params.id, 10);
+
+  try {
+    const result = await db.drawRaffleWinner(raffleId);
+    if (result.error) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    const raffleRes = await db.pool.query('SELECT title FROM raffles WHERE id = $1', [raffleId]);
+    const raffleTitle = raffleRes.rows[0] ? raffleRes.rows[0].title : `Raffle #${raffleId}`;
+
+    await db.createModerationLog('DRAW_RAFFLE', admin, raffleTitle, `Drew winner for raffle #${raffleId}`);
+
+    // If there is a winner, emit a system message in the chat
+    if (result.winner) {
+      const io = req.app.get('io');
+      if (io) {
+        const systemMessage = {
+          id: Date.now() + Math.random(),
+          username: 'System',
+          message: `🎟️ **Raffle Completed!** Congratulations to **@${result.winner.username}** for winning the raffle: "${raffleTitle}"! 🎁`,
+          created_at: new Date(),
+          role: 'admin',
+          is_system: true
+        };
+        io.emit('new_message', systemMessage);
+      }
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error('Draw raffle winner error:', err);
+    res.status(500).json({ error: 'Failed to draw winner.' });
+  }
+});
+
+// Delete a raffle
+router.post('/raffles/:id/delete', async (req, res) => {
+  const admin = req.adminUser.username;
+  const raffleId = parseInt(req.params.id, 10);
+
+  try {
+    const deleted = await db.deleteRaffle(raffleId);
+    if (!deleted) {
+      return res.status(500).json({ error: 'Failed to delete raffle.' });
+    }
+
+    await db.createModerationLog('DELETE_RAFFLE', admin, `Raffle #${raffleId}`, `Deleted raffle #${raffleId}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete raffle error:', err);
+    res.status(500).json({ error: 'Failed to delete raffle.' });
+  }
+});
+
 module.exports = router;

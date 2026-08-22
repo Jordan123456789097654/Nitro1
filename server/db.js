@@ -447,6 +447,25 @@ const db = {
           reviewed_at TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS raffles (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          description TEXT DEFAULT '',
+          ticket_cost INT DEFAULT 50,
+          max_tickets_per_user INT DEFAULT -1,
+          ends_at TIMESTAMPTZ NOT NULL,
+          winner_id INT REFERENCES users(id) ON DELETE SET NULL,
+          is_drawn BOOLEAN DEFAULT false,
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS raffle_tickets (
+          id SERIAL PRIMARY KEY,
+          raffle_id INT REFERENCES raffles(id) ON DELETE CASCADE,
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
@@ -2726,6 +2745,143 @@ JSON Response:`;
     } catch (e) {
       console.error('getShopItems error:', e.message);
       return [];
+    }
+  },
+
+  async createRaffle({ title, description, ticket_cost, max_tickets_per_user, ends_at }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO raffles (title, description, ticket_cost, max_tickets_per_user, ends_at)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [title, description, ticket_cost, max_tickets_per_user, ends_at]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createRaffle error:', e.message);
+      return null;
+    }
+  },
+
+  async getRaffles(userId) {
+    try {
+      // Lazy evaluation of expired, undrawn raffles (auto-draw them!)
+      const now = new Date();
+      const expiredRes = await pool.query('SELECT id FROM raffles WHERE ends_at <= $1 AND is_drawn = false', [now]);
+      for (const row of expiredRes.rows) {
+        await this.drawRaffleWinner(row.id);
+      }
+
+      // Fetch all raffles
+      const res = await pool.query(`
+        SELECT r.*, 
+               u.username as winner_username, 
+               u.display_name as winner_display_name,
+               (SELECT COUNT(*) FROM raffle_tickets t WHERE t.raffle_id = r.id) as total_tickets_sold,
+               (SELECT COUNT(*) FROM raffle_tickets t WHERE t.raffle_id = r.id AND t.user_id = $1) as user_tickets_count
+        FROM raffles r
+        LEFT JOIN users u ON r.winner_id = u.id
+        ORDER BY r.is_drawn ASC, r.ends_at ASC, r.id DESC
+      `, [userId || 0]);
+      return res.rows;
+    } catch (e) {
+      console.error('getRaffles error:', e.message);
+      return [];
+    }
+  },
+
+  async buyRaffleTickets(userId, raffleId, count) {
+    try {
+      const userRes = await pool.query('SELECT coins FROM users WHERE id = $1', [userId]);
+      if (!userRes.rows.length) return { error: 'User not found.' };
+      const userCoins = userRes.rows[0].coins || 0;
+
+      const raffleRes = await pool.query('SELECT * FROM raffles WHERE id = $1', [raffleId]);
+      if (!raffleRes.rows.length) return { error: 'Raffle not found.' };
+      const raffle = raffleRes.rows[0];
+
+      if (raffle.is_drawn || new Date(raffle.ends_at).getTime() <= Date.now()) {
+        return { error: 'This raffle has already closed.' };
+      }
+
+      const totalCost = raffle.ticket_cost * count;
+      if (userCoins < totalCost) {
+        return { error: `Insufficient coins. Tickets cost 🪙 ${totalCost} but you only have 🪙 ${userCoins}.` };
+      }
+
+      // Limit check
+      if (raffle.max_tickets_per_user > 0) {
+        const userTicketsRes = await pool.query('SELECT COUNT(*) FROM raffle_tickets WHERE raffle_id = $1 AND user_id = $2', [raffleId, userId]);
+        const userTicketsCount = parseInt(userTicketsRes.rows[0].count, 10);
+        if (userTicketsCount + count > raffle.max_tickets_per_user) {
+          return { error: `Purchase limit exceeded. You can only buy up to ${raffle.max_tickets_per_user} tickets (you already own ${userTicketsCount}).` };
+        }
+      }
+
+      // Deduct coins & insert tickets
+      await pool.query('BEGIN');
+      await pool.query('UPDATE users SET coins = coins - $1 WHERE id = $2', [totalCost, userId]);
+      for (let i = 0; i < count; i++) {
+        await pool.query('INSERT INTO raffle_tickets (raffle_id, user_id) VALUES ($1, $2)', [raffleId, userId]);
+      }
+      await pool.query('COMMIT');
+
+      return { success: true, count, totalCost };
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      console.error('buyRaffleTickets error:', e.message);
+      return { error: 'Failed to purchase raffle tickets.' };
+    }
+  },
+
+  async drawRaffleWinner(raffleId) {
+    try {
+      const raffleRes = await pool.query('SELECT * FROM raffles WHERE id = $1', [raffleId]);
+      if (!raffleRes.rows.length) return { error: 'Raffle not found.' };
+      const raffle = raffleRes.rows[0];
+
+      if (raffle.is_drawn) {
+        return { error: 'Raffle winner has already been drawn.' };
+      }
+
+      // Fetch all tickets for this raffle
+      const ticketsRes = await pool.query('SELECT * FROM raffle_tickets WHERE raffle_id = $1', [raffleId]);
+      if (!ticketsRes.rows.length) {
+        // No tickets sold - mark as drawn with no winner
+        await pool.query('UPDATE raffles SET is_drawn = true WHERE id = $1', [raffleId]);
+        return { success: true, winner: null };
+      }
+
+      // Pick a random ticket
+      const randomIndex = Math.floor(Math.random() * ticketsRes.rows.length);
+      const winningTicket = ticketsRes.rows[randomIndex];
+      const winnerId = winningTicket.user_id;
+
+      const winnerUser = await this.getUserById(winnerId);
+
+      // Set winner
+      await pool.query('UPDATE raffles SET winner_id = $1, is_drawn = true WHERE id = $2', [winnerId, raffleId]);
+
+      return {
+        success: true,
+        winner: {
+          id: winnerId,
+          username: winnerUser.username,
+          display_name: winnerUser.display_name
+        }
+      };
+    } catch (e) {
+      console.error('drawRaffleWinner error:', e.message);
+      return { error: 'Failed to draw raffle winner.' };
+    }
+  },
+
+  async deleteRaffle(raffleId) {
+    try {
+      await pool.query('DELETE FROM raffles WHERE id = $1', [raffleId]);
+      return true;
+    } catch (e) {
+      console.error('deleteRaffle error:', e.message);
+      return false;
     }
   },
 

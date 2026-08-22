@@ -282,6 +282,7 @@ app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/shop', require('./routes/shop'));
 app.use('/api/themes', require('./routes/themes'));
 app.use('/api/tournaments', require('./routes/tournaments'));
+app.use('/api/raffles', require('./routes/raffles'));
 
 // GET /api/weather - Proxy wttr.in with curl user-agent to ensure clean plain-text return
 app.get('/api/weather', async (req, res) => {

@@ -16,6 +16,7 @@ import { initNotifications } from './notifications.js';
 import { initShop } from './shop.js';
 import { initTournaments } from './tournaments.js';
 import { initSpinWheel } from './spin.js';
+import { initRaffles } from './raffles.js';
 
 export const FAVICON_MAP = {
   default: '/favicon.svg',
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initShop();
   initTournaments();
   initSpinWheel();
+  initRaffles();
   initGames();
   initChat();
   initAdmin();

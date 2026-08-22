@@ -2221,13 +2221,26 @@
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-        <!-- Quests Segment -->
-        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;">
-          <h2 style="color: #38bdf8; font-size: 1.2rem; margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-            <span>🏆</span> Daily Challenges & Quests
-          </h2>
-          <div id="quests-list-container" style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading quests...</div>
+        <!-- Quests & Raffles Column -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Quests Segment -->
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;">
+            <h2 style="color: #38bdf8; font-size: 1.2rem; margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+              <span>🏆</span> Daily Challenges & Quests
+            </h2>
+            <div id="quests-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading quests...</div>
+            </div>
+          </div>
+
+          <!-- Raffles Segment -->
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;">
+            <h2 style="color: #fbbf24; font-size: 1.2rem; margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+              <span>🎟️</span> Live Raffles & Prize Draws
+            </h2>
+            <div id="raffles-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading raffles...</div>
+            </div>
           </div>
         </div>
 
@@ -2343,6 +2356,7 @@
               <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
               <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
               <button class="admin-tab-btn" data-tab="admintournaments" onclick="window.adminFetchTournaments()">🏆 Tournaments (Jams)</button>
+              <button class="admin-tab-btn" data-tab="adminraffles" onclick="window.adminFetchRaffles()">🎟️ Manage Raffles</button>
             </div>
           </div>
         </div>
@@ -2600,6 +2614,70 @@
           <div style="position: relative; max-width: 90vw; max-height: 90vh;">
             <button style="position: absolute; top: -35px; right: 0; background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">✕ Close</button>
             <img id="tour-lightbox-img" style="max-width: 100%; max-height: 85vh; border: 2px solid #38bdf8; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.85);" onclick="event.stopPropagation()">
+          </div>
+        </div>
+
+        <!-- Admin Tab: Raffles Manager -->
+        <div class="admin-tab-content" id="tab-adminraffles" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 24px; align-items: start;">
+            
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px;">
+              <h3 style="color: #fbbf24; margin: 0 0 14px 0; font-size: 1.15rem; font-weight: 800;">🎟️ Create New Coin Raffle</h3>
+              <form id="admin-raffle-form" style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="form-group" style="margin: 0;">
+                  <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1;">Raffle Title / Prize</label>
+                  <input type="text" id="admin-raffle-title" required placeholder="e.g. $10 Amazon Gift Card" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff;">
+                </div>
+
+                <div class="form-group" style="margin: 0;">
+                  <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1;">Description</label>
+                  <textarea id="admin-raffle-desc" placeholder="Details about this raffle draw..." style="width: 100%; height: 60px; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; font-size: 0.82rem; resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1;">Ticket Cost (Coins)</label>
+                    <input type="number" id="admin-raffle-cost" value="50" min="1" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff;">
+                  </div>
+                  <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1;">Max Tickets / User</label>
+                    <input type="number" id="admin-raffle-limit" value="-1" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff;" title="Set to -1 for unlimited">
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin: 0;">
+                  <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1;">Ends At Date/Time</label>
+                  <input type="datetime-local" id="admin-raffle-ends" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff;">
+                </div>
+
+                <button type="submit" class="btn-pill primary" style="background: #fbbf24; border-color: #fbbf24; color: #000; font-weight: 800; margin-top: 8px;">Create Raffle Draw</button>
+              </form>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px;">
+              <h3 style="color: #fbbf24; margin: 0 0 14px 0; font-size: 1.15rem; font-weight: 800;">🎟️ Active & Ended Raffles</h3>
+              <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+                  <thead>
+                    <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+                      <th style="padding: 8px;">ID</th>
+                      <th style="padding: 8px;">Title</th>
+                      <th style="padding: 8px;">Price</th>
+                      <th style="padding: 8px;">Sold</th>
+                      <th style="padding: 8px;">Ends At</th>
+                      <th style="padding: 8px;">Winner</th>
+                      <th style="padding: 8px; text-align: right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-raffles-table-body">
+                    <tr>
+                      <td colspan="7" style="padding: 20px; text-align: center; color: var(--text-muted);">No raffles created yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         </div>
 

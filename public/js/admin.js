@@ -3309,4 +3309,132 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const raffleForm = document.getElementById('admin-raffle-form');
+  if (raffleForm) {
+    raffleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('admin-raffle-title').value.trim();
+      const description = document.getElementById('admin-raffle-desc').value.trim();
+      const ticketCost = document.getElementById('admin-raffle-cost').value;
+      const maxTickets = document.getElementById('admin-raffle-limit').value;
+      const endsAt = document.getElementById('admin-raffle-ends').value;
+
+      try {
+        const res = await authFetch('/api/admin/raffles/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            description,
+            ticket_cost: parseInt(ticketCost, 10),
+            max_tickets_per_user: parseInt(maxTickets, 10),
+            ends_at: endsAt
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert('🎟️ Raffle successfully created!');
+          raffleForm.reset();
+          window.adminFetchRaffles();
+        } else {
+          alert(data.error || 'Failed to create raffle.');
+        }
+      } catch (err) {
+        alert('Network error creating raffle.');
+      }
+    });
+  }
 });
+
+window.adminFetchRaffles = async () => {
+  const tbody = document.getElementById('admin-raffles-table-body');
+  if (!tbody) return;
+
+  try {
+    const res = await authFetch('/api/raffles');
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      tbody.innerHTML = `<tr><td colspan="7" style="padding: 14px; text-align: center; color: #ef4444;">Failed to load raffles.</td></tr>`;
+      return;
+    }
+
+    const raffles = data.raffles || [];
+    if (raffles.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="padding: 14px; text-align: center; color: var(--text-muted);">No raffles created yet.</td></tr>`;
+      return;
+    }
+
+    let html = '';
+    raffles.forEach(raffle => {
+      const endsTime = new Date(raffle.ends_at).getTime();
+      const isExpired = endsTime <= Date.now();
+      const isClosed = raffle.is_drawn || isExpired;
+
+      html += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); hover: background rgba(255,255,255,0.02);">
+          <td style="padding: 8px;">${raffle.id}</td>
+          <td style="padding: 8px; font-weight: 700; color: #fbbf24;">${escapeHtml(raffle.title)}</td>
+          <td style="padding: 8px;">🪙 ${raffle.ticket_cost}</td>
+          <td style="padding: 8px;">${raffle.total_tickets_sold || 0}</td>
+          <td style="padding: 8px; color: ${isClosed ? 'var(--text-muted)' : '#cbd5e1'};">${new Date(raffle.ends_at).toLocaleString()}</td>
+          <td style="padding: 8px; color: #10b981; font-weight: 700;">${raffle.winner_username ? `@${escapeHtml(raffle.winner_display_name || raffle.winner_username)}` : (isClosed ? 'No participants' : 'Pending')}</td>
+          <td style="padding: 8px; text-align: right; display: flex; gap: 6px; justify-content: flex-end;">
+            ${!raffle.is_drawn ? `
+              <button class="btn-small draw-winner-btn" data-id="${raffle.id}" style="background: #10b981; color: #000; font-weight: 700; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer;">Draw</button>
+            ` : ''}
+            <button class="btn-small danger delete-raffle-btn" data-id="${raffle.id}" style="border-radius: 4px; padding: 4px 10px; cursor: pointer;">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+
+    // Bind Draw winner buttons
+    tbody.querySelectorAll('.draw-winner-btn').forEach(btn => {
+      btn.onclick = async () => {
+        if (!confirm('Are you sure you want to draw the winner for this raffle right now?')) return;
+        const id = btn.getAttribute('data-id');
+        try {
+          const drawRes = await authFetch(`/api/admin/raffles/${id}/draw`, { method: 'POST' });
+          const drawData = await drawRes.json();
+          if (!drawRes.ok || drawData.error) {
+            alert(drawData.error || 'Failed to draw winner.');
+          } else {
+            alert(drawData.winner ? `🎉 Winner drawn: @${drawData.winner.username}!` : 'No tickets sold, raffle closed with no winner.');
+            window.adminFetchRaffles();
+          }
+        } catch (e) {
+          alert('Network error drawing raffle winner.');
+        }
+      };
+    });
+
+    // Bind Delete buttons
+    tbody.querySelectorAll('.delete-raffle-btn').forEach(btn => {
+      btn.onclick = async () => {
+        if (!confirm('Are you sure you want to delete this raffle? This cannot be undone.')) return;
+        const id = btn.getAttribute('data-id');
+        try {
+          const delRes = await authFetch(`/api/admin/raffles/${id}/delete`, { method: 'POST' });
+          if (delRes.ok) {
+            alert('Raffle deleted.');
+            window.adminFetchRaffles();
+          } else {
+            alert('Failed to delete raffle.');
+          }
+        } catch (e) {
+          alert('Network error deleting raffle.');
+        }
+      };
+    });
+
+  } catch (err) {
+    console.error('adminFetchRaffles error:', err);
+    tbody.innerHTML = `<tr><td colspan="7" style="padding: 14px; text-align: center; color: #ef4444;">Network error loading raffles.</td></tr>`;
+  }
+};
