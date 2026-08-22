@@ -2752,12 +2752,21 @@ window.adminFetchShop = async function() {
           ? (item.stock_count === 0 ? '<span style="color:#ef4444; font-weight:800;">SOLD OUT</span>' : `${item.stock_count} units`)
           : 'Unlimited';
 
+        const imgTag = item.image_url
+          ? `<img src="${escapeHtml(item.image_url)}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);" alt="">`
+          : `<div style="width: 28px; height: 28px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px;"></div>`;
+
         return `
           <tr style="border-bottom: 1px solid var(--card-border);">
             <td style="padding: 12px 14px; font-weight: 700; color: #10b981;">#${item.id}</td>
             <td style="padding: 12px 14px; color: #fff;">
-              <strong style="display: block;">${escapeHtml(item.name)}</strong>
-              <span style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(item.description)}</span>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                ${imgTag}
+                <div>
+                  <strong style="display: block;">${escapeHtml(item.name)}</strong>
+                  <span style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(item.description)}</span>
+                </div>
+              </div>
             </td>
             <td style="padding: 12px 14px; text-transform: uppercase; font-size: 0.75rem; color: #38bdf8; font-weight: 700;">${item.category.replace('_', ' ')}</td>
             <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">${COIN_SVG} ${item.price}</td>
@@ -2791,6 +2800,7 @@ window.adminOpenEditShopModal = function(id) {
   document.getElementById('admin-edit-shop-cat').value = item.category;
   document.getElementById('admin-edit-shop-perk').value = item.perk_value || '';
   document.getElementById('admin-edit-shop-delivery-note').value = item.delivery_note || '';
+  document.getElementById('admin-edit-shop-image-url').value = item.image_url || '';
 
   const modal = document.getElementById('admin-edit-shop-modal');
   if (modal) modal.style.display = 'flex';
@@ -2895,12 +2905,13 @@ function setupCreateShopForm() {
       const perk_value = document.getElementById('admin-shop-perk').value.trim();
       const delivery_note = document.getElementById('admin-shop-delivery-note')?.value.trim() || '';
       const stock_count = document.getElementById('admin-shop-stock')?.value.trim() || '-1';
+      const image_url = document.getElementById('admin-shop-image-url')?.value.trim() || '';
 
       try {
         const res = await authFetch('/api/admin/shop/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -2969,12 +2980,13 @@ function setupCreateShopForm() {
       const perk_value = document.getElementById('admin-edit-shop-perk').value.trim();
       const delivery_note = document.getElementById('admin-edit-shop-delivery-note').value.trim();
       const stock_count = document.getElementById('admin-edit-shop-stock').value.trim();
+      const image_url = document.getElementById('admin-edit-shop-image-url').value.trim();
 
       try {
         const res = await authFetch(`/api/admin/shop/${id}/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url })
         });
         const data = await res.json();
         if (res.ok && data.success) {

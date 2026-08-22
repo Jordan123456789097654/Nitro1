@@ -142,9 +142,14 @@ function renderStoreItems(items, inventory) {
       ? `shop-badge-${item.category}`
       : 'shop-badge-default';
 
+    const imgHtml = item.image_url
+      ? `<img src="${escapeHtml(item.image_url)}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.06);" alt="${escapeHtml(item.name)}">`
+      : '';
+
     return `
       <div class="shop-item-card">
         <div>
+          ${imgHtml}
           <span class="shop-badge ${badgeClass}">${item.category.replace('_', ' ')}</span>
           <strong style="color: #fff; font-size: 0.88rem; display: block; margin-top: 4px;">${escapeHtml(item.name)}</strong>
           <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.35;">${escapeHtml(item.description)}</p>

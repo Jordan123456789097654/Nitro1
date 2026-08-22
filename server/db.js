@@ -469,6 +469,7 @@ const db = {
       `);
 
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS image_url VARCHAR(255) DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_flair_locked BOOLEAN DEFAULT false;");
       await pool.query("ALTER TABLE games ADD COLUMN IF NOT EXISTS is_taken_down BOOLEAN DEFAULT false;");
@@ -3131,13 +3132,13 @@ JSON Response:`;
     }
   },
 
-  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count }) {
+  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count, image_url }) {
     try {
       const res = await pool.query(`
-        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count, image_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1]);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '']);
       return res.rows[0];
     } catch (e) {
       console.error('createShopItem error:', e.message);
@@ -3155,14 +3156,14 @@ JSON Response:`;
     }
   },
 
-  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count }) {
+  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count, image_url }) {
     try {
       const res = await pool.query(`
         UPDATE shop_items
-        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7
-        WHERE id = $8
+        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7, image_url = $8
+        WHERE id = $9
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, id]);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', id]);
       return res.rows[0];
     } catch (e) {
       console.error('updateShopItem error:', e.message);
