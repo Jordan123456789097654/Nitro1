@@ -3454,3 +3454,170 @@ window.adminFetchRaffles = async () => {
     tbody.innerHTML = `<tr><td colspan="7" style="padding: 14px; text-align: center; color: #ef4444;">Network error loading raffles.</td></tr>`;
   }
 };
+
+// ── Spin Wheel Admin Panel ───────────────────────────────────────────────────
+
+(function initSpinAdmin() {
+  const refreshBtn  = document.getElementById('admin-spin-refresh-btn');
+  const addBtn      = document.getElementById('admin-spin-add-btn');
+  const addForm     = document.getElementById('admin-spin-add-form');
+  const addSaveBtn  = document.getElementById('admin-spin-add-save-btn');
+
+  if (!refreshBtn) return; // admin tab not present
+
+  addBtn.addEventListener('click', () => {
+    addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+  });
+
+  refreshBtn.addEventListener('click', () => adminFetchSpinSegments());
+
+  addSaveBtn.addEventListener('click', async () => {
+    const label      = document.getElementById('spin-new-label').value.trim();
+    const coins      = document.getElementById('spin-new-coins').value || 0;
+    const xp         = document.getElementById('spin-new-xp').value || 0;
+    const color      = document.getElementById('spin-new-color').value;
+    const probability = document.getElementById('spin-new-prob').value || 0.05;
+    const sort_order  = document.getElementById('spin-new-sort').value || 0;
+    if (!label) return alert('Label is required.');
+    try {
+      const res = await authFetch('/api/admin/spin-wheel/segments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label, coins, xp, color, probability, sort_order })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        addForm.style.display = 'none';
+        document.getElementById('spin-new-label').value = '';
+        adminFetchSpinSegments();
+        // Re-render wheel preview if on page
+        try { import('./spin.js').then(m => m.drawWheel && adminFetchSpinSegments()); } catch(e) {}
+      } else {
+        alert(data.error || 'Failed to create segment.');
+      }
+    } catch (err) { alert('Network error.'); }
+  });
+
+  // Auto-load when admin tab is opened
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.dataset && e.target.dataset.tab === 'adminshop') {
+      adminFetchSpinSegments();
+    }
+  });
+})();
+
+async function adminFetchSpinSegments() {
+  const container = document.getElementById('admin-spin-segments-table');
+  if (!container) return;
+
+  container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem; text-align:center; padding:12px;">Loading...</p>';
+  try {
+    const res = await authFetch('/api/admin/spin-wheel/segments');
+    const data = await res.json();
+    if (!data.segments || !data.segments.length) {
+      container.innerHTML = '<p style="color: var(--text-muted); font-size:0.8rem; text-align:center; padding:12px;">No segments found. Add one above.</p>';
+      return;
+    }
+    const totalProb = data.segments.reduce((s, seg) => s + Number(seg.probability), 0);
+    container.innerHTML = `
+      <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.05); text-align:left;">
+            <th style="padding:8px 10px;">Color</th>
+            <th style="padding:8px 10px;">Label</th>
+            <th style="padding:8px 10px;">Coins</th>
+            <th style="padding:8px 10px;">XP</th>
+            <th style="padding:8px 10px;">Prob. Weight</th>
+            <th style="padding:8px 10px;">Odds</th>
+            <th style="padding:8px 10px;">Order</th>
+            <th style="padding:8px 10px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.segments.map(seg => {
+            const odds = totalProb > 0 ? ((seg.probability / totalProb) * 100).toFixed(1) : '?';
+            return `<tr style="border-bottom:1px solid rgba(255,255,255,0.06);" id="spin-seg-row-${seg.id}">
+              <td style="padding:8px 10px;"><div style="width:22px;height:22px;border-radius:4px;background:${seg.color};border:1px solid rgba(255,255,255,0.2);"></div></td>
+              <td style="padding:8px 10px; color:#fff; font-weight:700;">${escapeHtml(seg.label)}</td>
+              <td style="padding:8px 10px; color:#fbbf24;">${seg.coins}</td>
+              <td style="padding:8px 10px; color:#38bdf8;">${seg.xp}</td>
+              <td style="padding:8px 10px; color:#a3e635;">${seg.probability}</td>
+              <td style="padding:8px 10px; color:#94a3b8;">${odds}%</td>
+              <td style="padding:8px 10px; color:#94a3b8;">${seg.sort_order}</td>
+              <td style="padding:8px 10px; display:flex; gap:6px;">
+                <button onclick="window.adminEditSpinSeg(${seg.id})" style="background:#3b82f6;border:none;color:#fff;border-radius:4px;padding:3px 8px;font-size:0.72rem;font-weight:700;cursor:pointer;">Edit</button>
+                <button onclick="window.adminDeleteSpinSeg(${seg.id})" style="background:#ef4444;border:none;color:#fff;border-radius:4px;padding:3px 8px;font-size:0.72rem;font-weight:700;cursor:pointer;">Delete</button>
+              </td>
+            </tr>
+            <tr id="spin-seg-edit-${seg.id}" style="display:none; background:rgba(0,0,0,0.4);">
+              <td colspan="8" style="padding:10px 14px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;">
+                  <div><label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:3px;">Label</label>
+                    <input id="spin-edit-label-${seg.id}" type="text" value="${escapeHtml(seg.label)}" style="width:100%;padding:5px 7px;background:#000;border:1px solid var(--card-border);color:#fff;border-radius:5px;font-size:0.78rem;"></div>
+                  <div><label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:3px;">Coins</label>
+                    <input id="spin-edit-coins-${seg.id}" type="number" value="${seg.coins}" min="0" style="width:100%;padding:5px 7px;background:#000;border:1px solid var(--card-border);color:#fff;border-radius:5px;font-size:0.78rem;"></div>
+                  <div><label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:3px;">XP</label>
+                    <input id="spin-edit-xp-${seg.id}" type="number" value="${seg.xp}" min="0" style="width:100%;padding:5px 7px;background:#000;border:1px solid var(--card-border);color:#fff;border-radius:5px;font-size:0.78rem;"></div>
+                  <div><label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:3px;">Color</label>
+                    <input id="spin-edit-color-${seg.id}" type="color" value="${seg.color}" style="width:100%;height:30px;padding:2px 3px;background:#000;border:1px solid var(--card-border);border-radius:5px;cursor:pointer;"></div>
+                  <div><label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:3px;">Prob. Weight</label>
+                    <input id="spin-edit-prob-${seg.id}" type="number" value="${seg.probability}" min="0.001" step="0.001" style="width:100%;padding:5px 7px;background:#000;border:1px solid var(--card-border);color:#fff;border-radius:5px;font-size:0.78rem;"></div>
+                  <div><label style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:3px;">Sort Order</label>
+                    <input id="spin-edit-sort-${seg.id}" type="number" value="${seg.sort_order}" style="width:100%;padding:5px 7px;background:#000;border:1px solid var(--card-border);color:#fff;border-radius:5px;font-size:0.78rem;"></div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                  <button onclick="window.adminSaveSpinSeg(${seg.id})" style="background:#10b981;border:none;color:#000;border-radius:5px;padding:5px 14px;font-size:0.78rem;font-weight:800;cursor:pointer;">💾 Save</button>
+                  <button onclick="document.getElementById('spin-seg-edit-${seg.id}').style.display='none'" style="background:rgba(255,255,255,0.08);border:none;color:#fff;border-radius:5px;padding:5px 14px;font-size:0.78rem;cursor:pointer;">Cancel</button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = '<p style="color:#ef4444;font-size:0.8rem;text-align:center;padding:12px;">Failed to load segments.</p>';
+  }
+}
+window.adminFetchSpinSegments = adminFetchSpinSegments;
+
+window.adminEditSpinSeg = function(id) {
+  const editRow = document.getElementById(`spin-seg-edit-${id}`);
+  if (editRow) editRow.style.display = editRow.style.display === 'none' ? 'table-row' : 'none';
+};
+
+window.adminSaveSpinSeg = async function(id) {
+  const label       = document.getElementById(`spin-edit-label-${id}`).value.trim();
+  const coins       = document.getElementById(`spin-edit-coins-${id}`).value || 0;
+  const xp          = document.getElementById(`spin-edit-xp-${id}`).value || 0;
+  const color       = document.getElementById(`spin-edit-color-${id}`).value;
+  const probability = document.getElementById(`spin-edit-prob-${id}`).value || 0.05;
+  const sort_order  = document.getElementById(`spin-edit-sort-${id}`).value || 0;
+  if (!label) return alert('Label is required.');
+  try {
+    const res = await authFetch(`/api/admin/spin-wheel/segments/${id}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label, coins, xp, color, probability, sort_order })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      adminFetchSpinSegments();
+    } else {
+      alert(data.error || 'Failed to update segment.');
+    }
+  } catch (err) { alert('Network error.'); }
+};
+
+window.adminDeleteSpinSeg = async function(id) {
+  if (!confirm(`Delete spin wheel segment #${id}?`)) return;
+  try {
+    const res = await authFetch(`/api/admin/spin-wheel/segments/${id}/delete`, { method: 'POST' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      adminFetchSpinSegments();
+    } else {
+      alert(data.error || 'Failed to delete segment.');
+    }
+  } catch (err) { alert('Network error.'); }
+};

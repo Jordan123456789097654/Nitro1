@@ -2145,4 +2145,54 @@ router.post('/raffles/:id/delete', async (req, res) => {
   }
 });
 
+// ── Spin Wheel Admin CRUD ────────────────────────────────────────────────────
+
+// GET /api/admin/spin-wheel/segments
+router.get('/spin-wheel/segments', async (req, res) => {
+  try {
+    const segments = await db.getSpinWheelSegments();
+    res.json({ success: true, segments });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch segments.' });
+  }
+});
+
+// POST /api/admin/spin-wheel/segments/create
+router.post('/spin-wheel/segments/create', async (req, res) => {
+  const { label, coins, xp, color, probability, sort_order } = req.body;
+  if (!label) return res.status(400).json({ error: 'Label is required.' });
+  try {
+    const seg = await db.createSpinWheelSegment({ label, coins: parseInt(coins)||0, xp: parseInt(xp)||0, color, probability: parseFloat(probability)||0.05, sort_order: parseInt(sort_order)||0 });
+    if (!seg) return res.status(500).json({ error: 'Failed to create segment.' });
+    sendDiscordLog({ category: 'admin', action: 'SPIN_SEGMENT_CREATED', admin: req.adminUser.username, details: `Created spin segment "${label}"` });
+    res.json({ success: true, segment: seg });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create segment.' });
+  }
+});
+
+// POST /api/admin/spin-wheel/segments/:id/update
+router.post('/spin-wheel/segments/:id/update', async (req, res) => {
+  const { label, coins, xp, color, probability, sort_order } = req.body;
+  if (!label) return res.status(400).json({ error: 'Label is required.' });
+  try {
+    const seg = await db.updateSpinWheelSegment(req.params.id, { label, coins: parseInt(coins)||0, xp: parseInt(xp)||0, color, probability: parseFloat(probability)||0.05, sort_order: parseInt(sort_order)||0 });
+    if (!seg) return res.status(500).json({ error: 'Failed to update segment.' });
+    res.json({ success: true, segment: seg });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update segment.' });
+  }
+});
+
+// POST /api/admin/spin-wheel/segments/:id/delete
+router.post('/spin-wheel/segments/:id/delete', async (req, res) => {
+  try {
+    await db.deleteSpinWheelSegment(req.params.id);
+    sendDiscordLog({ category: 'admin', action: 'SPIN_SEGMENT_DELETED', admin: req.adminUser.username, details: `Deleted spin segment #${req.params.id}` });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete segment.' });
+  }
+});
+
 module.exports = router;

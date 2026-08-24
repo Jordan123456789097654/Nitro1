@@ -2220,64 +2220,24 @@
       <div id="daily-spin-card" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 8px 32px rgba(251, 191, 36, 0.03);">
         <div style="flex: 1; min-width: 280px;">
           <h2 style="color: #fbbf24; font-size: 1.25rem; margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
-            <span>🎡</span> Daily Rewards Lucky Wheel
+            <span>🎡</span> Rewards Lucky Wheel <span style="font-size:0.75rem;background:rgba(251,191,36,0.15);color:#fbbf24;border-radius:20px;padding:2px 10px;font-weight:700;">Every 4 Hours</span>
           </h2>
           <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0; line-height: 1.4;">
-            Log in every 24 hours to spin the wheel and win bonus Coins, XP, or special mystery shop booster codes!
+            Spin every 4 hours to win bonus Coins, XP, or hit the Jackpot!
           </p>
-          <div id="daily-spin-cooldown-msg" style="margin-top: 10px; font-weight: 800; font-size: 0.82rem; color: #10b981; display: none;">
+          <div id="daily-spin-cooldown-msg" style="margin-top: 10px; font-weight: 800; font-size: 0.82rem; color: #10b981; display: block;">
             ✅ You can spin the wheel now!
           </div>
         </div>
         
-        <!-- Interactive SVG Spin Wheel -->
+        <!-- Interactive SVG Spin Wheel — rendered dynamically by spin.js -->
         <div style="display: flex; align-items: center; gap: 20px; flex-shrink: 0; margin: 0 auto;">
-          <div style="position: relative; width: 140px; height: 140px;">
+          <div style="position: relative; width: 160px; height: 160px;">
             <!-- Indicator Arrow -->
             <div style="position: absolute; top: -12px; left: calc(50% - 10px); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 16px solid #fbbf24; z-index: 10; filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.85));"></div>
             
             <svg id="wheel-svg" style="width: 100%; height: 100%; transform: rotate(0deg); transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1); filter: drop-shadow(0 4px 15px rgba(0,0,0,0.6));" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="48" fill="#111827" stroke="#fbbf24" stroke-width="2.5"/>
-              <!-- wedges -->
-              <path d="M50,50 L50,2 A48,48 0 0,1 91.5,26 Z" fill="#6d28d9" />
-              <path d="M50,50 L91.5,26 A48,48 0 0,1 91.5,74 Z" fill="#047857" />
-              <path d="M50,50 L91.5,74 A48,48 0 0,1 50,98 Z" fill="#1d4ed8" />
-              <path d="M50,50 L50,98 A48,48 0 0,1 8.5,74 Z" fill="#be123c" />
-              <path d="M50,50 L8.5,74 A48,48 0 0,1 8.5,26 Z" fill="#b45309" />
-              <path d="M50,50 L8.5,26 A48,48 0 0,1 50,2 Z" fill="#0369a1" />
-              
-              <!-- Wedge text/value placeholders labels centered -->
-              <text x="70" y="24" transform="rotate(30, 70, 24)" fill="#fff" font-size="5" font-weight="900" text-anchor="middle">50 🪙</text>
-              <text x="82" y="52" transform="rotate(90, 82, 52)" fill="#fff" font-size="5" font-weight="900" text-anchor="middle">100 🪙</text>
-              <text x="68" y="78" transform="rotate(150, 68, 78)" fill="#fff" font-size="5" font-weight="900" text-anchor="middle">250 🪙</text>
-              <text x="32" y="78" transform="rotate(210, 32, 78)" fill="#fff" font-size="5" font-weight="900" text-anchor="middle">500 XP</text>
-              <text x="18" y="52" transform="rotate(270, 18, 52)" fill="#fbbf24" font-size="5" font-weight="900" text-anchor="middle">JACKPOT</text>
-              <text x="32" y="24" transform="rotate(330, 32, 24)" fill="#fff" font-size="5" font-weight="900" text-anchor="middle">150 🪙</text>
-
-              <!-- Divider lines -->
-              <line x1="50" y1="50" x2="50" y2="2" stroke="#fbbf24" stroke-width="1.5"/>
-              <line x1="50" y1="50" x2="91.5" y2="26" stroke="#fbbf24" stroke-width="1.5"/>
-              <line x1="50" y1="50" x2="91.5" y2="74" stroke="#fbbf24" stroke-width="1.5"/>
-              <line x1="50" y1="50" x2="50" y2="98" stroke="#fbbf24" stroke-width="1.5"/>
-              <line x1="50" y1="50" x2="8.5" y2="74" stroke="#fbbf24" stroke-width="1.5"/>
-              <line x1="50" y1="50" x2="8.5" y2="26" stroke="#fbbf24" stroke-width="1.5"/>
-
-              <!-- Outer border bulbs -->
-              <circle cx="50" cy="5" r="1.5" fill="#fff" />
-              <circle cx="72.5" cy="11" r="1.5" fill="#fff" />
-              <circle cx="89" cy="27.5" r="1.5" fill="#fff" />
-              <circle cx="95" cy="50" r="1.5" fill="#fff" />
-              <circle cx="89" cy="72.5" r="1.5" fill="#fff" />
-              <circle cx="72.5" cy="89" r="1.5" fill="#fff" />
-              <circle cx="50" cy="95" r="1.5" fill="#fff" />
-              <circle cx="27.5" cy="89" r="1.5" fill="#fff" />
-              <circle cx="11" cy="72.5" r="1.5" fill="#fff" />
-              <circle cx="5" cy="50" r="1.5" fill="#fff" />
-              <circle cx="11" cy="27.5" r="1.5" fill="#fff" />
-              <circle cx="27.5" cy="11" r="1.5" fill="#fff" />
-
-              <!-- Inner center hub -->
-              <circle cx="50" cy="50" r="10" fill="#fbbf24" stroke="#fff" stroke-width="1.5"/>
+              <!-- Segments rendered by spin.js drawWheel() -->
             </svg>
           </div>
           
@@ -3454,6 +3414,55 @@
             <p style="color: var(--text-muted); font-size: 0.76rem; margin-bottom: 12px;">Paste a JSON array of products. Example: <code>[{"name": "Item 1", "description": "Desc", "price": 100, "category": "custom_flair", "stock_count": 10}]</code></p>
             <textarea id="admin-bulk-shop-textarea" placeholder='[{"name": "Neon Username", "description": "Gives neon chat effect", "price": 250, "category": "chat_glow", "perk_value": "#ff00ea", "stock_count": 5}]' style="width: 100%; height: 120px; background: #000; border: 1px solid var(--card-border); color: #fbbf24; border-radius: 8px; font-family: monospace; font-size: 0.78rem; padding: 10px; resize: vertical; outline: none; margin-bottom: 12px;"></textarea>
             <button id="admin-bulk-shop-submit-btn" class="btn-small" style="background: #fbbf24; color: #000; font-weight: 800; padding: 6px 16px;">Import Items</button>
+          </div>
+
+          <!-- 🎡 Spin Wheel Config Panel -->
+          <div style="background: rgba(251,191,36,0.04); border: 1px solid rgba(251,191,36,0.25); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <h4 style="margin: 0; color: #fbbf24; font-size: 1rem;">🎡 Spin Wheel Segments</h4>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="admin-spin-refresh-btn" class="btn-small secondary" style="color: #fbbf24;">🔄 Refresh</button>
+                <button id="admin-spin-add-btn" class="btn-small secondary" style="color: #10b981;">➕ Add Segment</button>
+              </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.76rem; margin: 0 0 12px;">Each segment has a label (shown on wheel), coin/XP reward, color, and probability weight. Higher probability = more likely to land on.</p>
+
+            <!-- Add Segment Form (hidden by default) -->
+            <div id="admin-spin-add-form" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid rgba(251,191,36,0.15); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+              <h5 style="margin: 0 0 10px; color: #fbbf24; font-size: 0.85rem;">New Segment</h5>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Label *</label>
+                  <input type="text" id="spin-new-label" placeholder="e.g. 500 🪙" style="width: 100%; padding: 6px 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Coins</label>
+                  <input type="number" id="spin-new-coins" placeholder="500" value="100" min="0" style="width: 100%; padding: 6px 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 3px;">XP</label>
+                  <input type="number" id="spin-new-xp" placeholder="0" value="0" min="0" style="width: 100%; padding: 6px 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Color</label>
+                  <input type="color" id="spin-new-color" value="#6d28d9" style="width: 100%; height: 32px; padding: 2px 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; cursor: pointer;">
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Probability Weight</label>
+                  <input type="number" id="spin-new-prob" placeholder="0.05" value="0.05" min="0.001" step="0.001" style="width: 100%; padding: 6px 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 3px;">Sort Order</label>
+                  <input type="number" id="spin-new-sort" placeholder="0" value="0" style="width: 100%; padding: 6px 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+                </div>
+              </div>
+              <button id="admin-spin-add-save-btn" class="btn-small" style="margin-top: 10px; background: #10b981; color: #000; font-weight: 800;">Save Segment</button>
+            </div>
+
+            <!-- Segments Table -->
+            <div id="admin-spin-segments-table" style="overflow-x: auto;">
+              <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 12px;">Click Refresh to load segments.</p>
+            </div>
           </div>
 
           <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">

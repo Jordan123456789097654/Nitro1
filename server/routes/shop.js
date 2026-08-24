@@ -123,6 +123,16 @@ router.post('/quests/trigger', async (req, res) => {
   }
 });
 
+// GET /api/shop/spin-segments - Public: get spin wheel segments for rendering
+router.get('/spin-segments', async (req, res) => {
+  try {
+    const segments = await db.getSpinWheelSegments();
+    res.json({ success: true, segments });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch spin segments.' });
+  }
+});
+
 // POST /api/shop/spin - Spin the daily rewards wheel
 router.post('/spin', async (req, res) => {
   const user = await getAuthUser(req);

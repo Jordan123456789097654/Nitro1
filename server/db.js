@@ -493,6 +493,42 @@ const db = {
       // Track exact claim time separately from last-progress time so daily reset is accurate
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP;");
 
+      // Spin wheel admin-configurable segments
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS spin_wheel_segments (
+          id SERIAL PRIMARY KEY,
+          label VARCHAR(100) NOT NULL,
+          coins INT NOT NULL DEFAULT 0,
+          xp INT NOT NULL DEFAULT 0,
+          color VARCHAR(20) NOT NULL DEFAULT '#6d28d9',
+          probability FLOAT NOT NULL DEFAULT 0.1,
+          sort_order INT NOT NULL DEFAULT 0
+        );
+      `);
+      // Seed default 16 segments if none exist
+      const segCount = await pool.query('SELECT COUNT(*) FROM spin_wheel_segments');
+      if (parseInt(segCount.rows[0].count, 10) === 0) {
+        await pool.query(`
+          INSERT INTO spin_wheel_segments (label, coins, xp, color, probability, sort_order) VALUES
+          ('50 🪙', 50, 0, '#1d4ed8', 0.18, 0),
+          ('75 🪙', 75, 0, '#0369a1', 0.14, 1),
+          ('100 🪙', 100, 0, '#047857', 0.13, 2),
+          ('150 🪙', 150, 0, '#6d28d9', 0.10, 3),
+          ('200 🪙', 200, 0, '#be123c', 0.08, 4),
+          ('250 🪙', 250, 0, '#b45309', 0.07, 5),
+          ('350 🪙', 350, 0, '#0f766e', 0.06, 6),
+          ('500 🪙', 500, 0, '#7c3aed', 0.05, 7),
+          ('100 XP', 0, 100, '#d97706', 0.06, 8),
+          ('250 XP', 0, 250, '#0891b2', 0.05, 9),
+          ('500 XP', 0, 500, '#059669', 0.04, 10),
+          ('750 XP', 0, 750, '#dc2626', 0.03, 11),
+          ('750 🪙', 750, 0, '#92400e', 0.025, 12),
+          ('1000 🪙', 1000, 0, '#1e40af', 0.02, 13),
+          ('2000 🪙', 2000, 0, '#7f1d1d', 0.01, 14),
+          ('🎰 JACKPOT 5000 🪙', 5000, 0, '#fbbf24', 0.005, 15)
+        `);
+      }
+
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -2929,51 +2965,101 @@ JSON Response:`;
     }
   },
 
+  async getSpinWheelSegments() {
+    try {
+      const res = await pool.query('SELECT * FROM spin_wheel_segments ORDER BY sort_order ASC, id ASC');
+      return res.rows;
+    } catch (e) {
+      console.error('getSpinWheelSegments error:', e.message);
+      return [];
+    }
+  },
+
+  async createSpinWheelSegment({ label, coins, xp, color, probability, sort_order }) {
+    try {
+      const res = await pool.query(
+        'INSERT INTO spin_wheel_segments (label, coins, xp, color, probability, sort_order) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [label, coins || 0, xp || 0, color || '#6d28d9', probability || 0.1, sort_order || 0]
+      );
+      return res.rows[0];
+    } catch (e) {
+      console.error('createSpinWheelSegment error:', e.message);
+      return null;
+    }
+  },
+
+  async updateSpinWheelSegment(id, { label, coins, xp, color, probability, sort_order }) {
+    try {
+      const res = await pool.query(
+        'UPDATE spin_wheel_segments SET label=$1, coins=$2, xp=$3, color=$4, probability=$5, sort_order=$6 WHERE id=$7 RETURNING *',
+        [label, coins || 0, xp || 0, color || '#6d28d9', probability || 0.1, sort_order || 0, id]
+      );
+      return res.rows[0];
+    } catch (e) {
+      console.error('updateSpinWheelSegment error:', e.message);
+      return null;
+    }
+  },
+
+  async deleteSpinWheelSegment(id) {
+    try {
+      await pool.query('DELETE FROM spin_wheel_segments WHERE id=$1', [id]);
+      return true;
+    } catch (e) {
+      console.error('deleteSpinWheelSegment error:', e.message);
+      return false;
+    }
+  },
+
   async claimDailySpin(userId) {
     try {
       const userRes = await pool.query('SELECT last_spin_at, coins, xp FROM users WHERE id = $1', [userId]);
       if (!userRes.rows.length) return { error: 'User not found.' };
       const user = userRes.rows[0];
 
+      const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
       if (user.last_spin_at) {
         const lastSpin = new Date(user.last_spin_at).getTime();
         const diff = Date.now() - lastSpin;
-        if (diff < 24 * 60 * 60 * 1000) {
-          const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - diff) / (60 * 60 * 1000));
-          return { error: `Rewards wheel is on cooldown. Try again in ${hoursLeft} hour(s).` };
+        if (diff < COOLDOWN_MS) {
+          const totalMinsLeft = Math.ceil((COOLDOWN_MS - diff) / (60 * 1000));
+          const hoursLeft = Math.floor(totalMinsLeft / 60);
+          const minsLeft = totalMinsLeft % 60;
+          const timeStr = hoursLeft > 0 ? `${hoursLeft}h ${minsLeft}m` : `${minsLeft}m`;
+          return { error: `Wheel is on cooldown. Try again in ${timeStr}.` };
         }
       }
 
-      // Roll rewards (6 wedges on wheel)
-      // Index 0: 50 Coins
-      // Index 1: 100 Coins
-      // Index 2: 250 Coins
-      // Index 3: 500 XP
-      // Index 4: 1000 Coins (JACKPOT!)
-      // Index 5: 150 Coins
-      const roll = Math.random();
-      let index = 0;
-      let reward = { coins: 50, xp: 0, text: '50 Coins' };
-
-      if (roll < 0.05) {
-        index = 4;
-        reward = { coins: 1000, xp: 0, text: '1000 Coins (JACKPOT!)' };
-      } else if (roll < 0.15) {
-        index = 3;
-        reward = { coins: 0, xp: 500, text: '500 XP Boost' };
-      } else if (roll < 0.30) {
-        index = 2;
-        reward = { coins: 250, xp: 0, text: '250 Coins' };
-      } else if (roll < 0.50) {
-        index = 5;
-        reward = { coins: 150, xp: 0, text: '150 Coins' };
-      } else if (roll < 0.80) {
-        index = 1;
-        reward = { coins: 100, xp: 0, text: '100 Coins' };
-      } else {
-        index = 0;
-        reward = { coins: 50, xp: 0, text: '50 Coins' };
+      // Load segments from DB
+      let segments = await this.getSpinWheelSegments();
+      if (!segments.length) {
+        // Fallback default
+        segments = [
+          { id: 0, label: '50 🪙', coins: 50, xp: 0, color: '#1d4ed8', probability: 0.5 },
+          { id: 1, label: '100 🪙', coins: 100, xp: 0, color: '#047857', probability: 0.3 },
+          { id: 2, label: '250 🪙', coins: 250, xp: 0, color: '#6d28d9', probability: 0.15 },
+          { id: 3, label: '🎰 JACKPOT 1000 🪙', coins: 1000, xp: 0, color: '#fbbf24', probability: 0.05 }
+        ];
       }
+
+      // Normalize probabilities and pick a segment using weighted random
+      const totalProb = segments.reduce((sum, s) => sum + (s.probability || 0), 0);
+      let roll = Math.random() * totalProb;
+      let wonSegment = segments[segments.length - 1]; // fallback last
+      for (const seg of segments) {
+        roll -= (seg.probability || 0);
+        if (roll <= 0) {
+          wonSegment = seg;
+          break;
+        }
+      }
+
+      const wonIndex = segments.indexOf(wonSegment);
+      const reward = {
+        coins: wonSegment.coins || 0,
+        xp: wonSegment.xp || 0,
+        text: wonSegment.label
+      };
 
       // Update user coins, XP and spin time
       const newCoins = (user.coins || 0) + reward.coins;
@@ -2986,10 +3072,11 @@ JSON Response:`;
 
       return {
         success: true,
-        index,
+        index: wonIndex,
         reward,
         newCoins,
-        newXp
+        newXp,
+        segments // send segments to client so wheel matches server state
       };
     } catch (e) {
       console.error('claimDailySpin error:', e.message);

@@ -1,22 +1,23 @@
 import { authFetch, getCurrentUser } from './auth.js';
 import { loadShopData } from './shop.js';
 
+const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
+
 let isSpinning = false;
+let wheelSegments = [];
+let cooldownTimer = null;
 
 export function initSpinWheel() {
   const spinBtn = document.getElementById('spin-wheel-btn');
   const wheelSvg = document.getElementById('wheel-svg');
-  const cooldownMsg = document.getElementById('daily-spin-cooldown-msg');
-
   if (!spinBtn || !wheelSvg) return;
 
-  // Initial check to show/hide cooldown message
+  loadSegmentsAndDraw();
   updateCooldownUI();
 
   spinBtn.addEventListener('click', async () => {
     const user = getCurrentUser();
     if (!user) return alert('Please sign in to spin the rewards wheel.');
-
     if (isSpinning) return;
 
     try {
@@ -24,9 +25,7 @@ export function initSpinWheel() {
       spinBtn.disabled = true;
       spinBtn.textContent = '🌀 SPINNING...';
 
-      const res = await authFetch('/api/shop/spin', {
-        method: 'POST'
-      });
+      const res = await authFetch('/api/shop/spin', { method: 'POST' });
       const data = await res.json();
 
       if (!res.ok || data.error) {
@@ -34,43 +33,44 @@ export function initSpinWheel() {
         isSpinning = false;
         spinBtn.disabled = false;
         spinBtn.textContent = '🌀 SPIN NOW';
+        updateCooldownUI();
         return;
       }
 
-      // Successful spin! Get won index (0 to 5)
-      const wonIndex = data.index;
-      console.log(`🎯 Wheel landed on Wedge index ${wonIndex}: ${data.reward.text}`);
+      // Server returns fresh segments — re-render wheel to stay in sync
+      if (data.segments && data.segments.length) {
+        wheelSegments = data.segments;
+        drawWheel(wheelSegments);
+      }
 
-      // Calculate rotation: 5 full spins (1800 deg) + offset to align won wedge center (index * 60 + 30) at the top pointer (0 deg)
-      const wedgeCenter = wonIndex * 60 + 30;
+      const wonIndex = data.index;
+      const n = wheelSegments.length || 1;
+      const degPerSegment = 360 / n;
+      const wedgeCenter = wonIndex * degPerSegment + degPerSegment / 2;
       const targetRotation = 1800 + (360 - wedgeCenter);
 
-      // Reset transition and rotation before starting to allow consecutive spins
-      wheelSvg.style.transition = 'none';
-      wheelSvg.style.transform = 'rotate(0deg)';
-      
-      // Force repaint
-      wheelSvg.offsetHeight;
+      const wheelSvgEl = document.getElementById('wheel-svg');
+      wheelSvgEl.style.transition = 'none';
+      wheelSvgEl.style.transform = 'rotate(0deg)';
+      wheelSvgEl.offsetHeight;
 
-      // Start spin
-      wheelSvg.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)';
-      wheelSvg.style.transform = `rotate(${targetRotation}deg)`;
+      wheelSvgEl.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)';
+      wheelSvgEl.style.transform = `rotate(${targetRotation}deg)`;
 
-      // Wait for transition to complete (4 seconds)
       setTimeout(() => {
         isSpinning = false;
         spinBtn.textContent = '🌀 SPIN NOW';
-        
-        // Show reward notice
-        alert(`🎉 Congratulations! You won: ${data.reward.text}!`);
 
-        // Update local user object coins/XP in memory
+        const coinStr = data.reward.coins > 0 ? ` +${data.reward.coins.toLocaleString()} 🪙` : '';
+        const xpStr  = data.reward.xp > 0    ? ` +${data.reward.xp.toLocaleString()} XP`   : '';
+        alert(`🎉 You won: ${data.reward.text}!\n${coinStr || xpStr}\n\nBalance: ${(data.newCoins||0).toLocaleString()} 🪙  |  ${(data.newXp||0).toLocaleString()} XP`);
+
         if (user) {
           if (data.reward.coins) user.coins = data.newCoins;
-          if (data.reward.xp) user.xp = data.newXp;
+          if (data.reward.xp)    user.xp   = data.newXp;
+          user.last_spin_at = new Date().toISOString();
         }
 
-        // Trigger updates in shop UI header balances
         loadShopData();
         updateCooldownUI();
       }, 4100);
@@ -85,30 +85,135 @@ export function initSpinWheel() {
   });
 }
 
+// ── Fetch segments and render ────────────────────────────────────────────────
+
+async function loadSegmentsAndDraw() {
+  try {
+    const res = await fetch('/api/shop/spin-segments');
+    const data = await res.json();
+    if (data.segments && data.segments.length) wheelSegments = data.segments;
+  } catch (e) { /* use fallback */ }
+
+  if (!wheelSegments.length) {
+    wheelSegments = [
+      { label: '50 🪙',   coins: 50,   xp: 0, color: '#1d4ed8' },
+      { label: '100 🪙',  coins: 100,  xp: 0, color: '#047857' },
+      { label: '250 🪙',  coins: 250,  xp: 0, color: '#6d28d9' },
+      { label: '500 🪙',  coins: 500,  xp: 0, color: '#be123c' },
+      { label: '🎰 JACKPOT 5000 🪙', coins: 5000, xp: 0, color: '#fbbf24' }
+    ];
+  }
+
+  drawWheel(wheelSegments);
+}
+
+export function drawWheel(segments) {
+  const svg = document.getElementById('wheel-svg');
+  if (!svg) return;
+
+  const n = segments.length;
+  const cx = 50, cy = 50, r = 48;
+  const degPerSeg = 360 / n;
+
+  function polar(angleDeg, radius) {
+    const rad = ((angleDeg - 90) * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  }
+
+  let paths = '', texts = '', lines = '', bulbs = '';
+
+  segments.forEach((seg, i) => {
+    const startAngle = i * degPerSeg;
+    const endAngle   = startAngle + degPerSeg;
+    const midAngle   = startAngle + degPerSeg / 2;
+
+    const s = polar(startAngle, r);
+    const e = polar(endAngle, r);
+    const largeArc = degPerSeg > 180 ? 1 : 0;
+    const color = seg.color || '#6d28d9';
+
+    paths += `<path d="M${cx},${cy} L${s.x.toFixed(2)},${s.y.toFixed(2)} A${r},${r} 0 ${largeArc},1 ${e.x.toFixed(2)},${e.y.toFixed(2)} Z" fill="${color}"/>`;
+
+    // Text
+    const textRadius = r * 0.62;
+    const tp = polar(midAngle, textRadius);
+    const fontSize = n <= 8 ? 5.5 : n <= 12 ? 4.2 : 3.4;
+    const label = seg.label || '';
+    const words = label.split(' ');
+    const half = Math.ceil(words.length / 2);
+    const line1 = words.slice(0, half).join(' ');
+    const line2 = words.slice(half).join(' ');
+    const hasTwo = line2.length > 0 && n <= 16;
+    const dyOffset = hasTwo ? -(fontSize * 0.55) : 0;
+
+    texts += `<text transform="rotate(${midAngle.toFixed(1)}, ${tp.x.toFixed(2)}, ${tp.y.toFixed(2)})" x="${tp.x.toFixed(2)}" y="${(tp.y + dyOffset).toFixed(2)}" fill="#fff" font-size="${fontSize}" font-weight="900" text-anchor="middle" dominant-baseline="middle">${escSvg(line1)}</text>`;
+    if (hasTwo) {
+      texts += `<text transform="rotate(${midAngle.toFixed(1)}, ${tp.x.toFixed(2)}, ${tp.y.toFixed(2)})" x="${tp.x.toFixed(2)}" y="${(tp.y + dyOffset + fontSize * 1.2).toFixed(2)}" fill="#fff" font-size="${fontSize}" font-weight="900" text-anchor="middle" dominant-baseline="middle">${escSvg(line2)}</text>`;
+    }
+
+    lines += `<line x1="${cx}" y1="${cy}" x2="${s.x.toFixed(2)}" y2="${s.y.toFixed(2)}" stroke="#fbbf24" stroke-width="1"/>`;
+
+    const bp = polar(midAngle, r - 3);
+    bulbs += `<circle cx="${bp.x.toFixed(2)}" cy="${bp.y.toFixed(2)}" r="1.1" fill="rgba(255,255,255,0.45)"/>`;
+  });
+
+  svg.innerHTML = `
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#111827" stroke="#fbbf24" stroke-width="2.5"/>
+    ${paths}
+    ${lines}
+    ${texts}
+    ${bulbs}
+    <circle cx="${cx}" cy="${cy}" r="9" fill="#fbbf24" stroke="#fff" stroke-width="1.5"/>
+    <text x="${cx}" y="${cy}" fill="#000" font-size="4.5" font-weight="900" text-anchor="middle" dominant-baseline="middle">SPIN</text>
+  `;
+}
+
+function escSvg(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Cooldown countdown UI ────────────────────────────────────────────────────
+
 function updateCooldownUI() {
   const user = getCurrentUser();
   const cooldownMsg = document.getElementById('daily-spin-cooldown-msg');
   const spinBtn = document.getElementById('spin-wheel-btn');
+  if (!cooldownMsg || !spinBtn) return;
 
-  if (!user || !cooldownMsg || !spinBtn) return;
+  if (cooldownTimer) clearInterval(cooldownTimer);
 
-  if (user.last_spin_at) {
-    const lastSpin = new Date(user.last_spin_at).getTime();
-    const diff = Date.now() - lastSpin;
-    if (diff < 24 * 60 * 60 * 1000) {
-      const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - diff) / (60 * 60 * 1000));
-      cooldownMsg.style.display = 'block';
-      cooldownMsg.style.color = '#ef4444';
-      cooldownMsg.textContent = `⏳ Cooldown active. Next spin available in ${hoursLeft} hour(s).`;
+  const lastSpinAt = user?.last_spin_at;
+  if (lastSpinAt) {
+    const lastSpin = new Date(lastSpinAt).getTime();
+    if ((Date.now() - lastSpin) < COOLDOWN_MS) {
       spinBtn.disabled = true;
       spinBtn.style.opacity = '0.5';
       spinBtn.style.cursor = 'not-allowed';
+
+      function tick() {
+        const left = COOLDOWN_MS - (Date.now() - lastSpin);
+        if (left <= 0) {
+          clearInterval(cooldownTimer);
+          cooldownMsg.style.color = '#10b981';
+          cooldownMsg.textContent = '✅ You can spin the wheel now!';
+          spinBtn.disabled = false;
+          spinBtn.style.opacity = '1';
+          spinBtn.style.cursor = 'pointer';
+          return;
+        }
+        const h  = Math.floor(left / 3600000);
+        const m  = Math.floor((left % 3600000) / 60000);
+        const s  = Math.floor((left % 60000) / 1000);
+        const pad = v => String(v).padStart(2, '0');
+        cooldownMsg.style.color = '#f59e0b';
+        cooldownMsg.textContent = `⏳ Next spin in: ${h}:${pad(m)}:${pad(s)}`;
+      }
+      tick();
+      cooldownTimer = setInterval(tick, 1000);
       return;
     }
   }
 
-  // Ready to spin
-  cooldownMsg.style.display = 'block';
   cooldownMsg.style.color = '#10b981';
   cooldownMsg.textContent = '✅ You can spin the wheel now!';
   spinBtn.disabled = false;
