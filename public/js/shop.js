@@ -124,18 +124,24 @@ function renderStoreItems(items, inventory) {
   container.innerHTML = filtered.map(item => {
     const isOwned = ownedItemIds.has(item.id);
     const isSoldOut = item.stock_count !== undefined && item.stock_count !== null && item.stock_count >= 0 && item.stock_count === 0;
+    // Repeatable items always show the Buy button even if already owned
+    const showBuyBtn = item.is_repeatable || !isOwned;
 
     let actionBtn = '';
-    if (isOwned) {
-      actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`;
-    } else if (isSoldOut) {
+    if (isSoldOut) {
       actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: not-allowed;">SOLD OUT</button>`;
-    } else {
+    } else if (showBuyBtn) {
       actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for ${COIN_SVG} ${item.price}</button>`;
+    } else {
+      actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`;
     }
 
     const stockIndicator = item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0
       ? `<span style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; display: block; margin-top: 4px;">⏳ Only ${item.stock_count} left in stock!</span>`
+      : '';
+
+    const repeatBadge = item.is_repeatable
+      ? `<span style="font-size: 0.68rem; color: #f59e0b; font-weight: 700; display: block; margin-top: 3px;">♻️ Can buy multiple times</span>`
       : '';
 
     const badgeClass = ['chat_glow', 'custom_flair', 'irl_reward'].includes(item.category)
@@ -154,6 +160,7 @@ function renderStoreItems(items, inventory) {
           <strong style="color: #fff; font-size: 0.88rem; display: block; margin-top: 4px;">${escapeHtml(item.name)}</strong>
           <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.35;">${escapeHtml(item.description)}</p>
           ${stockIndicator}
+          ${repeatBadge}
         </div>
         <div>
           ${actionBtn}

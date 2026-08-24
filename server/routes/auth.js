@@ -418,6 +418,31 @@ router.get('/profile/:username', async (req, res) => {
 
 
 
+// GET /api/auth/pending-notifications - Return unseen raffle win notifications (and mark as seen)
+router.get('/pending-notifications', async (req, res) => {
+  let userId = null;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+      userId = decoded.id;
+    } catch (e) {}
+  } else if (req.cookies && req.cookies.nitro_jwt_token) {
+    try {
+      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
+      userId = decoded.id;
+    } catch (e) {}
+  } else if (req.session && req.session.user) {
+    userId = req.session.user.id;
+  }
+
+  if (!userId) return res.status(401).json({ error: 'Not authenticated.' });
+
+  const wins = await db.getUnseenRaffleWins(userId);
+  res.json({ success: true, raffle_wins: wins });
+});
+
 // Logout
 router.post('/logout', (req, res) => {
   res.clearCookie('nitro_jwt_token', { path: '/' });

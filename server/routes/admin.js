@@ -1673,7 +1673,7 @@ router.post('/appeals/:id/review', async (req, res) => {
 
 // ADMIN CREATE SHOP ITEM
 router.post('/shop/create', async (req, res) => {
-  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url } = req.body;
+  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable } = req.body;
   if (!name || !description || !price || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
   }
@@ -1687,7 +1687,8 @@ router.post('/shop/create', async (req, res) => {
       perk_value: perk_value || '',
       delivery_note: delivery_note || '',
       stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1,
-      image_url: image_url || ''
+      image_url: image_url || '',
+      is_repeatable: Boolean(is_repeatable)
     });
 
     if (!newItem) {
@@ -1718,7 +1719,7 @@ router.post('/shop/bulk-create', async (req, res) => {
   const created = [];
   try {
     for (const item of items) {
-      const { name, description, price, category, perk_value, delivery_note, stock_count, image_url } = item;
+      const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable } = item;
       if (!name || !description || price === undefined || !category) continue;
 
       const newItem = await db.createShopItem({
@@ -1729,7 +1730,8 @@ router.post('/shop/bulk-create', async (req, res) => {
         perk_value: perk_value || '',
         delivery_note: delivery_note || '',
         stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1,
-        image_url: image_url || ''
+        image_url: image_url || '',
+        is_repeatable: Boolean(is_repeatable)
       });
       if (newItem) created.push(newItem);
     }
@@ -1750,7 +1752,7 @@ router.post('/shop/bulk-create', async (req, res) => {
 // ADMIN UPDATE SHOP ITEM
 router.post('/shop/:id/update', async (req, res) => {
   const itemId = req.params.id;
-  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url } = req.body;
+  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable } = req.body;
   if (!name || !description || price === undefined || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
   }
@@ -1764,7 +1766,8 @@ router.post('/shop/:id/update', async (req, res) => {
       perk_value: perk_value || '',
       delivery_note: delivery_note || '',
       stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1,
-      image_url: image_url || ''
+      image_url: image_url || '',
+      is_repeatable: Boolean(is_repeatable)
     });
 
     if (!updated) {

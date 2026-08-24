@@ -2771,7 +2771,7 @@ window.adminFetchShop = async function() {
             <td style="padding: 12px 14px; text-transform: uppercase; font-size: 0.75rem; color: #38bdf8; font-weight: 700;">${item.category.replace('_', ' ')}</td>
             <td style="padding: 12px 14px; color: #fbbf24; font-weight: 800;">${COIN_SVG} ${item.price}</td>
             <td style="padding: 12px 14px; font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${escapeHtml(item.perk_value || 'None')}</td>
-            <td style="padding: 12px 14px; font-weight: 700; font-size: 0.8rem; color: #fbbf24;">${stockStr}</td>
+            <td style="padding: 12px 14px; font-weight: 700; font-size: 0.8rem; color: #fbbf24;">${stockStr}${item.is_repeatable ? ' <span title="Repeatable" style="color:#f59e0b;font-size:0.7rem;background:rgba(245,158,11,0.15);border-radius:4px;padding:1px 5px;">♻️ Multi-buy</span>' : ''}</td>
             <td style="padding: 12px 14px; display: flex; gap: 6px;">
               <button class="btn-small secondary" onclick="window.adminOpenEditShopModal(${item.id})" style="background: #10b981; border: none; color: #000; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Edit</button>
               <button class="btn-small primary" onclick="window.adminDeleteShopItem(${item.id})" style="background: #ef4444; border: none; color: #fff; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Delete</button>
@@ -2801,6 +2801,8 @@ window.adminOpenEditShopModal = function(id) {
   document.getElementById('admin-edit-shop-perk').value = item.perk_value || '';
   document.getElementById('admin-edit-shop-delivery-note').value = item.delivery_note || '';
   document.getElementById('admin-edit-shop-image-url').value = item.image_url || '';
+  const repeatEl = document.getElementById('admin-edit-shop-repeatable');
+  if (repeatEl) repeatEl.checked = Boolean(item.is_repeatable);
 
   const modal = document.getElementById('admin-edit-shop-modal');
   if (modal) modal.style.display = 'flex';
@@ -2906,12 +2908,13 @@ function setupCreateShopForm() {
       const delivery_note = document.getElementById('admin-shop-delivery-note')?.value.trim() || '';
       const stock_count = document.getElementById('admin-shop-stock')?.value.trim() || '-1';
       const image_url = document.getElementById('admin-shop-image-url')?.value.trim() || '';
+      const is_repeatable = document.getElementById('admin-shop-repeatable')?.checked || false;
 
       try {
         const res = await authFetch('/api/admin/shop/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -2981,12 +2984,13 @@ function setupCreateShopForm() {
       const delivery_note = document.getElementById('admin-edit-shop-delivery-note').value.trim();
       const stock_count = document.getElementById('admin-edit-shop-stock').value.trim();
       const image_url = document.getElementById('admin-edit-shop-image-url').value.trim();
+      const is_repeatable = document.getElementById('admin-edit-shop-repeatable')?.checked || false;
 
       try {
         const res = await authFetch(`/api/admin/shop/${id}/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable })
         });
         const data = await res.json();
         if (res.ok && data.success) {

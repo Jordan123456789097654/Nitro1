@@ -466,6 +466,15 @@ const db = {
           user_id INT REFERENCES users(id) ON DELETE CASCADE,
           created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS raffle_win_notifications (
+          id SERIAL PRIMARY KEY,
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          raffle_id INT REFERENCES raffles(id) ON DELETE CASCADE,
+          raffle_title VARCHAR(255) NOT NULL,
+          seen BOOLEAN DEFAULT false,
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        );
       `);
 
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS delivery_note TEXT DEFAULT '';");
@@ -479,6 +488,11 @@ const db = {
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS stock_count INT DEFAULT -1;");
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_spin_at TIMESTAMP;");
+      // Allow items to be purchased more than once
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS is_repeatable BOOLEAN DEFAULT false;");
+      // Track exact claim time separately from last-progress time so daily reset is accurate
+      await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP;");
+
 
       // Seed default shop items
       const shopItemsCount = await pool.query('SELECT COUNT(*) FROM shop_items');
@@ -2862,6 +2876,12 @@ JSON Response:`;
       // Set winner
       await pool.query('UPDATE raffles SET winner_id = $1, is_drawn = true WHERE id = $2', [winnerId, raffleId]);
 
+      // Create a login-popup notification for the winner
+      await pool.query(
+        'INSERT INTO raffle_win_notifications (user_id, raffle_id, raffle_title) VALUES ($1, $2, $3)',
+        [winnerId, raffleId, raffle.title]
+      );
+
       return {
         success: true,
         winner: {
@@ -2883,6 +2903,29 @@ JSON Response:`;
     } catch (e) {
       console.error('deleteRaffle error:', e.message);
       return false;
+    }
+  },
+
+  async getUnseenRaffleWins(userId) {
+    try {
+      const res = await pool.query(
+        `SELECT id, raffle_id, raffle_title, created_at
+         FROM raffle_win_notifications
+         WHERE user_id = $1 AND seen = false
+         ORDER BY created_at DESC`,
+        [userId]
+      );
+      if (res.rows.length > 0) {
+        // Mark all as seen so the popup only shows once
+        await pool.query(
+          'UPDATE raffle_win_notifications SET seen = true WHERE user_id = $1 AND seen = false',
+          [userId]
+        );
+      }
+      return res.rows;
+    } catch (e) {
+      console.error('getUnseenRaffleWins error:', e.message);
+      return [];
     }
   },
 
@@ -2968,10 +3011,12 @@ JSON Response:`;
         return { error: `Insufficient coins. You need ${item.price - coins} more coins.` };
       }
 
-      // Check if already purchased
-      const invCheck = await pool.query('SELECT * FROM user_inventory WHERE user_id = $1 AND item_id = $2', [userId, itemId]);
-      if (invCheck.rows.length) {
-        return { error: 'You already own this item.' };
+      // Check if already purchased (skip for repeatable items)
+      if (!item.is_repeatable) {
+        const invCheck = await pool.query('SELECT * FROM user_inventory WHERE user_id = $1 AND item_id = $2', [userId, itemId]);
+        if (invCheck.rows.length) {
+          return { error: 'You already own this item.' };
+        }
       }
 
       // Check stock count
@@ -2979,9 +3024,30 @@ JSON Response:`;
         return { error: 'This item is sold out.' };
       }
 
-      // Deduct coins and add to inventory
+      // Deduct coins
       await pool.query('UPDATE users SET coins = COALESCE(coins, 0) - $1 WHERE id = $2', [item.price, userId]);
-      await pool.query('INSERT INTO user_inventory (user_id, item_id) VALUES ($1, $2)', [userId, itemId]);
+
+      // Add to inventory (upsert for non-repeatable, insert for repeatable)
+      if (item.is_repeatable) {
+        // For repeatable items, log each purchase in shop_purchases table
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS shop_purchases (
+            id SERIAL PRIMARY KEY,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE,
+            item_id INT REFERENCES shop_items(id) ON DELETE CASCADE,
+            purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+        await pool.query('INSERT INTO shop_purchases (user_id, item_id) VALUES ($1, $2)', [userId, itemId]);
+        // Also upsert into inventory so the perk is equipped
+        await pool.query(`
+          INSERT INTO user_inventory (user_id, item_id)
+          VALUES ($1, $2)
+          ON CONFLICT (user_id, item_id) DO UPDATE SET purchased_at = CURRENT_TIMESTAMP
+        `, [userId, itemId]);
+      } else {
+        await pool.query('INSERT INTO user_inventory (user_id, item_id) VALUES ($1, $2)', [userId, itemId]);
+      }
 
       // Decrement stock if limited
       if (item.stock_count !== null && item.stock_count > 0) {
@@ -2995,6 +3061,7 @@ JSON Response:`;
       return { error: 'Database transaction error.' };
     }
   },
+
 
   async getUserInventory(userId) {
     try {
@@ -3075,14 +3142,14 @@ JSON Response:`;
         } else {
           const uq = uqRes.rows[0];
 
-          // Check and reset if claimed > 24 hours ago
-          if (uq.is_claimed && uq.updated_at) {
-            const claimedTime = new Date(uq.updated_at);
+          // Check and reset if claimed >= 24 hours ago (use claimed_at, not updated_at)
+          if (uq.is_claimed && uq.claimed_at) {
+            const claimedTime = new Date(uq.claimed_at);
             if ((new Date() - claimedTime) / (1000 * 60 * 60) >= 24) {
               const isCompleted = incrementBy >= q.target_value;
               await pool.query(`
                 UPDATE user_quests 
-                SET current_value = $1, is_completed = $2, is_claimed = false, updated_at = CURRENT_TIMESTAMP
+                SET current_value = $1, is_completed = $2, is_claimed = false, claimed_at = null, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = $3 AND quest_id = $4
               `, [Math.min(q.target_value, incrementBy), isCompleted, userId, q.id]);
               continue;
@@ -3122,7 +3189,10 @@ JSON Response:`;
       if (!uq.is_completed) return { error: 'Quest is not completed yet.' };
       if (uq.is_claimed) return { error: 'Reward has already been claimed.' };
 
-      await pool.query('UPDATE user_quests SET is_claimed = true, updated_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND quest_id = $2', [userId, questId]);
+      await pool.query(
+        'UPDATE user_quests SET is_claimed = true, claimed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND quest_id = $2',
+        [userId, questId]
+      );
       await pool.query('UPDATE users SET coins = COALESCE(coins, 0) + $1, xp = COALESCE(xp, 0) + $2 WHERE id = $3', [uq.reward_coins, uq.reward_xp, userId]);
 
       return { success: true, reward_coins: uq.reward_coins, reward_xp: uq.reward_xp };
@@ -3132,13 +3202,14 @@ JSON Response:`;
     }
   },
 
-  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count, image_url }) {
+
+  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable }) {
     try {
       const res = await pool.query(`
-        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count, image_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '']);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', is_repeatable ? true : false]);
       return res.rows[0];
     } catch (e) {
       console.error('createShopItem error:', e.message);
@@ -3156,20 +3227,21 @@ JSON Response:`;
     }
   },
 
-  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count, image_url }) {
+  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable }) {
     try {
       const res = await pool.query(`
         UPDATE shop_items
-        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7, image_url = $8
-        WHERE id = $9
+        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7, image_url = $8, is_repeatable = $9
+        WHERE id = $10
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', id]);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', is_repeatable ? true : false, id]);
       return res.rows[0];
     } catch (e) {
       console.error('updateShopItem error:', e.message);
       return null;
     }
   },
+
 
   async createQuest({ title, description, type, target_value, reward_coins, reward_xp }) {
     try {

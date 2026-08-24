@@ -981,6 +981,8 @@ function setupMandatoryLoginGate(onUserChange) {
         if (data.must_reset_password) {
           setTimeout(handleMandatoryPasswordReset, 500);
         }
+        // Check for raffle win notifications
+        setTimeout(() => checkAndShowRaffleWinPopup(data.token), 800);
         if (onUserChange) onUserChange(currentUser);
       } catch (err) {
         errorMsg.textContent = 'Network or server connection error.';
@@ -1111,6 +1113,8 @@ function setupAuthModal(onUserChange) {
         if (data.must_reset_password) {
           setTimeout(handleMandatoryPasswordReset, 500);
         }
+        // Check for raffle win notifications
+        setTimeout(() => checkAndShowRaffleWinPopup(data.token), 800);
         if (onUserChange) onUserChange(currentUser);
       } catch (err) {
         errorMsg.textContent = 'Network or server error.';
@@ -1141,3 +1145,98 @@ export function triggerClientLogout() {
   if (onUserChangeCallback) onUserChangeCallback(currentUser);
 }
 window.triggerClientLogout = triggerClientLogout;
+
+// ─── Raffle Win Popup ────────────────────────────────────────────────────────
+
+async function checkAndShowRaffleWinPopup(token) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch('/api/auth/pending-notifications', { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.raffle_wins || !data.raffle_wins.length) return;
+    // Show a popup for each unseen win (usually just one, but handle multiple)
+    data.raffle_wins.forEach((win, idx) => {
+      setTimeout(() => showRaffleWinPopup(win), idx * 600);
+    });
+  } catch (e) { /* silent */ }
+}
+
+function showRaffleWinPopup(win) {
+  // Remove any existing popup
+  const existing = document.getElementById('raffle-win-popup');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'raffle-win-popup';
+  overlay.style.cssText = `
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.75);z-index:99999;
+    display:flex;align-items:center;justify-content:center;
+    animation:fadeIn .3s ease;
+  `;
+
+  const date = win.created_at ? new Date(win.created_at).toLocaleDateString() : '';
+  const card = document.createElement('div');
+  card.style.cssText = `
+    background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+    border:2px solid #f59e0b;
+    border-radius:20px;max-width:440px;width:90%;padding:40px 32px 32px;
+    text-align:center;position:relative;
+    box-shadow:0 0 60px rgba(245,158,11,0.4),0 20px 60px rgba(0,0,0,0.8);
+    animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+  `;
+
+  card.innerHTML = `
+    <style>
+      @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+      @keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(120px) rotate(720deg);opacity:0}}
+      .raffle-confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 1.2s ease-in forwards;}
+    </style>
+    <div style="font-size:64px;margin-bottom:12px;animation:spin 1s ease-out;">🎉</div>
+    <div style="font-size:13px;font-weight:700;letter-spacing:3px;color:#f59e0b;text-transform:uppercase;margin-bottom:8px;">🏆 You Won!</div>
+    <h2 style="color:#fff;font-size:22px;font-weight:800;margin:0 0 12px;line-height:1.3;">${escapeHtml(win.raffle_title)}</h2>
+    <p style="color:#94a3b8;font-size:14px;margin:0 0 24px;">Congratulations! Your ticket was drawn as the winner of this raffle. Contact an admin to claim your prize!</p>
+    ${date ? `<div style="color:#64748b;font-size:12px;margin-bottom:20px;">Drawn on ${date}</div>` : ''}
+    <button id="raffle-win-close" style="
+      background:linear-gradient(135deg,#f59e0b,#d97706);
+      color:#000;border:none;border-radius:10px;
+      padding:12px 32px;font-size:15px;font-weight:700;
+      cursor:pointer;width:100%;letter-spacing:.5px;
+      transition:transform .15s,box-shadow .15s;
+    " onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+      🎊 Awesome, Thanks!
+    </button>
+  `;
+
+  // Add confetti
+  const colors = ['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899'];
+  for (let i = 0; i < 14; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'raffle-confetti';
+    dot.style.cssText = `
+      background:${colors[i % colors.length]};
+      left:${Math.random() * 100}%;
+      top:${Math.random() * 40}%;
+      animation-delay:${Math.random() * 0.5}s;
+      animation-duration:${1 + Math.random()}s;
+    `;
+    card.appendChild(dot);
+  }
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  const closeBtn = card.querySelector('#raffle-win-close');
+  closeBtn.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+export { checkAndShowRaffleWinPopup };
