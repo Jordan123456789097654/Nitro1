@@ -1727,6 +1727,15 @@ function setupAdminActions() {
     document.getElementById('admin-edit-user-glow').value = user.pro_chat_glow || 'gold';
     document.getElementById('admin-edit-user-flair').value = user.pro_custom_flair || '';
     document.getElementById('admin-edit-user-new-password').value = '';
+    // Coins / XP — show current balance as hint, clear field so blank = keep
+    const coinsInput = document.getElementById('admin-edit-user-coins');
+    const xpInput    = document.getElementById('admin-edit-user-xp');
+    const coinsLabel = document.getElementById('admin-edit-user-current-coins');
+    const xpLabel    = document.getElementById('admin-edit-user-current-xp');
+    if (coinsInput) coinsInput.value = '';
+    if (xpInput)    xpInput.value    = '';
+    if (coinsLabel) coinsLabel.textContent = `(current: ${(user.coins || 0).toLocaleString()})`;
+    if (xpLabel)    xpLabel.textContent    = `(current: ${(user.xp    || 0).toLocaleString()})`;
     const flairLockedCheck = document.getElementById('admin-edit-user-flair-locked');
     if (flairLockedCheck) {
       flairLockedCheck.checked = Boolean(user.is_flair_locked);
@@ -1824,25 +1833,27 @@ function setupAdminActions() {
       const pro_custom_flair = document.getElementById('admin-edit-user-flair').value.trim();
       const new_password = document.getElementById('admin-edit-user-new-password').value;
       const is_flair_locked = document.getElementById('admin-edit-user-flair-locked')?.checked || false;
+      const coinsRaw = document.getElementById('admin-edit-user-coins')?.value;
+      const xpRaw    = document.getElementById('admin-edit-user-xp')?.value;
+      // Only send coins/xp if admin actually typed a value
+      const coins = coinsRaw !== '' && coinsRaw !== undefined && coinsRaw !== null ? parseInt(coinsRaw, 10) : undefined;
+      const xp    = xpRaw    !== '' && xpRaw    !== undefined && xpRaw    !== null ? parseInt(xpRaw,    10) : undefined;
+
+      const payload = { role, display_name, avatar_url, bio, pro_chat_glow, pro_custom_flair, new_password, is_flair_locked };
+      if (coins !== undefined) payload.coins = coins;
+      if (xp    !== undefined) payload.xp    = xp;
 
       try {
         const res = await authFetch(`/api/admin/users/${userId}/profile`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            role,
-            display_name,
-            avatar_url,
-            bio,
-            pro_chat_glow,
-            pro_custom_flair,
-            new_password,
-            is_flair_locked
-          })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok) {
-          alert(`✅ Profile for ${targetUsername} configured successfully!`);
+          const coinMsg = coins !== undefined ? ` | 🪙 ${coins.toLocaleString()} coins` : '';
+          const xpMsg   = xp    !== undefined ? ` | ⭐ ${xp.toLocaleString()} XP`       : '';
+          alert(`✅ Profile for ${targetUsername} updated!${coinMsg}${xpMsg}`);
           document.getElementById('admin-user-profile-modal')?.classList.remove('active');
           fetchUsers();
           fetchLogs();

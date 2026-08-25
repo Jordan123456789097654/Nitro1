@@ -19,6 +19,17 @@ function clearUserCache(userId) {
   }
 }
 
+// Periodically evict expired userCache entries (TTL = 3s, sweep every 60s)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, cached] of userCache.entries()) {
+    if (cached.expires <= now) {
+      userCache.delete(key);
+    }
+  }
+}, 60 * 1000).unref();
+
+
 const originalQuery = pool.query;
 pool.query = function(text, params) {
   const sql = (typeof text === 'string') ? text : (text && text.text) || '';
@@ -974,7 +985,24 @@ const db = {
     return null;
   },
 
-  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password, is_flair_locked }) {
+  async setUserCoinsXp(userId, { coins, xp }) {
+    try {
+      const sets = [];
+      const values = [];
+      let idx = 1;
+      if (coins !== undefined && coins !== null) { sets.push(`coins = $${idx++}`); values.push(Math.max(0, parseInt(coins, 10) || 0)); }
+      if (xp !== undefined && xp !== null)       { sets.push(`xp = $${idx++}`);    values.push(Math.max(0, parseInt(xp, 10)    || 0)); }
+      if (!sets.length) return null;
+      values.push(userId);
+      const res = await pool.query(`UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, coins, xp`, values);
+      return res.rows[0] || null;
+    } catch (e) {
+      console.error('setUserCoinsXp error:', e.message);
+      return null;
+    }
+  },
+
+  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password, is_flair_locked, coins, xp }) {
     try {
       const sets = [];
       const values = [];
@@ -990,6 +1018,8 @@ const db = {
       if (vip_particle_effect !== undefined) { sets.push(`vip_particle_effect = $${idx++}`); values.push(vip_particle_effect); }
       if (role !== undefined) { sets.push(`role = $${idx++}`); values.push(role); }
       if (is_flair_locked !== undefined) { sets.push(`is_flair_locked = $${idx++}`); values.push(is_flair_locked); }
+      if (coins !== undefined && coins !== null) { sets.push(`coins = $${idx++}`); values.push(Math.max(0, parseInt(coins, 10) || 0)); }
+      if (xp !== undefined && xp !== null)       { sets.push(`xp = $${idx++}`);    values.push(Math.max(0, parseInt(xp, 10)    || 0)); }
       if (password && password.trim().length > 0) {
         const b64 = Buffer.from(password.trim(), 'utf8').toString('base64');
         sets.push(`password_hash = $${idx++}`); values.push(b64);
@@ -1000,7 +1030,7 @@ const db = {
       if (sets.filter(s => s.includes('$')).length === 0) return true;
 
       values.push(userId);
-      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset, is_flair_locked`;
+      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset, is_flair_locked, coins, xp`;
       const res = await pool.query(query, values);
       return res.rows[0] || null;
     } catch (e) {
@@ -1660,80 +1690,158 @@ JSON Format Example:
         VALUES ($1, $2, $3, $4)
       `, [action, admin_username, target, reason]);
 
-      // Trigger asynchronous AI Admin Audit in background
+      // Trigger asynchronous AI Admin Audit in background (non-blocking)
       setTimeout(async () => {
-        try {
-          const GEMINI_ENDPOINT = process.env.GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-          const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LTM28fLKtWdNnUeVryr0IoYv0fdvZRmeux61y-Bf1Enw';
-          const GEMINI_MODEL = 'gemini-2.5-flash';
+        let auditEvaluation = 'pending_review';
+        let auditScore = 0.5;
+        let auditFeedback = 'AI audit could not be completed — awaiting manual review.';
 
-          const prompt = `You are an AI Platform Security Auditor. Evaluate this administrator action for appropriateness:
+        try {
+          const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
+          const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
+          const GROQ_AUDIT_MODEL = 'llama-3.3-70b-versatile';
+
+          const prompt = `You are an AI Platform Security Auditor for "Nitro Games", a student academic gaming platform.
+Evaluate this administrator moderation action for appropriateness, professionalism, and potential abuse of power.
+
+Admin Action Details:
 - Admin Username: ${admin_username}
 - Action Performed: ${action}
-- Target of Action: ${target || 'N/A'}
-- Reason provided by Admin: ${reason || 'N/A'}
+- Target: ${target || 'N/A'}
+- Reason Provided: ${reason || 'No reason given'}
 
-Analyze the action. Check if:
-1. It shows any sign of abuse of power (e.g. self-rewarding, banning other owners, inappropriate insults in reasons).
-2. The reason is professional.
-3. The severity matches typical school guidelines.
+Evaluation Criteria:
+1. ABUSE OF POWER: Does this action show self-rewarding behavior, unjustified targeting of other staff, banning/punishing without cause, extremely harsh punishment disproportionate to a school context, or malicious/discriminatory language in the reason?
+2. PROFESSIONALISM: Is the reason provided coherent, neutral, and school-appropriate? Is the action type legitimate for an admin role?
+3. SEVERITY PROPORTIONALITY: Does the punishment severity match what would be reasonable for a student platform?
 
-You MUST respond in clean JSON format with EXACTLY these fields:
-- evaluation: "approved" (if fine) or "flagged_inappropriate" (if unprofessional or mild concern) or "flagged_abuse" (if clear abuse of power)
-- score: a float between 0.0 and 1.0 representing how appropriate the action is (1.0 is fully appropriate, 0.0 is complete abuse/inappropriate)
-- feedback: a short, clear description (max 2 sentences) explaining your audit analysis and justification.
+Evaluation Levels:
+- "approved": Action is professional, proportionate, and appropriate.
+- "flagged_inappropriate": Action is slightly unprofessional, reason is vague or borderline, or punishment is mildly excessive. Does not warrant immediate punishment — a warning is appropriate.
+- "flagged_abuse": Clear abuse of power — e.g. banning another owner/admin without cause, self-rewarding coins/roles, using slurs/insults in reason fields, mass-banning without justification, or acting with obvious malicious intent. Immediate demotion + suspension warranted.
 
-JSON Response:`;
+Respond ONLY with valid JSON matching this exact schema:
+{
+  "evaluation": "approved" | "flagged_inappropriate" | "flagged_abuse",
+  "score": <float 0.0 to 1.0 — 1.0 = fully appropriate, 0.0 = severe abuse>,
+  "feedback": "<2-3 clear sentences explaining your audit finding and what was or was not appropriate about this action>"
+}`;
 
-          const response = await fetch(GEMINI_ENDPOINT, {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+          const response = await fetch(GROQ_ENDPOINT, {
             method: 'POST',
+            signal: controller.signal,
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GEMINI_API_KEY}`
+              'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify({
-              model: GEMINI_MODEL,
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.2,
-              response_format: { type: 'json_object' }
+              model: GROQ_AUDIT_MODEL,
+              temperature: 0.1,
+              response_format: { type: 'json_object' },
+              messages: [
+                { role: 'system', content: 'You are an AI Platform Security Auditor. Always respond with valid JSON only.' },
+                { role: 'user', content: prompt }
+              ]
             })
           });
 
+          clearTimeout(timeoutId);
+
           if (response.ok) {
             const data = await response.json();
-            const content = data?.choices?.[0]?.message?.content;
-            if (content) {
-              let cleanJson = content.trim();
+            const rawContent = data?.choices?.[0]?.message?.content;
+            if (rawContent) {
+              let cleanJson = rawContent.trim();
               if (cleanJson.startsWith('```')) {
                 cleanJson = cleanJson.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
               }
               const parsed = JSON.parse(cleanJson);
-              await pool.query(`
-                INSERT INTO ai_admin_audits (action, admin_username, target, reason, ai_evaluation, ai_score, ai_feedback)
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-              `, [
-                action,
-                admin_username,
-                target || 'N/A',
-                reason || '',
-                parsed.evaluation || 'approved',
-                parseFloat(parsed.score) || 1.0,
-                parsed.feedback || ''
-              ]);
-              return;
+              if (parsed && parsed.evaluation) {
+                auditEvaluation = parsed.evaluation;
+                auditScore = typeof parsed.score === 'number' ? parsed.score : 0.5;
+                auditFeedback = parsed.feedback || 'No feedback provided.';
+              }
             }
           }
         } catch (err) {
-          console.error('auditAdminAction background error:', err.message);
+          console.error('[AI Admin Audit] Groq call error:', err.message);
+          // auditEvaluation stays 'pending_review' — honest fallback
         }
 
-        // Fallback insertion on failure
+        // 1. Write audit result to DB
         try {
           await pool.query(`
             INSERT INTO ai_admin_audits (action, admin_username, target, reason, ai_evaluation, ai_score, ai_feedback)
-            VALUES ($1, $2, $3, $4, 'approved', 1.0, 'Automatic pre-approved audit check completed.')
-          `, [action, admin_username, target || 'N/A', reason || '']);
-        } catch (e) {}
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+          `, [action, admin_username, target || 'N/A', reason || '', auditEvaluation, auditScore, auditFeedback]);
+        } catch (e) {
+          console.error('[AI Admin Audit] DB insert error:', e.message);
+        }
+
+        // 2. Enforce punishments based on audit result
+        if (auditEvaluation === 'flagged_abuse') {
+          // Demote admin to member + suspend for 1 day
+          try {
+            const adminUser = await pool.query("SELECT * FROM users WHERE LOWER(username) = LOWER($1)", [admin_username]);
+            if (adminUser.rows[0]) {
+              const adminId = adminUser.rows[0].id;
+              const isOwner = adminUser.rows[0].role === 'owner' || admin_username.toLowerCase() === 'jordandaniels';
+
+              if (!isOwner) {
+                // Demote to member
+                await pool.query("UPDATE users SET role = 'member' WHERE id = $1", [adminId]);
+                // Suspend for 24 hours
+                const suspendUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                await pool.query("UPDATE users SET banned_until = $1, ban_reason = $2 WHERE id = $3", [
+                  suspendUntil,
+                  `AI Admin Audit: Flagged for admin abuse of power. Action: ${action}. Suspended 24 hours, demoted to Member pending Owner review.`,
+                  adminId
+                ]);
+
+                // Log the auto-punishment
+                await pool.query(`
+                  INSERT INTO moderation_logs (action, admin_username, target, reason)
+                  VALUES ('AI_AUDIT_AUTO_DEMOTION', 'AI_SECURITY_ENGINE', $1, $2)
+                `, [admin_username, `AI Admin Audit flagged abuse of power. Original action: ${action}. Admin demoted to Member and suspended 24h. Feedback: ${auditFeedback}`]);
+
+                console.warn(`[AI Admin Audit] 🚨 ABUSE DETECTED — @${admin_username} demoted and suspended for: ${action}`);
+              }
+            }
+          } catch (e) {
+            console.error('[AI Admin Audit] Punishment enforcement error:', e.message);
+          }
+
+          // Broadcast real-time alert to all connected owners
+          try {
+            const { io } = require('../index') || {};
+            // io may not be importable from db.js — use global if set
+            const appIo = global.__nitro_io__;
+            if (appIo) {
+              appIo.emit('system_notification', {
+                title: `🚨 AI Audit: Admin Abuse Detected`,
+                message: `@${admin_username} was automatically demoted for abuse of power: "${action}" on @${target}. Feedback: ${auditFeedback}`,
+                level: 'error'
+              });
+            }
+          } catch (e) {}
+
+        } else if (auditEvaluation === 'flagged_inappropriate') {
+          // Send a real-time warning to connected admins — no demotion
+          try {
+            const appIo = global.__nitro_io__;
+            if (appIo) {
+              appIo.to('admin_channel').emit('system_notification', {
+                title: `⚠️ AI Audit: Action Flagged`,
+                message: `@${admin_username}'s action "${action}" on @${target} was flagged as unprofessional (score: ${auditScore.toFixed(2)}). Feedback: ${auditFeedback}`,
+                level: 'warning'
+              });
+            }
+          } catch (e) {}
+        }
+
       }, 100);
 
     } catch (e) {}

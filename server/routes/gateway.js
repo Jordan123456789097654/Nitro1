@@ -49,16 +49,29 @@ const PROXY_ENGINES = {
 };
 
 // Global Cookie Jar per User Session
+// { sessionKey -> { cookies: Map, lastAccessed: timestamp } }
 const COOKIE_JAR = new Map();
+const COOKIE_SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes idle
+
+// Evict stale sessions every 10 minutes to prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [sessionKey, session] of COOKIE_JAR.entries()) {
+    if (now - session.lastAccessed > COOKIE_SESSION_TTL_MS) {
+      COOKIE_JAR.delete(sessionKey);
+    }
+  }
+}, 10 * 60 * 1000).unref();
 
 function getCookiesForRequest(sessionKey, targetDomain) {
-  const jar = COOKIE_JAR.get(sessionKey);
-  if (!jar) return '';
+  const session = COOKIE_JAR.get(sessionKey);
+  if (!session) return '';
+  session.lastAccessed = Date.now();
   const validCookies = [];
   const now = Date.now();
-  for (const [key, c] of jar.entries()) {
+  for (const [key, c] of session.cookies.entries()) {
     if (c.expires && c.expires < now) {
-      jar.delete(key);
+      session.cookies.delete(key);
       continue;
     }
     if (!c.domain || targetDomain.includes(c.domain.replace(/^\./, ''))) {
@@ -71,9 +84,11 @@ function getCookiesForRequest(sessionKey, targetDomain) {
 function saveCookiesFromResponse(sessionKey, targetDomain, setCookieHeader) {
   if (!setCookieHeader) return;
   if (!COOKIE_JAR.has(sessionKey)) {
-    COOKIE_JAR.set(sessionKey, new Map());
+    COOKIE_JAR.set(sessionKey, { cookies: new Map(), lastAccessed: Date.now() });
   }
-  const jar = COOKIE_JAR.get(sessionKey);
+  const session = COOKIE_JAR.get(sessionKey);
+  session.lastAccessed = Date.now();
+  const jar = session.cookies;
   const lines = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
 
   lines.forEach(line => {

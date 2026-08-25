@@ -45,17 +45,18 @@ const io = new Server(server, {
   allowEIO3: true,
   pingTimeout: 60000,
   pingInterval: 25000,
-  maxHttpBufferSize: 1e8,
+  maxHttpBufferSize: 5e6, // 5MB — was 100MB which could trigger OOM on a single payload
   cookie: false
 });
 app.set('io', io);
+global.__nitro_io__ = io; // exposed for db.js audit enforcement (avoids circular require)
 app.set('trust proxy', 1);
 
 // Middleware & Security Headers
 app.use(cors());
 app.use(cookieParser());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -262,12 +263,16 @@ app.post('/api/visit', async (req, res) => {
   }
 });
 
+// Per-route body size overrides for endpoints that accept base64 image/file uploads
+// (Global limit is 2mb — these specific routes need more)
+const largeBodyParser = express.json({ limit: '15mb' });
+
 // API Routes
 app.use('/gateway', gatewayRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', largeBodyParser, authRoutes);
 app.use('/api/games', gamesRoutes);
 app.use('/api/apps', appsRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', largeBodyParser, adminRoutes);
 app.use('/api/gateway', gatewayRoutes);
 app.use('/api/updates', updatesRoutes);
 app.use('/api/polls', pollsRoutes);
@@ -276,7 +281,7 @@ app.use('/api/friends', require('./routes/friends'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/music', require('./routes/music'));
 app.use('/api/soundboard', require('./routes/soundboard'));
-app.use('/api/ai', require('./routes/ai'));
+app.use('/api/ai', largeBodyParser, require('./routes/ai'));
 app.use('/api/appeals', require('./routes/appeals'));
 app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/shop', require('./routes/shop'));

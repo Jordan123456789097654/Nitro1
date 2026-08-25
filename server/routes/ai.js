@@ -71,13 +71,21 @@ const MODE_PROMPTS = {
 };
 
 // Global In-Memory Rate Limiter with Dynamic Threshold
+// Capped to prevent unbounded array growth; uses a circular-friendly splice approach
 const requestTimestamps = [];
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const MAX_RATE_LIMIT_ENTRIES = 200; // hard cap — well above any realistic rateLimit value
 
 function checkGlobalRateLimit(maxRequests = 15) {
   const now = Date.now();
-  while (requestTimestamps.length > 0 && requestTimestamps[0] <= now - RATE_LIMIT_WINDOW_MS) {
-    requestTimestamps.shift();
+  const cutoff = now - RATE_LIMIT_WINDOW_MS;
+  // Remove expired entries from the front
+  let i = 0;
+  while (i < requestTimestamps.length && requestTimestamps[i] <= cutoff) i++;
+  if (i > 0) requestTimestamps.splice(0, i);
+  // Hard cap in case of extreme backlog
+  if (requestTimestamps.length > MAX_RATE_LIMIT_ENTRIES) {
+    requestTimestamps.splice(0, requestTimestamps.length - MAX_RATE_LIMIT_ENTRIES);
   }
   if (requestTimestamps.length >= maxRequests) {
     return false;

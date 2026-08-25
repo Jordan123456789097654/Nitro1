@@ -752,7 +752,7 @@ router.post('/users/:id/role', async (req, res) => {
 router.post('/users/:id/profile', async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
-  const { display_name, bio, avatar_url, pro_chat_glow, pro_custom_flair, role, new_password, is_flair_locked } = req.body;
+  const { display_name, bio, avatar_url, pro_chat_glow, pro_custom_flair, role, new_password, is_flair_locked, coins, xp } = req.body;
 
   try {
     const targetUser = await db.getUserById(targetId);
@@ -781,11 +781,13 @@ router.post('/users/:id/profile', async (req, res) => {
       pro_custom_flair: pro_custom_flair !== undefined ? pro_custom_flair.trim() : targetUser.pro_custom_flair,
       role: role ? role.trim() : targetUser.role,
       password: new_password,
-      is_flair_locked: is_flair_locked !== undefined ? Boolean(is_flair_locked) : targetUser.is_flair_locked
+      is_flair_locked: is_flair_locked !== undefined ? Boolean(is_flair_locked) : targetUser.is_flair_locked,
+      coins: coins !== '' && coins !== undefined ? coins : undefined,
+      xp:    xp    !== '' && xp    !== undefined ? xp    : undefined
     });
 
     const io = req.app.get('io');
-    if (io) {
+    if (io && updated) {
       io.emit('user_profile_updated', {
         userId: targetId,
         username: targetUser.username,
@@ -793,18 +795,21 @@ router.post('/users/:id/profile', async (req, res) => {
       });
     }
 
-    await db.createModerationLog('ADMIN_EDIT_USER_PROFILE', admin, targetUser.username, `Updated profile/settings for ${targetUser.username}`);
+    const coinNote = (coins !== '' && coins !== undefined) ? ` | Coins→${coins}` : '';
+    const xpNote   = (xp    !== '' && xp    !== undefined) ? ` | XP→${xp}`       : '';
+    await db.createModerationLog('ADMIN_EDIT_USER_PROFILE', admin, targetUser.username, `Updated profile for ${targetUser.username}${coinNote}${xpNote}`);
 
     sendDiscordLog({
       category: 'moderation',
       action: 'ADMIN_EDIT_USER_PROFILE',
       admin,
       target: targetUser.username,
-      details: `Profile configured by admin: Name: ${display_name || targetUser.username}, Role: ${role || targetUser.role}`
+      details: `Profile updated: Name: ${display_name || targetUser.username}, Role: ${role || targetUser.role}${coinNote}${xpNote}`
     });
 
     res.json({ success: true, message: `Profile for ${targetUser.username} updated successfully.`, user: updated });
   } catch (err) {
+    console.error('admin profile update error:', err);
     res.status(500).json({ error: 'Failed to update user profile.' });
   }
 });

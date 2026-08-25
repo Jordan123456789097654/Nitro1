@@ -36,9 +36,37 @@ const { checkMessageWithGroqModeration, checkImageWithGroqModeration, getSafetyH
 const activeConnections = new Map(); // socket.id -> connection details
 const userLastMessageTime = new Map(); // userId/ip -> timestamp
 const userMessageHistory = new Map(); // userId/ip -> [{ text, time }]
-const whiteboardRooms = new Map(); // roomCode -> [stroke]
+const whiteboardRooms = new Map(); // roomCode -> { strokes: [], lastActivity: timestamp }
 const privateRooms = new Map(); // roomCode -> { owner, password, members: Map(socket.id -> username) }
 let chatSlowmodeSeconds = 0; // 0 = off
+
+// Sweep stale spam-tracker entries every 5 minutes to prevent unbounded Map growth
+setInterval(() => {
+  const cutoff = Date.now() - 12000; // 12s — same window used when filtering history
+  for (const [key, history] of userMessageHistory.entries()) {
+    if (!history.length || history[history.length - 1].time < cutoff) {
+      userMessageHistory.delete(key);
+    }
+  }
+  // Remove slowmode entries older than 10 minutes (well past any slowmode window)
+  const slowmodeCutoff = Date.now() - 10 * 60 * 1000;
+  for (const [key, ts] of userLastMessageTime.entries()) {
+    if (ts < slowmodeCutoff) {
+      userLastMessageTime.delete(key);
+    }
+  }
+}, 5 * 60 * 1000).unref();
+
+// Evict whiteboard rooms idle for more than 2 hours
+setInterval(() => {
+  const cutoff = Date.now() - 2 * 60 * 60 * 1000;
+  for (const [roomKey, room] of whiteboardRooms.entries()) {
+    if (room.lastActivity < cutoff) {
+      whiteboardRooms.delete(roomKey);
+    }
+  }
+}, 30 * 60 * 1000).unref();
+
 
 function broadcastRoomUpdate(roomCode, io) {
   const roomKey = roomCode.toLowerCase().trim();
@@ -1008,25 +1036,28 @@ function initChatSocket(io) {
     socket.on('join_whiteboard', ({ roomCode }) => {
       const targetRoom = 'wb_' + (roomCode ? roomCode.toLowerCase().trim() : 'global');
       socket.join(targetRoom);
-      const strokes = whiteboardRooms.get(targetRoom) || [];
+      const room = whiteboardRooms.get(targetRoom);
+      const strokes = room ? room.strokes : [];
       socket.emit('whiteboard_history', { strokes });
     });
 
     socket.on('whiteboard_draw', ({ roomCode, stroke }) => {
       if (!stroke) return;
       const targetRoom = 'wb_' + (roomCode ? roomCode.toLowerCase().trim() : 'global');
-      
-      let strokes = whiteboardRooms.get(targetRoom) || [];
-      strokes.push(stroke);
-      if (strokes.length > 800) strokes = strokes.slice(-800); // cap memory buffer
-      whiteboardRooms.set(targetRoom, strokes);
+
+      let room = whiteboardRooms.get(targetRoom);
+      if (!room) room = { strokes: [], lastActivity: Date.now() };
+      room.strokes.push(stroke);
+      if (room.strokes.length > 800) room.strokes = room.strokes.slice(-800); // cap memory buffer
+      room.lastActivity = Date.now();
+      whiteboardRooms.set(targetRoom, room);
 
       socket.to(targetRoom).emit('whiteboard_draw', { stroke });
     });
 
     socket.on('whiteboard_clear', ({ roomCode }) => {
       const targetRoom = 'wb_' + (roomCode ? roomCode.toLowerCase().trim() : 'global');
-      whiteboardRooms.set(targetRoom, []);
+      whiteboardRooms.set(targetRoom, { strokes: [], lastActivity: Date.now() });
       io.to(targetRoom).emit('whiteboard_clear');
     });
 
