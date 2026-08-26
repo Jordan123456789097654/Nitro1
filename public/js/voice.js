@@ -43,13 +43,32 @@ let isSpeakingLocally = false;
 const peerSpeakingStates = {}; // socketId -> boolean
 let fxNodes = [];
 
-const RTC_CONFIG = {
+// Default STUN-only config, used until /api/voice/ice-config responds (or if
+// it fails). STUN alone often can't establish a connection on networks that
+// restrict raw UDP — see fetchIceConfig() below, which adds a TURN relay
+// server when the deployment has one configured.
+let RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' }
   ]
 };
+
+async function fetchIceConfig() {
+  try {
+    const res = await fetch('/api/voice/ice-config');
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.iceServers) && data.iceServers.length) {
+      RTC_CONFIG = { iceServers: data.iceServers };
+      if (!data.turnConfigured) {
+        console.warn('[Voice] No TURN server configured — voice may fail to connect on restrictive networks.');
+      }
+    }
+  } catch (e) {
+    console.warn('[Voice] Failed to fetch ICE config, using default STUN-only servers:', e.message);
+  }
+}
 
 window.setPeerVolume = (socketId, val) => {
   const num = parseFloat(val);
@@ -65,6 +84,7 @@ window.setPeerVolume = (socketId, val) => {
 };
 
 export function initVoiceRooms() {
+  fetchIceConfig();
   setupVoiceUI();
   setupSidebarVoiceDockUI();
   setupPttKeyListeners();
@@ -466,6 +486,18 @@ function createPeerConnection(targetSocketId) {
   const streamToSend = processedStream || localStream;
   if (streamToSend) {
     streamToSend.getTracks().forEach(track => pc.addTrack(track, streamToSend));
+  } else {
+    // BUGFIX: users who denied mic access (listen-only mode) had `streamToSend`
+    // as null, so no audio track was ever added to the connection. That meant
+    // the SDP offer/answer had NO audio m-line at all, so this peer couldn't
+    // receive anyone else's audio either — not just fail to send their own.
+    // Explicitly add a recvonly audio transceiver so listen-only users still
+    // negotiate an audio channel and can hear everyone else.
+    try {
+      pc.addTransceiver('audio', { direction: 'recvonly' });
+    } catch (e) {
+      console.warn('Could not add recvonly audio transceiver:', e);
+    }
   }
 
   pc.onicecandidate = (event) => {
