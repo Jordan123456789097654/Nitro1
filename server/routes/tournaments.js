@@ -30,7 +30,7 @@ function saveBase64Image(base64Data) {
   }
 }
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('../secrets');
 
 // Helper to authenticate request and get DB user
 async function getAuthUser(req) {

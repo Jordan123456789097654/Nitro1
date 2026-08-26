@@ -1773,6 +1773,8 @@
             <span id="chat-online-count">Online</span>
           </div>
 
+          <button id="owner-purge-chat-btn" style="display: none; padding: 6px 14px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-left: auto;" title="Permanently delete all Global Chat history">🔥 Purge Chat</button>
+
           <div id="chat-dm-bar" style="display: none; flex-direction: column; gap: 8px; width: 100%; padding: 4px 0;">
             <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
               <input type="text" id="chat-dm-target-user" placeholder="Enter student username to DM..." style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.88rem;">
@@ -1869,7 +1871,7 @@
           <button type="button" class="btn-small" id="chat-image-btn" style="background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 800;" title="Attach Image (Scanned by Groq AI)">🖼️ Image</button>
           <button type="button" class="btn-small" id="chat-gif-btn" style="background: rgba(255,255,255,0.08); color: #fbbf24; border: 1px solid rgba(255,255,255,0.1); font-weight: 800;" title="Insert Animated GIF / Sticker">GIF</button>
           <button type="button" class="btn-small" id="chat-voice-record-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800;" title="Record 15s Voice Memo">🎙️ Mic</button>
-          <input type="text" id="chat-input" placeholder="Type a message... (press Enter to send)" autocomplete="off">
+          <input type="text" id="chat-input" placeholder="Type a message... (**bold**, *italic*, `code`, ~~strike~~)" autocomplete="off">
           <button type="submit" class="btn-pill primary">Send</button>
         </form>
       </div>
@@ -1897,14 +1899,8 @@
             <button class="browser-btn" id="browser-open-blank-btn" title="Open in about:blank disguise" style="color: #fbbf24;">🚀 Cloak</button>
           </div>
 
-          <!-- Stealth Gateway Engine Selector Profile -->
-          <select id="browser-gateway-engine-select" class="browser-engine-select" title="Stealth Gateway Engine Profile" style="background: #111420; border-color: #38bdf8; color: #38bdf8; font-weight: 700;">
-            <option value="turbo">⚡ Stealth Turbo (Chrome 128)</option>
-            <option value="shield">🛡️ Shield Ultra (Safari macOS)</option>
-            <option value="academic">🎓 Academic Disguise (Google Classroom)</option>
-            <option value="mirror">🌀 Dynamic Mirror (Linux Chromium)</option>
-          </select>
-          
+          <!-- Gateway now runs a single Chrome-based engine; the multi-profile
+               selector (including "Academic Disguise") was removed. -->
           <select id="browser-search-engine-select" class="browser-engine-select" title="Search Engine">
             <option value="duckduckgo">🦆 DuckDuckGo</option>
             <option value="brave">🦁 Brave Search</option>
@@ -2287,6 +2283,27 @@
 
           <div id="shop-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
             <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading store...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6b: SUB-STORE (opened from an "Open Shop" card) -->
+    <section class="page-view" id="view-store">
+      <div id="store-page-card" style="max-width: 1300px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden;">
+        <img id="store-detail-banner" src="" alt="" style="display: none; width: 100%; max-height: 260px; object-fit: cover;">
+
+        <div id="store-page-body" style="padding: 24px;">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px; flex-wrap: wrap;">
+            <button id="store-detail-back-btn" class="btn-pill secondary" style="color: #cbd5e1;">← Back to Shop</button>
+            <div style="flex: 1; min-width: 200px;">
+              <h1 id="store-detail-name" style="margin: 0; font-size: 1.8rem;">Store</h1>
+              <p id="store-detail-desc" style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.92rem;"></p>
+            </div>
+          </div>
+
+          <div id="store-items-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+            <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading...</div>
           </div>
         </div>
       </div>
@@ -3348,11 +3365,86 @@
 
         <!-- Admin Tab: Manage Shop -->
         <div class="admin-tab-content" id="tab-adminshop" style="display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
             <h3 style="color: #10b981; margin: 0;">🛍️ Shop Store Items Manager</h3>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn-small secondary" onclick="document.getElementById('admin-stores-card').style.display = document.getElementById('admin-stores-card').style.display === 'none' ? 'block' : 'none'" style="color: #38bdf8;">🏪 Manage Stores</button>
               <button class="btn-small secondary" onclick="document.getElementById('admin-create-shop-card').style.display = document.getElementById('admin-create-shop-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Add Store Item</button>
               <button class="btn-small secondary" onclick="document.getElementById('admin-bulk-shop-card').style.display = document.getElementById('admin-bulk-shop-card').style.display === 'none' ? 'block' : 'none'" style="color: #fbbf24;">📤 Bulk Import Products</button>
+            </div>
+          </div>
+
+          <!-- Stores Manager Card -->
+          <div id="admin-stores-card" style="background: rgba(56,189,248,0.03); border: 1px solid rgba(56,189,248,0.2); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <h4 style="margin: 0; color: #38bdf8;">🏪 Stores (Sub-Shops)</h4>
+              <button id="admin-add-store-btn" class="btn-small secondary" style="color: #38bdf8;">➕ New Store</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.76rem; margin: 0 0 12px;">Create a store, then assign shop items to it (via "Belongs To" on any item) and mark a card as a "Store Front" that opens it. Deleting a store moves its items back to the main shop.</p>
+
+            <!-- New/Edit Store Form -->
+            <form id="admin-store-form" style="display: none; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; align-items: end; margin-bottom: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px;">
+              <input type="hidden" id="admin-store-id">
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Store Name *</label>
+                <input type="text" id="admin-store-name" required placeholder="e.g. Gabe's Bakery" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Description</label>
+                <input type="text" id="admin-store-desc" placeholder="Short tagline shown at the top of the store" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Thumbnail Image URL</label>
+                <input type="text" id="admin-store-image-url" placeholder="Small icon shown in Manage Stores list" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div style="grid-column: 1 / -1; margin: 4px 0; border-top: 1px dashed rgba(255,255,255,0.1);"></div>
+              <div style="grid-column: 1 / -1; font-size: 0.74rem; color: #38bdf8; font-weight: 700;">🎨 Store Page Appearance</div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Banner Image URL</label>
+                <input type="text" id="admin-store-banner-url" placeholder="Wide banner shown at top of store page" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Background Color</label>
+                <input type="color" id="admin-store-bg-color" value="#0a0a0a" style="width: 100%; padding: 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; height: 34px; cursor: pointer;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Accent / Button Color</label>
+                <input type="color" id="admin-store-accent-color" value="#10b981" style="width: 100%; padding: 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; height: 34px; cursor: pointer;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Text Color</label>
+                <input type="color" id="admin-store-text-color" value="#ffffff" style="width: 100%; padding: 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; height: 34px; cursor: pointer;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Item Card Color</label>
+                <input type="color" id="admin-store-card-bg-color" value="#141414" style="width: 100%; padding: 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; height: 34px; cursor: pointer;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Buy Button Text</label>
+                <input type="text" id="admin-store-button-label" placeholder="Buy for" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Page Background Image URL</label>
+                <input type="text" id="admin-store-bg-image-url" placeholder="Optional full-page background image" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Border Color</label>
+                <input type="color" id="admin-store-border-color" value="#2a2f3d" style="width: 100%; padding: 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; height: 34px; cursor: pointer;">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Heading Color</label>
+                <input type="color" id="admin-store-heading-color" value="#10b981" style="width: 100%; padding: 4px; background: #000; border: 1px solid var(--card-border); border-radius: 6px; height: 34px; cursor: pointer;">
+              </div>
+              <div>
+                <button type="button" id="admin-store-reset-colors-btn" class="btn-small secondary" style="width: 100%; height: 34px; font-size: 0.72rem; color: var(--text-muted);">↺ Reset Colors</button>
+              </div>
+              <div>
+                <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800; background: #38bdf8; color: #000;">Save Store</button>
+              </div>
+            </form>
+
+            <div id="admin-stores-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 10px;">Loading stores...</div>
             </div>
           </div>
 
@@ -3401,6 +3493,25 @@
                 <label for="admin-shop-repeatable" style="font-size: 0.78rem; color: var(--text-muted); cursor: pointer; margin: 0;">
                   ♻️ <strong style="color: #f59e0b;">Can be purchased multiple times</strong> (e.g. gift cards, coins)
                 </label>
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Belongs To (Optional)</label>
+                <select id="admin-shop-store" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem; height: 34px;">
+                  <option value="">— Main Shop —</option>
+                </select>
+              </div>
+              <div style="grid-column: 1 / -1; background: rgba(56,189,248,0.05); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" id="admin-shop-is-store-front" style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer; flex-shrink: 0;">
+                  <label for="admin-shop-is-store-front" style="font-size: 0.78rem; color: var(--text-muted); cursor: pointer; margin: 0;">
+                    🏪 <strong style="color: #38bdf8;">This is a Store Front</strong> (shows "Open Shop" instead of a Buy button)
+                  </label>
+                </div>
+                <div style="flex: 1; min-width: 160px;">
+                  <select id="admin-shop-opens-store" style="width: 100%; padding: 8px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem; height: 34px;">
+                    <option value="">Select which store it opens...</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <button type="submit" class="btn-small primary" style="width: 100%; height: 34px; font-weight: 800; background: #10b981; color: #000;">Add Item</button>
@@ -3847,6 +3958,25 @@
           <label for="admin-edit-shop-repeatable" style="font-size: 0.82rem; cursor: pointer; margin: 0;">
             ♻️ <strong style="color: #f59e0b;">Can be purchased multiple times</strong> (e.g. gift cards, coins)
           </label>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 700;">Belongs To (Optional)</label>
+          <select id="admin-edit-shop-store" class="custom-select-dropdown" style="width: 100%;">
+            <option value="">— Main Shop —</option>
+          </select>
+        </div>
+
+        <div style="background: rgba(56,189,248,0.05); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="admin-edit-shop-is-store-front" style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer; flex-shrink: 0;">
+            <label for="admin-edit-shop-is-store-front" style="font-size: 0.82rem; cursor: pointer; margin: 0;">
+              🏪 <strong style="color: #38bdf8;">This is a Store Front</strong> (shows "Open Shop" instead of a Buy button)
+            </label>
+          </div>
+          <select id="admin-edit-shop-opens-store" class="custom-select-dropdown" style="width: 100%;">
+            <option value="">Select which store it opens...</option>
+          </select>
         </div>
 
         <button type="submit" class="btn-pill primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 8px; font-weight: 800; background: #10b981; color: #000;">💾 Save Product Changes</button>

@@ -48,6 +48,37 @@
   gap: 14px;
 }
 
+/* Discord-style spoiler tags: black bar hides the text until clicked */
+.chat-spoiler {
+  background: #1a1d24;
+  color: transparent;
+  border-radius: 3px;
+  padding: 0 4px;
+  cursor: pointer;
+  transition: color 0.1s ease;
+}
+.chat-spoiler.revealed {
+  background: rgba(255,255,255,0.08);
+  color: inherit;
+  cursor: text;
+}
+
+.chat-system-message .chat-msg-body,
+.chat-system-message code {
+  word-break: break-word;
+}
+
+/* Friends list & Voice Rooms panels live inside the same fixed-height
+   .chat-container as messages, but previously had no scroll region of
+   their own — content taller than the box was silently clipped with no
+   way to reach it. Give them the same flex:1 + overflow-y:auto treatment. */
+#chat-friends-container,
+#chat-voice-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .chat-msg-row {
   display: flex;
   align-items: flex-start;

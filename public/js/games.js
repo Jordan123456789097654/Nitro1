@@ -856,7 +856,7 @@ function getProxiedUrl(rawUrl, isApp = false) {
   if (rawUrl.startsWith('/')) return rawUrl.replace(/ /g, "%20");
   const token = localStorage.getItem('nitro_jwt_token');
   const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-  const engine = localStorage.getItem('nitro_gateway_engine') || 'chrome';
+  const engine = 'chrome';
   const engineParam = `&engine=${encodeURIComponent(engine)}`;
   const surfParam = isApp ? '&surf=true' : '';
   // Encode the URL to handle spaces and special characters

@@ -17,6 +17,22 @@ function authFetch(url, options = {}) {
   return fetch(url, Object.assign({}, options, { headers }));
 }
 
+// BUGFIX: playTrack() used to set `iframe.src = track.url` directly to a raw
+// youtube-nocookie.com URL, completely bypassing the gateway proxy that every
+// other embedded surface (Browser tab, Games) already goes through. On any
+// network that blocks YouTube's domain outright, the embed would just fail
+// to load with no fallback. Routing it through /api/gateway — same as
+// getProxiedUrl() in games.js — means playback uses the same proxy path
+// (and engine/auth) as everything else in the app.
+function getProxiedMusicUrl(rawUrl) {
+  if (!rawUrl) return '';
+  if (rawUrl.startsWith('/api/gateway')) return rawUrl;
+  const token = localStorage.getItem('nitro_jwt_token');
+  const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
+  const engine = 'chrome';
+  return `/api/gateway?url=${encodeURIComponent(rawUrl)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
+}
+
 export function initMusicPlayer() {
   loadSavedQueue();
   setupMusicControls();
@@ -332,7 +348,7 @@ function playTrack(idx) {
   if (!track || !iframe) return;
 
   if (titleEl) titleEl.textContent = `${track.title} • ${track.artist}`;
-  iframe.src = track.url;
+  iframe.src = getProxiedMusicUrl(track.url);
   isPlaying = true;
   renderQueueList();
 }

@@ -11,41 +11,21 @@ const dns = require('dns');
 const db = require('../db');
 const { sendDiscordLog } = require('../discordLogger');
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('../secrets');
+const { isOwner: checkIsOwner } = require('../permissions');
 
 // -------------------------------------------------------------
-// 1. STEALTH ENGINE PROFILES & VIRTUAL COOKIE STORE
+// 1. STEALTH ENGINE PROFILE & VIRTUAL COOKIE STORE
 // -------------------------------------------------------------
-const PROXY_ENGINES = {
-  turbo: {
-    name: '⚡ Stealth Turbo Engine',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-    secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-    platform: '"Windows"',
-    mobile: '?0'
-  },
-  shield: {
-    name: '🛡️ Shield Ultra Engine',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15',
-    secChUa: '',
-    platform: '"macOS"',
-    mobile: '?0'
-  },
-  academic: {
-    name: '🎓 Academic Disguise Engine',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Google-Classroom/2.4',
-    secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-    platform: '"Windows"',
-    mobile: '?0',
-    referer: 'https://classroom.google.com/'
-  },
-  mirror: {
-    name: '🌀 Dynamic Mirror Engine',
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-    secChUa: '"Chromium";v="128", "Not;A=Brand";v="24"',
-    platform: '"Linux"',
-    mobile: '?0'
-  }
+// Only one profile now: a plain Chrome/Windows UA. The previous multi-profile
+// selector (including a "shield" Safari profile and an "Academic Disguise"
+// profile that spoofed a Google Classroom referer) has been removed.
+const CHROME_ENGINE = {
+  name: 'Chrome',
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+  secChUa: '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+  platform: '"Windows"',
+  mobile: '?0'
 };
 
 // Global Cookie Jar per User Session
@@ -174,7 +154,7 @@ function isKnownAdRequest(urlObj) {
 // -------------------------------------------------------------
 // 3. DYNAMIC URL REWRITER & CLIENT INTERCEPTOR SCRIPT
 // -------------------------------------------------------------
-function proxifyTargetUrl(rawUrl, baseUrl, gatewayPrefix) {
+function proxifyTargetUrl(rawUrl, baseUrl, gatewayPrefix, authSuffix = '') {
   if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
   const t = rawUrl.trim();
   if (t.startsWith('#') || t.startsWith('javascript:') || t.startsWith('data:') || t.startsWith('blob:') || t.startsWith('mailto:')) {
@@ -183,20 +163,20 @@ function proxifyTargetUrl(rawUrl, baseUrl, gatewayPrefix) {
   if (t.includes('/api/gateway')) return rawUrl;
   try {
     const abs = new URL(t, baseUrl).href;
-    return `${gatewayPrefix}${encodeURIComponent(abs)}`;
+    return `${gatewayPrefix}${encodeURIComponent(abs)}${authSuffix}`;
   } catch (e) {
     return rawUrl;
   }
 }
 
-function rewriteCssUrls(cssText, baseUrl, gatewayPrefix) {
+function rewriteCssUrls(cssText, baseUrl, gatewayPrefix, authSuffix = '') {
   if (!cssText || typeof cssText !== 'string') return cssText;
   return cssText.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi, (match, q, u) => {
-    return `url("${proxifyTargetUrl(u, baseUrl, gatewayPrefix)}")`;
+    return `url("${proxifyTargetUrl(u, baseUrl, gatewayPrefix, authSuffix)}")`;
   });
 }
 
-function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix) {
+function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = '') {
   if (!htmlText || typeof htmlText !== 'string') return htmlText;
 
   let html = htmlText;
@@ -212,16 +192,34 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix) {
 
   // Rewrite href, src, action attributes
   html = html.replace(/\b(href|src|action)\s*=\s*(['"])([^'"]+)\2/gi, (match, attr, q, url) => {
-    return `${attr}=${q}${proxifyTargetUrl(url, baseUrl, gatewayPrefix)}${q}`;
+    return `${attr}=${q}${proxifyTargetUrl(url, baseUrl, gatewayPrefix, authSuffix)}${q}`;
   });
 
   // Inject Shield Interceptor Script into <head>
+  // BUGFIX: <base> previously pointed at the *wrapped* gateway URL (e.g.
+  // ".../api/gateway?url=<encoded target>"). Any relative URL the page
+  // resolves natively — anchors set via JS as `el.href = 'relative/path'`,
+  // client-side routers, etc. — resolved against that base ignore its query
+  // string entirely and land back on our own domain's bare path, producing a
+  // broken link instead of the real target page. Pointing <base> at the real
+  // target URL means native relative resolution works correctly, and the
+  // click/fetch/XHR interceptors below still catch and re-wrap the result
+  // into a proxied URL before anything actually navigates or requests it.
   const shieldScript = `
-    <base href="${gatewayPrefix}${encodeURIComponent(baseUrl)}">
+    <base href="${baseUrl}">
     <script>
       (function() {
         window.__NITRO_SHIELD_BASE__ = "${baseUrl}";
         window.__NITRO_SHIELD_PREFIX__ = "${gatewayPrefix}";
+        // BUGFIX: previously proxify() only prepended the gateway prefix and the
+        // encoded target URL, with no auth token or engine choice attached. That
+        // meant every link click, fetch(), or XHR made *after* the first page
+        // load silently fell back to an unauthenticated Guest request on the
+        // default engine — breaking anything gated behind login, and losing
+        // whatever proxy engine the user had picked. Now every rewritten
+        // navigation carries the same auth/engine suffix as the page that
+        // spawned it.
+        window.__NITRO_SHIELD_SUFFIX__ = "${authSuffix.replace(/"/g, '\\"')}";
 
         // Frame Buster Shield: Lock window.top & window.parent
         try {
@@ -253,7 +251,7 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix) {
         function proxify(u) {
           if (!u || typeof u !== 'string' || u.startsWith('data:') || u.startsWith('blob:') || u.includes('/api/gateway')) return u;
           try {
-            return window.__NITRO_SHIELD_PREFIX__ + encodeURIComponent(new URL(u, window.__NITRO_SHIELD_BASE__).href);
+            return window.__NITRO_SHIELD_PREFIX__ + encodeURIComponent(new URL(u, window.__NITRO_SHIELD_BASE__).href) + window.__NITRO_SHIELD_SUFFIX__;
           } catch(e) { return u; }
         }
 
@@ -324,19 +322,58 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix) {
         }
 
         // Intercept Link Clicks & Form Submissions
+        // BUGFIX: this used to run unguarded. If e.target.closest() or reading
+        // a.href threw for any reason (detached nodes, non-Element targets,
+        // exotic href values some sites use), the exception propagated out of
+        // a capturing-phase listener and could leave the page's own click
+        // handling in a broken state — which is what showed up as "the proxy
+        // crashes" when clicking certain links. Every branch is now wrapped
+        // so a single bad link degrades to "nothing happens" instead of
+        // breaking navigation for the rest of the session. It also now reads
+        // the raw href ATTRIBUTE (not the browser-resolved property) to
+        // correctly detect '#', 'javascript:', 'mailto:', and 'tel:' links,
+        // and hands off target="_blank" / ctrl+click / middle-click to the
+        // parent Nitro Shield browser to open as a real new tab instead of
+        // hijacking the current page's navigation.
         document.addEventListener('click', function(e) {
-          var a = e.target.closest('a');
-          if (a && a.href && !a.href.startsWith('#') && !a.href.includes('/api/gateway')) {
+          try {
+            var a = e.target && e.target.closest ? e.target.closest('a') : null;
+            if (!a) return;
+            var rawHref = a.getAttribute('href');
+            if (!rawHref) return;
+            var trimmed = rawHref.trim();
+            if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith('javascript:') ||
+                trimmed.startsWith('mailto:') || trimmed.startsWith('tel:') || trimmed.startsWith('data:')) {
+              return;
+            }
+            if (!a.href || a.href.includes('/api/gateway')) return;
+
+            var wantsNewTab = a.target === '_blank' || e.ctrlKey || e.metaKey || e.button === 1;
+            if (wantsNewTab) {
+              e.preventDefault();
+              try {
+                window.parent.postMessage({ __nitroShieldOpenTab: true, url: new URL(rawHref, window.__NITRO_SHIELD_BASE__).href }, '*');
+              } catch (err) {
+                // Fallback: still navigate current frame rather than doing nothing
+                window.location.href = proxify(a.href);
+              }
+              return;
+            }
+
             e.preventDefault();
             window.location.href = proxify(a.href);
+          } catch (err) {
+            // Swallow — a malformed link should never take down the rest of the page.
           }
         }, true);
 
         document.addEventListener('submit', function(e) {
-          var form = e.target;
-          if (form && form.action && !form.action.includes('/api/gateway')) {
-            form.action = proxify(form.action);
-          }
+          try {
+            var form = e.target;
+            if (form && form.action && !form.action.includes('/api/gateway')) {
+              form.action = proxify(form.action);
+            }
+          } catch (err) {}
         }, true);
       })();
     </script>
@@ -391,7 +428,7 @@ router.all('/', async (req, res) => {
     `);
   }
 
-  const isOwner = user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels');
+  const isOwner = checkIsOwner(user);
 
   // Blocked Domain Notice
   if (!isOwner && rawUrl) {
@@ -473,9 +510,10 @@ router.all('/', async (req, res) => {
     return res.status(403).send('Private network access restricted.');
   }
 
-  // Engine Profile
-  const engineKey = req.query.engine || 'turbo';
-  const engine = PROXY_ENGINES[engineKey] || PROXY_ENGINES.turbo;
+  // Engine Profile (single Chrome profile now — engine query param, if any,
+  // from old bookmarked/cached links is simply ignored rather than erroring)
+  const engine = CHROME_ENGINE;
+  const engineKey = 'chrome';
   const sessionKey = user.username || req.ip || 'default_session';
   const cookies = getCookiesForRequest(sessionKey, urlObj.hostname);
 
@@ -487,6 +525,15 @@ router.all('/', async (req, res) => {
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'none'
   };
+
+  // BUGFIX: audio/video elements (music player, YouTube embeds, any <video>/<audio>
+  // on a proxied page) request media in chunks via the Range header and expect a
+  // 206 Partial Content response. Without forwarding it upstream, the target
+  // always sends the full file back with 200 — which most players refuse to
+  // treat as streamable, so playback silently fails or never starts.
+  if (req.headers.range) {
+    fetchHeaders['Range'] = req.headers.range;
+  }
 
   if (cookies) fetchHeaders['Cookie'] = cookies;
   if (engine.secChUa) fetchHeaders['Sec-Ch-Ua'] = engine.secChUa;
@@ -543,11 +590,17 @@ router.all('/', async (req, res) => {
     const restricted = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'content-encoding', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
     const gatewayPrefix = `${req.protocol}://${req.get('host')}/api/gateway?url=`;
 
+    // BUGFIX: carry the auth token + chosen engine forward onto every link
+    // this page will generate, so clicking further into a site doesn't drop
+    // back to an unauthenticated Guest request on the default engine.
+    const rawToken = req.query.token || '';
+    const authSuffix = `${rawToken ? `&token=${encodeURIComponent(rawToken)}` : ''}&engine=${encodeURIComponent(engineKey)}`;
+
     response.headers.forEach((v, k) => {
       const l = k.toLowerCase();
       if (!restricted.includes(l)) {
         if (l === 'location') {
-          res.setHeader('Location', proxifyTargetUrl(v, finalUrl, gatewayPrefix));
+          res.setHeader('Location', proxifyTargetUrl(v, finalUrl, gatewayPrefix, authSuffix));
         } else {
           try { res.setHeader(k, v); } catch(e){}
         }
@@ -560,12 +613,12 @@ router.all('/', async (req, res) => {
 
     if (contentType.includes('text/html')) {
       const htmlText = buffer.toString('utf-8');
-      const transformed = transformHtmlResponse(htmlText, finalUrl, gatewayPrefix);
+      const transformed = transformHtmlResponse(htmlText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.send(transformed);
     } else if (contentType.includes('text/css')) {
       const cssText = buffer.toString('utf-8');
-      const transformed = rewriteCssUrls(cssText, finalUrl, gatewayPrefix);
+      const transformed = rewriteCssUrls(cssText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/css');
       return res.send(transformed);
     } else {

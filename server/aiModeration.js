@@ -169,7 +169,7 @@ MANDATORY SEVERITY & AUTONOMOUS PUNISHMENT RULES:
 6. "eating_disorders":
    - Mentions, expressions, promotion, or suggestions of eating disorders, anorexia, bulimia, purging, extreme starvation, or self-harm eating behaviors MUST BE CLASSIFIED as "eating_disorders" with severity "high" or "extreme" and action_type: "block" or "warn". DO NOT flag standard hunger comments, physical sickness/toothaches, or minor casual remarks like "i cant eat...".
 7. "substance_abuse":
-   - Mentions, promotion, or suggestions of drug abuse, illicit substances, overdose, addiction, or alcoholism MUST BE CLASSIFIED as "substance_abuse" and action_type: "block" or "warn".
+   - Mentions, promotion, or suggestions of drug abuse, illicit substances, overdose, addiction, or alcoholism MUST BE CLASSIFIED as "substance_abuse" and "ban" (1 to 7 days) or "mute" (1 to 24 hours).
 8. "mental_health":
    - Mentions or expressions of extreme depression, severe anxiety, panic attacks, or requesting mental health resources MUST BE CLASSIFIED as "mental_health" and action_type: "block" or "warn".
 9. "domestic_abuse":
@@ -395,7 +395,7 @@ Respond ONLY with valid JSON.`;
 }
 
 /**
- * Evaluates an image with Groq AI Vision model (llama-3.2-11b-vision-preview).
+ * Evaluates an image with Groq AI Vision model (qwen/qwen3.6-27b).
  * Scans image for NSFW/nudity, gore, violence, hate speech text inside image, or doxxing.
  */
 async function checkImageWithGroqModeration(imageUrlOrBase64, options = {}) {
@@ -409,7 +409,9 @@ async function checkImageWithGroqModeration(imageUrlOrBase64, options = {}) {
     return { flagged: false, bypassed: true, reason: 'AI Moderation Offline' };
   }
 
-  const visionModel = options.model || 'llama-3.2-11b-vision-preview';
+  // llama-3.2-11b-vision-preview was decommissioned by Groq — requests to it 404'd,
+  // which silently disabled image moderation (fail-open in the catch block below).
+  const visionModel = options.model || 'qwen/qwen3.6-27b';
   const timeoutMs = options.timeoutMs || 7000;
 
   const systemPrompt = `You are an uncompromising AI Safety Image Moderation Engine for "Nitro Games", a student gaming and chat community.

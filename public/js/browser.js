@@ -36,8 +36,22 @@ export function initBrowser() {
   setupSplitViewUI();
   setupSpeedDialUI();
   setupIframeLoadListeners();
+  setupProxyMessageListener();
   renderTabs();
   renderActiveTab();
+}
+
+// Proxied pages can't open real new browser tabs (they're sandboxed inside our
+// iframe), so the injected shield script posts a message here instead when a
+// link wants target="_blank" or the user ctrl/middle-clicks it. Without this,
+// those clicks either silently did nothing or hijacked the current tab's
+// navigation, which is one of the ways "clicking a link" could feel broken.
+function setupProxyMessageListener() {
+  window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (!data || typeof data !== 'object' || !data.__nitroShieldOpenTab || !data.url) return;
+    createNewTab(data.url);
+  });
 }
 
 function loadSavedBookmarks() {
@@ -68,7 +82,7 @@ function setupTabsUI() {
 
 function createNewTab(targetUrl = '') {
   const newId = 'tab-' + Date.now();
-  tabs.push({
+  const newTab = {
     id: newId,
     title: 'New Tab',
     url: targetUrl,
@@ -76,7 +90,15 @@ function createNewTab(targetUrl = '') {
     historyIndex: targetUrl ? 0 : -1,
     favicon: '🌐',
     zoomLevel: 100
-  });
+  };
+  if (targetUrl) {
+    try {
+      const host = new URL(targetUrl).hostname;
+      newTab.title = host.replace('www.', '');
+      newTab.favicon = getFaviconEmojiForUrl(targetUrl);
+    } catch (e) {}
+  }
+  tabs.push(newTab);
   activeTabId = newId;
   renderTabs();
   renderActiveTab();
@@ -175,10 +197,8 @@ function updateIframeSrc(iframeEl, targetUrl) {
   if (!iframeEl || !targetUrl) return;
   const token = localStorage.getItem('nitro_jwt_token');
   const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-  const engineSelect = document.getElementById('browser-gateway-engine-select');
-  const engine = engineSelect ? engineSelect.value : (localStorage.getItem('nitro_shield_engine') || 'turbo');
 
-  const proxiedUrl = `/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
+  const proxiedUrl = `/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}&engine=chrome`;
   if (iframeEl.src !== `${window.location.origin}${proxiedUrl}`) {
     iframeEl.src = proxiedUrl;
   }
@@ -243,17 +263,7 @@ function setupToolbarControls() {
   const refreshBtn = document.getElementById('browser-refresh');
   const homeBtn = document.getElementById('browser-home');
   const bookmarkStarBtn = document.getElementById('browser-bookmark-star-btn');
-  const engineSelect = document.getElementById('browser-gateway-engine-select');
   const openBlankBtn = document.getElementById('browser-open-blank-btn');
-
-  if (engineSelect) {
-    const saved = localStorage.getItem('nitro_shield_engine');
-    if (saved) engineSelect.value = saved;
-    engineSelect.addEventListener('change', (e) => {
-      localStorage.setItem('nitro_shield_engine', e.target.value);
-      renderActiveTab();
-    });
-  }
 
   if (goBtn && urlInput) {
     goBtn.addEventListener('click', () => navigateTab(urlInput.value));
@@ -408,8 +418,7 @@ function launchAboutBlankCloak() {
 
   const token = localStorage.getItem('nitro_jwt_token');
   const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
-  const engine = localStorage.getItem('nitro_shield_engine') || 'turbo';
-  const fullUrl = `${window.location.origin}/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}&engine=${encodeURIComponent(engine)}`;
+  const fullUrl = `${window.location.origin}/api/gateway?url=${encodeURIComponent(targetUrl)}${tokenParam}&engine=chrome`;
 
   const win = window.open('about:blank', '_blank');
   if (!win) return alert('Pop-up blocked! Please allow pop-ups for about:blank cloak.');

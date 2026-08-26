@@ -5,6 +5,7 @@ const COIN_SVG = `<svg class="coin-icon" style="width:14px; height:14px; display
 
 let activeCategory = 'all';
 let loadedShopItems = [];
+let currentStoreId = null; // set while viewing a sub-store, so buy/refresh knows where to return to
 
 export function initShop() {
   // Bind category tabs
@@ -31,7 +32,14 @@ export function initShop() {
   const navShopBtn = document.querySelector('.nav-btn[data-view="shop"]');
   if (navShopBtn) {
     navShopBtn.addEventListener('click', () => {
-      loadShopData();
+      window.closeStoreFront ? window.closeStoreFront() : loadShopData();
+    });
+  }
+
+  const backBtn = document.getElementById('store-detail-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      window.closeStoreFront();
     });
   }
 }
@@ -104,15 +112,19 @@ export async function loadShopData() {
   }
 }
 
-function renderStoreItems(items, inventory) {
-  const container = document.getElementById('shop-items-grid');
+function renderStoreItems(items, inventory, containerId = 'shop-items-grid', theme = null) {
+  const container = document.getElementById(containerId);
   if (!container) return;
 
   const ownedItemIds = new Set((inventory || []).map(i => i.item_id));
+  const accentColor = theme?.accent_color || '#10b981';
+  const cardBgColor = theme?.card_bg_color || '';
+  const textColor = theme?.text_color || '#fff';
+  const buttonLabel = theme?.button_label || 'Buy for';
 
-  // Filter by category
+  // Filter by category (category tabs only apply to the main shop grid)
   let filtered = items;
-  if (activeCategory !== 'all') {
+  if (containerId === 'shop-items-grid' && activeCategory !== 'all') {
     filtered = items.filter(item => item.category === activeCategory);
   }
 
@@ -128,19 +140,21 @@ function renderStoreItems(items, inventory) {
     const showBuyBtn = item.is_repeatable || !isOwned;
 
     let actionBtn = '';
-    if (isSoldOut) {
+    if (item.is_store_front) {
+      actionBtn = `<button onclick="window.openStoreFront(${item.opens_store_id})" style="width: 100%; padding: 8px; background: #38bdf8; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">🏪 Open Shop</button>`;
+    } else if (isSoldOut) {
       actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: not-allowed;">SOLD OUT</button>`;
     } else if (showBuyBtn) {
-      actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: #10b981; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">Buy for ${COIN_SVG} ${item.price}</button>`;
+      actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: ${accentColor}; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">${escapeHtml(buttonLabel)} ${COIN_SVG} ${item.price}</button>`;
     } else {
       actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`;
     }
 
-    const stockIndicator = item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0
+    const stockIndicator = (!item.is_store_front && item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0)
       ? `<span style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; display: block; margin-top: 4px;">⏳ Only ${item.stock_count} left in stock!</span>`
       : '';
 
-    const repeatBadge = item.is_repeatable
+    const repeatBadge = (!item.is_store_front && item.is_repeatable)
       ? `<span style="font-size: 0.68rem; color: #f59e0b; font-weight: 700; display: block; margin-top: 3px;">♻️ Can buy multiple times</span>`
       : '';
 
@@ -152,12 +166,14 @@ function renderStoreItems(items, inventory) {
       ? `<img src="${escapeHtml(item.image_url)}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.06);" alt="${escapeHtml(item.name)}">`
       : '';
 
+    const cardStyle = cardBgColor ? ` style="background: ${cardBgColor};"` : '';
+
     return `
-      <div class="shop-item-card">
+      <div class="shop-item-card"${cardStyle}>
         <div>
           ${imgHtml}
           <span class="shop-badge ${badgeClass}">${item.category.replace('_', ' ')}</span>
-          <strong style="color: #fff; font-size: 0.88rem; display: block; margin-top: 4px;">${escapeHtml(item.name)}</strong>
+          <strong style="color: ${textColor}; font-size: 0.88rem; display: block; margin-top: 4px;">${escapeHtml(item.name)}</strong>
           <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem; line-height: 1.35;">${escapeHtml(item.description)}</p>
           ${stockIndicator}
           ${repeatBadge}
@@ -169,6 +185,93 @@ function renderStoreItems(items, inventory) {
     `;
   }).join('');
 }
+
+// Open a dedicated sub-store page (drilled into from a "store front" card)
+window.openStoreFront = async function(storeId) {
+  if (!storeId) return;
+  const token = localStorage.getItem('nitro_jwt_token') || '';
+  if (!token) return alert('Please sign in to browse this shop.');
+
+  const storeCard = document.getElementById('store-page-card');
+  const storeGrid = document.getElementById('store-items-grid');
+  if (!storeCard || !storeGrid) return;
+
+  currentStoreId = storeId;
+  window.switchView('store'); // full page navigation, not a nested box
+  storeGrid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px; text-align: center;">Loading...</div>';
+
+  try {
+    const [storeRes, invRes] = await Promise.all([
+      fetch(`/api/shop/stores/${storeId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('/api/shop/inventory', { headers: { 'Authorization': `Bearer ${token}` } })
+    ]);
+    const storeData = await storeRes.json();
+    const invData = await invRes.json();
+
+    if (!storeRes.ok || !storeData.success) {
+      storeGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #ef4444; font-size: 0.85rem;">${escapeHtml(storeData.error || 'This shop is unavailable.')}</div>`;
+      return;
+    }
+
+    const store = storeData.store;
+    const nameEl = document.getElementById('store-detail-name');
+    const descEl = document.getElementById('store-detail-desc');
+    if (nameEl) {
+      nameEl.textContent = store.name;
+      nameEl.style.color = store.heading_color || '#10b981';
+    }
+    if (descEl) {
+      descEl.textContent = store.description || '';
+      descEl.style.color = store.text_color || 'var(--text-muted)';
+    }
+
+    // Apply full per-store page appearance
+    storeCard.style.background = store.bg_color || 'var(--card-bg)';
+    storeCard.style.borderColor = store.border_color || 'var(--card-border)';
+    if (store.bg_image_url) {
+      storeCard.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('${store.bg_image_url.replace(/'/g, "\\'")}')`;
+      storeCard.style.backgroundSize = 'cover';
+      storeCard.style.backgroundPosition = 'center';
+    } else {
+      storeCard.style.backgroundImage = '';
+    }
+
+    const bannerEl = document.getElementById('store-detail-banner');
+    if (bannerEl) {
+      if (store.banner_url) {
+        bannerEl.src = store.banner_url;
+        bannerEl.style.display = 'block';
+      } else {
+        bannerEl.style.display = 'none';
+        bannerEl.src = '';
+      }
+    }
+
+    loadedShopItems = storeData.items || [];
+    renderStoreItems(storeData.items, invData.inventory, 'store-items-grid', {
+      accent_color: store.accent_color,
+      card_bg_color: store.card_bg_color,
+      text_color: store.text_color,
+      button_label: store.button_label
+    });
+  } catch (err) {
+    console.error('Error loading store:', err);
+    storeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #ef4444; font-size: 0.85rem;">Network error loading shop.</div>';
+  }
+};
+
+window.closeStoreFront = function() {
+  currentStoreId = null;
+  const storeCard = document.getElementById('store-page-card');
+  if (storeCard) {
+    // Clear any store-custom appearance so it doesn't linger for the next store opened
+    storeCard.style.background = '';
+    storeCard.style.borderColor = '';
+    storeCard.style.backgroundImage = '';
+  }
+  window.switchView('shop');
+  loadShopData();
+};
 
 function renderQuests(quests) {
   const container = document.getElementById('quests-list-container');
@@ -256,7 +359,11 @@ window.buyShopItem = async function(itemId) {
       if (window.fetchUserProfile) {
         await window.fetchUserProfile();
       }
-      loadShopData();
+      if (currentStoreId) {
+        window.openStoreFront(currentStoreId);
+      } else {
+        loadShopData();
+      }
     } else {
       alert(data.error || 'Failed to buy shop item.');
     }

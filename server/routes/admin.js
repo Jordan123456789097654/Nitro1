@@ -7,8 +7,10 @@ const systemState = require('../systemState');
 const { sendDiscordLog } = require('../discordLogger');
 const { getActiveConnectionsList } = require('../chatSocket');
 const { testGroqModeration } = require('../aiModeration');
+const { postSystemMessage } = require('../systemMessage');
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('../secrets');
+const { isOwner, isAdminOrOwner } = require('../permissions');
 
 async function punishTreasonousAdmin(req, res, targetUser) {
   const adminUser = req.adminUser || req.user;
@@ -70,7 +72,7 @@ const requireAdmin = async (req, res, next) => {
     } catch (e) {}
   }
 
-  if (!user || (!['admin', 'owner'].includes(user.role) && user.username?.toLowerCase() !== 'jordandaniels')) {
+  if (!isAdminOrOwner(user)) {
     return res.status(403).json({ error: 'Access denied. Administrator or Owner privileges required.' });
   }
 
@@ -82,7 +84,7 @@ const requireAdmin = async (req, res, next) => {
 
 const requireOwner = (req, res, next) => {
   const user = req.adminUser;
-  if (!user || (user.role !== 'owner' && user.username.toLowerCase() !== 'jordandaniels')) {
+  if (!isOwner(user)) {
     return res.status(403).json({ error: 'Owner privileges required for this action.' });
   }
   next();
@@ -90,7 +92,7 @@ const requireOwner = (req, res, next) => {
 
 const requireStrictAdmin = (req, res, next) => {
   const user = req.adminUser || req.user;
-  if (!user || (user.role !== 'admin' && user.role !== 'owner' && user.username?.toLowerCase() !== 'jordandaniels')) {
+  if (!isAdminOrOwner(user)) {
     return res.status(403).json({ error: 'Access denied. Strict Admin privileges required.' });
   }
   next();
@@ -372,6 +374,15 @@ router.post('/clear-chat', requireOwner, async (req, res) => {
   try {
     await db.clearAllChatMessages();
     await db.createModerationLog('PURGE_CHAT_HISTORY', req.adminUser.username, 'Global Chat', 'Purged all chat history');
+
+    const io = req.app.get('io');
+    if (io) {
+      // Tell every connected client to wipe their local chat view immediately,
+      // not just the admin who clicked the button.
+      io.emit('chat_purged', { by: req.adminUser.username });
+      await postSystemMessage(io, `🧹 Global chat history was purged by an owner.`);
+    }
+
     res.json({ success: true, message: 'Global chat history cleared successfully.' });
   } catch (e) {
     res.status(500).json({ error: 'Failed to clear chat history.' });
@@ -976,8 +987,8 @@ router.post('/users/:id/gateway-ban', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
-    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
-    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    const isTargetOwner = isOwner(targetUser);
+    const isTriggererOwner = isOwner(req.adminUser);
     if (isTargetOwner && !isTriggererOwner) {
       return await punishTreasonousAdmin(req, res, targetUser);
     }
@@ -1034,13 +1045,13 @@ router.delete('/users/:id', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
-    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
-    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    const isTargetOwner = isOwner(targetUser);
+    const isTriggererOwner = isOwner(req.adminUser);
     if (isTargetOwner && !isTriggererOwner) {
       return await punishTreasonousAdmin(req, res, targetUser);
     }
 
-    if (targetUser.role === 'admin' && targetUser.username.toLowerCase() === 'jordandaniels') {
+    if (targetUser.role === 'admin' && isOwner(targetUser)) {
       return res.status(403).json({ error: 'Cannot delete primary platform administrator account.' });
     }
 
@@ -1071,8 +1082,8 @@ router.post('/users/:id/ban', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
-    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
-    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    const isTargetOwner = isOwner(targetUser);
+    const isTriggererOwner = isOwner(req.adminUser);
     if (isTargetOwner && !isTriggererOwner) {
       return await punishTreasonousAdmin(req, res, targetUser);
     }
@@ -1136,8 +1147,8 @@ router.post('/users/:id/mute', async (req, res) => {
     const targetUser = await db.getUserById(targetId);
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
-    const isTargetOwner = targetUser.role === 'owner' || targetUser.username?.toLowerCase() === 'jordandaniels';
-    const isTriggererOwner = req.adminUser.role === 'owner' || req.adminUser.username?.toLowerCase() === 'jordandaniels';
+    const isTargetOwner = isOwner(targetUser);
+    const isTriggererOwner = isOwner(req.adminUser);
     if (isTargetOwner && !isTriggererOwner) {
       return await punishTreasonousAdmin(req, res, targetUser);
     }
@@ -1676,9 +1687,111 @@ router.post('/appeals/:id/review', async (req, res) => {
   }
 });
 
+// ADMIN LIST ALL SHOP ITEMS (includes items tucked inside sub-stores)
+router.get('/shop/items/all', async (req, res) => {
+  try {
+    const items = await db.getAllShopItemsAdmin();
+    res.json({ success: true, items });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch shop items.' });
+  }
+});
+
+// ===== STORES (sub-shops opened from a "store front" item) =====
+
+// ADMIN LIST STORES
+router.get('/stores', async (req, res) => {
+  try {
+    const stores = await db.getStores();
+    res.json({ success: true, stores });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch stores.' });
+  }
+});
+
+// ADMIN GET SINGLE STORE + ITS ITEMS
+router.get('/stores/:id', async (req, res) => {
+  try {
+    const store = await db.getStoreById(req.params.id);
+    if (!store) return res.status(404).json({ error: 'Store not found.' });
+    const items = await db.getStoreItems(req.params.id);
+    res.json({ success: true, store, items });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch store.' });
+  }
+});
+
+// ADMIN CREATE STORE
+router.post('/stores/create', async (req, res) => {
+  const { name, description, image_url, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color } = req.body;
+  if (!name) return res.status(400).json({ error: 'Store name is required.' });
+
+  try {
+    const newStore = await db.createStore({ name, description: description || '', image_url: image_url || '', banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color });
+    if (!newStore) return res.status(500).json({ error: 'Failed to create store.' });
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'STORE_CREATED',
+      admin: req.adminUser.username,
+      target: name,
+      details: `Created store "${name}"`
+    });
+
+    res.json({ success: true, message: `Store "${name}" created successfully!`, store: newStore });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error creating store.' });
+  }
+});
+
+// ADMIN UPDATE STORE
+router.post('/stores/:id/update', async (req, res) => {
+  const storeId = req.params.id;
+  const { name, description, image_url, is_active, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color } = req.body;
+  if (!name) return res.status(400).json({ error: 'Store name is required.' });
+
+  try {
+    const updated = await db.updateStore(storeId, { name, description: description || '', image_url: image_url || '', is_active, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color });
+    if (!updated) return res.status(500).json({ error: 'Failed to update store.' });
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'STORE_UPDATED',
+      admin: req.adminUser.username,
+      target: name,
+      details: `Updated store ID ${storeId}: "${name}"`
+    });
+
+    res.json({ success: true, message: `Store "${name}" updated successfully!`, store: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error updating store.' });
+  }
+});
+
+// ADMIN DELETE STORE
+router.post('/stores/:id/delete', async (req, res) => {
+  const storeId = req.params.id;
+  try {
+    const success = await db.deleteStore(storeId);
+    if (!success) return res.status(500).json({ error: 'Failed to delete store.' });
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'STORE_DELETED',
+      admin: req.adminUser.username,
+      target: `Store ID: ${storeId}`,
+      details: `Deleted store ID ${storeId}. Its items were moved back to the main shop.`
+    });
+
+    res.json({ success: true, message: 'Store deleted. Its items were moved back to the main shop.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error deleting store.' });
+  }
+});
+
 // ADMIN CREATE SHOP ITEM
 router.post('/shop/create', async (req, res) => {
-  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable } = req.body;
+  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id } = req.body;
   if (!name || !description || !price || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
   }
@@ -1693,7 +1806,10 @@ router.post('/shop/create', async (req, res) => {
       delivery_note: delivery_note || '',
       stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1,
       image_url: image_url || '',
-      is_repeatable: Boolean(is_repeatable)
+      is_repeatable: Boolean(is_repeatable),
+      store_id: store_id ? parseInt(store_id, 10) : null,
+      is_store_front: Boolean(is_store_front),
+      opens_store_id: opens_store_id ? parseInt(opens_store_id, 10) : null
     });
 
     if (!newItem) {
@@ -1757,7 +1873,7 @@ router.post('/shop/bulk-create', async (req, res) => {
 // ADMIN UPDATE SHOP ITEM
 router.post('/shop/:id/update', async (req, res) => {
   const itemId = req.params.id;
-  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable } = req.body;
+  const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id } = req.body;
   if (!name || !description || price === undefined || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
   }
@@ -1772,7 +1888,10 @@ router.post('/shop/:id/update', async (req, res) => {
       delivery_note: delivery_note || '',
       stock_count: stock_count !== undefined ? parseInt(stock_count, 10) : -1,
       image_url: image_url || '',
-      is_repeatable: Boolean(is_repeatable)
+      is_repeatable: Boolean(is_repeatable),
+      store_id: store_id ? parseInt(store_id, 10) : null,
+      is_store_front: Boolean(is_store_front),
+      opens_store_id: opens_store_id ? parseInt(opens_store_id, 10) : null
     });
 
     if (!updated) {
@@ -1916,15 +2035,7 @@ router.post('/tournaments', async (req, res) => {
     const io = req.app.get('io');
     if (io) {
       io.emit('tournament_created', { tournament: tour });
-      const systemMessage = {
-        id: Date.now() + Math.random(),
-        username: 'System',
-        message: `🏆 **A new High Score Tournament has started: ${title}!** Submit your screenshot proof to win prizes! 🪙`,
-        created_at: new Date(),
-        role: 'admin',
-        is_system: true
-      };
-      io.emit('new_message', systemMessage);
+      await postSystemMessage(io, `🏆 A new High Score Tournament has started: ${title}! Submit your screenshot proof to win prizes! 🪙`);
     }
 
     res.json({ success: true, message: 'Tournament created successfully!', tournament: tour });
@@ -1987,15 +2098,7 @@ router.post('/tournaments/submissions/:id/review', async (req, res) => {
       });
 
       if (decision === 'approved') {
-        const systemMessage = {
-          id: Date.now() + Math.random(),
-          username: 'System',
-          message: `🎉 **@${submission.username}** had their score of **${submission.score}** approved on the leaderboard!`,
-          created_at: new Date(),
-          role: 'admin',
-          is_system: true
-        };
-        io.emit('new_message', systemMessage);
+        await postSystemMessage(io, `🎉 @${submission.username} had their score of ${submission.score} approved on the leaderboard!`);
       }
     }
 
@@ -2034,15 +2137,7 @@ router.post('/tournaments/:id/close', async (req, res) => {
       const topRows = await db.getTournamentLeaderboard(tournamentId);
       if (topRows && topRows.length > 0) {
         const winner = topRows[0];
-        const systemMessage = {
-          id: Date.now() + Math.random(),
-          username: 'System',
-          message: `👑 **Tournament Over!** Congratulations to **@${winner.username}** for winning "${closed.title}" with a high score of **${winner.score}**! 🏆`,
-          created_at: new Date(),
-          role: 'admin',
-          is_system: true
-        };
-        io.emit('new_message', systemMessage);
+        await postSystemMessage(io, `👑 Tournament Over! Congratulations to @${winner.username} for winning "${closed.title}" with a high score of ${winner.score}! 🏆`);
       }
     }
 
@@ -2112,15 +2207,7 @@ router.post('/raffles/:id/draw', async (req, res) => {
     if (result.winner) {
       const io = req.app.get('io');
       if (io) {
-        const systemMessage = {
-          id: Date.now() + Math.random(),
-          username: 'System',
-          message: `🎟️ **Raffle Completed!** Congratulations to **@${result.winner.username}** for winning the raffle: "${raffleTitle}"! 🎁`,
-          created_at: new Date(),
-          role: 'admin',
-          is_system: true
-        };
-        io.emit('new_message', systemMessage);
+        await postSystemMessage(io, `🎟️ Raffle Completed! Congratulations to @${result.winner.username} for winning the raffle: "${raffleTitle}"! 🎁`);
       }
     }
 

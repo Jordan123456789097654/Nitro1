@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../db');
 const { sendDiscordLog } = require('../discordLogger');
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('../secrets');
 
 function generateAccountToken(user) {
   return jwt.sign(
@@ -20,24 +20,44 @@ function encodePassword(password) {
   return bcrypt.hashSync(password.trim(), 10);
 }
 
+// Returns { valid, legacy } — legacy=true means the stored password was NOT a bcrypt
+// hash (base64 or plaintext), so the caller should immediately re-hash and persist it.
 function verifyPassword(plainPassword, storedPassword) {
-  if (!storedPassword || !plainPassword) return false;
+  if (!storedPassword || !plainPassword) return { valid: false, legacy: false };
 
   const trimmed = plainPassword.trim();
+  const looksLikeBcrypt = /^\$2[aby]\$\d{2}\$/.test(storedPassword);
 
-  // 1. Bcrypt hash check
-  try {
-    if (bcrypt.compareSync(trimmed, storedPassword)) return true;
-  } catch (e) {}
+  // 1. Bcrypt hash check (current, correct storage format)
+  if (looksLikeBcrypt) {
+    try {
+      return { valid: bcrypt.compareSync(trimmed, storedPassword), legacy: false };
+    } catch (e) {
+      return { valid: false, legacy: false };
+    }
+  }
 
-  // 2. Base64 decoded check (backwards compatibility for legacy users)
+  // 2. Base64 decoded check (legacy accounts created before bcrypt migration)
   try {
     const decoded = Buffer.from(storedPassword, 'base64').toString('utf8');
-    if (decoded === trimmed) return true;
+    if (decoded === trimmed) return { valid: true, legacy: true };
   } catch (e) {}
 
-  // 3. Direct match check (backwards compatibility for seed users)
-  return trimmed === storedPassword;
+  // 3. Direct plaintext match (legacy seed users)
+  if (trimmed === storedPassword) return { valid: true, legacy: true };
+
+  return { valid: false, legacy: false };
+}
+
+// Immediately upgrades a legacy (base64/plaintext) password to a proper bcrypt hash
+// after a successful login, so the weak format never persists longer than one login.
+async function upgradeLegacyPasswordIfNeeded(userId, plainPassword, legacy) {
+  if (!legacy) return;
+  try {
+    await db.updateUserPassword(userId, encodePassword(plainPassword));
+  } catch (e) {
+    console.error('Legacy password upgrade failed:', e.message);
+  }
 }
 
 // Check active session & profile
@@ -170,10 +190,11 @@ router.post('/profile', async (req, res) => {
         return res.status(400).json({ error: 'Current password is required to set a new password.' });
       }
       const fullUser = await db.getUserByUsername(user.username);
-      const isMatch = verifyPassword(current_password, fullUser.password_hash);
+      const { valid: isMatch, legacy } = verifyPassword(current_password, fullUser.password_hash);
       if (!isMatch) {
         return res.status(400).json({ error: 'Incorrect current password.' });
       }
+      await upgradeLegacyPasswordIfNeeded(userId, current_password, legacy);
       if (new_password.trim().length < 4) {
         return res.status(400).json({ error: 'New password must be at least 4 characters.' });
       }
@@ -335,10 +356,11 @@ router.post('/login', async (req, res) => {
       }
     }
 
-    const match = verifyPassword(password, user.password_hash);
+    const { valid: match, legacy } = verifyPassword(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ error: 'Invalid username or password.' });
     }
+    await upgradeLegacyPasswordIfNeeded(user.id, password, legacy);
 
     const token = generateAccountToken(user);
     const userSession = {

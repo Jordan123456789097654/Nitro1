@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const db = require('../db');
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('../secrets');
 
 function authenticateToken(req, res, next) {
   let token = null;

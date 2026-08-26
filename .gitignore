@@ -1,9 +1,0 @@
-node_modules/
-.env
-public/uploads/*
-!public/uploads/.gitkeep
-*.log
-.system_generated/
-.gemini/
-temp_comic_relief/
-temp_games_repo/

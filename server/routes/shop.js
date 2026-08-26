@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('../secrets');
 
 // Helper to authenticate request and get DB user
 async function getAuthUser(req) {
@@ -27,6 +27,20 @@ router.get('/items', async (req, res) => {
     res.json({ success: true, items });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch shop items.' });
+  }
+});
+
+// GET /api/shop/stores/:id - Get a store's info and its items
+router.get('/stores/:id', async (req, res) => {
+  try {
+    const store = await db.getStoreById(req.params.id);
+    if (!store || !store.is_active) {
+      return res.status(404).json({ error: 'Shop not found.' });
+    }
+    const items = await db.getStoreItems(req.params.id);
+    res.json({ success: true, store, items });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch shop.' });
   }
 });
 

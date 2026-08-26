@@ -1,4 +1,5 @@
 import { getCurrentUser } from './auth.js';
+import { isLegalChessMove, isLegalCheckersMove } from './gamerules.js';
 
 let currentChannelId = null;
 let currentSocket = null;
@@ -314,6 +315,8 @@ function renderBoard() {
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const tile = document.createElement('div');
+      tile.dataset.row = row;
+      tile.dataset.col = col;
       tile.style.width = '100%';
       tile.style.height = '100%';
       tile.style.display = 'flex';
@@ -378,7 +381,18 @@ function handleCellClick(row, col) {
       return;
     }
 
-    // Move piece to the new target cell!
+    // Move piece to the new target cell — only if it's actually a legal move
+    // for that piece. Previously any square was accepted ("Sandbox mode"),
+    // which let players move pieces however they wanted.
+    const isLegal = currentGameType === 'checkers'
+      ? isLegalCheckersMove(board, selectedCell.row, selectedCell.col, row, col, turn)
+      : isLegalChessMove(board, selectedCell.row, selectedCell.col, row, col, turn);
+
+    if (!isLegal) {
+      flashIllegalMove(row, col);
+      return;
+    }
+
     executeMove(selectedCell.row, selectedCell.col, row, col);
     selectedCell = null;
   } else {
@@ -390,9 +404,23 @@ function handleCellClick(row, col) {
   }
 }
 
+function flashIllegalMove(row, col) {
+  const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+  if (!cell) return;
+  cell.classList.add('illegal-move-flash');
+  setTimeout(() => cell.classList.remove('illegal-move-flash'), 350);
+}
+
 function executeMove(fromRow, fromCol, toRow, toCol) {
   const piece = board[fromRow][fromCol];
   if (!piece) return;
+
+  // Defense in depth: re-validate here too, in case executeMove is ever
+  // reached from a path other than the click handler above.
+  const isLegal = currentGameType === 'checkers'
+    ? isLegalCheckersMove(board, fromRow, fromCol, toRow, toCol, turn)
+    : isLegalChessMove(board, fromRow, fromCol, toRow, toCol, turn);
+  if (!isLegal) return;
 
   // Sandbox mode: Execute move directly. 
   // Let's add simple checkers king promotions!

@@ -389,6 +389,15 @@ const db = {
           is_active BOOLEAN DEFAULT true
         );
 
+        CREATE TABLE IF NOT EXISTS stores (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          description TEXT DEFAULT '',
+          image_url VARCHAR(255) DEFAULT '',
+          is_active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS user_inventory (
           user_id INT REFERENCES users(id) ON DELETE CASCADE,
           item_id INT REFERENCES shop_items(id) ON DELETE CASCADE,
@@ -503,6 +512,23 @@ const db = {
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS is_repeatable BOOLEAN DEFAULT false;");
       // Track exact claim time separately from last-progress time so daily reset is accurate
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP;");
+
+      // Sub-shops: a shop item can either live inside a store (store_id) or,
+      // if it's a "store front" card, open a store instead of being bought directly.
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS store_id INT REFERENCES stores(id) ON DELETE SET NULL;");
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS is_store_front BOOLEAN DEFAULT false;");
+      await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS opens_store_id INT REFERENCES stores(id) ON DELETE SET NULL;");
+
+      // Per-store page customization: banner image + full color scheme + button wording
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS banner_url VARCHAR(255) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS bg_color VARCHAR(20) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS accent_color VARCHAR(20) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS text_color VARCHAR(20) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS card_bg_color VARCHAR(20) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS button_label VARCHAR(50) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS bg_image_url VARCHAR(255) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS border_color VARCHAR(20) DEFAULT '';");
+      await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS heading_color VARCHAR(20) DEFAULT '';");
 
       // Spin wheel admin-configurable segments
       await pool.query(`
@@ -1021,8 +1047,10 @@ const db = {
       if (coins !== undefined && coins !== null) { sets.push(`coins = $${idx++}`); values.push(Math.max(0, parseInt(coins, 10) || 0)); }
       if (xp !== undefined && xp !== null)       { sets.push(`xp = $${idx++}`);    values.push(Math.max(0, parseInt(xp, 10)    || 0)); }
       if (password && password.trim().length > 0) {
-        const b64 = Buffer.from(password.trim(), 'utf8').toString('base64');
-        sets.push(`password_hash = $${idx++}`); values.push(b64);
+        const bcrypt = require('bcryptjs');
+        const hashed = bcrypt.hashSync(password.trim(), 10);
+        sets.push(`password_hash = $${idx++}`); values.push(hashed);
+        sets.push(`force_password_reset = true`);
       }
       sets.push(`require_profile_update = false`);
       sets.push(`profile_lock_reason = ''`);
@@ -1470,7 +1498,7 @@ const db = {
       // Groq AI API details
       const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
       const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-      const GROQ_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
+      const GROQ_MODEL = process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b';
 
       const batchSize = 35;
       const allRows = res.rows;
@@ -1699,7 +1727,7 @@ JSON Format Example:
         try {
           const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
           const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-          const GROQ_AUDIT_MODEL = 'llama-3.3-70b-versatile';
+          const GROQ_AUDIT_MODEL = process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b';
 
           const prompt = `You are an AI Platform Security Auditor for "Nitro Games", a student academic gaming platform.
 Evaluate this administrator moderation action for appropriateness, professionalism, and potential abuse of power.
@@ -2250,7 +2278,7 @@ Respond ONLY with valid JSON matching this exact schema:
   async getDMs(username1, username2) {
     try {
       const res = await pool.query(`
-        SELECT id, sender_id, receiver_id, sender_username, receiver_username, COALESCE(content, message) as content, created_at 
+        SELECT id, sender_id, receiver_id, sender_username, receiver_username, COALESCE(content, message) as content, image_url, audio_url, created_at 
         FROM direct_messages
         WHERE (LOWER(sender_username) = LOWER($1) AND LOWER(receiver_username) = LOWER($2))
            OR (LOWER(sender_username) = LOWER($2) AND LOWER(receiver_username) = LOWER($1))
@@ -2899,11 +2927,101 @@ Respond ONLY with valid JSON matching this exact schema:
 
   async getShopItems() {
     try {
-      const res = await pool.query('SELECT * FROM shop_items WHERE is_active = true ORDER BY price ASC');
+      // Only top-level items: items stashed inside a sub-store (store_id set)
+      // are fetched separately via getStoreItems() when that store is opened.
+      const res = await pool.query('SELECT * FROM shop_items WHERE is_active = true AND store_id IS NULL ORDER BY price ASC');
       return res.rows;
     } catch (e) {
       console.error('getShopItems error:', e.message);
       return [];
+    }
+  },
+
+  async getAllShopItemsAdmin() {
+    try {
+      // Unlike getShopItems(), this includes items tucked inside sub-stores
+      // so admins can still find/edit/delete them from the main items table.
+      const res = await pool.query(`
+        SELECT s.*, st.name AS store_name
+        FROM shop_items s
+        LEFT JOIN stores st ON s.store_id = st.id
+        ORDER BY s.price ASC
+      `);
+      return res.rows;
+    } catch (e) {
+      console.error('getAllShopItemsAdmin error:', e.message);
+      return [];
+    }
+  },
+
+  async getStores() {
+    try {
+      const res = await pool.query('SELECT * FROM stores WHERE is_active = true ORDER BY name ASC');
+      return res.rows;
+    } catch (e) {
+      console.error('getStores error:', e.message);
+      return [];
+    }
+  },
+
+  async getStoreById(id) {
+    try {
+      const res = await pool.query('SELECT * FROM stores WHERE id = $1', [id]);
+      return res.rows[0] || null;
+    } catch (e) {
+      console.error('getStoreById error:', e.message);
+      return null;
+    }
+  },
+
+  async getStoreItems(storeId) {
+    try {
+      const res = await pool.query('SELECT * FROM shop_items WHERE is_active = true AND store_id = $1 ORDER BY price ASC', [storeId]);
+      return res.rows;
+    } catch (e) {
+      console.error('getStoreItems error:', e.message);
+      return [];
+    }
+  },
+
+  async createStore({ name, description, image_url, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color }) {
+    try {
+      const res = await pool.query(`
+        INSERT INTO stores (name, description, image_url, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *
+      `, [name, description || '', image_url || '', banner_url || '', bg_color || '', accent_color || '', text_color || '', card_bg_color || '', button_label || '', bg_image_url || '', border_color || '', heading_color || '']);
+      return res.rows[0];
+    } catch (e) {
+      console.error('createStore error:', e.message);
+      return null;
+    }
+  },
+
+  async updateStore(id, { name, description, image_url, is_active, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color }) {
+    try {
+      const res = await pool.query(`
+        UPDATE stores
+        SET name = $1, description = $2, image_url = $3, is_active = $4,
+            banner_url = $5, bg_color = $6, accent_color = $7, text_color = $8, card_bg_color = $9, button_label = $10,
+            bg_image_url = $11, border_color = $12, heading_color = $13
+        WHERE id = $14 RETURNING *
+      `, [name, description || '', image_url || '', is_active !== undefined ? Boolean(is_active) : true, banner_url || '', bg_color || '', accent_color || '', text_color || '', card_bg_color || '', button_label || '', bg_image_url || '', border_color || '', heading_color || '', id]);
+      return res.rows[0];
+    } catch (e) {
+      console.error('updateStore error:', e.message);
+      return null;
+    }
+  },
+
+  async deleteStore(id) {
+    try {
+      // Items that lived inside this store fall back to the main shop rather
+      // than vanishing (ON DELETE SET NULL on store_id handles this at the DB level).
+      await pool.query('DELETE FROM stores WHERE id = $1', [id]);
+      return true;
+    } catch (e) {
+      console.error('deleteStore error:', e.message);
+      return false;
     }
   },
 
@@ -3198,6 +3316,10 @@ Respond ONLY with valid JSON matching this exact schema:
       if (!itemRes.rows.length) return { error: 'Item not found.' };
       const item = itemRes.rows[0];
 
+      if (item.is_store_front) {
+        return { error: 'This opens a shop and cannot be purchased directly.' };
+      }
+
       const userRes = await pool.query('SELECT coins FROM users WHERE id = $1', [userId]);
       if (!userRes.rows.length) return { error: 'User not found.' };
       const coins = userRes.rows[0].coins || 0;
@@ -3398,13 +3520,13 @@ Respond ONLY with valid JSON matching this exact schema:
   },
 
 
-  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable }) {
+  async createShopItem({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id }) {
     try {
       const res = await pool.query(`
-        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO shop_items (name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', is_repeatable ? true : false]);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', is_repeatable ? true : false, store_id || null, is_store_front ? true : false, opens_store_id || null]);
       return res.rows[0];
     } catch (e) {
       console.error('createShopItem error:', e.message);
@@ -3422,14 +3544,14 @@ Respond ONLY with valid JSON matching this exact schema:
     }
   },
 
-  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable }) {
+  async updateShopItem(id, { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id }) {
     try {
       const res = await pool.query(`
         UPDATE shop_items
-        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7, image_url = $8, is_repeatable = $9
-        WHERE id = $10
+        SET name = $1, description = $2, price = $3, category = $4, perk_value = $5, delivery_note = $6, stock_count = $7, image_url = $8, is_repeatable = $9, store_id = $10, is_store_front = $11, opens_store_id = $12
+        WHERE id = $13
         RETURNING *
-      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', is_repeatable ? true : false, id]);
+      `, [name, description, price, category, perk_value, delivery_note || '', stock_count !== undefined ? stock_count : -1, image_url || '', is_repeatable ? true : false, store_id || null, is_store_front ? true : false, opens_store_id || null, id]);
       return res.rows[0];
     } catch (e) {
       console.error('updateShopItem error:', e.message);

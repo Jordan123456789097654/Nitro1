@@ -5,6 +5,7 @@ const systemState = require('../systemState');
 const { sendDiscordLog } = require('../discordLogger');
 const db = require('../db');
 const { checkMessageWithGroqModeration, getSafetyHotlineText } = require('../aiModeration');
+const { JWT_SECRET } = require('../secrets');
 
 // GET /api/ai/status (Public AI Status Check)
 router.get('/status', (req, res) => {
@@ -24,8 +25,11 @@ const GEMINI_FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.1-f
 // Fallback API: Groq
 const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
-const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'llama-3.2-11b-vision-preview';
+// llama-3.3-70b-versatile and llama-3.2-11b-vision-preview were both decommissioned by Groq
+// (see https://console.groq.com/docs/deprecations) — every request to them now 404s with
+// "model_not_found". Migrated to Groq's current recommended replacements.
+const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b';
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';
 
 const BASE_SYSTEM_PROMPT = `You are Nitro AI — a super chill, high-IQ, and quick-witted study co-pilot. You combine the relaxed, casual personality of a clever friend with the pedagogical precision of an elite tutor. Speak naturally, informally, and lowkey use Gen Z slang and vibes (e.g., "no cap", "fr fr", "lowkey", "highkey", "bruh", "cooking", "it's giving", "slay", "bet", "real") where appropriate, but still keep it smart and actually helpful. Avoid sounding like a dry academic textbook or a stiff formal bot.
 
@@ -446,7 +450,7 @@ router.post('/ask', async (req, res) => {
   if (preferredModel.startsWith('gemini')) {
     answer = await callGemini(messages, preferredModel, temperature);
     if (!answer && currentAiConfig.autoFallbackOn429 !== false) {
-      const fallbackModel = currentAiConfig.fallbackChatModel || 'llama-3.3-70b-versatile';
+      const fallbackModel = currentAiConfig.fallbackChatModel || 'openai/gpt-oss-120b';
       answer = await callGroq(messages, isImage, fallbackModel, temperature);
     }
   } else {
@@ -475,7 +479,7 @@ router.post('/ask', async (req, res) => {
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
         const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026');
+        const decoded = jwt.verify(token, JWT_SECRET);
         if (decoded.id) {
           await db.updateQuestProgress(decoded.id, 'ai_chat');
         }

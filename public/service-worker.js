@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nitro-hub-v2';
+const CACHE_NAME = 'nitro-hub-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -47,6 +47,30 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/socket.io') || 
     url.pathname.startsWith('/voice')
   ) {
+    return;
+  }
+
+  // The HTML document (and page navigations) must always be fetched fresh first.
+  // Serving a stale index.html from cache is how UI updates silently stop showing
+  // up after a deploy. We only fall back to the cached copy if the network fails
+  // (e.g. offline), so the PWA still works without a connection.
+  const isHtmlRequest = event.request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname === '/index.html';
+
+  if (isHtmlRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, networkResponse.clone());
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
     return;
   }
 

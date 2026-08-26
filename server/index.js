@@ -20,7 +20,7 @@ const pollsRoutes = require('./routes/polls');
 const { initChatSocket } = require('./chatSocket');
 const db = require('./db');
 
-const JWT_SECRET = process.env.SESSION_SECRET || 'nitro_jwt_secure_key_2026';
+const { JWT_SECRET } = require('./secrets');
 
 // Crash protection for cloud deployments (Render, Railway, Koyeb, Replit, nitromath.org)
 process.on('uncaughtException', (err) => {
@@ -72,7 +72,7 @@ app.use((req, res, next) => {
 
 // Express Session
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'nitro_super_secret_session_key_2026',
+  secret: JWT_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {

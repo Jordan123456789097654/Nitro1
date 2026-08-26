@@ -15,6 +15,35 @@ router.get('/list', (req, res) => {
   res.json({ success: true, channels });
 });
 
+// GET /api/voice/ice-config — WebRTC ICE server list for the client.
+// STUN-only setups (the previous hardcoded RTC_CONFIG) fail to establish a
+// peer connection at all on networks that block/restrict raw UDP — which is
+// exactly the kind of restrictive network this app's users are commonly on.
+// STUN just helps two peers discover each other's public address; it does
+// nothing if the network won't let UDP media flow directly between them. A
+// TURN server relays the actual audio over a connection the network will
+// allow (often TCP/443), which is what actually fixes "voice doesn't work"
+// for a lot of users. Configure TURN_URL / TURN_USERNAME / TURN_CREDENTIAL
+// in your environment (e.g. from Twilio, Metered, or a self-hosted coturn)
+// to enable it — TURN credentials are never hardcoded in client source.
+router.get('/ice-config', (req, res) => {
+  const iceServers = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' }
+  ];
+
+  if (process.env.TURN_URL && process.env.TURN_USERNAME && process.env.TURN_CREDENTIAL) {
+    iceServers.push({
+      urls: process.env.TURN_URL.split(',').map(u => u.trim()),
+      username: process.env.TURN_USERNAME,
+      credential: process.env.TURN_CREDENTIAL
+    });
+  }
+
+  res.json({ success: true, iceServers, turnConfigured: Boolean(process.env.TURN_URL) });
+});
+
 // Create a new channel
 router.post('/create', requireAuth, (req, res) => {
   const { name } = req.body;

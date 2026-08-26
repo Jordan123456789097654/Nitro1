@@ -52,6 +52,7 @@ export function initAdmin() {
   setupSlowmodeControls();
   setupCreateUserForm();
   setupCreateShopForm();
+  setupStoresForm();
   setupCreateQuestForm();
   setupAnnouncementDisableControls();
   setupUpdateDisableControls();
@@ -1280,6 +1281,7 @@ function setupAdminTabs() {
       }
       if (targetTab === 'adminshop') {
         if (window.adminFetchShop) window.adminFetchShop();
+        if (window.adminFetchStores) window.adminFetchStores();
       }
       if (targetTab === 'adminquests') {
         if (window.adminFetchQuests) window.adminFetchQuests();
@@ -2748,7 +2750,7 @@ window.adminFetchShop = async function() {
   tbody.innerHTML = `<tr><td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading store items...</td></tr>`;
 
   try {
-    const res = await authFetch('/api/shop/items');
+    const res = await authFetch('/api/admin/shop/items/all');
     const data = await res.json();
 
     if (res.ok && data.success) {
@@ -2767,6 +2769,13 @@ window.adminFetchShop = async function() {
           ? `<img src="${escapeHtml(item.image_url)}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);" alt="">`
           : `<div style="width: 28px; height: 28px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px;"></div>`;
 
+        const storeBadge = item.store_name
+          ? `<span title="Only visible inside this store" style="display:block; margin-top:3px; font-size:0.68rem; color:#38bdf8; background:rgba(56,189,248,0.12); border-radius:4px; padding:1px 5px; width:fit-content;">📦 In: ${escapeHtml(item.store_name)}</span>`
+          : '';
+        const storeFrontBadge = item.is_store_front
+          ? `<span style="display:block; margin-top:3px; font-size:0.68rem; color:#a78bfa; background:rgba(167,139,250,0.12); border-radius:4px; padding:1px 5px; width:fit-content;">🏪 Store Front</span>`
+          : '';
+
         return `
           <tr style="border-bottom: 1px solid var(--card-border);">
             <td style="padding: 12px 14px; font-weight: 700; color: #10b981;">#${item.id}</td>
@@ -2776,6 +2785,8 @@ window.adminFetchShop = async function() {
                 <div>
                   <strong style="display: block;">${escapeHtml(item.name)}</strong>
                   <span style="font-size: 0.76rem; color: var(--text-muted);">${escapeHtml(item.description)}</span>
+                  ${storeBadge}
+                  ${storeFrontBadge}
                 </div>
               </div>
             </td>
@@ -2815,9 +2826,196 @@ window.adminOpenEditShopModal = function(id) {
   const repeatEl = document.getElementById('admin-edit-shop-repeatable');
   if (repeatEl) repeatEl.checked = Boolean(item.is_repeatable);
 
+  const storeSel = document.getElementById('admin-edit-shop-store');
+  if (storeSel) storeSel.value = item.store_id || '';
+  const isFrontEl = document.getElementById('admin-edit-shop-is-store-front');
+  if (isFrontEl) isFrontEl.checked = Boolean(item.is_store_front);
+  const opensSel = document.getElementById('admin-edit-shop-opens-store');
+  if (opensSel) opensSel.value = item.opens_store_id || '';
+
   const modal = document.getElementById('admin-edit-shop-modal');
   if (modal) modal.style.display = 'flex';
 };
+
+// ===== STORES (sub-shops) =====
+let adminStoresCache = [];
+
+function populateStoreDropdowns() {
+  const selects = [
+    document.getElementById('admin-shop-store'),
+    document.getElementById('admin-edit-shop-store')
+  ];
+  const opensSelects = [
+    document.getElementById('admin-shop-opens-store'),
+    document.getElementById('admin-edit-shop-opens-store')
+  ];
+
+  selects.forEach(sel => {
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Main Shop —</option>' +
+      adminStoresCache.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+    sel.value = current;
+  });
+
+  opensSelects.forEach(sel => {
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Select which store it opens...</option>' +
+      adminStoresCache.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+    sel.value = current;
+  });
+}
+
+window.adminFetchStores = async function() {
+  const list = document.getElementById('admin-stores-list');
+  if (!list) return;
+  list.innerHTML = `<div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 10px;">Loading stores...</div>`;
+
+  try {
+    const res = await authFetch('/api/admin/stores');
+    const data = await res.json();
+    if (res.ok && data.success) {
+      adminStoresCache = data.stores || [];
+      populateStoreDropdowns();
+
+      if (adminStoresCache.length === 0) {
+        list.innerHTML = `<div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 10px;">No stores yet. Click "New Store" to create one.</div>`;
+        return;
+      }
+
+      list.innerHTML = adminStoresCache.map(store => `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            ${store.image_url ? `<img src="${escapeHtml(store.image_url)}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); flex-shrink:0;" alt="">` : `<div style="width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(56,189,248,0.1);border-radius:6px;">🏪</div>`}
+            <div style="min-width: 0;">
+              <strong style="display: block; color: #fff; font-size: 0.86rem;">${escapeHtml(store.name)}</strong>
+              <span style="font-size: 0.74rem; color: var(--text-muted); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(store.description || 'No description')}</span>
+            </div>
+            <div style="display: flex; gap: 3px; flex-shrink: 0;" title="Color scheme">
+              ${['bg_color', 'accent_color', 'text_color', 'card_bg_color', 'border_color', 'heading_color'].map(k => `<span style="width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.2); background: ${store[k] || 'transparent'};"></span>`).join('')}
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            <button class="btn-small secondary" onclick="window.adminEditStore(${store.id})" style="background: #38bdf8; border: none; color: #000; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Edit</button>
+            <button class="btn-small primary" onclick="window.adminDeleteStore(${store.id})" style="background: #ef4444; border: none; color: #fff; font-weight: 800; cursor: pointer; border-radius: 4px; padding: 4px 10px;">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      list.innerHTML = `<div style="color: #ef4444; font-size: 0.82rem; text-align: center; padding: 10px;">Failed to load stores.</div>`;
+    }
+  } catch (err) {
+    console.error('Error fetching stores:', err);
+    list.innerHTML = `<div style="color: #ef4444; font-size: 0.82rem; text-align: center; padding: 10px;">Network error fetching stores.</div>`;
+  }
+};
+
+window.adminEditStore = function(id) {
+  const store = adminStoresCache.find(s => s.id === id);
+  if (!store) return;
+  document.getElementById('admin-store-id').value = store.id;
+  document.getElementById('admin-store-name').value = store.name;
+  document.getElementById('admin-store-desc').value = store.description || '';
+  document.getElementById('admin-store-image-url').value = store.image_url || '';
+  document.getElementById('admin-store-banner-url').value = store.banner_url || '';
+  document.getElementById('admin-store-bg-color').value = store.bg_color || '#0a0a0a';
+  document.getElementById('admin-store-accent-color').value = store.accent_color || '#10b981';
+  document.getElementById('admin-store-text-color').value = store.text_color || '#ffffff';
+  document.getElementById('admin-store-card-bg-color').value = store.card_bg_color || '#141414';
+  document.getElementById('admin-store-button-label').value = store.button_label || '';
+  document.getElementById('admin-store-bg-image-url').value = store.bg_image_url || '';
+  document.getElementById('admin-store-border-color').value = store.border_color || '#2a2f3d';
+  document.getElementById('admin-store-heading-color').value = store.heading_color || '#10b981';
+  const form = document.getElementById('admin-store-form');
+  if (form) form.style.display = 'grid';
+};
+
+window.adminDeleteStore = async function(id) {
+  if (!confirm('Delete this store? Its items will be moved back to the main shop.')) return;
+  try {
+    const res = await authFetch(`/api/admin/stores/${id}/delete`, { method: 'POST' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      window.adminFetchStores();
+      window.adminFetchShop();
+    } else {
+      alert(data.error || 'Failed to delete store.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Network error deleting store.');
+  }
+};
+
+function setupStoresForm() {
+  const addBtn = document.getElementById('admin-add-store-btn');
+  const form = document.getElementById('admin-store-form');
+  if (addBtn && form) {
+    addBtn.addEventListener('click', () => {
+      document.getElementById('admin-store-id').value = '';
+      form.reset();
+      form.style.display = form.style.display === 'none' ? 'grid' : 'none';
+    });
+  }
+
+  const resetColorsBtn = document.getElementById('admin-store-reset-colors-btn');
+  if (resetColorsBtn) {
+    resetColorsBtn.addEventListener('click', () => {
+      document.getElementById('admin-store-bg-color').value = '#0a0a0a';
+      document.getElementById('admin-store-accent-color').value = '#10b981';
+      document.getElementById('admin-store-text-color').value = '#ffffff';
+      document.getElementById('admin-store-card-bg-color').value = '#141414';
+      document.getElementById('admin-store-button-label').value = '';
+      document.getElementById('admin-store-bg-image-url').value = '';
+      document.getElementById('admin-store-border-color').value = '#2a2f3d';
+      document.getElementById('admin-store-heading-color').value = '#10b981';
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('admin-store-id').value;
+      const name = document.getElementById('admin-store-name').value.trim();
+      const description = document.getElementById('admin-store-desc').value.trim();
+      const image_url = document.getElementById('admin-store-image-url').value.trim();
+      const banner_url = document.getElementById('admin-store-banner-url').value.trim();
+      const bg_color = document.getElementById('admin-store-bg-color').value;
+      const accent_color = document.getElementById('admin-store-accent-color').value;
+      const text_color = document.getElementById('admin-store-text-color').value;
+      const card_bg_color = document.getElementById('admin-store-card-bg-color').value;
+      const button_label = document.getElementById('admin-store-button-label').value.trim();
+      const bg_image_url = document.getElementById('admin-store-bg-image-url').value.trim();
+      const border_color = document.getElementById('admin-store-border-color').value;
+      const heading_color = document.getElementById('admin-store-heading-color').value;
+      if (!name) return alert('Store name is required.');
+
+      const endpoint = id ? `/api/admin/stores/${id}/update` : '/api/admin/stores/create';
+      try {
+        const res = await authFetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, image_url, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(data.message);
+          form.reset();
+          document.getElementById('admin-store-id').value = '';
+          form.style.display = 'none';
+          window.adminFetchStores();
+        } else {
+          alert(data.error || 'Failed to save store.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error saving store.');
+      }
+    });
+  }
+}
 
 window.adminDeleteShopItem = async function(id) {
   if (!confirm(`Are you sure you want to delete shop item #${id}?`)) return;
@@ -2920,12 +3118,15 @@ function setupCreateShopForm() {
       const stock_count = document.getElementById('admin-shop-stock')?.value.trim() || '-1';
       const image_url = document.getElementById('admin-shop-image-url')?.value.trim() || '';
       const is_repeatable = document.getElementById('admin-shop-repeatable')?.checked || false;
+      const store_id = document.getElementById('admin-shop-store')?.value || '';
+      const is_store_front = document.getElementById('admin-shop-is-store-front')?.checked || false;
+      const opens_store_id = document.getElementById('admin-shop-opens-store')?.value || '';
 
       try {
         const res = await authFetch('/api/admin/shop/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id })
         });
         const data = await res.json();
         if (res.ok && data.success) {
@@ -2996,12 +3197,15 @@ function setupCreateShopForm() {
       const stock_count = document.getElementById('admin-edit-shop-stock').value.trim();
       const image_url = document.getElementById('admin-edit-shop-image-url').value.trim();
       const is_repeatable = document.getElementById('admin-edit-shop-repeatable')?.checked || false;
+      const store_id = document.getElementById('admin-edit-shop-store')?.value || '';
+      const is_store_front = document.getElementById('admin-edit-shop-is-store-front')?.checked || false;
+      const opens_store_id = document.getElementById('admin-edit-shop-opens-store')?.value || '';
 
       try {
         const res = await authFetch(`/api/admin/shop/${id}/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable })
+          body: JSON.stringify({ name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id })
         });
         const data = await res.json();
         if (res.ok && data.success) {

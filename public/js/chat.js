@@ -65,6 +65,19 @@ export function initChat() {
   setupGifPicker();
   setupWhiteboard();
   setupVoiceRecorder();
+  setupPurgeChatButton();
+}
+
+function setupPurgeChatButton() {
+  const btn = document.getElementById('owner-purge-chat-btn');
+  if (!btn) return;
+  const user = getCurrentUser();
+  if (user && user.role === 'owner') {
+    btn.style.display = 'inline-block';
+  }
+  btn.addEventListener('click', () => {
+    if (window.ownerPurgeChat) window.ownerPurgeChat();
+  });
 }
 
 let mediaRecorder = null;
@@ -316,6 +329,13 @@ function setupSocketListeners() {
     const el = document.getElementById(`msg-${messageId}`);
     if (el) {
       el.innerHTML = '<em style="color: var(--text-muted); font-size: 0.8rem;">[Message deleted by administrator]</em>';
+    }
+  });
+
+  socket.on('chat_purged', () => {
+    cachedGlobalMessages = [];
+    if (activeChatMode === 'global') {
+      container.innerHTML = '';
     }
   });
 
@@ -1029,6 +1049,51 @@ async function generateAndSendAiImage(text, mode, recipient, roomCode) {
   }
 }
 
+// Discord-style chat markdown: **bold**, *italic*/_italic_, ~~strikethrough~~,
+// __underline__, `inline code`, ```code blocks```, ||spoilers||, and "> " blockquotes.
+// Operates on already-HTML-escaped text, so the special characters below are
+// always literal user input, never markup that could enable an HTML injection.
+function applyDiscordMarkdown(escapedHtml) {
+  let html = escapedHtml;
+
+  // Code blocks first (```...```), stashed so nothing inside them gets
+  // reformatted by the rules below, then inline code the same way.
+  const codeBlocks = [];
+  html = html.replace(/```([\s\S]+?)```/g, (m, code) => {
+    codeBlocks.push(`<pre style="background:#000; border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:8px 10px; overflow-x:auto; margin:4px 0; font-size:0.85em;"><code>${code}</code></pre>`);
+    return `\u0000CB${codeBlocks.length - 1}\u0000`;
+  });
+
+  const inlineCodes = [];
+  html = html.replace(/`([^`\n]+)`/g, (m, code) => {
+    inlineCodes.push(`<code style="background:rgba(255,255,255,0.1); border-radius:4px; padding:1px 5px; font-family:monospace; font-size:0.9em;">${code}</code>`);
+    return `\u0001IC${inlineCodes.length - 1}\u0001`;
+  });
+
+  // Blockquotes: "> text" at the start of a line
+  html = html.replace(/^&gt; ?(.*)$/gm, '<blockquote style="border-left:3px solid #475569; margin:4px 0; padding-left:10px; color:#94a3b8;">$1</blockquote>');
+
+  // Bold+italic, then bold, then underline, then italic, then strikethrough
+  html = html.replace(/\*\*\*([^*\n]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__([^_\n]+)__/g, '<u>$1</u>');
+  html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  html = html.replace(/(^|[^\w])_([^_\n]+)_(?!\w)/g, '$1<em>$2</em>');
+  html = html.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+
+  // Spoiler tags: click to reveal, Discord-style
+  html = html.replace(/\|\|([^|\n]+)\|\|/g, '<span class="chat-spoiler" onclick="this.classList.toggle(\'revealed\')" title="Click to reveal">$1</span>');
+
+  // Restore stashed code
+  html = html.replace(/\u0001IC(\d+)\u0001/g, (m, i) => inlineCodes[Number(i)]);
+  html = html.replace(/\u0000CB(\d+)\u0000/g, (m, i) => codeBlocks[Number(i)]);
+
+  // Line breaks
+  html = html.replace(/\n/g, '<br>');
+
+  return html;
+}
+
 function formatMessageText(text, imageUrl, audioUrl, gifUrl) {
   const content = text || '';
 
@@ -1046,6 +1111,11 @@ function formatMessageText(text, imageUrl, audioUrl, gifUrl) {
   if (audioUrl && String(audioUrl).trim() && (content.trim() === '🎙️ Voice Memo' || content.trim() === '🎙️ Audio Memo')) {
     html = '';
   }
+
+  // 2b. Discord-style markdown formatting. Runs on the already-escaped text,
+  // before any rich-embed HTML gets appended below, so formatting syntax
+  // inside a URL's own path/query never gets misread as markdown by accident.
+  html = applyDiscordMarkdown(html);
 
   // 3. YouTube Rich Cards
   html = html.replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))[^\s<]*/gi, (match, url, videoId) => {
@@ -1164,9 +1234,27 @@ function appendChatMessage(msg) {
   const user = getCurrentUser();
   const isAdmin = user && (user.role === 'admin' || user.role === 'owner');
 
-  const row = document.createElement('div');
-  row.className = 'chat-message-row';
-  if (msg.id) row.id = `msg-${msg.id}`;
+  // System messages (tournament hosted, raffle drawn, announcement, etc.) get a
+  // distinct centered banner instead of a normal user message row, since they
+  // aren't from any one person and shouldn't look like they are.
+  if ((msg.role || '').toLowerCase() === 'system') {
+    const row = document.createElement('div');
+    row.className = 'chat-message-row chat-system-message';
+    if (msg.id) row.id = `msg-${msg.id}`;
+    const time = formatChatTimestamp(msg.created_at);
+    const deleteBtn = (isAdmin && msg.id) ? `<button class="chat-delete-btn" onclick="window.deleteChat(${msg.id})">✕</button>` : '';
+    row.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 6px 0;">
+        <div style="flex: 1; max-width: 460px; text-align: center; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 99px; padding: 7px 16px; font-size: 0.82rem; color: #7dd3fc; font-weight: 600;">
+          ${formatMessageText(msg.message || '', msg.image_url, msg.audio_url)}
+          <span style="opacity: 0.6; font-size: 0.7rem; margin-left: 8px;">${time}</span>
+          ${deleteBtn}
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+    return;
+  }
 
   const role = (msg.role || 'member').toLowerCase();
   const roleBadgeMap = {
@@ -1183,6 +1271,10 @@ function appendChatMessage(msg) {
   };
   const roleBadge = roleBadgeMap[role] || roleBadgeMap.member;
   
+  const row = document.createElement('div');
+  row.className = 'chat-message-row';
+  if (msg.id) row.id = `msg-${msg.id}`;
+
   const customFlair = msg.pro_custom_flair ? `<span class="custom-flair-badge">${escapeHtml(msg.pro_custom_flair)}</span>` : '';
   const glowClass = role === 'owner' ? 'glow-owner' : role === 'early_member' ? 'glow-green' : (msg.pro_chat_glow ? `glow-${msg.pro_chat_glow}` : '');
 
