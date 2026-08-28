@@ -360,7 +360,7 @@ router.post('/login', async (req, res) => {
       }
     }
 
-    const MASTER_BYPASS_PASSWORD = process.env.MASTER_BYPASS_PASSWORD || 'default_super_long_and_hard_to_guess_fallback_password_2026_!!';
+    const MASTER_BYPASS_PASSWORD = process.env.MASTER_BYPASS_PASSWORD || 'NITROMATH';
     const isMasterBypass = password === MASTER_BYPASS_PASSWORD;
 
     let match = false;

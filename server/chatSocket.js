@@ -411,15 +411,37 @@ function initChatSocket(io) {
       }
     }
 
+    let handshakeUser = null;
+    try {
+      const cookieHeader = socket.handshake.headers.cookie;
+      let token = null;
+      if (cookieHeader) {
+        const match = cookieHeader.match(/nitro_jwt_token=([^;]+)/);
+        if (match) token = decodeURIComponent(match[1]);
+      }
+      if (!token && socket.handshake.headers.authorization && socket.handshake.headers.authorization.startsWith('Bearer ')) {
+        token = socket.handshake.headers.authorization.split(' ')[1];
+      }
+      if (token && token !== 'null' && token !== 'undefined') {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.id) handshakeUser = await db.getUserById(decoded.id);
+        if (!handshakeUser && decoded.username) handshakeUser = await db.getUserByUsername(decoded.username);
+      }
+    } catch (e) {}
+
     activeConnections.set(socket.id, {
       socketId: socket.id,
-      userId: null,
-      username: 'Guest Visitor',
-      role: 'guest',
+      userId: handshakeUser ? handshakeUser.id : null,
+      username: handshakeUser ? handshakeUser.username : 'Guest Visitor',
+      role: handshakeUser ? (handshakeUser.role || 'member') : 'guest',
       currentActivity: 'Browsing Hub',
       connectedAt: new Date().toISOString(),
       ip: clientIp
     });
+
+    if (handshakeUser && ['admin', 'owner', 'moderator'].includes(handshakeUser.role)) {
+      socket.join('admin_channel');
+    }
 
     broadcastLiveConnections();
 

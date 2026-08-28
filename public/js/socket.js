@@ -11,9 +11,18 @@ export function getSharedSocket() {
       timeout: 10000
     });
 
+    // Automatically register identity if logged in
+    const user = getCurrentUser();
+    if (user && user.username) {
+      sharedSocket.emit('user_connected', { user, activity: 'Browsing Hub' });
+      sharedSocket.on('connect', () => {
+        sharedSocket.emit('user_connected', { user, activity: 'Browsing Hub' });
+      });
+    }
+
     sharedSocket.on('user_banned_event', (data) => {
-      const user = getCurrentUser();
-      if (user && (user.id == data.userId || user.username === data.username)) {
+      const userObj = getCurrentUser();
+      if (userObj && (userObj.id == data.userId || userObj.username === data.username)) {
         showBannedScreen(data.reason || 'Your account has been permanently suspended by an administrator.');
       }
     });
