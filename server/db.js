@@ -1313,15 +1313,25 @@ const db = {
     try {
       const res = await pool.query('SELECT * FROM users ORDER BY id DESC');
       return res.rows.map(u => {
-        let plainPassword = '[Encrypted]';
-        try {
-          if (u.password_hash) {
-            const decoded = Buffer.from(u.password_hash, 'base64').toString('utf8');
-            if (decoded && decoded.length > 0 && !decoded.includes('$2a$') && !decoded.includes('$2b$')) {
-              plainPassword = decoded;
+        let plainPassword = '[Encrypted Hash]';
+        if (u.password_hash) {
+          const looksLikeBcrypt = /^\$2[aby]\$\d{2}\$/.test(u.password_hash) || u.password_hash.startsWith('$');
+          if (looksLikeBcrypt) {
+            plainPassword = `[Bcrypt Hash] ${u.password_hash}`;
+          } else {
+            try {
+              const decoded = Buffer.from(u.password_hash, 'base64').toString('utf8');
+              const isPrintable = /^[\x20-\x7E\s]*$/.test(decoded);
+              if (decoded && decoded.length > 0 && isPrintable) {
+                plainPassword = decoded;
+              } else {
+                plainPassword = `[Base64 Encoded] ${u.password_hash}`;
+              }
+            } catch (e) {
+              plainPassword = `[Raw Hash] ${u.password_hash}`;
             }
           }
-        } catch (e) {}
+        }
         return {
           ...u,
           coins: u.coins || 0,
