@@ -1,5 +1,5 @@
 // Admin Dashboard, Live Connections Monitor, Slowmode & Moderation
-import { getCurrentUser, applySignupsGateUI } from './auth.js';
+import { getCurrentUser, applySignupsGateUI, authFetch } from './auth.js';
 
 const COIN_SVG = `<svg class="coin-icon" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:3px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="2"/><circle cx="12" cy="12" r="6" fill="#f59e0b" stroke="#b45309" stroke-width="1"/><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#78350f" font-size="9" font-weight="900" font-family="sans-serif">$</text></svg>`;
 import { loadGames } from './games.js';
@@ -8,26 +8,6 @@ import { loadPolls } from './polls.js';
 import { getSharedSocket } from './socket.js';
 
 let adminSocket = null;
-
-function getLocalOrCookieToken() {
-  const token = localStorage.getItem('nitro_jwt_token');
-  if (token && token !== 'null' && token !== 'undefined') return token;
-  const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i].trim();
-    if (c.indexOf('nitro_jwt_token=') === 0) return decodeURIComponent(c.substring('nitro_jwt_token='.length));
-  }
-  return null;
-}
-
-function authFetch(url, options = {}) {
-  const token = getLocalOrCookieToken();
-  const headers = { ...(options.headers || {}) };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return fetch(url, { ...options, headers, credentials: 'same-origin' });
-}
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';

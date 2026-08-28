@@ -119,38 +119,7 @@ export async function authFetch(url, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  let res = await fetch(url, { ...options, headers, credentials: 'same-origin' });
-  
-  if (res.status === 403) {
-    try {
-      const clone = res.clone();
-      const body = await clone.json();
-      if (body && body.error === 'SUDO_REQUIRED') {
-        const password = prompt('🔒 Admin Panel Security Re-Authentication:\nPlease enter your password to confirm administrative access:');
-        if (password) {
-          const reauthRes = await fetch('/api/admin/reauth', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-            },
-            body: JSON.stringify({ password }),
-            credentials: 'same-origin'
-          });
-          const reauthData = await reauthRes.json();
-          if (reauthRes.ok && reauthData.success) {
-            res = await fetch(url, { ...options, headers, credentials: 'same-origin' });
-          } else {
-            alert(`❌ Admin re-authentication failed: ${reauthData.error || 'Incorrect password'}`);
-          }
-        } else {
-          alert('🔒 Access cancelled. Sudo authentication is required to access the admin panel.');
-        }
-      }
-    } catch (e) {}
-  }
-  
-  return res;
+  return fetch(url, { ...options, headers, credentials: 'same-origin' });
 }
 
 export function getCookie(name) {

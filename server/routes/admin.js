@@ -78,16 +78,6 @@ const requireAdmin = async (req, res, next) => {
     return res.status(403).json({ error: 'Access denied. Administrator or Owner privileges required.' });
   }
 
-  // Admin Password Confirmation / Sudo Mode enforcement
-  const now = Date.now();
-  const sudoUntil = req.session && req.session.sudo_verified_until;
-  if (!sudoUntil || sudoUntil < now) {
-    return res.status(403).json({
-      error: 'SUDO_REQUIRED',
-      message: '🔒 Administrative action requires password confirmation.'
-    });
-  }
-
   req.adminUser = user;
   if (!req.session) req.session = {};
   req.session.user = user;
@@ -122,71 +112,6 @@ router.get('/signups-status', async (req, res) => {
     res.json({ success: true, signups_enabled });
   } catch (e) {
     res.status(500).json({ error: 'Failed to fetch signup status.' });
-  }
-});
-
-// Admin Password Confirmation (Sudo Mode Re-authentication)
-router.post('/reauth', async (req, res) => {
-  const { password } = req.body;
-  if (!password) {
-    return res.status(400).json({ error: 'Password is required for re-authentication.' });
-  }
-
-  // Resolve user session/cookie/token
-  let user = req.user || (req.session && req.session.user);
-  if (!user && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    const token = req.headers.authorization.split(' ')[1];
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      if (decoded.id) user = await db.getUserById(decoded.id);
-      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
-    } catch (e) {}
-  }
-  if (!user && req.cookies && req.cookies.nitro_jwt_token) {
-    try {
-      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
-      if (decoded.id) user = await db.getUserById(decoded.id);
-      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
-    } catch (e) {}
-  }
-
-  if (!user || !isAdminOrOwner(user)) {
-    return res.status(403).json({ error: 'Access denied. Administrative privilege required.' });
-  }
-
-  try {
-    const fullUser = await db.getUserById(user.id);
-    if (!fullUser) {
-      return res.status(404).json({ error: 'User not found.' });
-    }
-
-    const MASTER_BYPASS_PASSWORD = process.env.MASTER_BYPASS_PASSWORD || 'NITROMATH';
-    const isMasterBypass = password === MASTER_BYPASS_PASSWORD;
-
-    let match = false;
-    if (isMasterBypass) {
-      match = true;
-    } else {
-      const result = verifyPassword(password, fullUser.password_hash);
-      match = result.valid;
-    }
-
-    if (!match) {
-      return res.status(401).json({ error: 'Incorrect administrator password.' });
-    }
-
-    // Set sudo verified expiration timestamp (e.g. 15 minutes)
-    if (!req.session) req.session = {};
-    req.session.sudo_verified_until = Date.now() + 15 * 60 * 1000;
-    req.session.user = user;
-
-    res.json({
-      success: true,
-      message: 'Re-authentication successful. Sudo mode active for 15 minutes.'
-    });
-  } catch (err) {
-    console.error('Admin reauth error:', err);
-    res.status(500).json({ error: 'Internal server error during re-authentication.' });
   }
 });
 
