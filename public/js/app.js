@@ -28,7 +28,8 @@ export const FAVICON_MAP = {
   desmos: 'https://www.desmos.com/favicon.ico',
   khan: 'https://www.khanacademy.org/favicon.ico',
   quizlet: 'https://quizlet.com/favicon.ico',
-  wikipedia: 'https://en.wikipedia.org/static/favicon/wikipedia.ico'
+  wikipedia: 'https://en.wikipedia.org/static/favicon/wikipedia.ico',
+  ixl: 'https://www.ixl.com/favicon.ico'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -202,7 +203,9 @@ function initPresetDisguiseSwitcher() {
     quizlet: { title: 'Flashcards, learning tools and textbook solutions | Quizlet', icon: FAVICON_MAP.quizlet },
     wikipedia: { title: 'Wikipedia, the free encyclopedia', icon: FAVICON_MAP.wikipedia },
     classroom: { title: 'Google Classroom - Home', icon: FAVICON_MAP.classroom },
-    docs: { title: 'Google Docs - Workspace', icon: FAVICON_MAP.docs }
+    docs: { title: 'Google Docs - Workspace', icon: FAVICON_MAP.docs },
+    canvas: { title: 'Dashboard | Canvas LMS', icon: FAVICON_MAP.canvas },
+    ixl: { title: 'IXL | Personalized Learning', icon: FAVICON_MAP.ixl }
   };
 
   select.addEventListener('change', () => {
@@ -395,6 +398,7 @@ window.setDisguisePreset = function(presetKey) {
     desmos: { title: 'Desmos | Graphing Calculator', icon: FAVICON_MAP.desmos },
     khan: { title: 'Dashboard | Khan Academy', icon: FAVICON_MAP.khan },
     drive: { title: 'Google Drive - My Drive', icon: FAVICON_MAP.drive },
+    ixl: { title: 'IXL | Personalized Learning', icon: FAVICON_MAP.ixl },
     reset: { title: 'Nitro OS | Gaming & Unblocked Apps', icon: FAVICON_MAP.default }
   };
   const config = PRESETS[presetKey] || PRESETS.reset;

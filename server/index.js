@@ -280,6 +280,7 @@ app.use('/api/voice', require('./routes/voice'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/music', require('./routes/music'));
+app.use('/api/me', require('./routes/me'));
 app.use('/api/soundboard', require('./routes/soundboard'));
 app.use('/api/ai', largeBodyParser, require('./routes/ai'));
 app.use('/api/appeals', require('./routes/appeals'));

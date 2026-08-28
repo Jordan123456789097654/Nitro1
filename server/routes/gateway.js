@@ -346,6 +346,14 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
                 trimmed.startsWith('mailto:') || trimmed.startsWith('tel:') || trimmed.startsWith('data:')) {
               return;
             }
+            var targetAttr = (a.getAttribute('target') || '').toLowerCase();
+            var wantsTopNavigation = targetAttr === '_top' || targetAttr === '_parent';
+            if (wantsTopNavigation) {
+              e.preventDefault();
+              window.location.href = a.href;
+              return;
+            }
+
             if (!a.href || a.href.includes('/api/gateway')) return;
 
             var wantsNewTab = a.target === '_blank' || e.ctrlKey || e.metaKey || e.button === 1;

@@ -81,6 +81,7 @@ const db = {
           review_disable_reason TEXT DEFAULT '',
           force_password_reset BOOLEAN DEFAULT false,
           is_flair_locked BOOLEAN DEFAULT false,
+          is_shop_banned BOOLEAN DEFAULT false,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -508,6 +509,7 @@ const db = {
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS stock_count INT DEFAULT -1;");
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_spin_at TIMESTAMP;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_shop_banned BOOLEAN DEFAULT false;");
       // Allow items to be purchased more than once
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS is_repeatable BOOLEAN DEFAULT false;");
       // Track exact claim time separately from last-progress time so daily reset is accurate
@@ -565,6 +567,10 @@ const db = {
           ('🎰 JACKPOT 5000 🪙', 5000, 0, '#fbbf24', 0.005, 15)
         `);
       }
+
+      await pool.query("CREATE INDEX IF NOT EXISTS idx_games_category ON games (category);");
+      await pool.query("CREATE INDEX IF NOT EXISTS idx_games_clicks ON games (clicks);");
+      await pool.query("CREATE INDEX IF NOT EXISTS idx_games_title ON games (title);");
 
 
       // Seed default shop items

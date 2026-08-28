@@ -111,6 +111,7 @@ CREATE TABLE users (
   is_disabled_for_review BOOLEAN DEFAULT false,
   review_disable_reason TEXT DEFAULT '',
   force_password_reset BOOLEAN DEFAULT false,
+  is_shop_banned BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

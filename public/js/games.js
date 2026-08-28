@@ -283,6 +283,8 @@ export function renderGames(games, targetGridId) {
   const grid = document.getElementById(targetGridId);
   if (!grid) return;
 
+  grid.innerHTML = ''; // Clear existing tiles
+
   if (games.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
@@ -293,43 +295,84 @@ export function renderGames(games, targetGridId) {
     return;
   }
 
-  grid.innerHTML = games.map(game => {
-    const isFav = favorites.includes(game.id);
-    const clickCount = parseInt(game.clicks || 0, 10);
-    const itemSlug = game.slug || game.id;
-    return `
-      <div class="game-card" data-slug="${itemSlug}" data-game-id="${game.id}">
-        <div class="game-thumb-wrap">
-          <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
-          ${game.is_vip ? `<span class="game-badge-vip" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:800;">👑 PRO</span>` : ''}
-          <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game-id="${game.id}" title="Toggle Favorite">★</button>
-        </div>
-        <div class="game-info-wrap">
-          <div class="game-title" title="${game.title}">${game.title}</div>
-          <div class="game-meta-row">
-            <span>${game.author || 'Community'}</span>
-            <span class="game-clicks" id="clicks-${game.id}">🔥 ${clickCount} clicks</span>
+  const BATCH_SIZE = 30;
+  let renderedCount = 0;
+
+  function renderNextBatch() {
+    const nextBatch = games.slice(renderedCount, renderedCount + BATCH_SIZE);
+    if (nextBatch.length === 0) return;
+
+    const html = nextBatch.map(game => {
+      const isFav = favorites.includes(game.id);
+      const clickCount = parseInt(game.clicks || 0, 10);
+      const itemSlug = game.slug || game.id;
+      return `
+        <div class="game-card" data-slug="${itemSlug}" data-game-id="${game.id}">
+          <div class="game-thumb-wrap">
+            <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
+            ${game.is_vip ? `<span class="game-badge-vip" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:800;">👑 PRO</span>` : ''}
+            <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game-id="${game.id}" title="Toggle Favorite">★</button>
+          </div>
+          <div class="game-info-wrap">
+            <div class="game-title" title="${game.title}">${game.title}</div>
+            <div class="game-meta-row">
+              <span>${game.author || 'Community'}</span>
+              <span class="game-clicks" id="clicks-${game.id}">🔥 ${clickCount} clicks</span>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
 
-  grid.querySelectorAll('.game-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.game-fav-btn')) return;
-      const slug = card.dataset.slug || card.dataset.gameId;
-      openGame(slug);
-    });
-  });
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
 
-  grid.querySelectorAll('.game-fav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const gid = parseInt(btn.dataset.gameId, 10);
-      toggleFavorite(gid, targetGridId);
-    });
-  });
+    while (tempDiv.firstChild) {
+      const card = tempDiv.firstChild;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.game-fav-btn')) return;
+        const slug = card.dataset.slug || card.dataset.gameId;
+        openGame(slug);
+      });
+
+      const favBtn = card.querySelector('.game-fav-btn');
+      if (favBtn) {
+        favBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const gid = parseInt(favBtn.dataset.gameId, 10);
+          toggleFavorite(gid, targetGridId);
+        });
+      }
+
+      grid.appendChild(card);
+    }
+
+    renderedCount += nextBatch.length;
+  }
+
+  // Initial load
+  renderNextBatch();
+
+  // Infinite Scroll Listener
+  const scrollContainer = grid.parentElement;
+  if (scrollContainer) {
+    if (grid._onScrollHandler) {
+      scrollContainer.removeEventListener('scroll', grid._onScrollHandler);
+      window.removeEventListener('scroll', grid._onScrollHandler);
+    }
+
+    const onScroll = () => {
+      const containerAtBottom = scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 300;
+      const windowAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300;
+      if (containerAtBottom || windowAtBottom) {
+        renderNextBatch();
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll);
+    grid._onScrollHandler = onScroll;
+  }
 }
 
 function toggleFavorite(gameId, targetGridId) {
@@ -1201,6 +1244,22 @@ function setupPlayerModal() {
     });
   }
 
+  // Click outside overlay to close game (destroys iframe to stop background lag)
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeBtn.click();
+      }
+    });
+  }
+
+  // Press Escape key to close game (destroys iframe)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeBtn.click();
+    }
+  });
+
   if (reloadBtn) {
     reloadBtn.addEventListener('click', () => {
       const iframe = document.querySelector('.player-iframe');
@@ -1285,6 +1344,10 @@ function setupPlayerModal() {
         desmos: {
           title: 'Desmos | Graphing Calculator',
           favicon: 'https://www.desmos.com/favicon.ico'
+        },
+        ixl: {
+          title: 'IXL | Personalized Learning',
+          favicon: 'https://www.ixl.com/favicon.ico'
         }
       };
 
@@ -1454,7 +1517,15 @@ let setupFilterAndSearch = function() {
   const tabFavs = document.getElementById('tab-filter-favs');
   const tabPlaylists = document.getElementById('tab-filter-playlists');
 
-  if (searchInput) searchInput.addEventListener('input', () => loadGames());
+  let searchTimeout = null;
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        loadGames();
+      }, 250);
+    });
+  }
   if (sortSelect) sortSelect.addEventListener('change', () => loadGames());
 
   if (tabAll && tabFavs && tabPlaylists) {

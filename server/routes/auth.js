@@ -17,33 +17,37 @@ function generateAccountToken(user) {
 
 function encodePassword(password) {
   if (!password) return '';
-  return bcrypt.hashSync(password.trim(), 10);
+  return Buffer.from(password.trim(), 'utf8').toString('base64');
 }
 
-// Returns { valid, legacy } — legacy=true means the stored password was NOT a bcrypt
-// hash (base64 or plaintext), so the caller should immediately re-hash and persist it.
+// Returns { valid, legacy } — legacy=true means the stored password is in the old bcrypt format,
+// so it should be upgraded/re-saved as base64.
 function verifyPassword(plainPassword, storedPassword) {
   if (!storedPassword || !plainPassword) return { valid: false, legacy: false };
 
   const trimmed = plainPassword.trim();
-  const looksLikeBcrypt = /^\$2[aby]\$\d{2}\$/.test(storedPassword);
 
-  // 1. Bcrypt hash check (current, correct storage format)
+  // 1. Base64 decoded check (current desired storage format)
+  try {
+    const looksLikeBcrypt = /^\$2[aby]\$\d{2}\$/.test(storedPassword);
+    if (!looksLikeBcrypt) {
+      const decoded = Buffer.from(storedPassword, 'base64').toString('utf8');
+      if (decoded === trimmed) return { valid: true, legacy: false };
+    }
+  } catch (e) {}
+
+  // 2. Bcrypt hash check (legacy check, upgrade to base64)
+  const looksLikeBcrypt = /^\$2[aby]\$\d{2}\$/.test(storedPassword);
   if (looksLikeBcrypt) {
     try {
-      return { valid: bcrypt.compareSync(trimmed, storedPassword), legacy: false };
+      const valid = bcrypt.compareSync(trimmed, storedPassword);
+      return { valid, legacy: valid }; // If valid, mark as legacy so we upgrade to base64!
     } catch (e) {
       return { valid: false, legacy: false };
     }
   }
 
-  // 2. Base64 decoded check (legacy accounts created before bcrypt migration)
-  try {
-    const decoded = Buffer.from(storedPassword, 'base64').toString('utf8');
-    if (decoded === trimmed) return { valid: true, legacy: true };
-  } catch (e) {}
-
-  // 3. Direct plaintext match (legacy seed users)
+  // 3. Direct plaintext match (fallback check, upgrade to base64)
   if (trimmed === storedPassword) return { valid: true, legacy: true };
 
   return { valid: false, legacy: false };

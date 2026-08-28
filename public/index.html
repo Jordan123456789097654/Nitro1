@@ -1932,16 +1932,16 @@
 
         <!-- Primary Single Viewport -->
         <div class="browser-viewport" id="browser-viewport-single">
-          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank" style="display: none; width: 100%; height: 100%; border: none;"></iframe>
+          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="about:blank" style="display: none; width: 100%; height: 100%; border: none;"></iframe>
         </div>
 
         <!-- Dual-Pane Split Screen Viewport Wrapper -->
         <div id="browser-viewport-split-wrapper" style="display: none; width: 100%; height: 600px; gap: 12px; border-radius: 14px; overflow: hidden;">
           <div style="flex: 1; height: 100%; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; background: #000;">
-            <iframe id="browser-iframe-primary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank"></iframe>
+            <iframe id="browser-iframe-primary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="about:blank"></iframe>
           </div>
           <div style="flex: 1; height: 100%; border: 1px solid #38bdf8; border-radius: 12px; overflow: hidden; background: #000;">
-            <iframe id="browser-iframe-secondary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" src="about:blank"></iframe>
+            <iframe id="browser-iframe-secondary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="about:blank"></iframe>
           </div>
         </div>
       </div>
@@ -1989,6 +1989,8 @@
                 <option value="wikipedia">🌐 Wikipedia Encyclopedia</option>
                 <option value="classroom">🎓 Google Classroom</option>
                 <option value="docs">📝 Google Docs</option>
+                <option value="canvas">🎨 Canvas LMS Dashboard</option>
+                <option value="ixl">📈 IXL Learning Center</option>
               </select>
             </div>
 
@@ -2195,7 +2197,7 @@
       </div>
 
       <div class="view-content-wrapper" style="height: calc(100vh - 220px); min-height: 560px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; position: relative;">
-        <iframe id="soundboard-gateway-frame" src="/api/gateway?url=https://soundbuttonsworld.com/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="soundboard-gateway-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="/api/gateway?url=https://soundbuttonsworld.com/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
     </section>
 

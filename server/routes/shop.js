@@ -49,6 +49,10 @@ router.post('/buy', async (req, res) => {
   const user = await getAuthUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
 
+  if (user.is_shop_banned) {
+    return res.status(403).json({ error: 'Your shop purchase privileges have been suspended by an administrator.' });
+  }
+
   const { itemId } = req.body;
   if (!itemId) return res.status(400).json({ error: 'Item ID is required.' });
 
