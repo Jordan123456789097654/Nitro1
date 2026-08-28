@@ -662,8 +662,12 @@ router.all('/', async (req, res) => {
       <!DOCTYPE html>
       <html><head><meta charset="UTF-8"><title>Gateway Proxy Error</title>
       <style>body{background:#090a0f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}
-      .card{background:rgba(239,68,68,0.15);border:1px solid #ef4444;padding:36px;border-radius:14px;max-width:480px;text-align:center;}</style>
-      </head><body><div class="card"><h3 style="color:#ef4444;">🌐 Connection Failure</h3><p>Unable to connect to target site: ${err.message}</p></div></body></html>
+      .card{background:rgba(239,68,68,0.15);border:1px solid #ef4444;padding:36px;border-radius:14px;max-width:600px;text-align:center;word-break:break-all;}</style>
+      </head><body><div class="card">
+        <h3 style="color:#ef4444;">🌐 Connection Failure</h3>
+        <p>Unable to connect to target site: <strong>${err.message}</strong></p>
+        <pre style="text-align:left; background:#000; padding:12px; border-radius:6px; font-size:0.75rem; color:#f87171; overflow-x:auto;">${err.stack || err}</pre>
+      </div></body></html>
     `);
   }
 });
