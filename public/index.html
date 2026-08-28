@@ -3422,7 +3422,53 @@
         <div class="admin-tab-content" id="tab-promocodes" style="display: none;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
             <h3 style="color: #38bdf8; margin: 0;">🔑 Reward & Promo Codes Generator</h3>
-            <button class="btn-small secondary" onclick="document.getElementById('admin-create-code-card').style.display = document.getElementById('admin-create-code-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Generate Code</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-small secondary" onclick="document.getElementById('admin-create-code-card').style.display = document.getElementById('admin-create-code-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Generate Code</button>
+              <button class="btn-small secondary" onclick="document.getElementById('admin-bulk-code-card').style.display = document.getElementById('admin-bulk-code-card').style.display === 'none' ? 'block' : 'none'" style="color: #fbbf24;">⚙️ Bulk Generate</button>
+              <button class="btn-small secondary" onclick="adminFetchPromoCodes(); adminFetchPromoRedemptions();" style="color: #38bdf8;">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <!-- Bulk Create Promo Code Form -->
+          <div id="admin-bulk-code-card" style="background: rgba(251,191,36,0.03); border: 1px solid rgba(251,191,36,0.2); border-radius: 12px; padding: 18px; margin-bottom: 20px; display: none;">
+            <h4 style="margin: 0 0 12px 0; color: #fbbf24;">⚙️ Bulk Generate Reward Codes</h4>
+            <form id="admin-bulk-code-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">PREFIX (OPTIONAL)</label>
+                <input type="text" id="admin-bulk-prefix" placeholder="e.g. VIP" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 800; text-transform: uppercase;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">NUMBER OF CODES</label>
+                <input type="number" id="admin-bulk-count" value="5" min="1" max="100" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">REWARD TYPE</label>
+                <select id="admin-bulk-type" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700; outline: none;">
+                  <option value="coins">Coins (🪙)</option>
+                  <option value="xp">XP (🏆)</option>
+                  <option value="premium">Premium PRO Rank (⭐)</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">REWARD VALUE</label>
+                <input type="number" id="admin-bulk-value" placeholder="e.g. 1000" min="1" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">MAX USES (OPTIONAL)</label>
+                <input type="number" id="admin-bulk-max-uses" placeholder="Unlimited" min="1" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">EXPIRATION DATE (OPTIONAL)</label>
+                <input type="date" id="admin-bulk-expiry" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700; color-scheme: dark;">
+              </div>
+              <div>
+                <button type="submit" class="btn-small primary" style="width: 100%; padding: 10px; font-weight: 800; background: #fbbf24; border-color: #d97706; color: #000;">⚡ Bulk Generate</button>
+              </div>
+            </form>
+            <div id="admin-bulk-results" style="margin-top: 14px; display: none;">
+              <label style="display: block; font-size: 0.75rem; color: #fbbf24; margin-bottom: 4px; font-weight: 700;">GENERATED CODES (COPY & SHARE)</label>
+              <textarea id="admin-bulk-textarea" readonly style="width: 100%; height: 80px; padding: 10px; background: #000; border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; color: #fff; font-family: monospace; font-size: 0.85rem; resize: none;"></textarea>
+            </div>
           </div>
 
           <!-- Create Promo Code Form -->
@@ -3474,6 +3520,25 @@
               </thead>
               <tbody id="admin-promo-codes-list">
                 <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Promo Code Redemptions Log -->
+          <h4 style="margin: 24px 0 12px 0; color: #38bdf8;">📜 Codes Claim History (Recent Redemptions)</h4>
+          <div class="table-container" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow-x: auto; margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px;">
+              <thead>
+                <tr style="background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">USER</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">CODE</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">REWARD TYPE</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">REWARD VALUE</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">REDEEMED AT</th>
+                </tr>
+              </thead>
+              <tbody id="admin-promo-redemptions-list">
+                <tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">No redemptions logged yet.</td></tr>
               </tbody>
             </table>
           </div>

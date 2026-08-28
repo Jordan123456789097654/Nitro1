@@ -1271,6 +1271,7 @@ function setupAdminTabs() {
       }
       if (targetTab === 'promocodes') {
         if (window.adminFetchPromoCodes) window.adminFetchPromoCodes();
+        if (window.adminFetchPromoRedemptions) window.adminFetchPromoRedemptions();
       }
       if (targetTab === 'shoppurchases') {
         if (window.adminFetchShopPurchases) window.adminFetchShopPurchases();
@@ -2089,6 +2090,50 @@ function setupAdminActions() {
       } catch (err) {
         console.error('Error generating promo code:', err);
         alert('Network error generating promo code.');
+      }
+    });
+  }
+
+  // Bulk Promo code generator form
+  const bulkCodeForm = document.getElementById('admin-bulk-code-form');
+  if (bulkCodeForm) {
+    bulkCodeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prefix = document.getElementById('admin-bulk-prefix').value.trim();
+      const count = document.getElementById('admin-bulk-count').value;
+      const reward_type = document.getElementById('admin-bulk-type').value;
+      const reward_value = document.getElementById('admin-bulk-value').value;
+      const max_uses = document.getElementById('admin-bulk-max-uses').value || null;
+      const expires_at = document.getElementById('admin-bulk-expiry').value || null;
+
+      if (!reward_type || reward_value === '') {
+        return alert('Please fill out all required fields.');
+      }
+
+      try {
+        const res = await authFetch('/api/admin/promo-codes/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prefix, count, reward_type, reward_value, max_uses, expires_at })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(`🎉 Successfully bulk generated ${data.codes.length} promo codes!`);
+          
+          const codeStrings = data.codes.map(c => c.code).join('\n');
+          document.getElementById('admin-bulk-textarea').value = codeStrings;
+          document.getElementById('admin-bulk-results').style.display = 'block';
+          
+          bulkCodeForm.reset();
+          if (window.adminFetchPromoCodes) {
+            window.adminFetchPromoCodes();
+          }
+        } else {
+          alert(data.error || 'Failed to bulk create promo codes.');
+        }
+      } catch (err) {
+        console.error('Error bulk generating promo codes:', err);
+        alert('Network error bulk generating promo codes.');
       }
     });
   }
@@ -3926,5 +3971,46 @@ window.adminDeletePromoCode = async function(code) {
   } catch (err) {
     console.error('Error deleting promo code:', err);
     alert('Network error deleting promo code.');
+  }
+};
+
+window.adminFetchPromoRedemptions = async function() {
+  const tbody = document.getElementById('admin-promo-redemptions-list');
+  if (!tbody) return;
+
+  try {
+    const res = await authFetch('/api/admin/promo-codes/redemptions');
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (!data.redemptions || data.redemptions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No redemptions logged yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.redemptions.map(r => {
+        const redeemedAt = new Date(r.redeemed_at).toLocaleString();
+        let rewardDisplay = '';
+        if (r.reward_type === 'coins') rewardDisplay = `🪙 ${r.reward_value} Coins`;
+        else if (r.reward_type === 'xp') rewardDisplay = `🏆 ${r.reward_value} XP`;
+        else if (r.reward_type === 'premium') rewardDisplay = `⭐ Premium PRO`;
+        else rewardDisplay = 'N/A';
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 10px; font-weight: 700; color: #fff;">@${escapeHtml(r.username)}</td>
+            <td style="padding: 10px; font-family: monospace; color: #38bdf8;">${escapeHtml(r.code)}</td>
+            <td style="padding: 10px; text-transform: uppercase; font-size: 0.78rem; color: #cbd5e1;">${escapeHtml(r.reward_type || 'N/A')}</td>
+            <td style="padding: 10px; font-weight: 800; color: #fbbf24;">${rewardDisplay}</td>
+            <td style="padding: 10px; color: var(--text-muted); font-size: 0.8rem;">${redeemedAt}</td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Error: ${data.error || 'Failed to fetch redemptions.'}</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Error fetching redemptions:', err);
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Network error fetching redemptions.</td></tr>';
   }
 };

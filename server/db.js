@@ -3865,6 +3865,24 @@ Respond ONLY with valid JSON matching this exact schema:
     }
   },
 
+  async getPromoCodeRedemptions() {
+    try {
+      const query = `
+        SELECT r.id, r.user_id, u.username, r.code, r.redeemed_at, c.reward_type, c.reward_value
+        FROM promo_code_redemptions r
+        JOIN users u ON r.user_id = u.id
+        LEFT JOIN promo_codes c ON r.code = c.code
+        ORDER BY r.redeemed_at DESC
+        LIMIT 100
+      `;
+      const res = await pool.query(query);
+      return res.rows;
+    } catch (e) {
+      console.error('getPromoCodeRedemptions error:', e.message);
+      return [];
+    }
+  },
+
   async createPromoCode(code, reward_type, reward_value, max_uses = null, expires_at = null) {
     const cleanCode = String(code).trim().toUpperCase();
     const res = await pool.query(

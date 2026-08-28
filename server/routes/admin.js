@@ -2419,4 +2419,65 @@ router.delete('/promo-codes/:code', async (req, res) => {
   }
 });
 
+// GET /api/admin/promo-codes/redemptions
+router.get('/promo-codes/redemptions', async (req, res) => {
+  try {
+    const redemptions = await db.getPromoCodeRedemptions();
+    res.json({ success: true, redemptions });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch redemptions.' });
+  }
+});
+
+// POST /api/admin/promo-codes/bulk
+router.post('/promo-codes/bulk', async (req, res) => {
+  const { prefix, count, reward_type, reward_value, max_uses, expires_at } = req.body;
+  const numCount = parseInt(count, 10) || 5;
+  if (!reward_type || reward_value === undefined) {
+    return res.status(400).json({ error: 'Reward type and reward value are required.' });
+  }
+
+  const allowedTypes = ['premium', 'coins', 'xp'];
+  if (!allowedTypes.includes(reward_type)) {
+    return res.status(400).json({ error: 'Invalid reward type. Choose premium, coins, or xp.' });
+  }
+
+  try {
+    const generated = [];
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const existing = await db.getPromoCodes();
+    const existingSet = new Set(existing.map(c => c.code));
+
+    const cleanPrefix = (prefix || '').trim().toUpperCase();
+
+    for (let i = 0; i < numCount; i++) {
+      let code = '';
+      let attempts = 0;
+      do {
+        let randPart = '';
+        for (let j = 0; j < 8; j++) {
+          randPart += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        code = cleanPrefix ? `${cleanPrefix}-${randPart.slice(0, 4)}-${randPart.slice(4)}` : `${randPart.slice(0, 4)}-${randPart.slice(4)}`;
+        attempts++;
+      } while ((existingSet.has(code) || generated.some(g => g.code === code)) && attempts < 100);
+
+      const newCode = await db.createPromoCode(code, reward_type, reward_value, max_uses, expires_at);
+      generated.push(newCode);
+    }
+
+    sendDiscordLog({
+      category: 'admin',
+      action: 'PROMO_CODES_BULK_CREATED',
+      admin: req.adminUser.username,
+      details: `Bulk created ${generated.length} promo codes (Reward: ${reward_value} ${reward_type})`
+    });
+
+    res.json({ success: true, codes: generated });
+  } catch (err) {
+    console.error('Bulk create promo codes error:', err);
+    res.status(500).json({ error: 'Failed to bulk create promo codes.' });
+  }
+});
+
 module.exports = router;
