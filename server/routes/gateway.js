@@ -2,6 +2,9 @@
 // Brand New Proxy & Stealth Gateway Engine ("Nitro Shield Proxy v3.0")
 // Completely rebuilt for high-speed streaming, dynamic link rewriting, header virtualization & ad blocking
 
+// Disable TLS validation globally for proxy requests to avoid certificate errors (e.g. system clock drift)
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
@@ -548,12 +551,18 @@ router.all('/', async (req, res) => {
   if (engine.platform) fetchHeaders['Sec-Ch-Ua-Platform'] = engine.platform;
   fetchHeaders['Referer'] = engine.referer || urlObj.origin;
 
+  const https = require('https');
+  const agent = new https.Agent({
+    rejectUnauthorized: false
+  });
+
   const fetchOptions = {
     method: ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method) ? req.method : 'GET',
     headers: fetchHeaders,
     redirect: 'follow',
     timeout: 15000,
-    compress: false
+    compress: false,
+    agent
   };
 
   if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
@@ -648,6 +657,7 @@ router.all('/', async (req, res) => {
       return res.send(buffer);
     }
   } catch (err) {
+    console.error('[Gateway Proxy Error] target:', (urlObj && urlObj.href) || targetUrl, err);
     return res.status(502).send(`
       <!DOCTYPE html>
       <html><head><meta charset="UTF-8"><title>Gateway Proxy Error</title>
