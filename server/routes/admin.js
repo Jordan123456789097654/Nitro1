@@ -627,6 +627,72 @@ router.post('/maintenance', async (req, res) => {
     details: `Maintenance mode was turned ${enabled ? 'ENABLED (Locked)' : 'OFF (Public)'} by administrator.`
   });
 
+  // Better Stack API integration for Maintenance Mode sync
+  const BETTERSTACK_TOKEN = process.env.BETTERSTACK_API_TOKEN || 'MXuYEq5B3HrrDxPpGqaVeET9';
+  const BETTERSTACK_PAGE_ID = '258777';
+  const BETTERSTACK_RESOURCE_ID = '8989106';
+
+  if (enabled) {
+    try {
+      const payload = {
+        title: "Scheduled System Maintenance",
+        report_type: "maintenance",
+        ends_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        message: "The platform is currently undergoing scheduled maintenance. Please check back shortly!",
+        affected_resources: [
+          {
+            status_page_resource_id: BETTERSTACK_RESOURCE_ID,
+            status: "maintenance"
+          }
+        ]
+      };
+
+      const response = await fetch(`https://uptime.betterstack.com/api/v2/status-pages/${BETTERSTACK_PAGE_ID}/status-reports`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${BETTERSTACK_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.data && data.data.id) {
+          await db.setSetting('betterstack_maintenance_report_id', data.data.id);
+          console.log(`[BetterStack] Created maintenance report: ${data.data.id}`);
+        }
+      } else {
+        const errorText = await response.text();
+        console.error(`[BetterStack] Error creating maintenance report:`, errorText);
+      }
+    } catch (err) {
+      console.error(`[BetterStack] Exception during Better Stack report creation:`, err.message);
+    }
+  } else {
+    try {
+      const reportId = await db.getSetting('betterstack_maintenance_report_id');
+      if (reportId) {
+        const response = await fetch(`https://uptime.betterstack.com/api/v2/status-pages/${BETTERSTACK_PAGE_ID}/status-reports/${reportId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${BETTERSTACK_TOKEN}`
+          }
+        });
+
+        if (response.status === 204) {
+          console.log(`[BetterStack] Deleted maintenance report: ${reportId}`);
+          await db.setSetting('betterstack_maintenance_report_id', '');
+        } else {
+          const errorText = await response.text();
+          console.error(`[BetterStack] Error deleting Better Stack report ${reportId}:`, errorText);
+        }
+      }
+    } catch (err) {
+      console.error(`[BetterStack] Exception during Better Stack report deletion:`, err.message);
+    }
+  }
+
   res.json({ success: true, maintenance_mode: Boolean(enabled) });
 });
 
