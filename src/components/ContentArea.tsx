@@ -43,7 +43,6 @@ import { isBookmarklet } from "@/lib/bookmarklets";
 import GamesPage from "./GamesPage";
 import GameViewerPage from "./GameViewerPage";
 import AIPage from "./AIPage";
-import AppsPage from "./AppsPage";
 import MusicPage from "./MusicPage";
 import ChatPage from "./ChatPage";
 import MoviesPage from "./MoviesPage";
@@ -51,7 +50,6 @@ import FirefoxVmPage from "./FirefoxVmPage";
 import AdViewerPage from "./AdViewerPage";
 import ObfuscatedText from "./ObfuscatedText";
 import { installFrameOpenTrap, parseAdTabUrl } from "@/lib/openTabBridge";
-import AppViewerPage from "./AppViewerPage";
 import ChangelogPage from "./ChangelogPage";
 import FeedbackPage from "./FeedbackPage";
 import AccountPage from "./AccountPage";
@@ -122,13 +120,6 @@ const DEFAULT_PRESETS: Preset[] = [
     label: "VM",
     url: "petezah://vm",
     icon: "monitor",
-    builtIn: true,
-  },
-  {
-    id: "apps",
-    label: "Apps",
-    url: "petezah://apps",
-    icon: "appwindow",
     builtIn: true,
   },
   {
@@ -1234,7 +1225,6 @@ function TabPane({
 
   const isGames = isGHref(tab.url);
   const isAI = tab.url === "petezah://ai";
-  const isApps = tab.url === "petezah://apps";
   const isMusic = tab.url === hrefs.mu() || tab.url.startsWith(hrefs.mu() + "?");
   const isChat = tab.url === "petezah://chat";
   const isMovies = tab.url === hrefs.mo();
@@ -1244,7 +1234,6 @@ function TabPane({
   const isUserProfile = tab.url.startsWith("petezah://user/");
   const isGameViewer = tab.url.startsWith(hrefs.gv());
   const displayUrl = isGameViewer ? hrefs.gv() : tab.url;
-  const isAppViewer = tab.url.startsWith("petezah://appviewer");
 
   if (isGameViewer) {
     const params = new URLSearchParams(tab.url.split("?")[1] || "");
@@ -1314,16 +1303,6 @@ function TabPane({
     );
   }
 
-  if (isApps) {
-    return (
-      <div
-        className="absolute inset-0"
-        style={{ display: isVisible ? "block" : "none" }}
-      >
-        <AppsPage onNavigate={onNavigate} />
-      </div>
-    );
-  }
 
   if (isMusic) {
     return (
@@ -1478,28 +1457,7 @@ function TabPane({
     );
   }
 
-  if (isAppViewer) {
-    const params = new URLSearchParams(tab.url.split("?")[1] || "");
-    const appUrl = params.get("url") || "";
-    const appTitle =
-      params.get("title") ||
-      (tab.title && tab.title !== "New Tab" && tab.title !== "Appviewer"
-        ? tab.title
-        : "") ||
-      "";
-    return (
-      <div
-        className="absolute inset-0"
-        style={{ display: isVisible ? "block" : "none" }}
-      >
-        <AppViewerPage
-          url={appUrl}
-          title={appTitle}
-          onBack={() => onNavigate("petezah://apps")}
-        />
-      </div>
-    );
-  }
+
 
   return (
     <div

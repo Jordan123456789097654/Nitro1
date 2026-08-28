@@ -53,7 +53,6 @@ interface SidebarProps {
 
 const SIDEBAR_FEATURES = [
   { icon: Gamepad2, label: marks.a(), url: hrefs.g() },
-  { icon: AppWindow, label: marks.apps(), url: "petezah://apps" },
   { icon: Bot, label: "AI", url: "petezah://ai" },
   { icon: Music, label: marks.music(), url: hrefs.mu() },
   { icon: Film, label: marks.movies(), url: hrefs.mo() },
@@ -279,9 +278,11 @@ export default function Sidebar({
                   <span className="w-8 h-8 rounded-full flex items-center justify-center transition-colors group-hover:bg-white/[0.08] sidebar-feature-icon">
                     <Icon size={14} />
                   </span>
-                  <ObfuscatedText as="span" className="text-[9px] leading-tight sidebar-feature-label" style={{ color: "hsla(0,0%,100%,0.55)" }}>
-                    {label}
-                  </ObfuscatedText>
+                  {label !== marks.music() && (
+                    <ObfuscatedText as="span" className="text-[9px] leading-tight sidebar-feature-label" style={{ color: "hsla(0,0%,100%,0.55)" }}>
+                      {label}
+                    </ObfuscatedText>
+                  )}
                 </button>
               ))}
             </div>

@@ -1396,28 +1396,62 @@ async function initWeatherClock() {
   const clockEl = document.getElementById('header-clock');
   const weatherEl = document.getElementById('header-weather');
 
-  if (clockEl) {
-    const updateTime = () => {
-      const now = new Date();
-      clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    };
-    updateTime();
-    setInterval(updateTime, 1000);
-  }
+  const timeNumEl = document.getElementById('header-clock-time');
+  const timeAmpmEl = document.getElementById('header-clock-ampm');
+  const weatherIconEl = document.getElementById('header-weather-icon');
+  const weatherTempEl = document.getElementById('header-weather-temp');
 
-  if (weatherEl) {
+  const updateTime = () => {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const timePart = `${String(hours).padStart(2, '0')}:${minutes}:${seconds}`;
+
+    if (timeNumEl && timeAmpmEl) {
+      timeNumEl.textContent = timePart;
+      timeAmpmEl.textContent = ampm;
+    }
+    if (clockEl) {
+      clockEl.textContent = `${timePart} ${ampm}`;
+    }
+  };
+
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  const updateWeather = async () => {
     try {
       const res = await fetch('/api/weather');
+      let cleanWeather = '🌤️ 72°F';
       if (res.ok) {
         const data = await res.json();
-        const cleanWeather = (data.weather || '🌤️ 72°F').replace('+', '');
+        cleanWeather = (data.weather || '🌤️ 72°F').replace('+', '').trim();
+      }
+
+      const match = cleanWeather.match(/^([^\s\d]+)\s*(.*)$/);
+      const icon = match ? match[1] : '🌤️';
+      const temp = match ? match[2] : cleanWeather;
+
+      if (weatherIconEl && weatherTempEl) {
+        weatherIconEl.textContent = icon;
+        weatherTempEl.textContent = temp;
+      } else if (weatherEl) {
         weatherEl.textContent = cleanWeather;
-      } else {
-        weatherEl.textContent = '🌤️ 72°F';
       }
     } catch (e) {
-      weatherEl.textContent = '🌤️ 72°F';
+      if (weatherIconEl && weatherTempEl) {
+        weatherIconEl.textContent = '🌤️';
+        weatherTempEl.textContent = '72°F';
+      } else if (weatherEl) {
+        weatherEl.textContent = '🌤️ 72°F';
+      }
     }
-  }
-}
+  };
 
+  await updateWeather();
+  setInterval(updateWeather, 600000);
+}

@@ -1318,11 +1318,28 @@
         <!-- Right System & Account Controls -->
         <div class="nav-group-cluster controls-cluster">
           <!-- Real-Time Weather & Clock Widget -->
-          <div id="header-system-widget" style="display: flex; align-items: center; gap: 10px; padding: 6px 14px; background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: 99px; font-size: 0.78rem; color: #cbd5e1; font-weight: 600; margin-right: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.25); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
-            <span style="color: #fbbf24; font-size: 0.85rem;">🕒</span>
-            <span id="header-clock" style="font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px; font-weight: 800; color: #38bdf8;">12:00:00 PM</span>
-            <span style="color: rgba(255,255,255,0.15);">|</span>
-            <span id="header-weather" style="display: flex; align-items: center; gap: 4px; color: #f8fafc; font-weight: 700;">🌤️ Loading...</span>
+          <div id="header-system-widget" style="display: flex; align-items: center; gap: 10px; padding: 4px 12px; background: rgba(15, 23, 42, 0.55); border: 1.5px solid rgba(255, 255, 255, 0.08); border-radius: 99px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.05); backdrop-filter: blur(12px); margin-right: 8px; flex-shrink: 0; user-select: none;">
+            <!-- Analogue Clock SVG Icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4)); flex-shrink: 0;">
+              <circle cx="12" cy="12" r="9" fill="#ffffff" stroke="#1e293b" stroke-width="2" />
+              <line x1="12" y1="12" x2="12" y2="7" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />
+              <line x1="12" y1="12" x2="15" y2="12" stroke="#1e293b" stroke-width="2" stroke-linecap="round" />
+              <circle cx="12" cy="12" r="1.5" fill="#ef4444" />
+            </svg>
+            <!-- Clock Text Stack -->
+            <div style="display: flex; flex-direction: column; line-height: 1.1; font-family: monospace; font-weight: 800; color: #38bdf8; font-size: 0.8rem; letter-spacing: 0.5px; min-width: 70px;">
+              <span id="header-clock-time">00:00:00</span>
+              <span id="header-clock-ampm" style="font-size: 0.7rem; opacity: 0.85;">AM</span>
+            </div>
+            <!-- Divider -->
+            <div style="width: 1.5px; height: 22px; background: rgba(255, 255, 255, 0.12); margin: 0 2px;"></div>
+            <!-- Weather Stack -->
+            <div id="header-weather" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; font-weight: 800; font-size: 0.72rem; color: #ffffff; min-width: 32px;">
+              <span id="header-weather-icon" style="font-size: 1rem; line-height: 1;">🌤️</span>
+              <span id="header-weather-temp">72°F</span>
+            </div>
+            <!-- Fallback text container for accessibility/compatibility -->
+            <span id="header-clock" style="display: none;"></span>
           </div>
           <!-- REAL-TIME NOTIFICATION BELL -->
           <div style="position: relative;">

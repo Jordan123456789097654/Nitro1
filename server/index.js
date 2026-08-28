@@ -12,7 +12,6 @@ const JavaScriptObfuscator = require('javascript-obfuscator');
  
 const authRoutes = require('./routes/auth');
 const gamesRoutes = require('./routes/games');
-const appsRoutes = require('./routes/apps');
 const adminRoutes = require('./routes/admin');
 const gatewayRoutes = require('./routes/gateway');
 const updatesRoutes = require('./routes/updates');
@@ -271,7 +270,7 @@ const largeBodyParser = express.json({ limit: '15mb' });
 app.use('/gateway', gatewayRoutes);
 app.use('/api/auth', largeBodyParser, authRoutes);
 app.use('/api/games', gamesRoutes);
-app.use('/api/apps', appsRoutes);
+app.use('/api/tmdb', require('./routes/movies'));
 app.use('/api/admin', largeBodyParser, adminRoutes);
 app.use('/api/gateway', gatewayRoutes);
 app.use('/api/updates', updatesRoutes);
@@ -289,6 +288,7 @@ app.use('/api/shop', require('./routes/shop'));
 app.use('/api/themes', require('./routes/themes'));
 app.use('/api/tournaments', require('./routes/tournaments'));
 app.use('/api/raffles', require('./routes/raffles'));
+app.use('/', require('./routes/legal'));
 
 // GET /api/weather - Proxy wttr.in with curl user-agent to ensure clean plain-text return
 app.get('/api/weather', async (req, res) => {

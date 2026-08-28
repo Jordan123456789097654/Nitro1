@@ -16,6 +16,34 @@ function timeAgo(ts: number) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+const CHANGELOG_TEMPLATES = [
+  {
+    name: "Select template...",
+    title: "",
+    content: "",
+  },
+  {
+    name: "🎮 Game Added",
+    title: "🎮 New Game Added: [Game Title]",
+    content: "We have added [Game Title] to the games library! Enjoy playing! Let us know if you find any bugs or have suggestions.",
+  },
+  {
+    name: "🔧 Bug Fixes",
+    title: "🔧 Bug Fixes & Stability Updates",
+    content: "- Resolved iframe scaling and viewport issues on mobile devices.\n- Patched audio player play/pause state synchronization.\n- Fixed user profile photo upload issues.",
+  },
+  {
+    name: "✨ UI/UX Redesign",
+    title: "✨ Brand New Visual Improvements",
+    content: "- Revamped sidebar navigation widget layout.\n- Polished transition animations between main dashboards.\n- Enhanced readability of typography on the legal and changelog sections.",
+  },
+  {
+    name: "⚙️ System Maintenance",
+    title: "⚙️ System Performance Optimization",
+    content: "- Completed backend database indexing upgrades for faster load times.\n- Migrated to new media servers for optimal streaming bandwidth.\n- Automated server recovery protocols.",
+  },
+];
+
 export default function ChangelogPage({ onNavigate }: { onNavigate: (url: string) => void }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -179,6 +207,24 @@ export default function ChangelogPage({ onNavigate }: { onNavigate: (url: string
               className="overflow-hidden">
               <div className="p-4 rounded-2xl mb-1 space-y-3"
                 style={{ background: "hsl(215 85% 52% / 0.05)", border: "1px solid hsl(215 85% 52% / 0.15)" }}>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider text-white/50 font-bold">Preset Template</label>
+                  <select
+                    onChange={e => {
+                      const idx = Number(e.target.value);
+                      if (idx > 0) {
+                        setNewTitle(CHANGELOG_TEMPLATES[idx].title);
+                        setNewContent(CHANGELOG_TEMPLATES[idx].content);
+                      }
+                    }}
+                    className="w-full text-xs py-2 px-3 rounded-xl outline-none cursor-pointer"
+                    style={{ background: "hsl(220 25% 9%)", border: "1px solid hsl(220 18% 15%)", color: "hsl(220 15% 75%)", fontFamily: "inherit" }}
+                  >
+                    {CHANGELOG_TEMPLATES.map((t, idx) => (
+                      <option key={t.name} value={idx} style={{ background: "hsl(220 25% 9%)" }}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Update title..."
                   className="w-full text-sm py-2.5 px-3 rounded-xl outline-none"
                   style={{ background: "hsl(220 25% 9%)", border: "1px solid hsl(220 18% 15%)", color: "hsl(220 15% 90%)", fontFamily: "inherit" }}
