@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "build": "vite build && powershell -Command \"Copy-Item dist/music.html public/games/music.html -Force; Copy-Item dist/assets public/assets -Recurse -Force\"",
+    "build": "vite build && powershell -Command \"Copy-Item dist/music.html public/games/music.html -Force; Copy-Item dist/assets/* public/assets/ -Recurse -Force\"",
     "build:viteOnly": "vite build",
     "postinstall": "node scripts/fix-wisp-streams.mjs"
   },

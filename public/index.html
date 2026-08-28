@@ -1291,6 +1291,10 @@
           <button class="nav-btn" data-view="soundboard" title="Web Audio Soundboard" style="color: #ec4899;">
             <span style="font-size: 1.1rem;">🔊</span>
           </button>
+          <button class="nav-btn" data-view="music" title="PeteZah Games Music System" style="color: #fbbf24;">
+            <span style="font-size: 1.1rem;">🎵</span>
+            <span class="nav-btn-text" style="color: #fbbf24;">Music</span>
+          </button>
         </div>
 
         <div class="nav-cluster-divider"></div>
@@ -2198,6 +2202,24 @@
 
       <div class="view-content-wrapper" style="height: calc(100vh - 220px); min-height: 560px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; position: relative;">
         <iframe id="soundboard-gateway-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="/api/gateway?url=https://soundbuttonsworld.com/" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </section>
+
+    <!-- SECTION 6.6: PETEZAH GAMES MUSIC SYSTEM HUB -->
+    <section class="page-view" id="view-music">
+      <div class="header-title-section" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <div>
+          <h1 style="background: linear-gradient(90deg, #fbbf24, #f59e0b, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PETEZAH UNBLOCKED MUSIC HUB</h1>
+          <p>Search, stream, and save your favorite songs and custom playlists without domain restrictions.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-pill secondary" onclick="const f = document.getElementById('music-gateway-frame'); if(f) f.src = f.src;" style="padding: 8px 18px; font-size: 0.82rem; font-weight: 700;">🔄 Reload Music Player</button>
+          <button class="btn-pill primary" onclick="const f = document.getElementById('music-gateway-frame'); if(f.requestFullscreen) f.requestFullscreen();" style="padding: 8px 18px; font-size: 0.82rem; font-weight: 800;">⤢ Fullscreen</button>
+        </div>
+      </div>
+
+      <div class="view-content-wrapper" style="height: calc(100vh - 220px); min-height: 560px; display: flex; flex-direction: column; background: #000; border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; position: relative;">
+        <iframe id="music-gateway-frame" src="/games/music.html" style="width: 100%; height: 100%; border: none; background: #090a0f;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
     </section>
 

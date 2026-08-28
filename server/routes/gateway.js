@@ -309,7 +309,7 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
         if (_fetch) {
           window.fetch = function(url, opts) {
             if (typeof url === 'string') url = proxify(url);
-            return _fetch.call(this, url, opts);
+            return _fetch(url, opts);
           };
         }
 

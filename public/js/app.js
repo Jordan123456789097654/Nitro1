@@ -687,6 +687,9 @@ window.switchView = function(targetView) {
   if (targetView === 'soundboard') {
     triggerQuestProgress('load_soundboard');
   }
+  if (targetView === 'music') {
+    triggerQuestProgress('load_music');
+  }
 };
 
 async function triggerQuestProgress(questType) {
