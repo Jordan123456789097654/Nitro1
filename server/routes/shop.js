@@ -75,6 +75,30 @@ router.post('/buy', async (req, res) => {
   }
 });
 
+// POST /api/shop/redeem - Redeem promo code
+router.post('/redeem', async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
+
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'Promo code is required.' });
+
+  try {
+    const result = await db.redeemPromoCode(user.id, code);
+    
+    await db.createModerationLog('PROMO_CODE_REDEEM', user.username, code.toUpperCase(), result.details);
+
+    res.json({
+      success: true,
+      message: `Successfully redeemed code! ${result.details}`,
+      reward_type: result.reward_type,
+      reward_value: result.reward_value
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Failed to redeem promo code.' });
+  }
+});
+
 // GET /api/shop/inventory - Get user inventory
 router.get('/inventory', async (req, res) => {
   const user = await getAuthUser(req);

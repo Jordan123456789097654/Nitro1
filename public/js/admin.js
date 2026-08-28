@@ -40,6 +40,9 @@ function escapeHtml(str) {
 }
 
 export function initAdmin() {
+  window.fetchUsers = fetchUsers;
+  window.adminFetchConnections = fetchLiveConnections;
+  window.fetchLiveConnections = fetchLiveConnections;
   setupAdminTabs();
   setupAdminActions();
   setupMaintenanceToggle();
@@ -1286,6 +1289,9 @@ function setupAdminTabs() {
       if (targetTab === 'adminquests') {
         if (window.adminFetchQuests) window.adminFetchQuests();
       }
+      if (targetTab === 'promocodes') {
+        if (window.adminFetchPromoCodes) window.adminFetchPromoCodes();
+      }
       if (targetTab === 'shoppurchases') {
         if (window.adminFetchShopPurchases) window.adminFetchShopPurchases();
       }
@@ -2067,6 +2073,45 @@ function setupAdminActions() {
       alert('Error denying suggestion.');
     }
   };
+
+  // Promo code generator form
+  const createCodeForm = document.getElementById('admin-create-code-form');
+  if (createCodeForm) {
+    createCodeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('admin-code-string').value.trim();
+      const reward_type = document.getElementById('admin-code-type').value;
+      const reward_value = document.getElementById('admin-code-value').value;
+      const max_uses = document.getElementById('admin-code-max-uses').value || null;
+      const expires_at = document.getElementById('admin-code-expiry').value || null;
+
+      if (!code || !reward_type || reward_value === '') {
+        return alert('Please fill out all required fields.');
+      }
+
+      try {
+        const res = await authFetch('/api/admin/promo-codes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, reward_type, reward_value, max_uses, expires_at })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(`🎉 Promo code "${code.toUpperCase()}" generated successfully!`);
+          createCodeForm.reset();
+          document.getElementById('admin-create-code-card').style.display = 'none';
+          if (window.adminFetchPromoCodes) {
+            window.adminFetchPromoCodes();
+          }
+        } else {
+          alert(data.error || 'Failed to create promo code.');
+        }
+      } catch (err) {
+        console.error('Error generating promo code:', err);
+        alert('Network error generating promo code.');
+      }
+    });
+  }
 }
 
 // 🤖 Groq AI Safety & Moderation Studio Frontend Module
@@ -3835,4 +3880,71 @@ window.adminDeleteSpinSeg = async function(id) {
       alert(data.error || 'Failed to delete segment.');
     }
   } catch (err) { alert('Network error.'); }
+};
+
+window.adminFetchPromoCodes = async function() {
+  const tbody = document.getElementById('admin-promo-codes-list');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Loading codes...</td></tr>';
+
+  try {
+    const res = await authFetch('/api/admin/promo-codes');
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (!data.codes || data.codes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">No promo codes generated yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.codes.map(c => {
+        const expires = c.expires_at ? new Date(c.expires_at).toLocaleDateString() : 'Never';
+        const limit = c.max_uses !== null ? c.max_uses : '∞';
+        
+        let rewardDisplay = '';
+        if (c.reward_type === 'coins') rewardDisplay = `🪙 ${c.reward_value} Coins`;
+        else if (c.reward_type === 'xp') rewardDisplay = `🏆 ${c.reward_value} XP`;
+        else if (c.reward_type === 'premium') rewardDisplay = `⭐ Premium PRO`;
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); hover:background:rgba(255,255,255,0.01);">
+            <td style="padding: 12px; font-weight: 800; color: #fff;">${escapeHtml(c.code)}</td>
+            <td style="padding: 12px; text-transform: uppercase; font-weight: 700; color: #cbd5e1;">${escapeHtml(c.reward_type)}</td>
+            <td style="padding: 12px; font-weight: 800; color: #fbbf24;">${rewardDisplay}</td>
+            <td style="padding: 12px; text-align: center; font-weight: 700;">${c.uses} / ${limit}</td>
+            <td style="padding: 12px; color: #cbd5e1;">${expires}</td>
+            <td style="padding: 12px; text-align: center;">
+              <button class="btn-small danger" onclick="window.adminDeletePromoCode('${escapeHtml(c.code)}')" style="padding: 4px 10px;">🗑️ Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Error: ${data.error || 'Failed to fetch codes.'}</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Error fetching promo codes:', err);
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Network error fetching promo codes.</td></tr>';
+  }
+};
+
+window.adminDeletePromoCode = async function(code) {
+  if (!confirm(`Are you sure you want to delete promo code "${code.toUpperCase()}"?`)) return;
+
+  try {
+    const res = await authFetch(`/api/admin/promo-codes/${encodeURIComponent(code)}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(`🗑️ Promo code "${code.toUpperCase()}" deleted!`);
+      window.adminFetchPromoCodes();
+    } else {
+      alert(data.error || 'Failed to delete promo code.');
+    }
+  } catch (err) {
+    console.error('Error deleting promo code:', err);
+    alert('Network error deleting promo code.');
+  }
 };

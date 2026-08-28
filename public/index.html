@@ -1948,16 +1948,16 @@
 
         <!-- Primary Single Viewport -->
         <div class="browser-viewport" id="browser-viewport-single">
-          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="about:blank" style="display: none; width: 100%; height: 100%; border: none;"></iframe>
+          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" style="display: none; width: 100%; height: 100%; border: none;"></iframe>
         </div>
 
         <!-- Dual-Pane Split Screen Viewport Wrapper -->
         <div id="browser-viewport-split-wrapper" style="display: none; width: 100%; height: 600px; gap: 12px; border-radius: 14px; overflow: hidden;">
           <div style="flex: 1; height: 100%; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; background: #000;">
-            <iframe id="browser-iframe-primary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="about:blank"></iframe>
+            <iframe id="browser-iframe-primary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock"></iframe>
           </div>
           <div style="flex: 1; height: 100%; border: 1px solid #38bdf8; border-radius: 12px; overflow: hidden; background: #000;">
-            <iframe id="browser-iframe-secondary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock" src="about:blank"></iframe>
+            <iframe id="browser-iframe-secondary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-pointer-lock"></iframe>
           </div>
         </div>
       </div>
@@ -2279,6 +2279,24 @@
         </div>
       </div>
 
+      <!-- Redeem Promo Code Card -->
+      <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(99, 102, 241, 0.08)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 1; min-width: 280px;">
+          <h2 style="color: #38bdf8; font-size: 1.25rem; margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
+            <span>🔑</span> Redeem Reward Code
+          </h2>
+          <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0; line-height: 1.4;">
+            Have a promo code? Enter it here to claim free Coins, XP, or Premium PRO rank upgrades!
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; width: 100%; max-width: 420px; flex-shrink: 0;">
+          <input type="text" id="shop-promo-code-input" placeholder="ENTER CODE..." style="flex: 1; padding: 12px 18px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 99px; color: #fff; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; text-align: center; letter-spacing: 1px; outline: none; transition: border-color 0.2s;">
+          <button id="shop-redeem-code-btn" class="btn-pill primary" style="background: #38bdf8; border-color: #38bdf8; color: #000; font-weight: 900; padding: 12px 28px; white-space: nowrap;">
+            🔑 Claim Code
+          </button>
+        </div>
+      </div>
+
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
         <!-- Quests & Raffles Column -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -2431,6 +2449,7 @@
               <button class="admin-tab-btn" data-tab="bugs" onclick="window.adminFetchBugs()">🐛 Bug Reports</button>
               <button class="admin-tab-btn" data-tab="adminshop" onclick="window.adminFetchShop()">🛍️ Manage Shop</button>
               <button class="admin-tab-btn" data-tab="shoppurchases" onclick="window.adminFetchShopPurchases()">🛒 Shop Purchases</button>
+              <button class="admin-tab-btn" data-tab="promocodes" onclick="window.adminFetchPromoCodes()">🔑 Promo Codes</button>
               <button class="admin-tab-btn" data-tab="adminquests" onclick="window.adminFetchQuests()">🏆 Manage Quests</button>
               <button class="admin-tab-btn" data-tab="announcements">📢 Global Banner</button>
               <button class="admin-tab-btn" data-tab="updates">📋 Patch Notes</button>
@@ -3394,6 +3413,67 @@
                 <tr>
                   <td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Click Refresh to load reports.</td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Promo Codes Manager -->
+        <div class="admin-tab-content" id="tab-promocodes" style="display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <h3 style="color: #38bdf8; margin: 0;">🔑 Reward & Promo Codes Generator</h3>
+            <button class="btn-small secondary" onclick="document.getElementById('admin-create-code-card').style.display = document.getElementById('admin-create-code-card').style.display === 'none' ? 'block' : 'none'" style="color: #10b981;">➕ Generate Code</button>
+          </div>
+
+          <!-- Create Promo Code Form -->
+          <div id="admin-create-code-card" style="background: rgba(56,189,248,0.03); border: 1px solid rgba(56,189,248,0.2); border-radius: 12px; padding: 18px; margin-bottom: 20px; display: none;">
+            <h4 style="margin: 0 0 12px 0; color: #38bdf8;">➕ Generate New Reward Code</h4>
+            <form id="admin-create-code-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">PROMO CODE STRING</label>
+                <input type="text" id="admin-code-string" placeholder="e.g. COOLSUMMER2026" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 800; text-transform: uppercase;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">REWARD TYPE</label>
+                <select id="admin-code-type" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700; outline: none;">
+                  <option value="coins">Coins (🪙)</option>
+                  <option value="xp">XP (🏆)</option>
+                  <option value="premium">Premium PRO Rank (⭐)</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">REWARD VALUE</label>
+                <input type="number" id="admin-code-value" placeholder="e.g. 500" min="1" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">MAX USES (OPTIONAL)</label>
+                <input type="number" id="admin-code-max-uses" placeholder="Unlimited" min="1" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 700;">EXPIRATION DATE (OPTIONAL)</label>
+                <input type="date" id="admin-code-expiry" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-weight: 700; color-scheme: dark;">
+              </div>
+              <div>
+                <button type="submit" class="btn-small primary" style="width: 100%; padding: 10px; font-weight: 800;">⚡ Create Code</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Promo Codes Table -->
+          <div class="table-container" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px;">
+              <thead>
+                <tr style="background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">CODE</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">REWARD TYPE</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">REWARD VALUE</th>
+                  <th style="padding: 12px; text-align: center; font-weight: 800; color: #cbd5e1;">USES / CAP</th>
+                  <th style="padding: 12px; text-align: left; font-weight: 800; color: #cbd5e1;">EXPIRATION</th>
+                  <th style="padding: 12px; text-align: center; font-weight: 800; color: #cbd5e1;">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="admin-promo-codes-list">
+                <!-- Dynamically populated -->
               </tbody>
             </table>
           </div>

@@ -576,10 +576,24 @@ router.all('/', async (req, res) => {
     const finalUrl = response.url || urlObj.href;
     const contentType = response.headers.get('content-type') || 'text/html';
 
-    const setCookies = response.headers.raw()['set-cookie'];
+    let setCookies = null;
+    if (typeof response.headers.raw === 'function') {
+      setCookies = response.headers.raw()['set-cookie'];
+    } else if (typeof response.headers.getSetCookie === 'function') {
+      setCookies = response.headers.getSetCookie();
+    } else {
+      const singleCookie = response.headers.get('set-cookie');
+      if (singleCookie) setCookies = [singleCookie];
+    }
     if (setCookies) saveCookiesFromResponse(sessionKey, urlObj.hostname, setCookies);
 
-    let buffer = await response.buffer();
+    let buffer;
+    if (typeof response.buffer === 'function') {
+      buffer = await response.buffer();
+    } else {
+      const arrayBuffer = await response.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+    }
     const encoding = response.headers.get('content-encoding');
 
     if (encoding) {

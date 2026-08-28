@@ -568,6 +568,28 @@ const db = {
         `);
       }
 
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS promo_codes (
+          code VARCHAR(50) PRIMARY KEY,
+          reward_type VARCHAR(20) NOT NULL,
+          reward_value INT NOT NULL,
+          max_uses INT,
+          uses INT DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          expires_at TIMESTAMP
+        );
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS promo_code_redemptions (
+          id SERIAL PRIMARY KEY,
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          code VARCHAR(50) REFERENCES promo_codes(code) ON DELETE CASCADE,
+          redeemed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, code)
+        );
+      `);
+
       await pool.query("CREATE INDEX IF NOT EXISTS idx_games_category ON games (category);");
       await pool.query("CREATE INDEX IF NOT EXISTS idx_games_clicks ON games (clicks);");
       await pool.query("CREATE INDEX IF NOT EXISTS idx_games_title ON games (title);");
@@ -3830,6 +3852,95 @@ Respond ONLY with valid JSON matching this exact schema:
     } catch (e) {
       console.error('closeTournament error:', e.message);
       return null;
+    }
+  },
+
+  async getPromoCodes() {
+    try {
+      const res = await pool.query('SELECT * FROM promo_codes ORDER BY created_at DESC');
+      return res.rows;
+    } catch (e) {
+      console.error('getPromoCodes error:', e.message);
+      return [];
+    }
+  },
+
+  async createPromoCode(code, reward_type, reward_value, max_uses = null, expires_at = null) {
+    const cleanCode = String(code).trim().toUpperCase();
+    const res = await pool.query(
+      'INSERT INTO promo_codes (code, reward_type, reward_value, max_uses, expires_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [cleanCode, reward_type, parseInt(reward_value, 10), max_uses ? parseInt(max_uses, 10) : null, expires_at || null]
+    );
+    return res.rows[0];
+  },
+
+  async deletePromoCode(code) {
+    const cleanCode = String(code).trim().toUpperCase();
+    await pool.query('DELETE FROM promo_codes WHERE code = $1', [cleanCode]);
+    return true;
+  },
+
+  async redeemPromoCode(userId, codeStr) {
+    const cleanCode = String(codeStr).trim().toUpperCase();
+    
+    const codeRes = await pool.query('SELECT * FROM promo_codes WHERE code = $1', [cleanCode]);
+    if (codeRes.rows.length === 0) {
+      throw new Error('Invalid promo code.');
+    }
+    const code = codeRes.rows[0];
+
+    if (code.expires_at && new Date() > new Date(code.expires_at)) {
+      throw new Error('This promo code has expired.');
+    }
+
+    if (code.max_uses !== null && code.uses >= code.max_uses) {
+      throw new Error('This promo code has reached its maximum usage limit.');
+    }
+
+    const redRes = await pool.query(
+      'SELECT id FROM promo_code_redemptions WHERE user_id = $1 AND code = $2',
+      [userId, cleanCode]
+    );
+    if (redRes.rows.length > 0) {
+      throw new Error('You have already redeemed this promo code.');
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      await client.query(
+        'INSERT INTO promo_code_redemptions (user_id, code) VALUES ($1, $2)',
+        [userId, cleanCode]
+      );
+
+      await client.query(
+        'UPDATE promo_codes SET uses = uses + 1 WHERE code = $1',
+        [cleanCode]
+      );
+
+      let details = '';
+      if (code.reward_type === 'coins') {
+        await client.query('UPDATE users SET coins = COALESCE(coins, 0) + $1 WHERE id = $2', [code.reward_value, userId]);
+        details = `Redeemed code "${cleanCode}" for +${code.reward_value} coins`;
+      } else if (code.reward_type === 'xp') {
+        await client.query('UPDATE users SET xp = COALESCE(xp, 0) + $1 WHERE id = $2', [code.reward_value, userId]);
+        details = `Redeemed code "${cleanCode}" for +${code.reward_value} XP`;
+      } else if (code.reward_type === 'premium') {
+        await client.query("UPDATE users SET role = 'pro' WHERE id = $1", [userId]);
+        details = `Redeemed code "${cleanCode}" for Premium PRO Status Upgrade`;
+      }
+
+      await client.query('COMMIT');
+      client.release();
+      
+      clearUserCache(userId);
+
+      return { success: true, reward_type: code.reward_type, reward_value: code.reward_value, details };
+    } catch (err) {
+      await client.query('ROLLBACK');
+      client.release();
+      throw err;
     }
   }
 };

@@ -42,6 +42,52 @@ export function initShop() {
       window.closeStoreFront();
     });
   }
+
+  // Promo code redemption
+  const redeemBtn = document.getElementById('shop-redeem-code-btn');
+  const codeInput = document.getElementById('shop-promo-code-input');
+  if (redeemBtn && codeInput) {
+    redeemBtn.addEventListener('click', async () => {
+      const code = codeInput.value.trim();
+      if (!code) return alert('Please enter a promo code.');
+
+      const token = localStorage.getItem('nitro_jwt_token') || '';
+      if (!token) return alert('Please sign in to redeem codes.');
+
+      redeemBtn.disabled = true;
+      redeemBtn.textContent = 'Claiming...';
+
+      try {
+        const res = await fetch('/api/shop/redeem', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert(`🎉 Code Redeemed Successfully!\n${data.message}`);
+          codeInput.value = '';
+          
+          if (window.fetchUserProfile) {
+            await window.fetchUserProfile();
+          }
+          loadShopData();
+        } else {
+          alert(data.error || 'Failed to redeem code.');
+        }
+      } catch (err) {
+        console.error('Error redeeming code:', err);
+        alert('Network error redeeming code.');
+      } finally {
+        redeemBtn.disabled = false;
+        redeemBtn.textContent = '🔑 Claim Code';
+      }
+    });
+  }
 }
 
 export async function loadShopData() {

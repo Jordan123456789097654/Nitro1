@@ -2430,4 +2430,68 @@ router.post('/spin-wheel/segments/:id/delete', async (req, res) => {
   }
 });
 
+// GET /api/admin/promo-codes
+router.get('/promo-codes', async (req, res) => {
+  try {
+    const codes = await db.getPromoCodes();
+    res.json({ success: true, codes });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch promo codes.' });
+  }
+});
+
+// POST /api/admin/promo-codes
+router.post('/promo-codes', async (req, res) => {
+  const { code, reward_type, reward_value, max_uses, expires_at } = req.body;
+  if (!code || !reward_type || reward_value === undefined) {
+    return res.status(400).json({ error: 'Code, reward type, and reward value are required.' });
+  }
+  
+  const allowedTypes = ['premium', 'coins', 'xp'];
+  if (!allowedTypes.includes(reward_type)) {
+    return res.status(400).json({ error: 'Invalid reward type. Choose premium, coins, or xp.' });
+  }
+
+  try {
+    const cleanCode = String(code).trim().toUpperCase();
+    const existing = await db.getPromoCodes();
+    if (existing.some(c => c.code === cleanCode)) {
+      return res.status(409).json({ error: 'Promo code already exists.' });
+    }
+
+    const newCode = await db.createPromoCode(cleanCode, reward_type, reward_value, max_uses, expires_at);
+    
+    sendDiscordLog({
+      category: 'admin',
+      action: 'PROMO_CODE_CREATED',
+      admin: req.adminUser.username,
+      details: `Created promo code "${cleanCode}" (Reward: ${reward_value} ${reward_type})`
+    });
+
+    res.json({ success: true, promo_code: newCode });
+  } catch (err) {
+    console.error('Create promo code error:', err);
+    res.status(500).json({ error: 'Failed to create promo code.' });
+  }
+});
+
+// DELETE /api/admin/promo-codes/:code
+router.delete('/promo-codes/:code', async (req, res) => {
+  const code = req.params.code;
+  try {
+    await db.deletePromoCode(code);
+    
+    sendDiscordLog({
+      category: 'admin',
+      action: 'PROMO_CODE_DELETED',
+      admin: req.adminUser.username,
+      details: `Deleted promo code "${code.toUpperCase()}"`
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete promo code.' });
+  }
+});
+
 module.exports = router;
