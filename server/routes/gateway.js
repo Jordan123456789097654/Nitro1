@@ -7,7 +7,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch');
+const fetch = global.fetch;
 const jwt = require('jsonwebtoken');
 const zlib = require('zlib');
 const dns = require('dns');
