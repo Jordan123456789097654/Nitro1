@@ -1,4 +1,4 @@
-const fetch = global.fetch;
+const fetch = require('node-fetch');
 
 const KEY = 'q7Zx!9pL';
 const UA =

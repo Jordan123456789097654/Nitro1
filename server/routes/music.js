@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = global.fetch;
+const fetch = require('node-fetch');
 const { bumpUsage } = require('../utils/usage-daily.js');
 const { mediaProxyPath, proxyMedia } = require('./music-media.js');
 
