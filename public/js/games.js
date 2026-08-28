@@ -327,8 +327,9 @@ export function renderGames(games, targetGridId) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
 
-    while (tempDiv.firstChild) {
-      const card = tempDiv.firstChild;
+    // Use Array.from(tempDiv.children) to ensure we only loop over Element nodes
+    // and completely avoid Text nodes (whitespace/newlines) which would crash.
+    Array.from(tempDiv.children).forEach(card => {
       card.addEventListener('click', (e) => {
         if (e.target.closest('.game-fav-btn')) return;
         const slug = card.dataset.slug || card.dataset.gameId;
@@ -345,7 +346,7 @@ export function renderGames(games, targetGridId) {
       }
 
       grid.appendChild(card);
-    }
+    });
 
     renderedCount += nextBatch.length;
   }
