@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('C:/Users/jorda/.gemini/antigravity/scratch/nitro-games/node_modules/node-fetch');
+const fetch = require('node-fetch');
 const { bumpUsage } = require('../utils/usage-daily');
 
 const router = express.Router();
