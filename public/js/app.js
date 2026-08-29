@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAboutBlankSiteLauncher();
   initAntiCloseProtection();
   initPanicKeySystem();
+  initScientificCalculator();
   initFakeErrorPanic();
   initVisitorCounter();
   initCookieConsent();
@@ -428,6 +429,61 @@ window.setDisguisePreset = function(presetKey) {
   localStorage.setItem('nitro_custom_title', config.title);
 };
 
+window.muteAllAudioElements = function() {
+  try {
+    document.querySelectorAll('audio, video').forEach(el => {
+      try {
+        el.muted = true;
+        el.volume = 0;
+        el.pause();
+      } catch (e) {}
+    });
+
+    document.querySelectorAll('iframe').forEach(iframe => {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (doc) {
+          doc.querySelectorAll('audio, video').forEach(el => {
+            try {
+              el.muted = true;
+              el.volume = 0;
+              el.pause();
+            } catch (e) {}
+          });
+        }
+      } catch (e) {}
+      try {
+        if (iframe.contentWindow) {
+          iframe.contentWindow.__pzMuted = true;
+          if (iframe.contentWindow.__pzAudioContexts) {
+            iframe.contentWindow.__pzAudioContexts.forEach(ctx => {
+              try { ctx.suspend(); } catch(e){}
+            });
+          }
+        }
+      } catch (e) {}
+    });
+
+    if (window.__pzAudioContexts) {
+      window.__pzAudioContexts.forEach(ctx => {
+        try { ctx.suspend(); } catch(e){}
+      });
+    }
+  } catch (err) {
+    console.warn('muteAllAudioElements error:', err);
+  }
+};
+
+window.spoofAcademicHistory = function() {
+  try {
+    window.history.pushState({ spoof: true }, '', '/apps?view=calculator');
+    window.history.pushState({ spoof: true }, '', '/classroom-dashboard');
+    window.history.pushState({ spoof: true }, '', '/api/math-homework');
+  } catch (err) {
+    console.warn('spoofAcademicHistory error:', err);
+  }
+};
+
 // Panic Key & Emergency Quick Redirect Engine
 function initPanicKeySystem() {
   const panicInput = document.getElementById('panic-key-input');
@@ -484,21 +540,55 @@ function initPanicKeySystem() {
 
   if (testBtn) {
     testBtn.addEventListener('click', () => {
+      if (typeof window.muteAllAudioElements === 'function') {
+        window.muteAllAudioElements();
+      }
+      if (typeof window.spoofAcademicHistory === 'function') {
+        window.spoofAcademicHistory();
+      }
       const destUrl = localStorage.getItem('nitro_panic_url') || 'https://classroom.google.com';
-      window.location.replace(destUrl);
+      if (destUrl === 'calculator') {
+        if (typeof window.toggleScientificCalculator === 'function') {
+          window.toggleScientificCalculator(true);
+        }
+      } else {
+        window.location.replace(destUrl);
+      }
     });
   }
 
   window.addEventListener('keydown', (e) => {
+    const calculatorOverlay = document.getElementById('math-calculator-overlay');
+    const isCalculatorOpen = calculatorOverlay && calculatorOverlay.style.display === 'flex';
+
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && document.activeElement.id !== 'panic-key-input') {
-      return;
+      const currentPanicKey = localStorage.getItem('nitro_panic_key') || ']';
+      if (e.key !== currentPanicKey) {
+        return;
+      }
     }
 
     const currentPanicKey = localStorage.getItem('nitro_panic_key') || ']';
     if (e.key === currentPanicKey) {
       e.preventDefault();
+      
+      if (typeof window.muteAllAudioElements === 'function') {
+        window.muteAllAudioElements();
+      }
+      
+      if (typeof window.spoofAcademicHistory === 'function') {
+        window.spoofAcademicHistory();
+      }
+
       const destUrl = localStorage.getItem('nitro_panic_url') || 'https://classroom.google.com';
-      window.location.replace(destUrl);
+      if (destUrl === 'calculator') {
+        if (typeof window.toggleScientificCalculator === 'function') {
+          const isCurrentlyVisible = calculatorOverlay && calculatorOverlay.style.display === 'flex';
+          window.toggleScientificCalculator(!isCurrentlyVisible);
+        }
+      } else {
+        window.location.replace(destUrl);
+      }
     }
   });
 }
@@ -892,6 +982,216 @@ function showAchievementToast(title, desc, icon) {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 500);
   }, 4500);
+}
+
+function drawGraph() {
+  const canvas = document.getElementById('calc-graph-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  const width = rect.width;
+  const height = rect.height;
+
+  ctx.fillStyle = '#070a0f';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.lineWidth = 1;
+  const gridSize = 20;
+  
+  for (let x = 0; x < width; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < height; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  const centerX = width / 2;
+  const centerY = height / 2;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.lineWidth = 1.5;
+
+  ctx.beginPath();
+  ctx.moveTo(0, centerY);
+  ctx.lineTo(width, centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, 0);
+  ctx.lineTo(centerX, height);
+  ctx.stroke();
+
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 2.5;
+  ctx.shadowColor = 'rgba(56, 189, 248, 0.4)';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+
+  const scaleX = 30;
+  const scaleY = 30;
+
+  let first = true;
+  for (let pixelX = 0; pixelX < width; pixelX++) {
+    const xVal = (pixelX - centerX) / scaleX;
+    const yVal = Math.sin(xVal);
+    const pixelY = centerY - (yVal * scaleY);
+
+    if (first) {
+      ctx.moveTo(pixelX, pixelY);
+      first = false;
+    } else {
+      ctx.lineTo(pixelX, pixelY);
+    }
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function initScientificCalculator() {
+  const overlay = document.getElementById('math-calculator-overlay');
+  const closeBtn = document.getElementById('math-calculator-close');
+  const exprDisplay = document.getElementById('calc-expression-display');
+  const resDisplay = document.getElementById('calc-result-display');
+  const buttonsContainer = document.getElementById('calc-buttons-container');
+  const historyLog = document.getElementById('calc-history-log');
+
+  if (!overlay) return;
+
+  let currentExpression = '';
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    if (overlay.style.display === 'flex') {
+      drawGraph();
+    }
+  });
+
+  function addToHistory(expr, result) {
+    if (!historyLog) return;
+    if (historyLog.innerText.includes('clear')) {
+      historyLog.innerHTML = '';
+    }
+    const entry = document.createElement('div');
+    entry.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+    entry.style.paddingBottom = '2px';
+    entry.style.marginBottom = '2px';
+    entry.innerHTML = `<span style="color: #64748b;">${escapeHtml(expr)}</span> = <span style="color: #38bdf8; font-weight: 700;">${escapeHtml(result)}</span>`;
+    historyLog.appendChild(entry);
+    historyLog.scrollTop = historyLog.scrollHeight;
+  }
+
+  function evaluateExpression(expr) {
+    try {
+      let safeExpr = expr
+        .replace(/PI/g, 'Math.PI')
+        .replace(/E/g, 'Math.E')
+        .replace(/sin\(/g, 'Math.sin(')
+        .replace(/cos\(/g, 'Math.cos(')
+        .replace(/tan\(/g, 'Math.tan(')
+        .replace(/log\(/g, 'Math.log10(')
+        .replace(/ln\(/g, 'Math.log(')
+        .replace(/sqrt\(/g, 'Math.sqrt(')
+        .replace(/\^/g, '**');
+
+      let check = safeExpr;
+      check = check.replace(/Math\.(PI|E|sin|cos|tan|log10|log|sqrt)/g, '');
+      check = check.replace(/[0-9+\-*/().\s%]/g, '');
+      check = check.replace(/\*\*/g, '');
+      
+      if (check.trim() !== '') {
+        return 'Syntax Error';
+      }
+
+      const result = new Function('return (' + safeExpr + ')')();
+      if (result === undefined || isNaN(result)) {
+        return 'Error';
+      }
+      return Number(result.toFixed(8)).toString();
+    } catch(err) {
+      return 'Syntax Error';
+    }
+  }
+
+  function updateDisplays() {
+    if (exprDisplay) exprDisplay.textContent = currentExpression || ' ';
+  }
+
+  if (buttonsContainer) {
+    buttonsContainer.querySelectorAll('.calc-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.getAttribute('data-val');
+        if (!val) return;
+
+        if (val === 'clear') {
+          currentExpression = '';
+          if (resDisplay) resDisplay.textContent = '0';
+        } else if (val === 'backspace') {
+          currentExpression = currentExpression.slice(0, -1);
+        } else if (val === 'equals') {
+          if (!currentExpression.trim()) return;
+          const res = evaluateExpression(currentExpression);
+          if (resDisplay) resDisplay.textContent = res;
+          if (res !== 'Syntax Error' && res !== 'Error') {
+            addToHistory(currentExpression, res);
+          }
+        } else {
+          currentExpression += val;
+        }
+        updateDisplays();
+      });
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (overlay.style.display !== 'flex') return;
+
+    const validKeys = '0123456789.+-*/()^';
+    if (validKeys.includes(e.key)) {
+      e.preventDefault();
+      currentExpression += e.key;
+      updateDisplays();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!currentExpression.trim()) return;
+      const res = evaluateExpression(currentExpression);
+      if (resDisplay) resDisplay.textContent = res;
+      if (res !== 'Syntax Error' && res !== 'Error') {
+        addToHistory(currentExpression, res);
+      }
+      updateDisplays();
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      currentExpression = currentExpression.slice(0, -1);
+      updateDisplays();
+    } else if (e.key === 'Escape') {
+      overlay.style.display = 'none';
+    }
+  });
+
+  window.toggleScientificCalculator = function(show) {
+    if (show) {
+      overlay.style.display = 'flex';
+      drawGraph();
+    } else {
+      overlay.style.display = 'none';
+    }
+  };
 }
 
 function initKonamiCode() {

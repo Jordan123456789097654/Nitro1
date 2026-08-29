@@ -1092,8 +1092,24 @@ export async function openGame(slug) {
           const currentPanicKey = localStorage.getItem('nitro_panic_key') || ']';
           if (e.key === currentPanicKey) {
             e.preventDefault();
+            
+            if (typeof window.top.muteAllAudioElements === 'function') {
+              window.top.muteAllAudioElements();
+            }
+            if (typeof window.top.spoofAcademicHistory === 'function') {
+              window.top.spoofAcademicHistory();
+            }
+
             const destUrl = localStorage.getItem('nitro_panic_url') || 'https://classroom.google.com';
-            window.top.location.replace(destUrl);
+            if (destUrl === 'calculator') {
+              if (typeof window.top.toggleScientificCalculator === 'function') {
+                const topOverlay = window.top.document.getElementById('math-calculator-overlay');
+                const isCurrentlyVisible = topOverlay && topOverlay.style.display === 'flex';
+                window.top.toggleScientificCalculator(!isCurrentlyVisible);
+              }
+            } else {
+              window.top.location.replace(destUrl);
+            }
           }
         });
       } catch (err) {

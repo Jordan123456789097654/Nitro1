@@ -2071,6 +2071,7 @@
                     <option value="https://docs.google.com">Google Docs</option>
                     <option value="https://canvas.instructure.com">Canvas LMS</option>
                     <option value="https://wikipedia.org">Wikipedia</option>
+                    <option value="calculator">🧮 Show Scientific Calculator</option>
                     <option value="custom">Custom URL...</option>
                   </select>
                 </div>
@@ -4424,6 +4425,97 @@
           <span id="auth-toggle-text">Don't have an account?</span>
           <a href="#" id="auth-toggle-link" style="color: var(--accent-color); font-weight: 700; text-decoration: none; margin-left: 4px;">Register</a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCIENTIFIC MATH CALCULATOR OVERLAY (STEALTH MODE) -->
+  <div class="modal-overlay" id="math-calculator-overlay" style="z-index: 999999; background: #0b0f19; display: none; align-items: center; justify-content: center; padding: 20px; overflow: hidden; width: 100vw; height: 100vh; position: fixed; inset: 0;">
+    <div class="modal-card" style="max-width: 820px; width: 100%; display: flex; flex-direction: column; background: #131926; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); position: relative; max-height: 90vh;">
+      <button class="modal-close" id="math-calculator-close" style="top: 14px; right: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;">✕</button>
+      
+      <!-- Calculator Header -->
+      <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 14px; margin-bottom: 18px;">
+        <span style="font-size: 1.8rem; filter: hue-rotate(140deg);">📐</span>
+        <div>
+          <h2 style="color: #38bdf8; margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px;">ALGEBRA II & TRIGONOMETRY WORKSPACE</h2>
+          <p style="color: #94a3b8; font-size: 0.8rem; margin: 2px 0 0; font-weight: 500;">Interactive Scientific Graphing Lab & Equation Solver (Student Account: Active)</p>
+        </div>
+      </div>
+
+      <!-- Main Layout Columns -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; overflow: hidden;">
+        
+        <!-- Left Column: Scientific Input & Grid -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Screen Display -->
+          <div style="background: #070a0f; border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; text-align: right; min-height: 84px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div id="calc-expression-display" style="font-size: 1rem; color: #64748b; font-family: monospace; white-space: nowrap; overflow-x: auto;"></div>
+            <div id="calc-result-display" style="font-size: 1.8rem; color: #fff; font-weight: 700; font-family: monospace; overflow-x: auto;">0</div>
+          </div>
+
+          <!-- Buttons Grid -->
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;" id="calc-buttons-container">
+            <!-- Row 1: Clear, Delete, Parentheses, Functions -->
+            <button class="calc-btn fn" data-val="clear" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.25);">C</button>
+            <button class="calc-btn fn" data-val="backspace">⌫</button>
+            <button class="calc-btn" data-val="(">(</button>
+            <button class="calc-btn" data-val=")">)</button>
+            <button class="calc-btn op" data-val="^">^</button>
+
+            <!-- Row 2: Scientific Functions & Div -->
+            <button class="calc-btn fn" data-val="sin(">sin</button>
+            <button class="calc-btn num" data-val="7">7</button>
+            <button class="calc-btn num" data-val="8">8</button>
+            <button class="calc-btn num" data-val="9">9</button>
+            <button class="calc-btn op" data-val="/">÷</button>
+
+            <!-- Row 3: Cos, 4, 5, 6, Mul -->
+            <button class="calc-btn fn" data-val="cos(">cos</button>
+            <button class="calc-btn num" data-val="4">4</button>
+            <button class="calc-btn num" data-val="5">5</button>
+            <button class="calc-btn num" data-val="6">6</button>
+            <button class="calc-btn op" data-val="*">×</button>
+
+            <!-- Row 4: Tan, 1, 2, 3, Sub -->
+            <button class="calc-btn fn" data-val="tan(">tan</button>
+            <button class="calc-btn num" data-val="1">1</button>
+            <button class="calc-btn num" data-val="2">2</button>
+            <button class="calc-btn num" data-val="3">3</button>
+            <button class="calc-btn op" data-val="-">−</button>
+
+            <!-- Row 5: log, ln, sqrt, constants, equal -->
+            <button class="calc-btn fn" data-val="sqrt(">√</button>
+            <button class="calc-btn fn" data-val="log(">log</button>
+            <button class="calc-btn num" data-val="0">0</button>
+            <button class="calc-btn num" data-val=".">.</button>
+            <button class="calc-btn op" data-val="+">+</button>
+
+            <!-- Row 6: constants, equal -->
+            <button class="calc-btn fn" data-val="PI">π</button>
+            <button class="calc-btn fn" data-val="E">e</button>
+            <button class="calc-btn fn" data-val="ln(">ln</button>
+            <button class="calc-btn eq" data-val="equals" style="grid-column: span 2; background: #38bdf8; color: #000; border: none; font-weight: 800;">=</button>
+          </div>
+        </div>
+
+        <!-- Right Column: Graph & Workspace History -->
+        <div style="display: flex; flex-direction: column; gap: 12px; height: 100%;">
+          <!-- Graph Canvas -->
+          <div style="flex: 1; min-height: 180px; background: #070a0f; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; position: relative;">
+            <div style="position: absolute; top: 6px; left: 8px; font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Graphing Grid: f(x) = sin(x)</div>
+            <canvas id="calc-graph-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+          </div>
+
+          <!-- History Panel -->
+          <div style="height: 120px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; display: flex; flex-direction: column;">
+            <strong style="color: #64748b; font-size: 0.72rem; text-transform: uppercase; margin-bottom: 6px;">Evaluation History Log</strong>
+            <div id="calc-history-log" style="flex: 1; overflow-y: auto; font-family: monospace; font-size: 0.78rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
+              <div style="color: #64748b; font-style: italic;">Log workspace clear.</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

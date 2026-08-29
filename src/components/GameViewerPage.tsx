@@ -155,11 +155,37 @@ function bindPanicToFrame(frame: HTMLIFrameElement | null) {
   if (!frame) return;
   try {
     frame.contentWindow?.addEventListener("keydown", (e: KeyboardEvent) => {
-      const panicKey = localStorage.getItem("panicKey");
-      const panicUrl = localStorage.getItem("panicUrl") || "https://classroom.google.com";
-      if (panicKey && e.key === panicKey) {
+      const panicKey = localStorage.getItem("nitro_panic_key") || localStorage.getItem("panicKey") || "]";
+      const panicUrl = localStorage.getItem("nitro_panic_url") || localStorage.getItem("panicUrl") || "https://classroom.google.com";
+      if (e.key === panicKey) {
         e.preventDefault();
-        window.top.location.href = panicUrl;
+        
+        try {
+          const topWin = window.top as any;
+          if (typeof topWin.muteAllAudioElements === 'function') {
+            topWin.muteAllAudioElements();
+          }
+        } catch (err) {}
+        
+        try {
+          const topWin = window.top as any;
+          if (typeof topWin.spoofAcademicHistory === 'function') {
+            topWin.spoofAcademicHistory();
+          }
+        } catch (err) {}
+
+        if (panicUrl === "calculator") {
+          try {
+            const topWin = window.top as any;
+            if (typeof topWin.toggleScientificCalculator === 'function') {
+              const topOverlay = topWin.document.getElementById('math-calculator-overlay');
+              const isCurrentlyVisible = topOverlay && topOverlay.style.display === 'flex';
+              topWin.toggleScientificCalculator(!isCurrentlyVisible);
+            }
+          } catch (err) {}
+        } else {
+          window.top!.location.replace(panicUrl);
+        }
       }
     });
   } catch (err) {
