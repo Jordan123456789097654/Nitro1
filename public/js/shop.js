@@ -462,6 +462,8 @@ window.claimQuestReward = async function(questId) {
     console.error('Error claiming quest:', err);
     alert('Network error claiming reward.');
   }
+};
+
 window.equipShopItem = async function(itemId, action) {
   const token = localStorage.getItem('nitro_jwt_token') || '';
   if (!token) return alert('Please sign in to manage equipment.');
