@@ -446,7 +446,7 @@ function initChatSocket(io) {
     broadcastLiveConnections();
 
     try {
-      const recentMessages = await db.getRecentChatMessages();
+      const recentMessages = await db.getRecentChatMessages(handshakeUser ? handshakeUser.id : null);
       socket.emit('initial_messages', recentMessages);
       socket.emit('slowmode_status', { seconds: chatSlowmodeSeconds });
     } catch (e) {
@@ -461,7 +461,7 @@ function initChatSocket(io) {
 
     socket.on('get_initial_messages', async () => {
       try {
-        const recentMessages = await db.getRecentChatMessages();
+        const recentMessages = await db.getRecentChatMessages(handshakeUser ? handshakeUser.id : null);
         socket.emit('initial_messages', recentMessages);
       } catch (e) {
         console.error('get_initial_messages error:', e);
@@ -706,8 +706,14 @@ function initChatSocket(io) {
 
       const savedAudioUrl = saveChatAttachment(audioUrl, 'audio');
       const savedImageUrl = saveChatAttachment(imageUrl, 'image');
-      const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, savedAudioUrl, savedImageUrl);
-      io.emit('new_message', newMsg);
+      const isShadow = dbUser && dbUser.is_shadowbanned;
+      const newMsg = await db.createChatMessage(user.id || null, user.username, role, cleanText, savedAudioUrl, savedImageUrl, isShadow);
+      
+      if (isShadow) {
+        socket.emit('new_message', newMsg);
+      } else {
+        io.emit('new_message', newMsg);
+      }
 
       sendDiscordLog({
         category: 'chat',

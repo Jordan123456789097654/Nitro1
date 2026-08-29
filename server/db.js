@@ -510,6 +510,8 @@ const db = {
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_spin_at TIMESTAMP;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_shop_banned BOOLEAN DEFAULT false;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_shadowbanned BOOLEAN DEFAULT false;");
+      await pool.query("ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS is_shadowbanned BOOLEAN DEFAULT false;");
       // Allow items to be purchased more than once
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS is_repeatable BOOLEAN DEFAULT false;");
       // Track exact claim time separately from last-progress time so daily reset is accurate
@@ -1826,29 +1828,30 @@ JSON Format Example:
   },
 
   // Chat
-  async getRecentChatMessages() {
+  async getRecentChatMessages(requestingUserId = null) {
     try {
       const res = await pool.query(`
         SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair, u.avatar_border, u.profile_banner, u.chat_font
         FROM chat_messages cm
         LEFT JOIN users u ON cm.user_id = u.id
         WHERE cm.is_deleted = false 
+          AND (cm.is_shadowbanned = false OR cm.user_id = $1)
         ORDER BY cm.id DESC 
         LIMIT 50
-      `);
+      `, [requestingUserId || -1]);
       return res.rows.reverse();
     } catch (e) {
       return [];
     }
   },
 
-  async createChatMessage(user_id, username, role, message, audio_url = '', image_url = '') {
+  async createChatMessage(user_id, username, role, message, audio_url = '', image_url = '', is_shadowbanned = false) {
     try {
       const res = await pool.query(`
-        INSERT INTO chat_messages (user_id, username, role, message, audio_url, image_url)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO chat_messages (user_id, username, role, message, audio_url, image_url, is_shadowbanned)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
-      `, [user_id, username, role, message, audio_url, image_url]);
+      `, [user_id, username, role, message, audio_url, image_url, is_shadowbanned]);
       
       const fullMsg = await pool.query(`
         SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair, u.avatar_border, u.profile_banner, u.chat_font
@@ -1859,7 +1862,7 @@ JSON Format Example:
 
       return fullMsg.rows[0] || res.rows[0];
     } catch (e) {
-      return { id: Date.now(), user_id, username, role, message, audio_url, image_url, created_at: new Date() };
+      return { id: Date.now(), user_id, username, role, message, audio_url, image_url, is_shadowbanned, created_at: new Date() };
     }
   },
 
@@ -4102,6 +4105,7 @@ Respond ONLY with valid JSON matching this exact schema:
       await client.query('ROLLBACK');
       client.release();
       throw err;
+    }
   },
 
   async getCustomBadges() {
@@ -4163,6 +4167,17 @@ Respond ONLY with valid JSON matching this exact schema:
     } catch (e) {
       console.error('getUserCustomBadges error:', e.message);
       return [];
+    }
+  },
+
+  async shadowbanUser(userId, status) {
+    try {
+      await pool.query('UPDATE users SET is_shadowbanned = $1 WHERE id = $2', [status, userId]);
+      clearUserCache(userId);
+      return true;
+    } catch (e) {
+      console.error('shadowbanUser error:', e.message);
+      return false;
     }
   }
 };

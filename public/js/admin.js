@@ -777,6 +777,9 @@ export function renderAdminUsersList() {
     if (u.require_profile_update) {
       statusHtml += '<span style="color:#ef4444; font-size:0.72rem; display:block; margin-top:4px; font-weight:800;">🔒 Profile Fix Required</span>';
     }
+    if (u.is_shadowbanned) {
+      statusHtml += '<span style="color:#94a3b8; font-size:0.72rem; display:block; margin-top:4px; font-weight:700;">🕵️ Shadowbanned (Silent)</span>';
+    }
 
     const displayName = u.display_name && u.display_name !== u.username ? `<span style="color:#38bdf8; font-size:0.82rem; display:block;">(${u.display_name})</span>` : '';
 
@@ -827,6 +830,10 @@ export function renderAdminUsersList() {
               ${u.is_banned ? 
                 `<button class="btn-small unban" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
                 `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
+              }
+              ${u.is_shadowbanned ?
+                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setShadowban(${u.id}, false)" title="Lift user shadowban">🔓 Un-Shadowban</button>` :
+                `<button class="btn-small" style="background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid #64748b; border-radius:6px; font-weight:700;" onclick="window.setShadowban(${u.id}, true)" title="Silently shadowban user">🕵️ Shadowban</button>`
               }
               ${u.role !== 'owner' && u.username.toLowerCase() !== 'jordandaniels' ?
                 `<button class="btn-small danger" style="background: rgba(239, 68, 68, 0.3); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
@@ -1662,6 +1669,32 @@ function setupAdminActions() {
       }
     } catch (e) {
       alert('Error updating ban status');
+    }
+  };
+
+  window.setShadowban = async (userId, isShadowbanned) => {
+    if (isShadowbanned) {
+      if (!confirm('Are you sure you want to silently SHADOWBAN this user? They will still be able to type in chat, but no other users will see their messages.')) return;
+    } else {
+      if (!confirm('Are you sure you want to lift the shadowban for this user?')) return;
+    }
+
+    try {
+      const res = await authFetch(`/api/admin/users/${userId}/shadowban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_shadowbanned: isShadowbanned })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(isShadowbanned ? '🕵️ User silently shadowbanned!' : '🔓 Shadowban lifted.');
+        fetchUsers();
+        fetchLogs();
+      } else {
+        alert(data.error || 'Failed to update shadowban status');
+      }
+    } catch (e) {
+      alert('Error updating shadowban status');
     }
   };
 

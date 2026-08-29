@@ -1153,6 +1153,44 @@ router.delete('/users/:id', requireOwner, async (req, res) => {
   }
 });
 
+// Toggle User Shadowban State (Restricted to Owners)
+router.post('/users/:id/shadowban', requireOwner, async (req, res) => {
+  const targetId = req.params.id;
+  const { is_shadowbanned } = req.body;
+  const admin = req.adminUser.username;
+
+  try {
+    const targetUser = await db.getUserById(targetId);
+    if (!targetUser) return res.status(404).json({ error: 'User not found.' });
+
+    const isTargetOwner = isOwner(targetUser);
+    const isTriggererOwner = isOwner(req.adminUser);
+    if (isTargetOwner && !isTriggererOwner) {
+      return await punishTreasonousAdmin(req, res, targetUser);
+    }
+
+    const shouldShadow = is_shadowbanned === true || is_shadowbanned === 'true';
+    await db.shadowbanUser(targetId, shouldShadow);
+    
+    await db.createModerationLog(
+      shouldShadow ? 'SHADOWBAN_USER' : 'UNSHADOWBAN_USER',
+      admin,
+      targetUser.username,
+      shouldShadow ? 'Silently shadowbanned user' : 'Shadowban lifted'
+    );
+
+    res.json({
+      success: true,
+      message: shouldShadow
+        ? `Silently shadowbanned user ${targetUser.username}.`
+        : `Lifted shadowban for user ${targetUser.username}.`
+    });
+  } catch (err) {
+    console.error('Shadowban API error:', err);
+    res.status(500).json({ error: 'Failed to process shadowban action.' });
+  }
+});
+
 // Ban / Unban User (Full Platform Account Ban with Duration Support)
 router.post('/users/:id/ban', requireOwner, async (req, res) => {
   const { is_banned, reason, durationHours } = req.body;
@@ -2586,6 +2624,22 @@ router.post('/user-action', requireOwner, async (req, res) => {
         io.emit('user_profile_updated', { userId, username: targetUser.username, role: 'member' });
       }
       return res.json({ success: true, message: `Demoted ${targetUser.username} to Member.` });
+
+    } else if (action === 'shadowban') {
+      if (!isOwner(req.adminUser)) {
+        return res.status(403).json({ error: 'Only the platform Owner can shadowban users.' });
+      }
+      await db.shadowbanUser(userId, true);
+      await db.createModerationLog('SHADOWBAN_USER', admin, targetUser.username, 'Shadowbanned silently');
+      return res.json({ success: true, message: `Silently shadowbanned user ${targetUser.username}.` });
+
+    } else if (action === 'unshadowban') {
+      if (!isOwner(req.adminUser)) {
+        return res.status(403).json({ error: 'Only the platform Owner can lift shadowbans.' });
+      }
+      await db.shadowbanUser(userId, false);
+      await db.createModerationLog('UNSHADOWBAN_USER', admin, targetUser.username, 'Shadowban lifted');
+      return res.json({ success: true, message: `Lifted shadowban for user ${targetUser.username}.` });
 
     } else if (action === 'delete') {
       if (isOwner(targetUser)) {
