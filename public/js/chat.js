@@ -1285,9 +1285,12 @@ function appendChatMessage(msg) {
   const rawContent = msg.message !== undefined ? msg.message : (msg.text !== undefined ? msg.text : (msg.content || ''));
   const bodyHtml = formatMessageText(rawContent, msg.image_url || msg.imageUrl, msg.audio_url || msg.audioUrl, msg.gif_url || msg.gifUrl);
 
+  const fontStyle = msg.chat_font ? `style="font-family: ${msg.chat_font};"` : '';
+  const borderStyle = msg.avatar_border ? `border: ${msg.avatar_border}; padding: 1px; box-sizing: border-box;` : '';
+
   row.innerHTML = `
     <div style="display: flex; gap: 10px; width: 100%;">
-      <div class="chat-msg-avatar" id="msg-avatar-${msg.id || Date.now()}" onclick="window.openPublicProfile('${escapeHtml(msg.username || '')}')" style="width: 34px; height: 34px; flex-shrink: 0; font-size: 1.1rem; border-radius: 50%; cursor: pointer;" title="Click to view @${escapeHtml(msg.username || '')}'s profile">👤</div>
+      <div class="chat-msg-avatar" id="msg-avatar-${msg.id || Date.now()}" onclick="window.openPublicProfile('${escapeHtml(msg.username || '')}')" style="width: 34px; height: 34px; flex-shrink: 0; font-size: 1.1rem; border-radius: 50%; cursor: pointer; ${borderStyle}" title="Click to view @${escapeHtml(msg.username || '')}'s profile">👤</div>
       <div style="flex: 1;">
         <div class="chat-msg-header">
           <div onclick="window.openPublicProfile('${msg.username || ''}')" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Click to view @${msg.username || ''}'s profile">
@@ -1301,7 +1304,7 @@ function appendChatMessage(msg) {
           <span class="chat-msg-time">${time}</span>
           ${deleteBtn}
         </div>
-        <div class="chat-msg-body">${bodyHtml}</div>
+        <div class="chat-msg-body" ${fontStyle}>${bodyHtml}</div>
       </div>
     </div>
   `;

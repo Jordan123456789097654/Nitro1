@@ -2610,4 +2610,61 @@ router.post('/user-action', requireOwner, async (req, res) => {
   }
 });
 
+// GET /api/admin/badges - List all custom badges
+router.get('/badges', async (req, res) => {
+  try {
+    const list = await db.getCustomBadges();
+    res.json({ success: true, badges: list });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve badges.' });
+  }
+});
+
+// POST /api/admin/badges/create - Create custom badge
+router.post('/badges/create', async (req, res) => {
+  const { badgeKey, title, description, icon } = req.body;
+  if (!badgeKey || !title || !description || !icon) {
+    return res.status(400).json({ error: 'All badge fields are required.' });
+  }
+  try {
+    const badge = await db.createCustomBadge({ badgeKey, title, description, icon });
+    if (!badge) return res.status(400).json({ error: 'Failed to create badge (badge key might already exist).' });
+    
+    await db.createModerationLog('CREATE_BADGE', req.adminUser.username, title, `Created custom badge key: ${badgeKey}`);
+    res.json({ success: true, badge });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create badge.' });
+  }
+});
+
+// POST /api/admin/badges/grant - Grant badge to user
+router.post('/badges/grant', async (req, res) => {
+  const { username, badgeKey } = req.body;
+  if (!username || !badgeKey) {
+    return res.status(400).json({ error: 'Username and badge key are required.' });
+  }
+  try {
+    const user = await db.getUserByUsername(username);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    await db.grantUserBadge(user.id, badgeKey);
+    await db.createModerationLog('GRANT_BADGE', req.adminUser.username, user.username, `Granted badge key: ${badgeKey}`);
+    res.json({ success: true, message: `Successfully granted badge to ${user.username}!` });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to grant badge.' });
+  }
+});
+
+// DELETE /api/admin/badges/:key - Delete custom badge
+router.delete('/badges/:key', async (req, res) => {
+  const badgeKey = req.params.key;
+  try {
+    await db.deleteCustomBadge(badgeKey);
+    await db.createModerationLog('DELETE_BADGE', req.adminUser.username, badgeKey, `Deleted custom badge key: ${badgeKey}`);
+    res.json({ success: true, message: 'Badge deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete badge.' });
+  }
+});
+
 module.exports = router;

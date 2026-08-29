@@ -1308,6 +1308,9 @@ function setupAdminTabs() {
       if (targetTab === 'adminquests') {
         if (window.adminFetchQuests) window.adminFetchQuests();
       }
+      if (targetTab === 'adminbadges') {
+        if (window.adminFetchBadges) window.adminFetchBadges();
+      }
       if (targetTab === 'promocodes') {
         if (window.adminFetchPromoCodes) window.adminFetchPromoCodes();
         if (window.adminFetchPromoRedemptions) window.adminFetchPromoRedemptions();
@@ -4051,5 +4054,117 @@ window.adminFetchPromoRedemptions = async function() {
   } catch (err) {
     console.error('Error fetching redemptions:', err);
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Network error fetching redemptions.</td></tr>';
+  }
+};
+
+window.adminFetchBadges = async function() {
+  const tbody = document.getElementById('admin-badges-list-tbody');
+  const select = document.getElementById('admin-grant-badge-key');
+  if (!tbody) return;
+
+  try {
+    const res = await authFetch('/api/admin/badges');
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      const list = data.badges || [];
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No custom badges created yet.</td></tr>';
+      } else {
+        tbody.innerHTML = list.map(b => `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:10px; font-size:1.5rem;">${escapeHtml(b.icon)}</td>
+            <td style="padding:10px; font-family:monospace; color:#38bdf8;">${escapeHtml(b.badge_key)}</td>
+            <td style="padding:10px; font-weight:700; color:#fff;">${escapeHtml(b.title)}</td>
+            <td style="padding:10px; color:var(--text-muted); font-size:0.82rem;">${escapeHtml(b.description)}</td>
+            <td style="padding:10px;">
+              <button class="btn-small danger" onclick="window.adminDeleteBadge('${escapeHtml(b.badge_key)}')">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      if (select) {
+        select.innerHTML = '<option value="">-- Select Badge --</option>' + list.map(b => `
+          <option value="${escapeHtml(b.badge_key)}">${escapeHtml(b.title)}</option>
+        `).join('');
+      }
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Error: ${data.error || 'Failed to fetch badges.'}</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Error fetching badges:', err);
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444;">Network error fetching badges.</td></tr>';
+  }
+};
+
+window.adminCreateBadge = async function(e) {
+  e.preventDefault();
+  const badgeKey = document.getElementById('admin-badge-key').value;
+  const title = document.getElementById('admin-badge-title').value;
+  const icon = document.getElementById('admin-badge-icon').value;
+  const description = document.getElementById('admin-badge-desc').value;
+
+  try {
+    const res = await authFetch('/api/admin/badges/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ badgeKey, title, icon, description })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('✨ Custom Badge created successfully!');
+      document.getElementById('admin-create-badge-form').reset();
+      window.adminFetchBadges();
+    } else {
+      alert(data.error || 'Failed to create custom badge.');
+    }
+  } catch (err) {
+    console.error('Create badge error:', err);
+    alert('Network error creating badge.');
+  }
+};
+
+window.adminGrantBadge = async function(e) {
+  e.preventDefault();
+  const username = document.getElementById('admin-grant-username').value;
+  const badgeKey = document.getElementById('admin-grant-badge-key').value;
+
+  try {
+    const res = await authFetch('/api/admin/badges/grant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, badgeKey })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(`🎁 Granted badge to @${username}!`);
+      document.getElementById('admin-grant-badge-form').reset();
+    } else {
+      alert(data.error || 'Failed to grant badge.');
+    }
+  } catch (err) {
+    console.error('Grant badge error:', err);
+    alert('Network error granting badge.');
+  }
+};
+
+window.adminDeleteBadge = async function(key) {
+  if (!confirm(`Are you sure you want to delete badge "${key}"? This will revoke it from all players who own it.`)) return;
+
+  try {
+    const res = await authFetch(`/api/admin/badges/${key}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('Badge deleted successfully.');
+      window.adminFetchBadges();
+    } else {
+      alert(data.error || 'Failed to delete badge.');
+    }
+  } catch (err) {
+    console.error('Delete badge error:', err);
+    alert('Network error deleting badge.');
   }
 };

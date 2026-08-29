@@ -1366,7 +1366,7 @@ export async function openPublicProfile(username) {
 
   const bannerEl = document.getElementById('pub-profile-banner');
   if (bannerEl) {
-    const val = targetUser.banner_url || '';
+    const val = targetUser.profile_banner || targetUser.banner_url || '';
     if (!val) {
       bannerEl.style.background = 'linear-gradient(135deg, #1e293b, #0f172a)';
     } else if (val.startsWith('#') || val.startsWith('rgb') || val.startsWith('hsl') || val.startsWith('linear-gradient')) {
@@ -1391,13 +1391,25 @@ export async function openPublicProfile(username) {
     avatarEl.innerHTML = targetUser.avatar_url
       ? `<img src="${targetUser.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='${avatarIcons[role] || '👤'}'">`
       : (avatarIcons[role] || '👤');
+
+    if (targetUser.avatar_border) {
+      avatarEl.style.border = targetUser.avatar_border;
+      avatarEl.style.padding = '3px';
+      avatarEl.style.boxSizing = 'border-box';
+    } else {
+      avatarEl.style.border = '';
+      avatarEl.style.padding = '';
+    }
   }
 
-  const unlockedBadges = MASTER_BADGES.filter(b => b.isUnlocked(targetUser));
-  if (badgeCountEl) badgeCountEl.textContent = `${unlockedBadges.length} Unlocked Badges`;
+  const unlockedStatic = MASTER_BADGES.filter(b => b.isUnlocked(targetUser));
+  const customBadges = targetUser.custom_badges || [];
+  const totalBadgesCount = unlockedStatic.length + customBadges.length;
+
+  if (badgeCountEl) badgeCountEl.textContent = `${totalBadgesCount} Unlocked Badges`;
 
   if (badgesListEl) {
-    badgesListEl.innerHTML = MASTER_BADGES.map(b => {
+    const staticHtml = MASTER_BADGES.map(b => {
       const unlocked = b.isUnlocked(targetUser);
       return `
         <div style="background:${unlocked ? 'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(139,92,246,0.12))' : 'rgba(0,0,0,0.3)'}; border:1px solid ${unlocked ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.06)'}; border-radius:8px; padding:10px 12px; display:flex; align-items:center; gap:10px;">
@@ -1409,6 +1421,25 @@ export async function openPublicProfile(username) {
         </div>
       `;
     }).join('');
+
+    const customHtml = customBadges.map(b => {
+      const isImgUrl = b.icon.startsWith('http') || b.icon.startsWith('/') || b.icon.includes('.');
+      const iconDisplay = isImgUrl 
+        ? `<img src="${escapeHtml(b.icon)}" style="width:1.5rem; height:1.5rem; object-fit:contain; border-radius:3px;">` 
+        : b.icon;
+      return `
+        <div style="background:linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,182,212,0.12)); border:1px solid rgba(16,185,129,0.4); border-radius:8px; padding:10px 12px; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.5rem; display:flex; align-items:center; justify-content:center;">${iconDisplay}</span>
+          <div style="flex:1;">
+            <strong style="color:#10b981; font-size:0.82rem; display:block;">${escapeHtml(b.title)}</strong>
+            <span style="font-size:0.72rem; color:var(--text-muted);">${escapeHtml(b.description)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    badgesListEl.innerHTML = staticHtml + customHtml;
+  }
   }
 
   const addFriendBtn = document.getElementById('pub-profile-add-friend-btn');

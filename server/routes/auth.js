@@ -182,7 +182,7 @@ router.post('/profile', async (req, res) => {
     return res.status(401).json({ error: 'You must be logged in to update your profile.' });
   }
 
-  const { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, current_password, new_password } = req.body;
+  const { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, current_password, new_password, avatar_border, profile_banner, chat_font } = req.body;
 
   try {
     const user = await db.getUserById(userId);
@@ -218,9 +218,15 @@ router.post('/profile', async (req, res) => {
     const inventory = await db.getUserInventory(userId);
     const ownedGlows = inventory.filter(i => i.category === 'chat_glow').map(i => i.perk_value);
     const ownedFlairs = inventory.filter(i => i.category === 'custom_flair').map(i => i.perk_value);
+    const ownedBorders = inventory.filter(i => i.category === 'avatar_border').map(i => i.perk_value);
+    const ownedBanners = inventory.filter(i => i.category === 'profile_banner').map(i => i.perk_value);
+    const ownedFonts = inventory.filter(i => i.category === 'chat_font').map(i => i.perk_value);
 
     const hasGlowPermission = isPro || (pro_chat_glow && ownedGlows.includes(pro_chat_glow.trim()));
     const hasFlairPermission = isPro || (pro_custom_flair && ownedFlairs.includes(pro_custom_flair.trim()));
+    const hasBorderPermission = isPro || !avatar_border || ownedBorders.includes(avatar_border.trim());
+    const hasBannerPermission = isPro || !profile_banner || ownedBanners.includes(profile_banner.trim());
+    const hasFontPermission = isPro || !chat_font || ownedFonts.includes(chat_font.trim());
 
     const updated = await db.updateUserProfile(userId, {
       avatar_url: avatar_url !== undefined ? avatar_url.trim() : user.avatar_url,
@@ -230,7 +236,10 @@ router.post('/profile', async (req, res) => {
       display_name: display_name !== undefined ? display_name.trim().slice(0, 50) : user.display_name,
       bio: bio !== undefined ? bio.trim().slice(0, 200) : user.bio,
       pro_chat_glow: pro_chat_glow !== undefined ? (hasGlowPermission ? pro_chat_glow.trim() : '') : user.pro_chat_glow,
-      pro_custom_flair: pro_custom_flair !== undefined ? (hasFlairPermission ? pro_custom_flair.trim().slice(0, 30) : '') : user.pro_custom_flair
+      pro_custom_flair: pro_custom_flair !== undefined ? (hasFlairPermission ? pro_custom_flair.trim().slice(0, 30) : '') : user.pro_custom_flair,
+      avatar_border: avatar_border !== undefined ? (hasBorderPermission ? avatar_border.trim() : '') : user.avatar_border,
+      profile_banner: profile_banner !== undefined ? (hasBannerPermission ? profile_banner.trim() : '') : user.profile_banner,
+      chat_font: chat_font !== undefined ? (hasFontPermission ? chat_font.trim() : '') : user.chat_font
     });
 
     sendDiscordLog({
@@ -295,6 +304,9 @@ router.post('/register', async (req, res) => {
       avatar_url: '',
       pro_chat_glow: 'gold',
       pro_custom_flair: '',
+      avatar_border: '',
+      profile_banner: '',
+      chat_font: '',
       force_password_reset: false,
       token
     };
@@ -391,6 +403,9 @@ router.post('/login', async (req, res) => {
       avatar_url: user.avatar_url || '',
       pro_chat_glow: user.pro_chat_glow || 'gold',
       pro_custom_flair: user.pro_custom_flair || '',
+      avatar_border: user.avatar_border || '',
+      profile_banner: user.profile_banner || '',
+      chat_font: user.chat_font || '',
       role: user.role,
       force_password_reset: Boolean(user.force_password_reset),
       token
@@ -437,6 +452,7 @@ router.get('/profile/:username', async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
+    const badges = await db.getUserCustomBadges(user.id);
     res.json({
       success: true,
       user: {
@@ -450,7 +466,11 @@ router.get('/profile/:username', async (req, res) => {
         chat_bubble_theme: user.chat_bubble_theme || '',
         vip_particle_effect: user.vip_particle_effect || '',
         pro_chat_glow: user.pro_chat_glow || '',
-        pro_custom_flair: user.pro_custom_flair || ''
+        pro_custom_flair: user.pro_custom_flair || '',
+        avatar_border: user.avatar_border || '',
+        profile_banner: user.profile_banner || '',
+        chat_font: user.chat_font || '',
+        custom_badges: badges
       }
     });
   } catch (err) {

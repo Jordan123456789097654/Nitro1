@@ -191,4 +191,56 @@ router.post('/spin', async (req, res) => {
   }
 });
 
+// POST /api/shop/equip - Equip or unequip an owned shop item
+router.post('/equip', async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+
+  const { itemId, action } = req.body; // action: 'equip' or 'unequip'
+  if (!itemId) return res.status(400).json({ error: 'Item ID is required.' });
+
+  try {
+    // Verify user owns the item
+    const invCheck = await pool.query(`
+      SELECT i.*, s.category, s.perk_value 
+      FROM user_inventory i 
+      JOIN shop_items s ON i.item_id = s.id 
+      WHERE i.user_id = $1 AND i.item_id = $2
+    `, [user.id, itemId]);
+
+    if (!invCheck.rows.length) {
+      return res.status(400).json({ error: 'You do not own this item.' });
+    }
+
+    const item = invCheck.rows[0];
+    const category = item.category;
+    const perkValue = item.perk_value;
+
+    let updateField = null;
+    if (category === 'chat_glow') updateField = 'pro_chat_glow';
+    else if (category === 'custom_flair') updateField = 'pro_custom_flair';
+    else if (category === 'avatar_border') updateField = 'avatar_border';
+    else if (category === 'profile_banner') updateField = 'profile_banner';
+    else if (category === 'chat_font') updateField = 'chat_font';
+
+    if (!updateField) {
+      return res.status(400).json({ error: 'This item type cannot be equipped.' });
+    }
+
+    const valueToSet = action === 'unequip' ? '' : perkValue;
+
+    // Update user profile setting
+    await pool.query(`UPDATE users SET ${updateField} = $1 WHERE id = $2`, [valueToSet, user.id]);
+
+    res.json({
+      success: true,
+      message: action === 'unequip' ? 'Unequipped item successfully!' : 'Equipped item successfully!',
+      category,
+      value: valueToSet
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to toggle equipment status.' });
+  }
+});
+
 module.exports = router;

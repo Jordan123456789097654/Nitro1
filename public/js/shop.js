@@ -182,8 +182,19 @@ function renderStoreItems(items, inventory, containerId = 'shop-items-grid', the
   container.innerHTML = filtered.map(item => {
     const isOwned = ownedItemIds.has(item.id);
     const isSoldOut = item.stock_count !== undefined && item.stock_count !== null && item.stock_count >= 0 && item.stock_count === 0;
-    // Repeatable items always show the Buy button even if already owned
     const showBuyBtn = item.is_repeatable || !isOwned;
+
+    const user = window.currentUser || (window.getCurrentUser ? window.getCurrentUser() : null);
+    let isEquipped = false;
+    if (user && isOwned) {
+      if (item.category === 'chat_glow' && user.pro_chat_glow === item.perk_value) isEquipped = true;
+      else if (item.category === 'custom_flair' && user.pro_custom_flair === item.perk_value) isEquipped = true;
+      else if (item.category === 'avatar_border' && user.avatar_border === item.perk_value) isEquipped = true;
+      else if (item.category === 'profile_banner' && user.profile_banner === item.perk_value) isEquipped = true;
+      else if (item.category === 'chat_font' && user.chat_font === item.perk_value) isEquipped = true;
+    }
+
+    const isEquipable = ['chat_glow', 'custom_flair', 'avatar_border', 'profile_banner', 'chat_font'].includes(item.category);
 
     let actionBtn = '';
     if (item.is_store_front) {
@@ -192,6 +203,12 @@ function renderStoreItems(items, inventory, containerId = 'shop-items-grid', the
       actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: not-allowed;">SOLD OUT</button>`;
     } else if (showBuyBtn) {
       actionBtn = `<button onclick="window.buyShopItem(${item.id})" style="width: 100%; padding: 8px; background: ${accentColor}; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;">${escapeHtml(buttonLabel)} ${COIN_SVG} ${item.price}</button>`;
+    } else if (isEquipable) {
+      if (isEquipped) {
+        actionBtn = `<button onclick="window.equipShopItem(${item.id}, 'unequip')" style="width: 100%; padding: 8px; background: #ef4444; border: none; color: #fff; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">🟢 EQUIPPED</button>`;
+      } else {
+        actionBtn = `<button onclick="window.equipShopItem(${item.id}, 'equip')" style="width: 100%; padding: 8px; background: #fbbf24; border: none; color: #000; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">⚡ EQUIP</button>`;
+      }
     } else {
       actionBtn = `<button disabled style="width: 100%; padding: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #64748b; border-radius: 8px; font-weight: 700; font-size: 0.78rem;">Purchased ✔</button>`;
     }
@@ -444,6 +461,43 @@ window.claimQuestReward = async function(questId) {
   } catch (err) {
     console.error('Error claiming quest:', err);
     alert('Network error claiming reward.');
+  }
+window.equipShopItem = async function(itemId, action) {
+  const token = localStorage.getItem('nitro_jwt_token') || '';
+  if (!token) return alert('Please sign in to manage equipment.');
+
+  try {
+    const res = await fetch('/api/shop/equip', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ itemId, action })
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      return alert(data.error || 'Failed to update equipment.');
+    }
+
+    alert(data.message);
+
+    // Update current user cache
+    const user = window.currentUser || (window.getCurrentUser ? window.getCurrentUser() : null);
+    if (user) {
+      if (data.category === 'chat_glow') user.pro_chat_glow = data.value;
+      else if (data.category === 'custom_flair') user.pro_custom_flair = data.value;
+      else if (data.category === 'avatar_border') user.avatar_border = data.value;
+      else if (data.category === 'profile_banner') user.profile_banner = data.value;
+      else if (data.category === 'chat_font') user.chat_font = data.value;
+    }
+
+    // Reload shop data to update buttons
+    loadShopData();
+  } catch (err) {
+    console.error('Equip error:', err);
+    alert('Network error updating equipment.');
   }
 };
 

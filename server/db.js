@@ -532,6 +532,32 @@ const db = {
       await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS border_color VARCHAR(20) DEFAULT '';");
       await pool.query("ALTER TABLE stores ADD COLUMN IF NOT EXISTS heading_color VARCHAR(20) DEFAULT '';");
 
+      // Dynamic profile & chat styling additions
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_border VARCHAR(100) DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_banner VARCHAR(255) DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_font VARCHAR(100) DEFAULT '';");
+
+      // Custom Badges tables
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS badges (
+          id SERIAL PRIMARY KEY,
+          badge_key VARCHAR(100) UNIQUE NOT NULL,
+          title VARCHAR(100) NOT NULL,
+          description TEXT NOT NULL,
+          icon VARCHAR(50) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS user_badges (
+          user_id INT REFERENCES users(id) ON DELETE CASCADE,
+          badge_key VARCHAR(100) REFERENCES badges(badge_key) ON DELETE CASCADE,
+          unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (user_id, badge_key)
+        );
+      `);
+
       // Spin wheel admin-configurable segments
       await pool.query(`
         CREATE TABLE IF NOT EXISTS spin_wheel_segments (
@@ -544,6 +570,9 @@ const db = {
           sort_order INT NOT NULL DEFAULT 0
         );
       `);
+
+      await pool.query("ALTER TABLE spin_wheel_segments ADD COLUMN IF NOT EXISTS badge_reward_key VARCHAR(100) DEFAULT NULL;");
+
       // Seed default 16 segments if none exist
       const segCount = await pool.query('SELECT COUNT(*) FROM spin_wheel_segments');
       if (parseInt(segCount.rows[0].count, 10) === 0) {
@@ -565,6 +594,21 @@ const db = {
           ('1000 🪙', 1000, 0, '#1e40af', 0.02, 13),
           ('2000 🪙', 2000, 0, '#7f1d1d', 0.01, 14),
           ('🎰 JACKPOT 5000 🪙', 5000, 0, '#fbbf24', 0.005, 15)
+        `);
+      }
+
+      // Seed spin badges
+      await pool.query(`
+        INSERT INTO badges (badge_key, title, description, icon)
+        VALUES ('spin_badge_lucky', '💎 Lucky Spin Winner', 'Earned by landing on the rare Lucky Badge segment of the Daily Rewards Wheel', '💎')
+        ON CONFLICT (badge_key) DO NOTHING;
+      `);
+
+      const checkLuckySeg = await pool.query("SELECT id FROM spin_wheel_segments WHERE badge_reward_key = 'spin_badge_lucky'");
+      if (checkLuckySeg.rows.length === 0) {
+        await pool.query(`
+          INSERT INTO spin_wheel_segments (label, coins, xp, color, probability, sort_order, badge_reward_key)
+          VALUES ('💎 LUCKY BADGE', 500, 1000, '#06b6d4', 0.015, 16, 'spin_badge_lucky')
         `);
       }
 
@@ -608,6 +652,25 @@ const db = {
           ('🎁 Amazon $5 Gift Card', 'Claim a real-life $5 Amazon Gift Card code!', 1000, 'irl_reward', 'AMZN5'),
           ('🎁 Amazon $10 Gift Card', 'Claim a real-life $10 Amazon Gift Card code!', 1800, 'irl_reward', 'AMZN10'),
           ('🕹️ Classic Gamer Mug', 'Physical Nitro platform retro coffee mug sent to you!', 2500, 'irl_reward', 'MUG')
+        `);
+      }
+
+      // Seed new Dynamic Shop items if they don't exist
+      const checkBorders = await pool.query("SELECT id FROM shop_items WHERE category = 'avatar_border'");
+      if (checkBorders.rows.length === 0) {
+        await pool.query(`
+          INSERT INTO shop_items (name, description, price, category, perk_value) VALUES
+          ('👑 Golden Crown Border', 'A shiny golden border around your user avatar', 250, 'avatar_border', '3px solid #fbbf24'),
+          ('🌌 Galactic Neon Border', 'A glowing purple/blue neon border around your user avatar', 350, 'avatar_border', '3px solid #a855f7'),
+          ('🌸 Sakura Pink Border', 'A soft pastel pink border around your user avatar', 150, 'avatar_border', '3px solid #f472b6'),
+          
+          ('🌈 Rainbow Pride Banner', 'A beautiful rainbow gradient background for your profile', 400, 'profile_banner', 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7)'),
+          ('🌃 Cyberpunk City Banner', 'A high-contrast neon purple and yellow profile banner', 300, 'profile_banner', 'linear-gradient(135deg, #1e1b4b, #311042)'),
+          ('❄️ Ice Frost Banner', 'A crisp cool cyan profile banner', 200, 'profile_banner', 'linear-gradient(135deg, #0891b2, #0284c7)'),
+          
+          ('👾 Retro 8-bit Chat Font', 'Displays your chat messages in classic arcade font style', 450, 'chat_font', '\"Press Start 2P\", cursive'),
+          ('✍️ Handwritten Chat Font', 'Displays your chat messages in custom cursive handwritten font', 300, 'chat_font', '\"Architects Daughter\", cursive'),
+          ('💻 Cyber Code Chat Font', 'Displays your chat messages in monospace developer code style', 150, 'chat_font', '\"Fira Code\", monospace')
         `);
       }
 
@@ -1097,7 +1160,7 @@ const db = {
     }
   },
 
-  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password, is_flair_locked, coins, xp }) {
+  async updateUserProfile(userId, { avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, display_name, bio, pro_chat_glow, pro_custom_flair, role, password, is_flair_locked, coins, xp, avatar_border, profile_banner, chat_font }) {
     try {
       const sets = [];
       const values = [];
@@ -1113,6 +1176,9 @@ const db = {
       if (vip_particle_effect !== undefined) { sets.push(`vip_particle_effect = $${idx++}`); values.push(vip_particle_effect); }
       if (role !== undefined) { sets.push(`role = $${idx++}`); values.push(role); }
       if (is_flair_locked !== undefined) { sets.push(`is_flair_locked = $${idx++}`); values.push(is_flair_locked); }
+      if (avatar_border !== undefined) { sets.push(`avatar_border = $${idx++}`); values.push(avatar_border); }
+      if (profile_banner !== undefined) { sets.push(`profile_banner = $${idx++}`); values.push(profile_banner); }
+      if (chat_font !== undefined) { sets.push(`chat_font = $${idx++}`); values.push(chat_font); }
       if (coins !== undefined && coins !== null) { sets.push(`coins = $${idx++}`); values.push(Math.max(0, parseInt(coins, 10) || 0)); }
       if (xp !== undefined && xp !== null)       { sets.push(`xp = $${idx++}`);    values.push(Math.max(0, parseInt(xp, 10)    || 0)); }
       if (password && password.trim().length > 0) {
@@ -1127,7 +1193,7 @@ const db = {
       if (sets.filter(s => s.includes('$')).length === 0) return true;
 
       values.push(userId);
-      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset, is_flair_locked, coins, xp`;
+      const query = `UPDATE users SET ${sets.join(', ')} WHERE id = $${idx} RETURNING id, username, display_name, bio, role, avatar_url, banner_url, chat_bubble_theme, vip_particle_effect, pro_chat_glow, pro_custom_flair, force_password_reset, is_flair_locked, coins, xp, avatar_border, profile_banner, chat_font`;
       const res = await pool.query(query, values);
       return res.rows[0] || null;
     } catch (e) {
@@ -1763,7 +1829,7 @@ JSON Format Example:
   async getRecentChatMessages() {
     try {
       const res = await pool.query(`
-        SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair
+        SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair, u.avatar_border, u.profile_banner, u.chat_font
         FROM chat_messages cm
         LEFT JOIN users u ON cm.user_id = u.id
         WHERE cm.is_deleted = false 
@@ -1785,7 +1851,7 @@ JSON Format Example:
       `, [user_id, username, role, message, audio_url, image_url]);
       
       const fullMsg = await pool.query(`
-        SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair
+        SELECT cm.*, u.avatar_url, u.display_name, u.pro_chat_glow, u.pro_custom_flair, u.avatar_border, u.profile_banner, u.chat_font
         FROM chat_messages cm
         LEFT JOIN users u ON cm.user_id = u.id
         WHERE cm.id = $1
@@ -3393,12 +3459,30 @@ Respond ONLY with valid JSON matching this exact schema:
         [newCoins, newXp, now, userId]
       );
 
+      // Grant badge if segment has badge_reward_key
+      let badgeGranted = null;
+      if (wonSegment.badge_reward_key) {
+        try {
+          const badgeRes = await pool.query('SELECT * FROM badges WHERE badge_key = $1', [wonSegment.badge_reward_key]);
+          if (badgeRes.rows.length > 0) {
+            await pool.query(
+              'INSERT INTO user_badges (user_id, badge_key) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+              [userId, wonSegment.badge_reward_key]
+            );
+            badgeGranted = badgeRes.rows[0];
+          }
+        } catch (badgeErr) {
+          console.error('Error granting spin badge:', badgeErr.message);
+        }
+      }
+
       return {
         success: true,
         index: wonIndex,
         reward,
         newCoins,
         newXp,
+        badgeGranted,
         segments // send segments to client so wheel matches server state
       };
     } catch (e) {
@@ -4018,6 +4102,67 @@ Respond ONLY with valid JSON matching this exact schema:
       await client.query('ROLLBACK');
       client.release();
       throw err;
+  },
+
+  async getCustomBadges() {
+    try {
+      const res = await pool.query('SELECT * FROM badges ORDER BY id DESC');
+      return res.rows;
+    } catch (e) {
+      console.error('getCustomBadges error:', e.message);
+      return [];
+    }
+  },
+
+  async createCustomBadge({ badgeKey, title, description, icon }) {
+    try {
+      const res = await pool.query(
+        'INSERT INTO badges (badge_key, title, description, icon) VALUES ($1, $2, $3, $4) RETURNING *',
+        [badgeKey.trim(), title.trim(), description.trim(), icon.trim()]
+      );
+      return res.rows[0];
+    } catch (e) {
+      console.error('createCustomBadge error:', e.message);
+      return null;
+    }
+  },
+
+  async grantUserBadge(userId, badgeKey) {
+    try {
+      await pool.query(
+        'INSERT INTO user_badges (user_id, badge_key) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [userId, badgeKey]
+      );
+      return true;
+    } catch (e) {
+      console.error('grantUserBadge error:', e.message);
+      return false;
+    }
+  },
+
+  async deleteCustomBadge(badgeKey) {
+    try {
+      await pool.query('DELETE FROM badges WHERE badge_key = $1', [badgeKey]);
+      return true;
+    } catch (e) {
+      console.error('deleteCustomBadge error:', e.message);
+      return false;
+    }
+  },
+
+  async getUserCustomBadges(userId) {
+    try {
+      const res = await pool.query(`
+        SELECT b.* 
+        FROM user_badges ub
+        JOIN badges b ON ub.badge_key = b.badge_key
+        WHERE ub.user_id = $1
+        ORDER BY ub.unlocked_at DESC
+      `, [userId]);
+      return res.rows;
+    } catch (e) {
+      console.error('getUserCustomBadges error:', e.message);
+      return [];
     }
   }
 };

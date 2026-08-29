@@ -65,6 +65,16 @@ function fitVantaCanvas(el: HTMLElement | null, effect: any, contained = false) 
     w = size.w;
     h = size.h;
   }
+
+  // Prevent layout loops: only resize renderer if the element size actually changed
+  const lastW = el.getAttribute("data-last-w");
+  const lastH = el.getAttribute("data-last-h");
+  if (lastW === String(w) && lastH === String(h)) {
+    return;
+  }
+  el.setAttribute("data-last-w", String(w));
+  el.setAttribute("data-last-h", String(h));
+
   el.style.width = contained ? "100%" : `${w}px`;
   el.style.height = contained ? "100%" : `${h}px`;
   el.style.left = "0";
@@ -202,14 +212,10 @@ export default function VantaBackground({ contained = false }: { contained?: boo
 
     let ro: ResizeObserver | null = null;
     try {
-      ro = new ResizeObserver(syncSize);
+      ro = new ResizeObserver(() => {
+        requestAnimationFrame(syncSize);
+      });
       if (fogRef.current) ro.observe(fogRef.current);
-      if (!contained) {
-        ro.observe(document.documentElement);
-        if (document.body) ro.observe(document.body);
-      } else if (fogRef.current?.parentElement) {
-        ro.observe(fogRef.current.parentElement);
-      }
     } catch {}
 
     return () => {
