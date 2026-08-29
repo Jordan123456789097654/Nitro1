@@ -487,6 +487,27 @@ router.all('/', async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
   let rawUrl = (req.query.url || '').trim();
+  let engineQuery = (req.query.engine || '').trim();
+  let engineKey = 'chrome';
+
+  if (engineQuery) {
+    let suffix = '';
+    if (engineQuery.startsWith('chromedark')) {
+      engineKey = 'chromedark';
+      suffix = engineQuery.substring('chromedark'.length);
+    } else if (engineQuery.startsWith('chrome')) {
+      engineKey = 'chrome';
+      suffix = engineQuery.substring('chrome'.length);
+    }
+
+    if (suffix && rawUrl) {
+      if (suffix.startsWith('/') && rawUrl.endsWith('/')) {
+        rawUrl = rawUrl + suffix.substring(1);
+      } else {
+        rawUrl = rawUrl + suffix;
+      }
+    }
+  }
   let user = req.user;
 
   if (!user && req.query.token) {
@@ -596,10 +617,8 @@ router.all('/', async (req, res) => {
     return res.status(403).send('Private network access restricted.');
   }
 
-  // Engine Profile (single Chrome profile now — engine query param, if any,
-  // from old bookmarked/cached links is simply ignored rather than erroring)
+  // Engine Profile (uses the engineKey resolved at the top of the router)
   const engine = CHROME_ENGINE;
-  const engineKey = 'chrome';
   const sessionKey = user.username || req.ip || 'default_session';
   const cookies = getCookiesForRequest(sessionKey, urlObj.hostname);
 
