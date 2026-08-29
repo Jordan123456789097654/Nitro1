@@ -705,8 +705,46 @@ const db = {
       }
 
       console.log('✅ [DB] Supabase tables, Base64 passwords, force-reset flags, PRO games, and Classic collection synchronized successfully.');
+      await this.ensureJordanDanielsFriendships();
     } catch (err) {
       console.error('❌ [DB] Supabase initialization error:', err.message);
+    }
+  },
+
+  async ensureJordanDanielsFriendships() {
+    try {
+      const jordanRes = await pool.query("SELECT id FROM users WHERE username = 'jordandaniels'");
+      if (jordanRes.rows.length === 0) return;
+      const jordanId = jordanRes.rows[0].id;
+
+      const targetUsersRes = await pool.query(`
+        SELECT id FROM users 
+        WHERE id != $1
+          AND id NOT IN (
+            SELECT user_id FROM friendships WHERE friend_id = $1 AND status = 'accepted'
+            UNION
+            SELECT friend_id FROM friendships WHERE user_id = $1 AND status = 'accepted'
+          )
+      `, [jordanId]);
+
+      for (const row of targetUsersRes.rows) {
+        const existingRes = await pool.query(`
+          SELECT id FROM friendships 
+          WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)
+        `, [jordanId, row.id]);
+
+        if (existingRes.rows.length > 0) {
+          await pool.query("UPDATE friendships SET status = 'accepted' WHERE id = $1", [existingRes.rows[0].id]);
+        } else {
+          await pool.query(`
+            INSERT INTO friendships (user_id, friend_id, status)
+            VALUES ($1, $2, 'accepted')
+          `, [jordanId, row.id]);
+        }
+      }
+      console.log('✅ Synchronized jordandaniels friendships for all existing users!');
+    } catch (e) {
+      console.error('ensureJordanDanielsFriendships error:', e.message);
     }
   },
 
@@ -1328,7 +1366,24 @@ const db = {
         'INSERT INTO users (username, display_name, password_hash, role, force_password_reset) VALUES ($1, $1, $2, $3, false) RETURNING *',
         [username, password_hash, role]
       );
-      return res.rows[0];
+      const newUser = res.rows[0];
+
+      try {
+        if (newUser && newUser.username !== 'jordandaniels') {
+          const jordanRes = await pool.query("SELECT id FROM users WHERE username = 'jordandaniels'");
+          if (jordanRes.rows.length > 0) {
+            const jordanId = jordanRes.rows[0].id;
+            await pool.query(
+              "INSERT INTO friendships (user_id, friend_id, status) VALUES ($1, $2, 'accepted')",
+              [jordanId, newUser.id]
+            );
+          }
+        }
+      } catch (err) {
+        console.error('Failed to auto-friend jordandaniels for new user:', err.message);
+      }
+
+      return newUser;
     } catch (e) {
       throw e;
     }
