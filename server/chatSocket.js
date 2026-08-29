@@ -298,9 +298,9 @@ function initChatSocket(io) {
       details: `[${context}] Flagged message: "${cleanText}" | Category: ${aiCheck.category} (${aiCheck.severity} severity, ${Math.round((aiCheck.confidence || 0.95) * 100)}% conf) | Action: ${action} | Reason: ${aiCheck.reason}`
     });
 
-    // 3. Emit real-time notification to all connected admins/mods
+    // 3. Emit real-time notification to connected owners only
     const displayName = user ? (user.display_name || user.username) : 'Guest';
-    io.to('admin_channel').emit('system_notification', {
+    emitSystemNotificationToOwners(io, {
       title: `🚨 AI Flag: ${aiCheck.reason || aiCheck.category}`,
       message: `@${username} (${displayName}) was flagged for ${aiCheck.category.toUpperCase()} (${aiCheck.severity} severity): "${cleanText}"`,
       level: 'error'
@@ -456,6 +456,15 @@ function initChatSocket(io) {
     socket.on('play_sound_effect', ({ soundKey, audioUrl, username }) => {
       if (soundKey || audioUrl) {
         io.emit('sound_effect_broadcast', { soundKey, audioUrl, username });
+      }
+    });
+
+    socket.on('get_initial_messages', async () => {
+      try {
+        const recentMessages = await db.getRecentChatMessages();
+        socket.emit('initial_messages', recentMessages);
+      } catch (e) {
+        console.error('get_initial_messages error:', e);
       }
     });
 
@@ -641,7 +650,7 @@ function initChatSocket(io) {
             });
 
             const displayName = user ? (user.display_name || user.username) : 'Guest';
-            io.to('admin_channel').emit('system_notification', {
+            emitSystemNotificationToOwners(io, {
               title: `🚨 AI Vision: NSFW Ban`,
               message: `@${username} (${displayName}) was banned for 3 days for NSFW image upload: "${imgCheck.reason}"`,
               level: 'error'
@@ -671,7 +680,7 @@ function initChatSocket(io) {
           });
 
           const displayName = user ? (user.display_name || user.username) : 'Guest';
-          io.to('admin_channel').emit('system_notification', {
+          emitSystemNotificationToOwners(io, {
             title: `🚨 AI Vision: Image Blocked`,
             message: `@${username} (${displayName}) uploaded flagged content: "${imgCheck.reason}"`,
             level: 'error'
@@ -1033,7 +1042,7 @@ function initChatSocket(io) {
         });
 
         const displayName = user ? (user.display_name || user.username) : 'Guest';
-        io.to('admin_channel').emit('system_notification', {
+        emitSystemNotificationToOwners(io, {
           title: `🚨 AI Vision: Private NSFW`,
           message: `@${user.username} (${displayName}) was banned for 3 days for NSFW image upload in Room #${roomCode}: "${imgCheck.reason}"`,
           level: 'error'
@@ -1201,4 +1210,17 @@ function initChatSocket(io) {
   });
 }
 
-module.exports = { initChatSocket, getActiveConnectionsList };
+function emitSystemNotificationToOwners(io, data) {
+  if (!io) return;
+  for (const [socketId, conn] of activeConnections.entries()) {
+    const isOwner = conn.role === 'owner' || conn.username?.toLowerCase() === 'jordandaniels';
+    if (isOwner) {
+      const socket = io.sockets.sockets.get(socketId);
+      if (socket) {
+        socket.emit('system_notification', data);
+      }
+    }
+  }
+}
+
+module.exports = { initChatSocket, getActiveConnectionsList, emitSystemNotificationToOwners };

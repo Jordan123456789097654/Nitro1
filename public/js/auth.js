@@ -453,8 +453,8 @@ export function updateNavAuthUI() {
       customThemeBtn.style.display = userLevel >= 2 ? 'block' : 'none';
     }
 
-    // Level >= 7: Admin, Owner
-    if (userLevel >= 7) {
+    // Level >= 6: Moderator, Owner
+    if (userLevel >= 6) {
       if (adminBtn) adminBtn.style.display = 'flex';
       if (addGameNavBtn) addGameNavBtn.style.display = 'flex';
       if (vipCheckbox) vipCheckbox.style.display = 'block';

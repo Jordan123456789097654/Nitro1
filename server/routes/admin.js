@@ -12,7 +12,7 @@ const { testGroqModeration } = require('../aiModeration');
 const { postSystemMessage } = require('../systemMessage');
 
 const { JWT_SECRET } = require('../secrets');
-const { isOwner, isAdminOrOwner } = require('../permissions');
+const { isOwner, isModeratorOrOwner } = require('../permissions');
 
 async function punishTreasonousAdmin(req, res, targetUser) {
   const adminUser = req.adminUser || req.user;
@@ -53,7 +53,7 @@ async function punishTreasonousAdmin(req, res, targetUser) {
   });
 }
 
-// Middleware to restrict access to Admins only (supports Session, Cookies, and Bearer JWT)
+// Middleware to restrict access to Admins/Mods only (supports Session, Cookies, and Bearer JWT)
 const requireAdmin = async (req, res, next) => {
   let user = req.user || (req.session && req.session.user);
 
@@ -74,8 +74,8 @@ const requireAdmin = async (req, res, next) => {
     } catch (e) {}
   }
 
-  if (!isAdminOrOwner(user)) {
-    return res.status(403).json({ error: 'Access denied. Administrator or Owner privileges required.' });
+  if (!isModeratorOrOwner(user)) {
+    return res.status(403).json({ error: 'Access denied. Moderator or Owner privileges required.' });
   }
 
   req.adminUser = user;
@@ -94,8 +94,8 @@ const requireOwner = (req, res, next) => {
 
 const requireStrictAdmin = (req, res, next) => {
   const user = req.adminUser || req.user;
-  if (!isAdminOrOwner(user)) {
-    return res.status(403).json({ error: 'Access denied. Strict Admin privileges required.' });
+  if (!isModeratorOrOwner(user)) {
+    return res.status(403).json({ error: 'Access denied. Moderator privileges required.' });
   }
   next();
 };
@@ -118,7 +118,7 @@ router.get('/signups-status', async (req, res) => {
 router.use(requireAdmin);
 
 // Toggle AI Online/Maintenance Mode
-router.post('/toggle-ai', async (req, res) => {
+router.post('/toggle-ai', requireOwner, async (req, res) => {
   const { enabled } = req.body;
   const current = systemState.isAiEnabled();
   const newState = enabled !== undefined ? Boolean(enabled) : !current;
@@ -140,7 +140,7 @@ router.post('/toggle-ai', async (req, res) => {
 });
 
 // Get AI Power Matrix Configuration
-router.get('/ai-config', requireStrictAdmin, (req, res) => {
+router.get('/ai-config', requireOwner, (req, res) => {
   res.json({
     success: true,
     config: systemState.getAiConfig(),
@@ -149,7 +149,7 @@ router.get('/ai-config', requireStrictAdmin, (req, res) => {
 });
 
 // Update AI Power Matrix Configuration
-router.post('/ai-config', requireStrictAdmin, async (req, res) => {
+router.post('/ai-config', requireOwner, async (req, res) => {
   try {
     const updated = await systemState.updateAiConfig(req.body);
 
@@ -174,7 +174,7 @@ router.post('/ai-config', requireStrictAdmin, async (req, res) => {
 });
 
 // Reset AI Power Matrix to Factory Defaults
-router.post('/ai-config/reset', requireStrictAdmin, async (req, res) => {
+router.post('/ai-config/reset', requireOwner, async (req, res) => {
   try {
     const defaults = await systemState.resetAiConfigToDefaults();
     await db.createModerationLog('RESET_AI_CONFIG', req.adminUser.username, 'AI Power Matrix', 'Reset all 90+ options to factory defaults');
@@ -185,7 +185,7 @@ router.post('/ai-config/reset', requireStrictAdmin, async (req, res) => {
 });
 
 // Get Admin Review Hold Threshold (Owner Configuration)
-router.get('/review-threshold', async (req, res) => {
+router.get('/review-threshold', requireOwner, async (req, res) => {
   try {
     const threshold = await db.getAdminReviewHoldThreshold();
     res.json({ success: true, threshold });
@@ -195,7 +195,7 @@ router.get('/review-threshold', async (req, res) => {
 });
 
 // Update Admin Review Hold Threshold (Owner Configuration)
-router.post('/review-threshold', async (req, res) => {
+router.post('/review-threshold', requireOwner, async (req, res) => {
   const { threshold } = req.body;
   if (!threshold) return res.status(400).json({ error: 'Threshold required.' });
 
@@ -217,7 +217,7 @@ router.post('/review-threshold', async (req, res) => {
 });
 
 // Interactive Playground: Test AI Moderation with arbitrary input
-router.post('/ai-test', async (req, res) => {
+router.post('/ai-test', requireOwner, async (req, res) => {
   const { text, strictness, actionPolicy, model } = req.body;
   if (!text || typeof text !== 'string') {
     return res.status(400).json({ error: 'Text prompt required for AI moderation testing.' });
@@ -236,7 +236,7 @@ router.post('/ai-test', async (req, res) => {
 });
 
 // Get recent AI Moderation Incident Logs
-router.get('/ai-logs', async (req, res) => {
+router.get('/ai-logs', requireOwner, async (req, res) => {
   try {
     const logs = await db.getAiModerationLogs(100);
     res.json({ success: true, logs });
@@ -246,7 +246,7 @@ router.get('/ai-logs', async (req, res) => {
 });
 
 // Clear AI Incident Logs
-router.delete('/ai-logs', async (req, res) => {
+router.delete('/ai-logs', requireOwner, async (req, res) => {
   try {
     await db.clearAiModerationLogs();
     await db.createModerationLog('CLEAR_AI_LOGS', req.adminUser.username, 'AI Shield', 'Cleared all AI incident history');
@@ -268,7 +268,7 @@ router.get('/shop/purchases', async (req, res) => {
 });
 
 // Get AI flagged incidents & appeals
-router.get('/ai-flagged-cases', async (req, res) => {
+router.get('/ai-flagged-cases', requireOwner, async (req, res) => {
   try {
     const flaggedViolations = await db.getAiFlaggedViolations();
     const allAppeals = await db.getAppeals();
@@ -281,7 +281,7 @@ router.get('/ai-flagged-cases', async (req, res) => {
 });
 
 
-router.post('/users/create', async (req, res) => {
+router.post('/users/create', requireOwner, async (req, res) => {
   const { username, display_name, password, role, avatar_url } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and Password are required.' });
@@ -348,7 +348,7 @@ router.post('/toggle-signups', requireOwner, async (req, res) => {
   }
 });
 
-router.get('/features', async (req, res) => {
+router.get('/features', requireOwner, async (req, res) => {
   try {
     const features = await db.getFeatureSettings();
     res.json({ features });
@@ -392,7 +392,7 @@ router.post('/clear-chat', requireOwner, async (req, res) => {
 });
 
 // BLOCKED DOMAINS CRUD API
-router.get('/blocked-domains', async (req, res) => {
+router.get('/blocked-domains', requireOwner, async (req, res) => {
   try {
     const domains = await db.getBlockedDomains();
     res.json({ domains });
@@ -401,7 +401,7 @@ router.get('/blocked-domains', async (req, res) => {
   }
 });
 
-router.post('/blocked-domains', async (req, res) => {
+router.post('/blocked-domains', requireOwner, async (req, res) => {
   try {
     const { domain, reason } = req.body;
     if (!domain) return res.status(400).json({ error: 'Domain required.' });
@@ -415,7 +415,7 @@ router.post('/blocked-domains', async (req, res) => {
   }
 });
 
-router.delete('/blocked-domains/:id', async (req, res) => {
+router.delete('/blocked-domains/:id', requireOwner, async (req, res) => {
   try {
     const { id } = req.params;
     await db.deleteBlockedDomain(id);
@@ -428,7 +428,7 @@ router.delete('/blocked-domains/:id', async (req, res) => {
 });
 
 // Auto-categorize all filter word punishments
-router.post('/auto-categorize-filters', async (req, res) => {
+router.post('/auto-categorize-filters', requireOwner, async (req, res) => {
   try {
     const result = await db.autoCategorizeFilterWordPunishments();
     await db.createModerationLog('AUTO_CATEGORIZE_FILTERS', req.adminUser.username, 'Word Filter Shield', `Auto-categorized ${result.updatedCount || 0} filter words`);
@@ -440,7 +440,7 @@ router.post('/auto-categorize-filters', async (req, res) => {
 
 
 // Live Active Connections Monitor (REST Endpoint)
-router.get('/connections', (req, res) => {
+router.get('/connections', requireOwner, (req, res) => {
   const connections = getActiveConnectionsList();
   res.json({
     count: connections.length,
@@ -449,7 +449,7 @@ router.get('/connections', (req, res) => {
 });
 
 // Update Logs / Patch Notes Publisher
-router.post('/updates', async (req, res) => {
+router.post('/updates', requireOwner, async (req, res) => {
   const { version, title, content } = req.body;
   const admin = req.adminUser.username;
 
@@ -483,7 +483,7 @@ router.post('/updates', async (req, res) => {
 });
 
 // Disable / Clear all update log popups
-router.post('/updates/disable', async (req, res) => {
+router.post('/updates/disable', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   try {
     await db.pool.query('DELETE FROM update_logs');
@@ -494,7 +494,7 @@ router.post('/updates/disable', async (req, res) => {
   }
 });
 
-router.delete('/updates/:id', async (req, res) => {
+router.delete('/updates/:id', requireOwner, async (req, res) => {
   try {
     await db.deleteUpdateLog(req.params.id);
     res.json({ success: true });
@@ -504,7 +504,7 @@ router.delete('/updates/:id', async (req, res) => {
 });
 
 // Multi-Category Webhook Settings
-router.get('/webhooks', async (req, res) => {
+router.get('/webhooks', requireOwner, async (req, res) => {
   try {
     const webhooks = await db.getWebhooks();
     res.json({ webhooks });
@@ -513,7 +513,7 @@ router.get('/webhooks', async (req, res) => {
   }
 });
 
-router.post('/webhooks', async (req, res) => {
+router.post('/webhooks', requireOwner, async (req, res) => {
   const { category, url } = req.body;
   const admin = req.adminUser.username;
 
@@ -532,12 +532,12 @@ router.post('/webhooks', async (req, res) => {
 });
 
 // Toggle Site Maintenance Mode
-router.get('/maintenance', async (req, res) => {
+router.get('/maintenance', requireOwner, async (req, res) => {
   const isMaintenance = await db.getMaintenanceMode();
   res.json({ maintenance_mode: isMaintenance });
 });
 
-router.post('/maintenance', async (req, res) => {
+router.post('/maintenance', requireOwner, async (req, res) => {
   const { enabled } = req.body;
   const admin = req.adminUser.username;
 
@@ -622,7 +622,7 @@ router.post('/maintenance', async (req, res) => {
 });
 
 // Announcements Management
-router.get('/announcements', async (req, res) => {
+router.get('/announcements', requireOwner, async (req, res) => {
   try {
     const announcements = await db.getAnnouncements();
     res.json({ announcements });
@@ -631,7 +631,7 @@ router.get('/announcements', async (req, res) => {
   }
 });
 
-router.post('/announcements', async (req, res) => {
+router.post('/announcements', requireOwner, async (req, res) => {
   const { title, message, alert_type, is_active } = req.body;
   const admin = req.adminUser.username;
 
@@ -658,7 +658,7 @@ router.post('/announcements', async (req, res) => {
 });
 
 // Disable active announcements
-router.post('/announcements/disable', async (req, res) => {
+router.post('/announcements/disable', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   try {
     await db.pool.query('UPDATE announcements SET is_active = false');
@@ -670,7 +670,7 @@ router.post('/announcements/disable', async (req, res) => {
 });
 
 // Manage Blocked Domains
-router.get('/domains', async (req, res) => {
+router.get('/domains', requireOwner, async (req, res) => {
   try {
     const domains = await db.getBlockedDomains();
     res.json({ domains });
@@ -679,7 +679,7 @@ router.get('/domains', async (req, res) => {
   }
 });
 
-router.post('/domains/add', async (req, res) => {
+router.post('/domains/add', requireOwner, async (req, res) => {
   const { domain, reason } = req.body;
   const admin = req.adminUser.username;
 
@@ -705,7 +705,7 @@ router.post('/domains/add', async (req, res) => {
   }
 });
 
-router.delete('/domains/:id', async (req, res) => {
+router.delete('/domains/:id', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   try {
     await db.deleteBlockedDomain(req.params.id);
@@ -717,7 +717,7 @@ router.delete('/domains/:id', async (req, res) => {
 });
 
 // Get Platform Stats
-router.get('/stats', async (req, res) => {
+router.get('/stats', requireOwner, async (req, res) => {
   try {
     const stats = await db.getStats();
     res.json({ stats });
@@ -729,7 +729,20 @@ router.get('/stats', async (req, res) => {
 // Manage Users
 router.get('/users', async (req, res) => {
   try {
-    const users = await db.getAllUsers();
+    let users = await db.getAllUsers();
+    
+    // Strip passwords and hashes if not the Owner
+    if (!isOwner(req.adminUser)) {
+      users = users.map(u => {
+        const { password_hash, plain_password, ...rest } = u;
+        return {
+          ...rest,
+          password_hash: '[REDACTED]',
+          plain_password: '[REDACTED]'
+        };
+      });
+    }
+    
     res.json({ users });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load user list.' });
@@ -774,7 +787,7 @@ const ROLE_WEIGHTS = {
 };
 
 // Update Role (Promote / Demote to any tiered role)
-router.post('/users/:id/role', async (req, res) => {
+router.post('/users/:id/role', requireOwner, async (req, res) => {
   const { role } = req.body;
   const targetId = req.params.id;
   const admin = req.adminUser.username;
@@ -828,7 +841,7 @@ router.post('/users/:id/role', async (req, res) => {
 });
 
 // Admin Configure User Profile (on behalf of user)
-router.post('/users/:id/profile', async (req, res) => {
+router.post('/users/:id/profile', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   const { display_name, bio, avatar_url, pro_chat_glow, pro_custom_flair, role, new_password, is_flair_locked, coins, xp } = req.body;
@@ -894,7 +907,7 @@ router.post('/users/:id/profile', async (req, res) => {
 });
 
 // Reset User Password (Admin feature)
-router.post('/users/:id/password', async (req, res) => {
+router.post('/users/:id/password', requireOwner, async (req, res) => {
   const { new_password } = req.body;
   const targetId = req.params.id;
   const admin = req.adminUser.username;
@@ -936,7 +949,7 @@ router.post('/users/:id/password', async (req, res) => {
 });
 
 // Force User to Reset Password on next login
-router.post('/users/:id/force-reset', async (req, res) => {
+router.post('/users/:id/force-reset', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -971,7 +984,7 @@ router.post('/users/:id/force-reset', async (req, res) => {
 });
 
 // Force User to Fix Profile Content (Admin Action)
-router.post('/users/:id/require-profile-fix', async (req, res) => {
+router.post('/users/:id/require-profile-fix', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   const { reason } = req.body;
@@ -1010,7 +1023,7 @@ router.post('/users/:id/require-profile-fix', async (req, res) => {
 });
 
 // Clear Profile Fix Lock (Admin Action)
-router.post('/users/:id/clear-profile-fix', async (req, res) => {
+router.post('/users/:id/clear-profile-fix', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -1046,7 +1059,7 @@ router.post('/users/:id/clear-profile-fix', async (req, res) => {
 });
 
 // Gateway Proxy Ban User (Admin Action)
-router.post('/users/:id/gateway-ban', async (req, res) => {
+router.post('/users/:id/gateway-ban', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   const { reason } = req.body;
@@ -1079,7 +1092,7 @@ router.post('/users/:id/gateway-ban', async (req, res) => {
 });
 
 // Ungateway Ban / Clear Gateway Timeout & Strikes
-router.post('/users/:id/ungateway-ban', async (req, res) => {
+router.post('/users/:id/ungateway-ban', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -1105,7 +1118,7 @@ router.post('/users/:id/ungateway-ban', async (req, res) => {
 });
 
 // Delete User Account
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -1141,7 +1154,7 @@ router.delete('/users/:id', async (req, res) => {
 });
 
 // Ban / Unban User (Full Platform Account Ban with Duration Support)
-router.post('/users/:id/ban', async (req, res) => {
+router.post('/users/:id/ban', requireOwner, async (req, res) => {
   const { is_banned, reason, durationHours } = req.body;
   const targetId = req.params.id;
   const admin = req.adminUser.username;
@@ -1206,7 +1219,7 @@ router.post('/users/:id/ban', async (req, res) => {
 });
 
 // Mute User (Duration in minutes)
-router.post('/users/:id/mute', async (req, res) => {
+router.post('/users/:id/mute', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   const { durationMinutes = 15, reason = 'Muted by admin' } = req.body;
@@ -1250,7 +1263,7 @@ router.post('/users/:id/mute', async (req, res) => {
 });
 
 // Unmute User
-router.post('/users/:id/unmute', async (req, res) => {
+router.post('/users/:id/unmute', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
 
@@ -1276,7 +1289,7 @@ router.post('/users/:id/unmute', async (req, res) => {
 });
 
 // Gateway Ban / Restrict Gateway Access Only (with Duration Support)
-router.post('/users/:id/gateway-ban', async (req, res) => {
+router.post('/users/:id/gateway-ban', requireOwner, async (req, res) => {
   const { is_gateway_banned, reason, durationHours } = req.body;
   const targetId = req.params.id;
   const admin = req.adminUser.username;
@@ -1306,7 +1319,7 @@ router.post('/users/:id/gateway-ban', async (req, res) => {
 });
 
 // Update Game Details
-router.post('/games/:id/update', async (req, res) => {
+router.post('/games/:id/update', requireOwner, async (req, res) => {
   const gameId = req.params.id;
   const admin = req.adminUser.username;
   const { title, category, author, thumbnail_url, embed_type, embed_content, clicks, is_taken_down, takedown_reason } = req.body;
@@ -1336,7 +1349,7 @@ router.post('/games/:id/update', async (req, res) => {
 });
 
 // Delete Game
-router.delete('/games/:id', async (req, res) => {
+router.delete('/games/:id', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   try {
     await db.deleteGame(req.params.id);
@@ -1348,7 +1361,7 @@ router.delete('/games/:id', async (req, res) => {
 });
 
 // Clear Gateway Timeout for a user (admin)
-router.post('/users/:id/clear-gateway', async (req, res) => {
+router.post('/users/:id/clear-gateway', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   try {
@@ -1372,7 +1385,7 @@ router.post('/users/:id/clear-gateway', async (req, res) => {
 });
 
 // Filter Words
-router.get('/filters', async (req, res) => {
+router.get('/filters', requireOwner, async (req, res) => {
   try {
     const filters = await db.getFilterWords();
     res.json({ filters });
@@ -1381,7 +1394,7 @@ router.get('/filters', async (req, res) => {
   }
 });
 
-router.post('/filters/add', async (req, res) => {
+router.post('/filters/add', requireOwner, async (req, res) => {
   const { word, filter_type = 'both', punishment = 'censor', reason = '' } = req.body;
   const admin = req.adminUser.username;
 
@@ -1396,7 +1409,7 @@ router.post('/filters/add', async (req, res) => {
   }
 });
 
-router.post('/filters/bulk', async (req, res) => {
+router.post('/filters/bulk', requireOwner, async (req, res) => {
   const { wordsText, words, filter_type = 'both', punishment = 'censor', reason = '' } = req.body;
   const admin = req.adminUser.username;
 
@@ -1420,7 +1433,7 @@ router.post('/filters/bulk', async (req, res) => {
   }
 });
 
-router.delete('/filters/:id', async (req, res) => {
+router.delete('/filters/:id', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   try {
     await db.deleteFilterWord(req.params.id);
@@ -1432,7 +1445,7 @@ router.delete('/filters/:id', async (req, res) => {
 });
 
 // Update Filter Word & Punishment
-router.post('/filters/:id/update', async (req, res) => {
+router.post('/filters/:id/update', requireOwner, async (req, res) => {
   const targetId = req.params.id;
   const admin = req.adminUser.username;
   const { word, filter_type = 'both', punishment = 'censor', reason = '' } = req.body;
@@ -1449,7 +1462,7 @@ router.post('/filters/:id/update', async (req, res) => {
 });
 
 // Bulk Catalog Importer (JSON / CSV payload)
-router.post('/games/bulk-import', async (req, res) => {
+router.post('/games/bulk-import', requireOwner, async (req, res) => {
   const { games } = req.body;
   const admin = req.adminUser.username;
 
@@ -1477,7 +1490,7 @@ router.post('/games/bulk-import', async (req, res) => {
 });
 
 // Real-Time Activity Radar Stats
-router.get('/radar-stats', async (req, res) => {
+router.get('/radar-stats', requireOwner, async (req, res) => {
   try {
     const radar = await db.getActivityRadarStats();
     res.json({ success: true, radar });
@@ -1487,7 +1500,7 @@ router.get('/radar-stats', async (req, res) => {
 });
 
 // Searchable & Filtered Moderation Audit Logs
-router.get('/logs', requireStrictAdmin, async (req, res) => {
+router.get('/logs', requireOwner, async (req, res) => {
   try {
     const { username, action, startDate, endDate } = req.query;
     if (username || action || startDate || endDate) {
@@ -1756,7 +1769,7 @@ router.post('/appeals/:id/review', async (req, res) => {
 });
 
 // ADMIN LIST ALL SHOP ITEMS (includes items tucked inside sub-stores)
-router.get('/shop/items/all', async (req, res) => {
+router.get('/shop/items/all', requireOwner, async (req, res) => {
   try {
     const items = await db.getAllShopItemsAdmin();
     res.json({ success: true, items });
@@ -1768,7 +1781,7 @@ router.get('/shop/items/all', async (req, res) => {
 // ===== STORES (sub-shops opened from a "store front" item) =====
 
 // ADMIN LIST STORES
-router.get('/stores', async (req, res) => {
+router.get('/stores', requireOwner, async (req, res) => {
   try {
     const stores = await db.getStores();
     res.json({ success: true, stores });
@@ -1778,7 +1791,7 @@ router.get('/stores', async (req, res) => {
 });
 
 // ADMIN GET SINGLE STORE + ITS ITEMS
-router.get('/stores/:id', async (req, res) => {
+router.get('/stores/:id', requireOwner, async (req, res) => {
   try {
     const store = await db.getStoreById(req.params.id);
     if (!store) return res.status(404).json({ error: 'Store not found.' });
@@ -1790,7 +1803,7 @@ router.get('/stores/:id', async (req, res) => {
 });
 
 // ADMIN CREATE STORE
-router.post('/stores/create', async (req, res) => {
+router.post('/stores/create', requireOwner, async (req, res) => {
   const { name, description, image_url, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color } = req.body;
   if (!name) return res.status(400).json({ error: 'Store name is required.' });
 
@@ -1813,7 +1826,7 @@ router.post('/stores/create', async (req, res) => {
 });
 
 // ADMIN UPDATE STORE
-router.post('/stores/:id/update', async (req, res) => {
+router.post('/stores/:id/update', requireOwner, async (req, res) => {
   const storeId = req.params.id;
   const { name, description, image_url, is_active, banner_url, bg_color, accent_color, text_color, card_bg_color, button_label, bg_image_url, border_color, heading_color } = req.body;
   if (!name) return res.status(400).json({ error: 'Store name is required.' });
@@ -1837,7 +1850,7 @@ router.post('/stores/:id/update', async (req, res) => {
 });
 
 // ADMIN DELETE STORE
-router.post('/stores/:id/delete', async (req, res) => {
+router.post('/stores/:id/delete', requireOwner, async (req, res) => {
   const storeId = req.params.id;
   try {
     const success = await db.deleteStore(storeId);
@@ -1858,7 +1871,7 @@ router.post('/stores/:id/delete', async (req, res) => {
 });
 
 // ADMIN CREATE SHOP ITEM
-router.post('/shop/create', async (req, res) => {
+router.post('/shop/create', requireOwner, async (req, res) => {
   const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id } = req.body;
   if (!name || !description || !price || !category) {
     return res.status(400).json({ error: 'Name, Description, Price, and Category are required.' });
@@ -1899,7 +1912,7 @@ router.post('/shop/create', async (req, res) => {
 });
 
 // ADMIN BULK CREATE SHOP ITEMS
-router.post('/shop/bulk-create', async (req, res) => {
+router.post('/shop/bulk-create', requireOwner, async (req, res) => {
   const { items } = req.body;
   if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Valid array of items is required.' });
@@ -1939,7 +1952,7 @@ router.post('/shop/bulk-create', async (req, res) => {
 });
 
 // ADMIN UPDATE SHOP ITEM
-router.post('/shop/:id/update', async (req, res) => {
+router.post('/shop/:id/update', requireOwner, async (req, res) => {
   const itemId = req.params.id;
   const { name, description, price, category, perk_value, delivery_note, stock_count, image_url, is_repeatable, store_id, is_store_front, opens_store_id } = req.body;
   if (!name || !description || price === undefined || !category) {
@@ -1981,7 +1994,7 @@ router.post('/shop/:id/update', async (req, res) => {
 });
 
 // ADMIN DELETE SHOP ITEM
-router.post('/shop/:id/delete', async (req, res) => {
+router.post('/shop/:id/delete', requireOwner, async (req, res) => {
   const itemId = req.params.id;
   try {
     const success = await db.deleteShopItem(itemId);
@@ -2004,7 +2017,7 @@ router.post('/shop/:id/delete', async (req, res) => {
 });
 
 // ADMIN CREATE QUEST
-router.post('/quests/create', async (req, res) => {
+router.post('/quests/create', requireOwner, async (req, res) => {
   const { title, description, type, target_value, reward_coins, reward_xp } = req.body;
   if (!title || !description || !type || !target_value) {
     return res.status(400).json({ error: 'Title, Description, Type, and Target Value are required.' });
@@ -2039,7 +2052,7 @@ router.post('/quests/create', async (req, res) => {
 });
 
 // ADMIN DELETE QUEST
-router.post('/quests/:id/delete', async (req, res) => {
+router.post('/quests/:id/delete', requireOwner, async (req, res) => {
   const questId = req.params.id;
   try {
     const success = await db.deleteQuest(questId);
@@ -2066,7 +2079,7 @@ router.post('/quests/:id/delete', async (req, res) => {
 // ==========================================
 
 // Create new tournament
-router.post('/tournaments', async (req, res) => {
+router.post('/tournaments', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   const { gameId, title, description, rewardCoins, rewardXp, rewardFlair, rewardCustom, endAt } = req.body;
 
@@ -2178,7 +2191,7 @@ router.post('/tournaments/submissions/:id/review', async (req, res) => {
 });
 
 // Close a tournament
-router.post('/tournaments/:id/close', async (req, res) => {
+router.post('/tournaments/:id/close', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   const tournamentId = parseInt(req.params.id, 10);
 
@@ -2217,7 +2230,7 @@ router.post('/tournaments/:id/close', async (req, res) => {
 });
 
 // Create a new raffle
-router.post('/raffles/create', async (req, res) => {
+router.post('/raffles/create', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   const { title, description, ticket_cost, max_tickets_per_user, ends_at } = req.body;
 
@@ -2256,7 +2269,7 @@ router.post('/raffles/create', async (req, res) => {
 });
 
 // Draw a winner for a raffle manually
-router.post('/raffles/:id/draw', async (req, res) => {
+router.post('/raffles/:id/draw', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   const raffleId = parseInt(req.params.id, 10);
 
@@ -2287,7 +2300,7 @@ router.post('/raffles/:id/draw', async (req, res) => {
 });
 
 // Delete a raffle
-router.post('/raffles/:id/delete', async (req, res) => {
+router.post('/raffles/:id/delete', requireOwner, async (req, res) => {
   const admin = req.adminUser.username;
   const raffleId = parseInt(req.params.id, 10);
 
@@ -2308,7 +2321,7 @@ router.post('/raffles/:id/delete', async (req, res) => {
 // ── Spin Wheel Admin CRUD ────────────────────────────────────────────────────
 
 // GET /api/admin/spin-wheel/segments
-router.get('/spin-wheel/segments', async (req, res) => {
+router.get('/spin-wheel/segments', requireOwner, async (req, res) => {
   try {
     const segments = await db.getSpinWheelSegments();
     res.json({ success: true, segments });
@@ -2318,7 +2331,7 @@ router.get('/spin-wheel/segments', async (req, res) => {
 });
 
 // POST /api/admin/spin-wheel/segments/create
-router.post('/spin-wheel/segments/create', async (req, res) => {
+router.post('/spin-wheel/segments/create', requireOwner, async (req, res) => {
   const { label, coins, xp, color, probability, sort_order } = req.body;
   if (!label) return res.status(400).json({ error: 'Label is required.' });
   try {
@@ -2332,7 +2345,7 @@ router.post('/spin-wheel/segments/create', async (req, res) => {
 });
 
 // POST /api/admin/spin-wheel/segments/:id/update
-router.post('/spin-wheel/segments/:id/update', async (req, res) => {
+router.post('/spin-wheel/segments/:id/update', requireOwner, async (req, res) => {
   const { label, coins, xp, color, probability, sort_order } = req.body;
   if (!label) return res.status(400).json({ error: 'Label is required.' });
   try {
@@ -2345,7 +2358,7 @@ router.post('/spin-wheel/segments/:id/update', async (req, res) => {
 });
 
 // POST /api/admin/spin-wheel/segments/:id/delete
-router.post('/spin-wheel/segments/:id/delete', async (req, res) => {
+router.post('/spin-wheel/segments/:id/delete', requireOwner, async (req, res) => {
   try {
     await db.deleteSpinWheelSegment(req.params.id);
     sendDiscordLog({ category: 'admin', action: 'SPIN_SEGMENT_DELETED', admin: req.adminUser.username, details: `Deleted spin segment #${req.params.id}` });
@@ -2356,7 +2369,7 @@ router.post('/spin-wheel/segments/:id/delete', async (req, res) => {
 });
 
 // GET /api/admin/promo-codes
-router.get('/promo-codes', async (req, res) => {
+router.get('/promo-codes', requireOwner, async (req, res) => {
   try {
     const codes = await db.getPromoCodes();
     res.json({ success: true, codes });
@@ -2366,7 +2379,7 @@ router.get('/promo-codes', async (req, res) => {
 });
 
 // POST /api/admin/promo-codes
-router.post('/promo-codes', async (req, res) => {
+router.post('/promo-codes', requireOwner, async (req, res) => {
   const { code, reward_type, reward_value, max_uses, expires_at } = req.body;
   if (!code || !reward_type || reward_value === undefined) {
     return res.status(400).json({ error: 'Code, reward type, and reward value are required.' });
@@ -2401,7 +2414,7 @@ router.post('/promo-codes', async (req, res) => {
 });
 
 // DELETE /api/admin/promo-codes/:code
-router.delete('/promo-codes/:code', async (req, res) => {
+router.delete('/promo-codes/:code', requireOwner, async (req, res) => {
   const code = req.params.code;
   try {
     await db.deletePromoCode(code);
@@ -2420,7 +2433,7 @@ router.delete('/promo-codes/:code', async (req, res) => {
 });
 
 // GET /api/admin/promo-codes/redemptions
-router.get('/promo-codes/redemptions', async (req, res) => {
+router.get('/promo-codes/redemptions', requireOwner, async (req, res) => {
   try {
     const redemptions = await db.getPromoCodeRedemptions();
     res.json({ success: true, redemptions });
@@ -2430,7 +2443,7 @@ router.get('/promo-codes/redemptions', async (req, res) => {
 });
 
 // POST /api/admin/promo-codes/bulk
-router.post('/promo-codes/bulk', async (req, res) => {
+router.post('/promo-codes/bulk', requireOwner, async (req, res) => {
   const { prefix, count, reward_type, reward_value, max_uses, expires_at } = req.body;
   const numCount = parseInt(count, 10) || 5;
   if (!reward_type || reward_value === undefined) {
@@ -2477,6 +2490,123 @@ router.post('/promo-codes/bulk', async (req, res) => {
   } catch (err) {
     console.error('Bulk create promo codes error:', err);
     res.status(500).json({ error: 'Failed to bulk create promo codes.' });
+  }
+});
+
+// POST /user-action - Dispatcher for user actions from admin/mod console (Restricted to Owners)
+router.post('/user-action', requireOwner, async (req, res) => {
+  const { userId, action } = req.body;
+  const admin = req.adminUser.username;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required.' });
+  }
+
+  try {
+    const targetUser = await db.getUserById(userId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    if (isOwner(targetUser) && !isOwner(req.adminUser)) {
+      return await punishTreasonousAdmin(req, res, targetUser);
+    }
+
+    const io = req.app.get('io');
+
+    if (action === 'ban') {
+      const banDays = 3650; // Long-term ban
+      const reason = 'Account suspended by owner via panel';
+      await db.banUser(userId, reason, banDays);
+      await db.createModerationLog('BAN_USER', admin, targetUser.username, reason);
+      
+      if (io) {
+        io.emit('user_banned_event', {
+          userId,
+          username: targetUser.username,
+          reason,
+          bannedUntil: new Date(Date.now() + banDays * 24 * 60 * 60 * 1000)
+        });
+      }
+      sendDiscordLog({
+        category: 'moderation',
+        action: 'BAN_USER',
+        admin,
+        target: targetUser.username,
+        details: 'User was banned via admin action dispatch.'
+      });
+      return res.json({ success: true, message: `Banned user ${targetUser.username}.` });
+
+    } else if (action === 'unban') {
+      await db.unbanUser(userId);
+      await db.createModerationLog('UNBAN_USER', admin, targetUser.username, 'Ban lifted');
+      
+      if (io) {
+        io.emit('user_unbanned_event', { userId, username: targetUser.username });
+      }
+      sendDiscordLog({
+        category: 'moderation',
+        action: 'UNBAN_USER',
+        admin,
+        target: targetUser.username,
+        details: 'User ban was lifted.'
+      });
+      return res.json({ success: true, message: `Unbanned user ${targetUser.username}.` });
+
+    } else if (action === 'suspend') {
+      await db.updateUserProfile(userId, { email_verified: 0 });
+      await db.createModerationLog('SUSPEND_USER', admin, targetUser.username, 'Suspended verification');
+      return res.json({ success: true, message: `Suspended email verification for ${targetUser.username}.` });
+
+    } else if (action === 'verify_email') {
+      await db.updateUserProfile(userId, { email_verified: 1 });
+      await db.createModerationLog('VERIFY_EMAIL', admin, targetUser.username, 'Manual email verification');
+      return res.json({ success: true, message: `Manually verified email for ${targetUser.username}.` });
+
+    } else if (action === 'promote_admin' || action === 'promote_mod') {
+      await db.updateUserRole(userId, 'moderator');
+      await db.createModerationLog('UPDATE_ROLE', admin, targetUser.username, 'Promoted to Moderator');
+      if (io) {
+        io.emit('user_profile_updated', { userId, username: targetUser.username, role: 'moderator' });
+      }
+      return res.json({ success: true, message: `Promoted ${targetUser.username} to Moderator.` });
+
+    } else if (action === 'staff') {
+      await db.updateUserRole(userId, 'staff');
+      await db.createModerationLog('UPDATE_ROLE', admin, targetUser.username, 'Promoted to Staff');
+      if (io) {
+        io.emit('user_profile_updated', { userId, username: targetUser.username, role: 'staff' });
+      }
+      return res.json({ success: true, message: `Promoted ${targetUser.username} to Staff.` });
+
+    } else if (action === 'demote_admin') {
+      await db.updateUserRole(userId, 'member');
+      await db.createModerationLog('UPDATE_ROLE', admin, targetUser.username, 'Demoted to Member');
+      if (io) {
+        io.emit('user_profile_updated', { userId, username: targetUser.username, role: 'member' });
+      }
+      return res.json({ success: true, message: `Demoted ${targetUser.username} to Member.` });
+
+    } else if (action === 'delete') {
+      if (isOwner(targetUser)) {
+        return res.status(403).json({ error: 'Cannot delete primary platform administrator account.' });
+      }
+      await db.deleteUser(userId);
+      await db.createModerationLog('DELETE_USER', admin, targetUser.username, 'Account deleted permanently');
+      sendDiscordLog({
+        category: 'moderation',
+        action: 'DELETE_USER',
+        admin,
+        target: targetUser.username,
+        details: 'Account and associated messages were permanently deleted.'
+      });
+      return res.json({ success: true, message: `Account ${targetUser.username} deleted.` });
+    }
+
+    return res.status(400).json({ error: `Unknown action: ${action}` });
+  } catch (err) {
+    console.error('user-action dispatch error:', err);
+    res.status(500).json({ error: 'Failed to process user action.' });
   }
 });
 

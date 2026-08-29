@@ -42,7 +42,8 @@ router.get('/', async (req, res) => {
 
     const email = user.email || `${user.username}@nitromath.org`;
     const isOwner = user.role === 'owner' || user.username.toLowerCase() === 'jordandaniels';
-    const isAdmin = isOwner ? 3 : (user.role === 'admin' ? 1 : 0);
+    const isModOrAdmin = ['moderator', 'admin'].includes(user.role);
+    const isAdmin = isOwner ? 3 : (isModOrAdmin ? 1 : 0);
 
     // Sync to local SQLite db so playlists work cleanly
     try {

@@ -128,6 +128,22 @@ function applyMuteToFrame(iframe: HTMLIFrameElement | null, muted: boolean) {
   } catch {}
 }
 
+function bindPanicToFrame(frame: HTMLIFrameElement | null) {
+  if (!frame) return;
+  try {
+    frame.contentWindow?.addEventListener("keydown", (e: KeyboardEvent) => {
+      const panicKey = localStorage.getItem("panicKey");
+      const panicUrl = localStorage.getItem("panicUrl") || "https://classroom.google.com";
+      if (panicKey && e.key === panicKey) {
+        e.preventDefault();
+        window.top.location.href = panicUrl;
+      }
+    });
+  } catch (err) {
+    console.error("Could not bind panic key to iframe:", err);
+  }
+}
+
 export default function AppViewerPage({ url, title, onBack }: AppViewerPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -175,6 +191,7 @@ export default function AppViewerPage({ url, title, onBack }: AppViewerPageProps
           "position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;transition:opacity 0.25s ease;pointer-events:none;";
         scFrame.frame.onload = () => {
           applyMuteToFrame(scFrame.frame, muted);
+          bindPanicToFrame(scFrame.frame);
         };
         void applyMuxForUrl(url).then(() => {
           try {

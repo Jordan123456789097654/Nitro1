@@ -1690,11 +1690,17 @@ export default function AccountPage({ onNavigate }: { onNavigate: (url: string) 
     }
   }
 
-  const roleLabel = (n: number, owner = false) => owner ? "Owner" : n >= 3 ? "Admin" : n >= 2 ? "Staff" : n >= 1 ? "Mod" : "User";
+  const roleLabel = (n: number, owner = false) => owner ? "Owner" : n >= 3 ? "Moderator" : n >= 2 ? "Staff" : n >= 1 ? "Moderator" : "User";
   const roleColor = (n: number, owner = false) => owner ? "hsl(38 90% 58%)" : n >= 3 ? C.accent : n >= 2 ? "hsl(270 55% 65%)" : n >= 1 ? "hsl(165 50% 52%)" : C.textMuted;
 
   const isAdmin = (user?.is_admin ?? 0) >= 1 || !!user?.is_owner;
-  const visibleSections = NAV.filter(s => !s.adminOnly || isAdmin);
+  const isOwner = !!user?.is_owner;
+  const visibleSections = NAV.filter(s => {
+    if (!s.adminOnly) return true;
+    if (!isAdmin) return false;
+    if (isOwner) return true;
+    return s.id === 'users';
+  });
 
   if (loading) return (
     <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" }}>
@@ -3475,28 +3481,31 @@ export default function AccountPage({ onNavigate }: { onNavigate: (url: string) 
                                 <ShieldOff size={11} style={{ color: "hsl(38 75% 58%)" }} />
                               </button>
                             )}
-                            {(u.email_verified ?? 1) !== 1 && !u.banned && (
+                            {isOwner && (u.email_verified ?? 1) !== 1 && !u.banned && (
                               <button title="Verify email" onClick={() => adminAction(u.id, "verify_email")} style={iconBtn}>
                                 <Mail size={11} style={{ color: "hsl(145 50% 55%)" }} />
                               </button>
                             )}
-                            {(u.email_verified ?? 1) === 1 && !u.banned && (
+                            {isOwner && (u.email_verified ?? 1) === 1 && !u.banned && (
                               <button title="Suspend" onClick={() => adminAction(u.id, "suspend")} style={iconBtn}>
                                 <UserMinus size={11} style={{ color: "hsl(38 75% 58%)" }} />
                               </button>
                             )}
-                            {!u.banned ? (
+                            {isOwner && !u.banned && (
                               <button title="Ban user + IP" onClick={() => adminAction(u.id, "ban")} style={iconBtn}>
                                 <Ban size={11} style={{ color: C.danger }} />
                               </button>
-                            ) : (
+                            )}
+                            {isOwner && u.banned && (
                               <button title="Unban" onClick={() => adminAction(u.id, "unban")} style={iconBtn}>
                                 <Check size={11} style={{ color: "hsl(145 50% 55%)" }} />
                               </button>
                             )}
-                            <button title="Delete user" onClick={() => { if (confirm(`Delete ${u.username || "this user"}?`)) adminAction(u.id, "delete"); }} style={iconBtn}>
-                              <Trash2 size={11} style={{ color: C.danger }} />
-                            </button>
+                            {isOwner && (
+                              <button title="Delete user" onClick={() => { if (confirm(`Delete ${u.username || "this user"}?`)) adminAction(u.id, "delete"); }} style={iconBtn}>
+                                <Trash2 size={11} style={{ color: C.danger }} />
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -3629,7 +3638,7 @@ export default function AccountPage({ onNavigate }: { onNavigate: (url: string) 
                                   </div>
                                 ))}
                               </div>
-                              {(selectedUser.email_verified ?? 1) !== 1 && selectedUser.id !== user.id && !selectedUser.is_owner && (
+                              {isOwner && (selectedUser.email_verified ?? 1) !== 1 && selectedUser.id !== user.id && !selectedUser.is_owner && (
                                 <button
                                   type="button"
                                   onClick={() => adminAction(selectedUser.id, "verify_email")}

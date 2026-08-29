@@ -743,6 +743,9 @@ export function renderAdminUsersList() {
   const searchInput = document.getElementById('admin-user-search');
   const search = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
+  const currentUser = getCurrentUser();
+  const isOwnerOrStrictAdmin = currentUser && (currentUser.role === 'owner' || currentUser.username?.toLowerCase() === 'jordandaniels');
+
   const users = (window.allAdminUsersList || []).filter(u => {
     if (!search) return true;
     return (u.username && u.username.toLowerCase().includes(search)) ||
@@ -790,7 +793,7 @@ export function renderAdminUsersList() {
           </div>
         </td>
         <td style="padding: 12px 14px;">
-          <select class="custom-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 6px 10px; font-size: 0.82rem; font-weight: 800; border-radius: 8px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; cursor: pointer;">
+          <select ${isOwnerOrStrictAdmin ? '' : 'disabled'} class="custom-select-dropdown role-select-dropdown" onchange="window.setRole(${u.id}, this.value)" style="padding: 6px 10px; font-size: 0.82rem; font-weight: 800; border-radius: 8px; background: #0e121e; border: 1px solid var(--card-border); color: #fff; cursor: ${isOwnerOrStrictAdmin ? 'pointer' : 'not-allowed'};">
             <option value="member" ${u.role === 'member' ? 'selected' : ''}>👤 Student (Member)</option>
             <option value="student_plus" ${u.role === 'student_plus' ? 'selected' : ''}>🎓 Student Plus</option>
             <option value="pro" ${u.role === 'pro' ? 'selected' : ''}>⚡ PRO Member</option>
@@ -805,28 +808,30 @@ export function renderAdminUsersList() {
         <td style="padding: 12px 14px;">${statusHtml}</td>
         <td style="padding: 12px 14px;">
           <div class="action-btn-group" style="display: flex; flex-wrap: wrap; gap: 6px;">
-            <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; border-radius:6px; font-weight:700;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
-            <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
-            ${u.require_profile_update ?
-              `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.clearProfileFix(${u.id}, '${u.username}')" title="Clear profile compliance lock">🔓 Unlock Profile</button>` :
-              `<button class="btn-small" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.requireProfileFix(${u.id}, '${u.username}')" title="Lock user account until profile is updated">⚠️ Lock Profile</button>`
-            }
-            ${u.muted_until && new Date(u.muted_until) > new Date() ?
-              `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnmuteUser(${u.id}, '${u.username}')" title="Lift chat mute immediately">🔊 Unmute</button>` :
-              `<button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')" title="Mute user from sending chat messages">🔇 Mute</button>`
-            }
-            <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
-            ${u.is_gateway_banned ? 
-              `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnproxyBan(${u.id}, '${u.username}')" title="Un-proxy ban user">🌐 Un-Proxy Ban</button>` :
-              `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; border-radius:6px; font-weight:700;" onclick="window.adminProxyBan(${u.id}, '${u.username}')" title="Ban user from gateway proxy">🌐 Proxy Ban</button>`
-            }
-            ${u.is_banned ? 
-              `<button class="btn-small unban" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
-              `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
-            }
-            ${u.role !== 'owner' && u.username.toLowerCase() !== 'jordandaniels' ?
-              `<button class="btn-small danger" style="background: rgba(239, 68, 68, 0.3); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
-            }
+            ${isOwnerOrStrictAdmin ? `
+              <button class="btn-small" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; border-radius:6px; font-weight:700;" onclick="window.viewUserPassword('${u.username}', '${u.plain_password || ''}')" title="View plain text / Base64 decoded password">👁️ Pass</button>
+              <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.adminConfigProfile(${u.id}, ${JSON.stringify(u).replace(/"/g, '&quot;')})" title="Edit user profile, name, avatar, bio & perks">✏️ Edit Profile</button>
+              ${u.require_profile_update ?
+                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.clearProfileFix(${u.id}, '${u.username}')" title="Clear profile compliance lock">🔓 Unlock Profile</button>` :
+                `<button class="btn-small" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.requireProfileFix(${u.id}, '${u.username}')" title="Lock user account until profile is updated">⚠️ Lock Profile</button>`
+              }
+              ${u.muted_until && new Date(u.muted_until) > new Date() ?
+                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnmuteUser(${u.id}, '${u.username}')" title="Lift chat mute immediately">🔊 Unmute</button>` :
+                `<button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')" title="Mute user from sending chat messages">🔇 Mute</button>`
+              }
+              <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
+              ${u.is_gateway_banned ? 
+                `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnproxyBan(${u.id}, '${u.username}')" title="Un-proxy ban user">🌐 Un-Proxy Ban</button>` :
+                `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; border-radius:6px; font-weight:700;" onclick="window.adminProxyBan(${u.id}, '${u.username}')" title="Ban user from gateway proxy">🌐 Proxy Ban</button>`
+              }
+              ${u.is_banned ? 
+                `<button class="btn-small unban" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, false)">🔓 Unban</button>` : 
+                `<button class="btn-small ban" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.setBan(${u.id}, true)">⛔ Ban</button>`
+              }
+              ${u.role !== 'owner' && u.username.toLowerCase() !== 'jordandaniels' ?
+                `<button class="btn-small danger" style="background: rgba(239, 68, 68, 0.3); color: #ef4444; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.deleteUser(${u.id}, '${u.username}')" title="Permanently delete account">🗑️ Delete</button>` : ''
+              }
+            ` : `<span style="color:#94a3b8; font-size:0.82rem; font-weight:700; padding:4px 8px; background:rgba(255,255,255,0.05); border-radius:6px; border:1px solid rgba(255,255,255,0.08);">👁️ View Only</span>`}
           </div>
         </td>
       </tr>
@@ -1236,15 +1241,49 @@ function setupBulkImporter() {
 }
 
 function setupAdminTabs() {
+  const user = getCurrentUser();
+  const isModOnly = user && user.role === 'moderator';
+  const allowedTabsForMod = ['users', 'shoppurchases', 'bugs', 'suggestions', 'appeals'];
+
   const tabs = document.querySelectorAll('.admin-tab-btn');
+  
+  if (isModOnly) {
+    tabs.forEach(btn => {
+      const tab = btn.dataset.tab;
+      if (!allowedTabsForMod.includes(tab)) {
+        btn.style.display = 'none';
+      }
+    });
+    
+    // Set default active tab to 'users' since 'radar' is hidden
+    const radarTab = document.querySelector('.admin-tab-btn[data-tab="radar"]');
+    if (radarTab) radarTab.classList.remove('active');
+    const usersTab = document.querySelector('.admin-tab-btn[data-tab="users"]');
+    if (usersTab) {
+      usersTab.classList.add('active');
+      setTimeout(() => {
+        document.querySelectorAll('.admin-tab-content').forEach(c => {
+          if (c.id !== 'tab-users') c.style.display = 'none';
+        });
+        const targetContent = document.getElementById('tab-users');
+        if (targetContent) targetContent.style.display = 'block';
+        fetchUsers();
+      }, 50);
+    }
+  }
+
   tabs.forEach(btn => {
     btn.addEventListener('click', () => {
+      const targetTab = btn.dataset.tab;
+      if (isModOnly && !allowedTabsForMod.includes(targetTab)) {
+        return; // Security check
+      }
       tabs.forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
 
-      const targetTab = btn.dataset.tab;
+      const targetTabName = btn.dataset.tab;
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
-      const targetContent = document.getElementById(`tab-${targetTab}`);
+      const targetContent = document.getElementById(`tab-${targetTabName}`);
       if (targetContent) targetContent.style.display = 'block';
 
       if (targetTab === 'connections') fetchLiveConnections();

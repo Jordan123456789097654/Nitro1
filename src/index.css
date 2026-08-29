@@ -671,3 +671,9 @@ body > #google_vignette {
 .music-shelf::-webkit-scrollbar {
   display: none;
 }
+
+/* Optimize rendering of long lists of games */
+.game-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 180px;
+}

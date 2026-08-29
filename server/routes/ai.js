@@ -6,6 +6,7 @@ const { sendDiscordLog } = require('../discordLogger');
 const db = require('../db');
 const { checkMessageWithGroqModeration, getSafetyHotlineText } = require('../aiModeration');
 const { JWT_SECRET } = require('../secrets');
+const { emitSystemNotificationToOwners } = require('../chatSocket');
 
 // GET /api/ai/status (Public AI Status Check)
 router.get('/status', (req, res) => {
@@ -322,7 +323,7 @@ router.post('/ask', async (req, res) => {
         
         const io = req.app.get('io');
         if (io) {
-          io.to('admin_channel').emit('system_notification', {
+          emitSystemNotificationToOwners(io, {
             title: `🚨 AI Chatbot Prompt Flagged`,
             message: `@${username} (${display_name}) was flagged in AI Chatbot for ${aiCheck.category.toUpperCase()}: "${textQuery}"`,
             level: 'error'

@@ -11,9 +11,9 @@ function isOwner(user) {
   return user.role === 'owner' || (user.username || '').toLowerCase() === 'jordandaniels';
 }
 
-function isAdminOrOwner(user) {
+function isModeratorOrOwner(user) {
   if (!user) return false;
-  return ['admin', 'owner'].includes(user.role) || isOwner(user);
+  return ['moderator', 'owner'].includes(user.role) || isOwner(user);
 }
 
-module.exports = { isOwner, isAdminOrOwner };
+module.exports = { isOwner, isModeratorOrOwner };

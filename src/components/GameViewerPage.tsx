@@ -151,6 +151,22 @@ function applyMuteToFrame(iframe: HTMLIFrameElement | null, muted: boolean) {
   } catch {}
 }
 
+function bindPanicToFrame(frame: HTMLIFrameElement | null) {
+  if (!frame) return;
+  try {
+    frame.contentWindow?.addEventListener("keydown", (e: KeyboardEvent) => {
+      const panicKey = localStorage.getItem("panicKey");
+      const panicUrl = localStorage.getItem("panicUrl") || "https://classroom.google.com";
+      if (panicKey && e.key === panicKey) {
+        e.preventDefault();
+        window.top.location.href = panicUrl;
+      }
+    });
+  } catch (err) {
+    console.error("Could not bind panic key to iframe:", err);
+  }
+}
+
 export default function GameViewerPage({
   url,
   title,
@@ -194,6 +210,13 @@ export default function GameViewerPage({
   }, []);
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("game-active", { detail: { active: true } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("game-active", { detail: { active: false } }));
+    };
+  }, []);
+
+  useEffect(() => {
     const handler = () => {
       const inFs = !!document.fullscreenElement;
       setIsFullscreen(inFs);
@@ -227,6 +250,7 @@ export default function GameViewerPage({
           "position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;transition:opacity 0.25s ease;";
         frame.onload = () => {
           applyMuteToFrame(frame, muted);
+          bindPanicToFrame(frame);
         };
         void applyMuxForUrl(playUrl).then(() => {
           try {
@@ -327,7 +351,10 @@ export default function GameViewerPage({
                 pointerEvents: unlocked ? "auto" : "none",
               }}
               title={displayTitle}
-              onLoad={() => applyMuteToFrame(iframeRef.current, muted)}
+              onLoad={() => {
+                applyMuteToFrame(iframeRef.current, muted);
+                bindPanicToFrame(iframeRef.current);
+              }}
             />
           )}
         </div>

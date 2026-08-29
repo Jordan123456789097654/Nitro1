@@ -662,17 +662,20 @@ const db = {
         `);
       }
 
-      // Seed / Update owner and default admin accounts
+      // Seed / Update owner and default admin/mod accounts
       const b64AdminPass = Buffer.from('admin123').toString('base64');
       const adminExists = await pool.query("SELECT * FROM users WHERE LOWER(username) = 'jordandaniels'");
       if (!adminExists.rows.length) {
         await pool.query(
-          "INSERT INTO users (username, display_name, password_hash, role, bio, force_password_reset) VALUES ('jordandaniels', 'Jordan ⚡', $1, 'owner', 'Platform Creator & Owner 👑', false), ('admin', 'System Admin 🛡️', $1, 'admin', 'Platform Administrator', false), ('student1', 'Alex Smith', $1, 'member', 'Honor Roll Student', false)",
+          "INSERT INTO users (username, display_name, password_hash, role, bio, force_password_reset) VALUES ('jordandaniels', 'Jordan ⚡', $1, 'owner', 'Platform Creator & Owner 👑', false), ('admin', 'System Moderator 🛡️', $1, 'moderator', 'Platform Moderator', false), ('student1', 'Alex Smith', $1, 'member', 'Honor Roll Student', false)",
           [b64AdminPass]
         );
       } else {
         await pool.query("UPDATE users SET role = 'owner' WHERE LOWER(username) = 'jordandaniels'");
       }
+
+      // Migrate existing 'admin' roles to 'moderator'
+      await pool.query("UPDATE users SET role = 'moderator' WHERE role = 'admin'");
 
       // Ensure all users have force_password_reset set to false by default on startup
       await pool.query("UPDATE users SET force_password_reset = false WHERE force_password_reset = true");
@@ -1895,11 +1898,12 @@ Respond ONLY with valid JSON matching this exact schema:
           } catch (e) {}
 
         } else if (auditEvaluation === 'flagged_inappropriate') {
-          // Send a real-time warning to connected admins — no demotion
+          // Send a real-time warning to connected owners only
           try {
             const appIo = global.__nitro_io__;
             if (appIo) {
-              appIo.to('admin_channel').emit('system_notification', {
+              const { emitSystemNotificationToOwners } = require('./chatSocket');
+              emitSystemNotificationToOwners(appIo, {
                 title: `⚠️ AI Audit: Action Flagged`,
                 message: `@${admin_username}'s action "${action}" on @${target} was flagged as unprofessional (score: ${auditScore.toFixed(2)}). Feedback: ${auditFeedback}`,
                 level: 'warning'

@@ -115,6 +115,17 @@ export default function VantaBackground({ contained = false }: { contained?: boo
   const [network, setNetwork] = useState(readNetwork);
   const [bgImage, setBgImage] = useState(readBgImage);
   const [themeId, setThemeId] = useState(readThemeId);
+  const [isGameActive, setIsGameActive] = useState(false);
+
+  useEffect(() => {
+    const handleGameActive = (e: any) => {
+      setIsGameActive(!!e.detail?.active);
+    };
+    window.addEventListener("game-active", handleGameActive);
+    return () => {
+      window.removeEventListener("game-active", handleGameActive);
+    };
+  }, []);
 
   useEffect(() => {
     const sync = () => {
@@ -132,7 +143,7 @@ export default function VantaBackground({ contained = false }: { contained?: boo
   }, []);
 
   useEffect(() => {
-    if (bgImage) {
+    if (isGameActive || bgImage) {
       try {
         fogEffect.current?.destroy?.();
       } catch {}
@@ -213,10 +224,10 @@ export default function VantaBackground({ contained = false }: { contained?: boo
         ro?.disconnect();
       } catch {}
     };
-  }, [bg, themeId, bgImage, contained]);
+  }, [bg, themeId, bgImage, contained, isGameActive]);
 
   useEffect(() => {
-    if (!network || bgImage) {
+    if (isGameActive || !network || bgImage) {
       try {
         netEffect.current?.destroy?.();
       } catch {}
@@ -249,7 +260,7 @@ export default function VantaBackground({ contained = false }: { contained?: boo
       }
       fitVantaCanvas(netRef.current, netEffect.current, contained);
     } catch {}
-  }, [network, themeId, bgImage, contained]);
+  }, [network, themeId, bgImage, contained, isGameActive]);
 
   useEffect(() => {
     return () => {

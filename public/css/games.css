@@ -169,6 +169,8 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   user-select: none;
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 180px;
 }
 
 .game-card:hover {

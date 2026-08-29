@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAppealModal();
   initSuggestAndBugModals();
   initWeatherClock();
-  window.openPublicProfile = openPublicProfile;
 
   initAuth((user) => {
     checkStatusAndAnnouncements();
@@ -83,8 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  window.checkUpdateLogs = checkUpdateLogs;
-  window.checkStatusAndAnnouncements = checkStatusAndAnnouncements;
   initDevToolsProtection();
 
   const adminLoginBtn = document.getElementById('maintenance-admin-login-btn');
@@ -339,6 +336,7 @@ function initUpdateLogsPopup() {
 }
 
 // Check Maintenance and Display Announcement Banner
+window.checkStatusAndAnnouncements = checkStatusAndAnnouncements;
 export async function checkStatusAndAnnouncements() {
   try {
     const res = await fetch('/api/status');
@@ -751,7 +749,22 @@ function initParticleCanvas() {
     alpha: Math.random() * 0.5 + 0.2
   }));
 
+  let animationId = null;
+  let isPaused = false;
+
+  function checkPauseState() {
+    const isTabHidden = document.visibilityState === 'hidden';
+    const isGameActive = document.getElementById('player-modal')?.classList.contains('active');
+    return isTabHidden || isGameActive;
+  }
+
   function animate() {
+    if (checkPauseState()) {
+      isPaused = true;
+      animationId = null;
+      return;
+    }
+
     ctx.clearRect(0, 0, width, height);
 
     particles.forEach(p => {
@@ -769,8 +782,36 @@ function initParticleCanvas() {
       ctx.fill();
     });
 
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
   }
+
+  function startOrResume() {
+    if (isPaused || !animationId) {
+      isPaused = false;
+      if (!animationId) {
+        animationId = requestAnimationFrame(animate);
+      }
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!checkPauseState()) {
+      startOrResume();
+    }
+  });
+
+  setInterval(() => {
+    const shouldPause = checkPauseState();
+    if (shouldPause && !isPaused) {
+      isPaused = true;
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    } else if (!shouldPause && isPaused) {
+      startOrResume();
+    }
+  }, 500);
 
   animate();
 }
@@ -938,9 +979,9 @@ function setupBadgesModal() {
   if (pubCloseBtn && pubModal) {
     pubCloseBtn.addEventListener('click', () => pubModal.classList.remove('active'));
   }
-  window.openPublicProfile = openPublicProfile;
 }
 
+window.openPublicProfile = openPublicProfile;
 export async function openPublicProfile(username) {
   if (!username) return;
   const modal = document.getElementById('public-profile-modal');

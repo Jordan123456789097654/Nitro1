@@ -1086,6 +1086,21 @@ export async function openGame(slug) {
       iframe.src = getProxiedUrl(activeGame.embed_content, activeGame.category === 'Apps');
     }
 
+    iframe.addEventListener('load', () => {
+      try {
+        iframe.contentWindow.addEventListener('keydown', (e) => {
+          const currentPanicKey = localStorage.getItem('nitro_panic_key') || ']';
+          if (e.key === currentPanicKey) {
+            e.preventDefault();
+            const destUrl = localStorage.getItem('nitro_panic_url') || 'https://classroom.google.com';
+            window.top.location.replace(destUrl);
+          }
+        });
+      } catch (err) {
+        console.error('Could not bind panic listener to iframe:', err);
+      }
+    });
+
     frameWrapper.appendChild(iframe);
     modal.classList.add('active');
 
