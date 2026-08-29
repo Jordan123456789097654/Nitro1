@@ -1440,7 +1440,6 @@ export async function openPublicProfile(username) {
 
     badgesListEl.innerHTML = staticHtml + customHtml;
   }
-  }
 
   const addFriendBtn = document.getElementById('pub-profile-add-friend-btn');
   if (addFriendBtn) {

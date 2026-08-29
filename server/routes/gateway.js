@@ -279,32 +279,36 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
 
         // Intercept HTMLScriptElement.prototype.src for dynamic Webpack chunk imports
         try {
-          var scriptSrcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
-          if (scriptSrcDesc && scriptSrcDesc.set) {
-            Object.defineProperty(HTMLScriptElement.prototype, 'src', {
-              get: function() { return deproxify(scriptSrcDesc.get.call(this)); },
-              set: function(val) {
-                scriptSrcDesc.set.call(this, proxify(val));
-              },
-              configurable: true,
-              enumerable: true
-            });
-          }
+          Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+            get: function() { return deproxify(this.getAttribute('src') || ''); },
+            set: function(val) { this.setAttribute('src', proxify(val)); },
+            configurable: true,
+            enumerable: true
+          });
         } catch(e) {}
 
         // Intercept HTMLLinkElement.prototype.href for CSS & dynamic font loads
         try {
-          var linkHrefDesc = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href');
-          if (linkHrefDesc && linkHrefDesc.set) {
-            Object.defineProperty(HTMLLinkElement.prototype, 'href', {
-              get: function() { return deproxify(linkHrefDesc.get.call(this)); },
-              set: function(val) {
-                linkHrefDesc.set.call(this, proxify(val));
-              },
-              configurable: true,
-              enumerable: true
-            });
-          }
+          Object.defineProperty(HTMLLinkElement.prototype, 'href', {
+            get: function() { return deproxify(this.getAttribute('href') || ''); },
+            set: function(val) { this.setAttribute('href', proxify(val)); },
+            configurable: true,
+            enumerable: true
+          });
+        } catch(e) {}
+
+        // Intercept global setAttribute on Element prototype
+        try {
+          var _origSetAttr = Element.prototype.setAttribute;
+          Element.prototype.setAttribute = function(name, val) {
+            var lower = (this.tagName || '').toLowerCase();
+            if (['script', 'img', 'link', 'iframe', 'audio', 'video', 'a', 'form'].indexOf(lower) !== -1) {
+              if ((name === 'src' || name === 'href' || name === 'action') && val) {
+                val = proxify(val);
+              }
+            }
+            return _origSetAttr.call(this, name, val);
+          };
         } catch(e) {}
 
         // Intercept document.createElement for dynamic scripts/styles
@@ -314,12 +318,12 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
             var el = _createElement.call(document, tagName, options);
             var lower = (tagName || '').toLowerCase();
             if (['script', 'img', 'link', 'iframe', 'audio', 'video'].indexOf(lower) !== -1) {
-              var _origSetAttr = el.setAttribute;
+              var _origElSetAttr = el.setAttribute;
               el.setAttribute = function(name, val) {
                 if ((name === 'src' || name === 'href') && val) {
                   val = proxify(val);
                 }
-                return _origSetAttr.call(this, name, val);
+                return _origElSetAttr.call(this, name, val);
               };
 
               if (lower === 'script' || lower === 'img' || lower === 'iframe' || lower === 'audio' || lower === 'video') {
@@ -696,18 +700,26 @@ router.all('/', async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
 
-    if (contentType.includes('text/html')) {
+    let finalContentType = contentType;
+    const lowerPath = urlObj.pathname.toLowerCase();
+    if (lowerPath.endsWith('.css') || urlObj.href.includes('.css?') || urlObj.href.includes('/skin.css') || urlObj.href.includes('/skin/')) {
+      finalContentType = 'text/css';
+    } else if (lowerPath.endsWith('.js') || lowerPath.endsWith('.mjs') || urlObj.href.includes('.js?') || urlObj.href.includes('/b.js')) {
+      finalContentType = 'application/javascript';
+    }
+
+    if (finalContentType.includes('text/html')) {
       const htmlText = buffer.toString('utf-8');
       const transformed = transformHtmlResponse(htmlText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.send(transformed);
-    } else if (contentType.includes('text/css')) {
+    } else if (finalContentType.includes('text/css')) {
       const cssText = buffer.toString('utf-8');
       const transformed = rewriteCssUrls(cssText, finalUrl, gatewayPrefix, authSuffix);
-      res.setHeader('Content-Type', 'text/css');
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
       return res.send(transformed);
     } else {
-      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Type', finalContentType);
       return res.send(buffer);
     }
   } catch (err) {
