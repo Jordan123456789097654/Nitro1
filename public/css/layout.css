@@ -1224,3 +1224,28 @@ body.pseudo-fullscreen {
   overflow: hidden !important;
 }
 
+/* Glassmorphism Performance Override (Flat UI Mode) */
+html.no-glassmorphism *,
+body.no-glassmorphism * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.no-glassmorphism .modal-overlay,
+html.no-glassmorphism .modal-card,
+html.no-glassmorphism .chat-container,
+html.no-glassmorphism .chat-sidebar,
+html.no-glassmorphism .chat-messages,
+html.no-glassmorphism .nav-sidebar,
+html.no-glassmorphism .top-navbar,
+html.no-glassmorphism .card,
+html.no-glassmorphism .glass-panel,
+html.no-glassmorphism .theme-settings-box,
+html.no-glassmorphism .themes-sidebar-panel,
+html.no-glassmorphism .studio-main-panel,
+html.no-glassmorphism .playlist-overlay,
+html.no-glassmorphism .popup-overlay {
+  background-color: var(--card-bg, #0b0f19) !important;
+  background-image: none !important;
+}
+

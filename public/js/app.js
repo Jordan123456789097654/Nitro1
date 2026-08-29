@@ -24,7 +24,7 @@ export const FAVICON_MAP = {
   drive: 'https://www.google.com/s2/favicons?domain=drive.google.com&sz=128',
   docs: 'https://www.google.com/s2/favicons?domain=docs.google.com&sz=128',
   github: 'https://www.google.com/s2/favicons?domain=github.com&sz=128',
-  canvas: 'https://www.canvas.instructure.com/favicon.ico',
+  canvas: 'https://www.wabash.edu/images2/technology/canvas.png',
   desmos: 'https://www.desmos.com/favicon.ico',
   khan: 'https://www.khanacademy.org/favicon.ico',
   quizlet: 'https://quizlet.com/favicon.ico',
@@ -201,7 +201,7 @@ function initPresetDisguiseSwitcher() {
     wikipedia: { title: 'Wikipedia, the free encyclopedia', icon: FAVICON_MAP.wikipedia },
     classroom: { title: 'Google Classroom - Home', icon: FAVICON_MAP.classroom },
     docs: { title: 'Google Docs - Workspace', icon: FAVICON_MAP.docs },
-    canvas: { title: 'Dashboard | Canvas LMS', icon: FAVICON_MAP.canvas },
+    canvas: { title: 'Dashboard', icon: FAVICON_MAP.canvas },
     ixl: { title: 'IXL | Personalized Learning', icon: FAVICON_MAP.ixl }
   };
 
@@ -262,6 +262,29 @@ function initToolsDropdown() {
 
 // Notification Preference Toggles
 function initNotificationPreferenceToggles() {
+  // Glassmorphism Performance Toggle
+  const disableGlassCheckbox = document.getElementById('disable-glass-checkbox');
+  const applyGlassmorphismState = (disabled) => {
+    if (disabled) {
+      document.documentElement.classList.add('no-glassmorphism');
+      document.body.classList.add('no-glassmorphism');
+    } else {
+      document.documentElement.classList.remove('no-glassmorphism');
+      document.body.classList.remove('no-glassmorphism');
+    }
+  };
+
+  const isGlassDisabled = localStorage.getItem('nitro_disable_glass') === 'true';
+  applyGlassmorphismState(isGlassDisabled);
+
+  if (disableGlassCheckbox) {
+    disableGlassCheckbox.checked = isGlassDisabled;
+    disableGlassCheckbox.addEventListener('change', (e) => {
+      localStorage.setItem('nitro_disable_glass', e.target.checked ? 'true' : 'false');
+      applyGlassmorphismState(e.target.checked);
+    });
+  }
+
   const disableAnnCheckbox = document.getElementById('disable-announcements-checkbox');
   const disableUpdatesCheckbox = document.getElementById('disable-updates-checkbox');
 

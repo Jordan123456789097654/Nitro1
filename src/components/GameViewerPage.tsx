@@ -240,9 +240,28 @@ export default function GameViewerPage({
     armPx().catch(() => {});
 
     const tryCreate = () => {
-      if (!pxReady()) return false;
       try {
         if (frameHostRef.current?.parentNode) return true;
+        
+        if (!pxReady()) {
+          const token = localStorage.getItem("nitro_jwt_token") || "";
+          const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
+          const proxiedUrl = `/api/gateway?url=${encodeURIComponent(playUrl)}${tokenParam}&engine=chrome`;
+          
+          const frame = document.createElement("iframe");
+          frame.style.cssText =
+            "position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;transition:opacity 0.25s ease;";
+          frame.onload = () => {
+            applyMuteToFrame(frame, muted);
+            bindPanicToFrame(frame);
+          };
+          frame.src = proxiedUrl;
+          frameHostRef.current = frame;
+          wrapper.appendChild(frame);
+          requestAnimationFrame(() => applyZoom(zoomRef.current));
+          return true;
+        }
+
         const scFrame = pxCreateFrame();
         if (!scFrame) return false;
         const frame = scFrame.frame as HTMLIFrameElement;

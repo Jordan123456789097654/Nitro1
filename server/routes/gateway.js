@@ -561,7 +561,7 @@ router.all('/', async (req, res) => {
     headers: fetchHeaders,
     redirect: 'follow',
     timeout: 15000,
-    compress: false,
+    compress: true,
     agent
   };
 
