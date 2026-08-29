@@ -739,6 +739,20 @@ const db = {
         await pool.query("UPDATE users SET role = 'owner' WHERE LOWER(username) = 'jordandaniels'");
       }
 
+      // Seed update log for today
+      const updateLogExists = await pool.query("SELECT id FROM update_logs WHERE version = '2.1.0'");
+      if (updateLogExists.rows.length === 0) {
+        await pool.query(`
+          INSERT INTO update_logs (version, title, content, author)
+          VALUES (
+            '2.1.0', 
+            '🚀 Dynamic Profile Shop, Daily Spin Badges & Shadowban release', 
+            '### 1. 🕵️ Supreme Owner Shadowban System\nIntroduced a silent shadowban system. Restricted to platform Owners only, shadowbanned users can still chat normally but their messages are silently kept from being broadcast to anyone else.\n\n### 2. 🛍️ Dynamic Cosmetics Store\nAdded Avatar Borders, Profile Banners, and Custom Chat Fonts. Buy items with your daily coins and equip/unequip them directly from the store!\n\n### 3. 🎡 Daily Spin Badges\nThe Daily Rewards wheel now contains a rare 💎 Lucky Spin segment that rewards players with a permanent profile badge.\n\n### 4. 🏅 Custom Admin Badge Creator\nAn all-new control room inside the admin panel allowing administrators to design custom badges and grant them directly to users.\n\n### 5. ⚡ WebGL 3D Rendering Performance Fixes\nOptimized ResizeObservers and WebGL layout reflows on the background canvas to fix page lag entirely.', 
+            'Supreme Owner'
+          )
+        `);
+      }
+
       // Migrate existing 'admin' roles to 'moderator'
       await pool.query("UPDATE users SET role = 'moderator' WHERE role = 'admin'");
 
