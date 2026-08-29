@@ -193,9 +193,11 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
   html = html.replace(/if\s*\(\s*top\s*!==?\s*self\s*\)[^}]*\}/gi, '');
   html = html.replace(/top\.location\s*=\s*self\.location/gi, '');
 
-  // Rewrite href, src, action attributes
-  html = html.replace(/\b(href|src|action)\s*=\s*(['"])([^'"]+)\2/gi, (match, attr, q, url) => {
-    return `${attr}=${q}${proxifyTargetUrl(url, baseUrl, gatewayPrefix, authSuffix)}${q}`;
+  // Rewrite href, src, action attributes (handles both quoted and unquoted attributes)
+  html = html.replace(/\b(href|src|action)\s*=\s*(?:(['"])(.*?)\2|([^\s>]+))/gi, (match, attr, q, quotedVal, unquotedVal) => {
+    const val = quotedVal !== undefined ? quotedVal : unquotedVal;
+    const quote = q !== undefined ? q : '';
+    return `${attr}=${quote}${proxifyTargetUrl(val, baseUrl, gatewayPrefix, authSuffix)}${quote}`;
   });
 
   // Inject Shield Interceptor Script into <head>
@@ -369,7 +371,18 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
         var _fetch = window.fetch;
         if (_fetch) {
           window.fetch = function(url, opts) {
-            if (typeof url === 'string') url = proxify(url);
+            if (url) {
+              if (typeof url === 'string') {
+                url = proxify(url);
+              } else if (url instanceof URL) {
+                url = proxify(url.href);
+              } else if (typeof url === 'object' && url.url) {
+                try {
+                  var newRequest = new Request(proxify(url.url), url);
+                  url = newRequest;
+                } catch(e) {}
+              }
+            }
             return _fetch(url, opts);
           };
         }
@@ -378,7 +391,11 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
         var _xhrOpen = XMLHttpRequest.prototype.open;
         if (_xhrOpen) {
           XMLHttpRequest.prototype.open = function(m, u, a, user, p) {
-            return _xhrOpen.call(this, m, proxify(u), a, user, p);
+            if (u) {
+              if (typeof u === 'string') u = proxify(u);
+              else if (u instanceof URL) u = proxify(u.href);
+            }
+            return _xhrOpen.call(this, m, u, a, user, p);
           };
         }
 
