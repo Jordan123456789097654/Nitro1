@@ -251,6 +251,25 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
           }
         } catch(e) {}
 
+        function deproxify(u) {
+          if (!u || typeof u !== 'string') return u;
+          if (u.includes('/api/gateway?url=')) {
+            try {
+              var search = u.split('?url=')[1] || '';
+              var encoded = search.split('&')[0] || '';
+              return decodeURIComponent(encoded);
+            } catch(e) {}
+          }
+          if (u.includes('/gateway?url=')) {
+            try {
+              var search = u.split('?url=')[1] || '';
+              var encoded = search.split('&')[0] || '';
+              return decodeURIComponent(encoded);
+            } catch(e) {}
+          }
+          return u;
+        }
+
         function proxify(u) {
           if (!u || typeof u !== 'string' || u.startsWith('data:') || u.startsWith('blob:') || u.includes('/api/gateway')) return u;
           try {
@@ -263,7 +282,7 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
           var scriptSrcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
           if (scriptSrcDesc && scriptSrcDesc.set) {
             Object.defineProperty(HTMLScriptElement.prototype, 'src', {
-              get: function() { return scriptSrcDesc.get.call(this); },
+              get: function() { return deproxify(scriptSrcDesc.get.call(this)); },
               set: function(val) {
                 scriptSrcDesc.set.call(this, proxify(val));
               },
@@ -278,7 +297,7 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
           var linkHrefDesc = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href');
           if (linkHrefDesc && linkHrefDesc.set) {
             Object.defineProperty(HTMLLinkElement.prototype, 'href', {
-              get: function() { return linkHrefDesc.get.call(this); },
+              get: function() { return deproxify(linkHrefDesc.get.call(this)); },
               set: function(val) {
                 linkHrefDesc.set.call(this, proxify(val));
               },
@@ -302,6 +321,41 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
                 }
                 return _origSetAttr.call(this, name, val);
               };
+
+              if (lower === 'script' || lower === 'img' || lower === 'iframe' || lower === 'audio' || lower === 'video') {
+                var _src = '';
+                Object.defineProperty(el, 'src', {
+                  get: function() { return deproxify(_src); },
+                  set: function(val) {
+                    _src = val;
+                    var proxied = proxify(val);
+                    try {
+                      _origSetAttr.call(el, 'src', proxied);
+                    } catch(e) {
+                      try { el.src = proxied; } catch(err) {}
+                    }
+                  },
+                  configurable: true,
+                  enumerable: true
+                });
+              }
+              if (lower === 'link') {
+                var _href = '';
+                Object.defineProperty(el, 'href', {
+                  get: function() { return deproxify(_href); },
+                  set: function(val) {
+                    _href = val;
+                    var proxied = proxify(val);
+                    try {
+                      _origSetAttr.call(el, 'href', proxied);
+                    } catch(e) {
+                      try { el.href = proxied; } catch(err) {}
+                    }
+                  },
+                  configurable: true,
+                  enumerable: true
+                });
+              }
             }
             return el;
           };
