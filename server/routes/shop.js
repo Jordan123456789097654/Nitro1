@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const pool = db.pool;
 const jwt = require('jsonwebtoken');
 
 const { JWT_SECRET } = require('../secrets');
@@ -241,31 +240,6 @@ router.post('/equip', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to toggle equipment status.' });
-  }
-});
-
-// POST /api/shop/buy-premium - Purchase 30 days of Premium for 1,000 coins
-router.post('/buy-premium', async (req, res) => {
-  const user = await getAuthUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
-
-  const PRICE = 1000;
-  if ((user.coins || 0) < PRICE) {
-    return res.status(400).json({ error: 'Not enough coins. Premium costs 1000 coins.' });
-  }
-
-  try {
-    const newCoins = user.coins - PRICE;
-    await pool.query('UPDATE users SET coins = $1 WHERE id = $2', [newCoins, user.id]);
-    await db.buyPremium(user.id, 30);
-
-    res.json({
-      success: true,
-      message: '🎉 Nitro Premium Pass activated! Enjoy your premium perks.',
-      newCoins
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to purchase Premium Pass.' });
   }
 });
 

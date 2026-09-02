@@ -2721,31 +2721,4 @@ router.delete('/badges/:key', async (req, res) => {
   }
 });
 
-// POST /api/admin/panic-mode - Owner-only: toggle the site disguise (panic mode)
-router.post('/panic-mode', async (req, res) => {
-  if (!isOwner(req.adminUser)) {
-    return res.status(403).json({ error: 'Only the platform Owner can toggle panic mode.' });
-  }
-  try {
-    const { enabled } = req.body;
-    const state = await db.setPanicMode(Boolean(enabled));
-    await db.createModerationLog(
-      state ? 'PANIC_MODE_ON' : 'PANIC_MODE_OFF',
-      req.adminUser.username,
-      'SYSTEM',
-      state ? '🚨 Panic mode activated — site disguised.' : '✅ Panic mode deactivated — site restored.'
-    );
-    sendDiscordLog({
-      category: 'moderation',
-      action: state ? 'PANIC_MODE_ON' : 'PANIC_MODE_OFF',
-      admin: req.adminUser.username,
-      target: 'SYSTEM',
-      details: state ? '🚨 Site disguise activated by Owner.' : '✅ Site disguise deactivated by Owner.'
-    });
-    res.json({ success: true, panic_mode: state });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to toggle panic mode.' });
-  }
-});
-
 module.exports = router;

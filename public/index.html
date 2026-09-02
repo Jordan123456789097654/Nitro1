@@ -2416,30 +2416,6 @@
         </div>
       </div>
 
-      <!-- OWNER-ONLY: SHUTDOWN / Panic Mode Button -->
-      <div id="owner-panic-zone" style="display:none; margin-bottom:18px; flex-direction:column; align-items:flex-end;">
-        <button id="panic-mode-btn" onclick="window.triggerPanicMode()" style="background:linear-gradient(135deg,#7f1d1d,#991b1b,#dc2626);color:#fff;border:2px solid #ef4444;border-radius:10px;padding:13px 26px;font-size:0.95rem;font-weight:900;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;box-shadow:0 0 24px rgba(239,68,68,0.55);transition:all 0.2s;">
-          &#9760;&#65039; SHUTDOWN WEBSITE
-        </button>
-        <div style="font-size:0.7rem;color:#ef4444;margin-top:4px;font-weight:700;letter-spacing:0.5px;">OWNER ONLY &mdash; ACTIVATES SITE DISGUISE</div>
-      </div>
-
-      <!-- Squid Game Panic Countdown Overlay -->
-      <div id="squid-panic-overlay" style="display:none;position:fixed;inset:0;background:#000;z-index:99999;flex-direction:column;align-items:center;justify-content:center;font-family:'Segoe UI',sans-serif;">
-        <div style="text-align:center;">
-          <div id="squid-shape" style="font-size:7rem;margin-bottom:20px;">&#9651;</div>
-          <div id="squid-title" style="font-size:2.6rem;font-weight:900;color:#ef4444;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">SITE SHUTDOWN</div>
-          <div id="squid-subtitle" style="font-size:1rem;color:#fca5a5;margin-bottom:32px;">Disguise activating in...</div>
-          <div id="squid-countdown" style="font-size:7rem;font-weight:900;color:#fff;line-height:1;">5</div>
-          <div id="squid-status" style="font-size:0.88rem;color:#64748b;margin-top:24px;"></div>
-        </div>
-      </div>
-      <style>
-        @keyframes squidPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.15);opacity:0.65;}}
-        #squid-shape{animation:squidPulse 0.9s infinite;}
-        #panic-mode-btn:hover{box-shadow:0 0 50px rgba(239,68,68,0.95)!important;transform:scale(1.05);}
-      </style>
-
       <div class="admin-dashboard-container" style="margin-top: 16px;">
         <!-- Maintenance Mode Bar -->
         <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; backdrop-filter: blur(12px);">

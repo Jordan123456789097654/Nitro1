@@ -197,31 +197,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// 🚨 PANIC MODE: Disguise the entire site as an innocent educational platform
-app.use(async (req, res, next) => {
-  // Always allow the owner through and allow API calls so they can turn it off
-  const isOwnerReq = req.user && (req.user.role === 'owner' || (req.user.username && req.user.username.toLowerCase() === 'jordandaniels'));
-  if (isOwnerReq) return next();
-  // Allow the panic-mode toggle and status endpoints to pass through
-  if (req.path.startsWith('/api/status') || req.path.startsWith('/api/admin/panic-mode')) return next();
-
-  try {
-    const isPanic = await db.getPanicMode();
-    if (isPanic) {
-      // For API requests, return a 503 with no game-related info
-      if (req.path.startsWith('/api/')) {
-        return res.status(503).json({ error: 'Service temporarily unavailable.' });
-      }
-      // For all HTML page requests, serve the disguise page
-      if (req.accepts('html')) {
-        return res.sendFile('disguise.html', { root: require('path').join(__dirname, '../public') });
-      }
-    }
-  } catch (e) {}
-
-  next();
-});
-
 // Global Authentication Enforcement for non-API routes
 app.use((req, res, next) => {
   // Allow public assets, root, embed, auth, and API routes
@@ -251,7 +226,6 @@ app.use('/js', (req, res, next) => {
 app.get('/api/status', async (req, res) => {
   try {
     const isMaintenance = await db.getMaintenanceMode();
-    const isPanicMode = await db.getPanicMode();
     const isOwner = req.user && (req.user.role === 'owner' || (req.user.username && req.user.username.toLowerCase() === 'jordandaniels'));
     const isAdmin = req.user && ['admin', 'owner'].includes(req.user.role);
     const announcement = await db.getActiveAnnouncement();
@@ -260,7 +234,6 @@ app.get('/api/status', async (req, res) => {
 
     res.json({
       maintenance_mode: isMaintenance,
-      panic_mode: isPanicMode,
       is_owner: isOwner,
       is_admin: isAdmin,
       announcement: announcement,
@@ -270,7 +243,6 @@ app.get('/api/status', async (req, res) => {
   } catch (err) {
     res.json({
       maintenance_mode: false,
-      panic_mode: false,
       is_owner: false,
       is_admin: false,
       announcement: null,

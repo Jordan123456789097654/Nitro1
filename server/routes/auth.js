@@ -408,12 +408,6 @@ router.post('/login', async (req, res) => {
       chat_font: user.chat_font || '',
       role: user.role,
       force_password_reset: Boolean(user.force_password_reset),
-      is_premium: user.is_premium,
-      premium_until: user.premium_until,
-      panic_url: user.panic_url,
-      panic_key: user.panic_key,
-      tab_title: user.tab_title,
-      tab_favicon: user.tab_favicon,
       token
     };
     req.session.user = userSession;
@@ -509,50 +503,6 @@ router.get('/pending-notifications', async (req, res) => {
 
   const wins = await db.getUnseenRaffleWins(userId);
   res.json({ success: true, raffle_wins: wins });
-});
-
-// POST /api/auth/premium-settings - Update premium settings (panic settings, tab disguises)
-router.post('/premium-settings', async (req, res) => {
-  let userId = null;
-
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    try {
-      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
-      userId = decoded.id;
-    } catch (e) {}
-  } else if (req.cookies && req.cookies.nitro_jwt_token) {
-    try {
-      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
-      userId = decoded.id;
-    } catch (e) {}
-  } else if (req.session && req.session.user) {
-    userId = req.session.user.id;
-  }
-
-  if (!userId) return res.status(401).json({ error: 'Not authenticated.' });
-
-  try {
-    const user = await db.getUserById(userId);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-
-    const isPremium = user.is_premium && user.premium_until && new Date(user.premium_until) > new Date();
-    if (!isPremium) {
-      return res.status(403).json({ error: '🚫 Premium features are locked. Please purchase a Nitro Premium Pass in the Shop.' });
-    }
-
-    const { panic_url, panic_key, tab_title, tab_favicon } = req.body;
-    await db.updatePremiumSettings(userId, {
-      panic_url: panic_url || 'https://www.nitromath.com',
-      panic_key: panic_key || 'Escape',
-      tab_title: tab_title || '',
-      tab_favicon: tab_favicon || ''
-    });
-
-    res.json({ success: true, message: 'Settings saved successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update premium settings.' });
-  }
 });
 
 // Logout
