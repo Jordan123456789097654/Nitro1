@@ -539,6 +539,16 @@ const db = {
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_banner VARCHAR(255) DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_font VARCHAR(100) DEFAULT '';");
 
+      // Premium System Migrations
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT false;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMP;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS panic_url TEXT DEFAULT 'https://www.nitromath.com';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS panic_key VARCHAR(50) DEFAULT 'Escape';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS tab_title VARCHAR(255) DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS tab_favicon TEXT DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_spins_today INT DEFAULT 0;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_spin_date VARCHAR(10) DEFAULT '';");
+
       // Custom Badges tables
       await pool.query(`
         CREATE TABLE IF NOT EXISTS badges (
@@ -836,6 +846,16 @@ const db = {
 
   async setMaintenanceMode(enabled) {
     await this.setSetting('maintenance_mode', enabled ? 'true' : 'false');
+    return Boolean(enabled);
+  },
+
+  async getPanicMode() {
+    const val = await this.getSetting('panic_mode');
+    return val === 'true';
+  },
+
+  async setPanicMode(enabled) {
+    await this.setSetting('panic_mode', enabled ? 'true' : 'false');
     return Boolean(enabled);
   },
 
@@ -1157,6 +1177,43 @@ const db = {
       console.error('getUserById error:', e.message);
     }
     return null;
+  },
+
+  async buyPremium(userId, durationDays = 30) {
+    try {
+      const user = await this.getUserById(userId);
+      if (!user) throw new Error('User not found.');
+
+      let newPremiumUntil = new Date();
+      if (user.is_premium && user.premium_until && new Date(user.premium_until) > new Date()) {
+        newPremiumUntil = new Date(user.premium_until);
+      }
+      newPremiumUntil.setDate(newPremiumUntil.getDate() + durationDays);
+
+      await pool.query(
+        'UPDATE users SET is_premium = true, premium_until = $1 WHERE id = $2',
+        [newPremiumUntil, userId]
+      );
+      clearUserCache(userId);
+      return true;
+    } catch (e) {
+      console.error('buyPremium error:', e.message);
+      throw e;
+    }
+  },
+
+  async updatePremiumSettings(userId, { panic_url, panic_key, tab_title, tab_favicon }) {
+    try {
+      await pool.query(
+        'UPDATE users SET panic_url = $1, panic_key = $2, tab_title = $3, tab_favicon = $4 WHERE id = $5',
+        [panic_url, panic_key, tab_title, tab_favicon, userId]
+      );
+      clearUserCache(userId);
+      return true;
+    } catch (e) {
+      console.error('updatePremiumSettings error:', e.message);
+      throw e;
+    }
   },
 
   async setUserCoinsXp(userId, { coins, xp }) {
@@ -3419,20 +3476,36 @@ Respond ONLY with valid JSON matching this exact schema:
 
   async claimDailySpin(userId) {
     try {
-      const userRes = await pool.query('SELECT last_spin_at, coins, xp FROM users WHERE id = $1', [userId]);
+      const userRes = await pool.query('SELECT last_spin_at, coins, xp, is_premium, premium_until, daily_spins_today, last_spin_date FROM users WHERE id = $1', [userId]);
       if (!userRes.rows.length) return { error: 'User not found.' };
       const user = userRes.rows[0];
 
-      const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
-      if (user.last_spin_at) {
-        const lastSpin = new Date(user.last_spin_at).getTime();
-        const diff = Date.now() - lastSpin;
-        if (diff < COOLDOWN_MS) {
-          const totalMinsLeft = Math.ceil((COOLDOWN_MS - diff) / (60 * 1000));
-          const hoursLeft = Math.floor(totalMinsLeft / 60);
-          const minsLeft = totalMinsLeft % 60;
-          const timeStr = hoursLeft > 0 ? `${hoursLeft}h ${minsLeft}m` : `${minsLeft}m`;
-          return { error: `Wheel is on cooldown. Try again in ${timeStr}.` };
+      const isPremium = user.is_premium && user.premium_until && new Date(user.premium_until) > new Date();
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      let newSpinsToday = 1;
+      if (isPremium) {
+        if (user.last_spin_date === todayStr) {
+          if (user.daily_spins_today >= 3) {
+            return { error: '⛔ Premium limit reached! You have already spun the wheel 3 times today. Come back tomorrow!' };
+          }
+          newSpinsToday = (user.daily_spins_today || 0) + 1;
+        } else {
+          newSpinsToday = 1;
+        }
+      } else {
+        // Standard user: 4-hour cooldown
+        const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
+        if (user.last_spin_at) {
+          const lastSpin = new Date(user.last_spin_at).getTime();
+          const diff = Date.now() - lastSpin;
+          if (diff < COOLDOWN_MS) {
+            const totalMinsLeft = Math.ceil((COOLDOWN_MS - diff) / (60 * 1000));
+            const hoursLeft = Math.floor(totalMinsLeft / 60);
+            const minsLeft = totalMinsLeft % 60;
+            const timeStr = hoursLeft > 0 ? `${hoursLeft}h ${minsLeft}m` : `${minsLeft}m`;
+            return { error: `Wheel is on cooldown. Standard users can spin once every 4 hours. Try again in ${timeStr}.` };
+          }
         }
       }
 
@@ -3467,13 +3540,13 @@ Respond ONLY with valid JSON matching this exact schema:
         text: wonSegment.label
       };
 
-      // Update user coins, XP and spin time
+      // Update user coins, XP, spin count, and last spin date
       const newCoins = (user.coins || 0) + reward.coins;
       const newXp = (user.xp || 0) + reward.xp;
       const now = new Date();
       await pool.query(
-        'UPDATE users SET coins = $1, xp = $2, last_spin_at = $3 WHERE id = $4',
-        [newCoins, newXp, now, userId]
+        'UPDATE users SET coins = $1, xp = $2, last_spin_at = $3, daily_spins_today = $4, last_spin_date = $5 WHERE id = $6',
+        [newCoins, newXp, now, newSpinsToday, todayStr, userId]
       );
 
       // Grant badge if segment has badge_reward_key

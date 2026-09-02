@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user && ['admin', 'owner'].includes(user.role)) {
       loadAdminData();
     }
+    initOwnerPanicZone(user);
   });
 
   initDevToolsProtection();
@@ -408,6 +409,21 @@ export async function checkStatusAndAnnouncements() {
       }
     } else {
       annBanner.style.display = 'none';
+    }
+
+    // Sync the panic mode button state for the owner
+    const localUser = getCurrentUser();
+    const ownerCheck = localUser && (localUser.role === 'owner' || (localUser.username && localUser.username.toLowerCase() === 'jordandaniels'));
+    if (ownerCheck && data.panic_mode) {
+      const btn = document.getElementById('panic-mode-btn');
+      if (btn && !btn.dataset.panicSynced) {
+        btn.dataset.panicSynced = '1';
+        btn.style.background = 'linear-gradient(135deg,#14532d,#166534,#16a34a)';
+        btn.style.borderColor = '#22c55e';
+        btn.style.boxShadow = '0 0 24px rgba(34,197,94,0.55)';
+        btn.textContent = '✅ RESTORE WEBSITE';
+        btn.onclick = window.restoreSiteFromPanic;
+      }
     }
   } catch (e) {}
 }
@@ -1849,3 +1865,149 @@ async function initWeatherClock() {
   await updateWeather();
   setInterval(updateWeather, 600000);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 🚨 PANIC MODE — Owner-Only Site Disguise System
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Show / hide the SHUTDOWN button based on whether the user is the owner
+function initOwnerPanicZone(user) {
+  const zone = document.getElementById('owner-panic-zone');
+  if (!zone) return;
+  const isOwner = user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'));
+  if (isOwner) {
+    zone.style.display = 'flex';
+  }
+}
+
+// Called from the SHUTDOWN WEBSITE button
+window.triggerPanicMode = async function() {
+  const user = getCurrentUser();
+  const isOwner = user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'));
+  if (!isOwner) {
+    alert('🔒 Access Denied: Only the platform Owner can use this.');
+    return;
+  }
+
+  const overlay = document.getElementById('squid-panic-overlay');
+  const countdownEl = document.getElementById('squid-countdown');
+  const statusEl = document.getElementById('squid-status');
+  const shapeEl = document.getElementById('squid-shape');
+  if (!overlay || !countdownEl) return;
+
+  // Show the overlay
+  overlay.style.display = 'flex';
+
+  // Squid Game shapes cycle
+  const SHAPES = ['▲', '●', '■', '★', '▲'];
+  const SHAPE_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#ef4444'];
+  let shapeIdx = 0;
+  const shapeInterval = setInterval(() => {
+    shapeIdx = (shapeIdx + 1) % SHAPES.length;
+    shapeEl.textContent = SHAPES[shapeIdx];
+    shapeEl.style.color = SHAPE_COLORS[shapeIdx];
+  }, 600);
+
+  // Countdown 5 → 1 then activate
+  let count = 5;
+  countdownEl.textContent = count;
+
+  const countInterval = setInterval(async () => {
+    count--;
+    countdownEl.textContent = count;
+
+    if (count === 3) statusEl.textContent = '⚠️ Purging all game data from view...';
+    if (count === 2) statusEl.textContent = '🔒 Locking site content...';
+    if (count === 1) statusEl.textContent = '🎭 Activating disguise...';
+
+    if (count <= 0) {
+      clearInterval(countInterval);
+      clearInterval(shapeInterval);
+      countdownEl.textContent = '0';
+      statusEl.textContent = '✅ Disguise activated!';
+
+      // Flicker effect
+      overlay.style.animation = 'none';
+      let flickers = 0;
+      const flickerInt = setInterval(() => {
+        overlay.style.opacity = flickers % 2 === 0 ? '0' : '1';
+        flickers++;
+        if (flickers >= 6) {
+          clearInterval(flickerInt);
+          overlay.style.opacity = '1';
+        }
+      }, 80);
+
+      // Hit the API to enable panic mode
+      try {
+        const token = localStorage.getItem('nitro_jwt_token') || '';
+        await fetch('/api/admin/panic-mode', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ enabled: true })
+        });
+      } catch (e) {}
+
+      // After a brief pause, reload — the server now serves disguise.html to everyone else
+      // The owner sees the same page (server lets them through)
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        // Show a toast to the owner
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#16a34a;color:#fff;padding:14px 24px;border-radius:12px;font-weight:800;font-size:0.9rem;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+        toast.innerHTML = '✅ Panic mode ON — site disguised for all users!<br/><span style="font-weight:500;font-size:0.8rem;">You (Owner) still see the real site.</span>';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+
+        // Update the SHUTDOWN button to become a RESTORE button
+        const btn = document.getElementById('panic-mode-btn');
+        if (btn) {
+          btn.style.background = 'linear-gradient(135deg,#14532d,#166534,#16a34a)';
+          btn.style.borderColor = '#22c55e';
+          btn.style.boxShadow = '0 0 24px rgba(34,197,94,0.55)';
+          btn.textContent = '✅ RESTORE WEBSITE';
+          btn.onclick = window.restoreSiteFromPanic;
+        }
+      }, 800);
+    }
+  }, 1000);
+};
+
+// Restore the site from panic mode
+window.restoreSiteFromPanic = async function() {
+  if (!confirm('Restore the real Nitro site for all users?')) return;
+  try {
+    const token = localStorage.getItem('nitro_jwt_token') || '';
+    const res = await fetch('/api/admin/panic-mode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ enabled: false })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#1a56db;color:#fff;padding:14px 24px;border-radius:12px;font-weight:800;font-size:0.9rem;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+      toast.textContent = '✅ Site restored — all users see the real site again!';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+
+      const btn = document.getElementById('panic-mode-btn');
+      if (btn) {
+        btn.style.background = 'linear-gradient(135deg,#7f1d1d,#991b1b,#dc2626)';
+        btn.style.borderColor = '#ef4444';
+        btn.style.boxShadow = '0 0 24px rgba(239,68,68,0.55)';
+        btn.innerHTML = '&#9760;&#65039; SHUTDOWN WEBSITE';
+        btn.onclick = window.triggerPanicMode;
+      }
+    }
+  } catch (e) {
+    alert('Failed to restore site. Try again.');
+  }
+};
+

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nitro Math Academy — Study Tools &amp; Homework Help</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f9; color: #1a202c; }
+    .topbar { background: #1a56db; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 58px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .topbar .logo { display: flex; align-items: center; gap: 10px; font-size: 1.18rem; font-weight: 700; }
+    .topbar nav { display: flex; gap: 6px; }
+    .topbar nav a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 6px 14px; border-radius: 6px; font-size: 0.88rem; font-weight: 500; }
+    .topbar nav a:hover, .topbar nav a.active { background: rgba(255,255,255,0.2); color: #fff; }
+    .banner { background: #ebf5fb; border-bottom: 1px solid #bcd2e8; padding: 8px 24px; font-size: 0.82rem; color: #1a56db; }
+    .hero { background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%); color: #fff; padding: 48px 24px 44px; text-align: center; }
+    .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+    .hero p { font-size: 1.02rem; opacity: 0.88; max-width: 520px; margin: 0 auto 22px; line-height: 1.6; }
+    .hero .search-bar { display: flex; max-width: 500px; margin: 0 auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.2); }
+    .hero .search-bar input { flex: 1; padding: 13px 18px; border: none; font-size: 0.95rem; outline: none; color: #1a202c; }
+    .hero .search-bar button { background: #16a34a; color: #fff; border: none; padding: 13px 22px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+    .main { max-width: 1100px; margin: 28px auto; padding: 0 18px; display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+    .section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; color: #1e3a5f; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .card { background: #fff; border: 1px solid #dde6f2; border-radius: 12px; padding: 18px 16px; cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
+    .card:hover { box-shadow: 0 6px 20px rgba(26,86,219,0.12); transform: translateY(-2px); }
+    .card .icon { font-size: 2rem; margin-bottom: 8px; }
+    .card .label { font-size: 0.88rem; font-weight: 700; margin-bottom: 4px; }
+    .card .sub { font-size: 0.78rem; color: #64748b; line-height: 1.4; }
+    .dash-box { background: #fff; border: 1px solid #dde6f2; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+    .dash-box h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 12px; color: #1e3a5f; }
+    .assign-list { list-style: none; }
+    .assign-list li { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.84rem; }
+    .assign-list li:last-child { border-bottom: none; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .dot.red { background: #ef4444; } .dot.yellow { background: #f59e0b; } .dot.green { background: #10b981; }
+    .meta { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    .progress-item { margin-bottom: 10px; }
+    .p-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .progress-bar { height: 7px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+    .progress-bar .fill { height: 100%; border-radius: 99px; }
+    .lb-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 0.82rem; border-bottom: 1px solid #f1f5f9; }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row .rank { width: 20px; color: #94a3b8; font-weight: 700; text-align: center; }
+    .lb-row .name { flex: 1; font-weight: 600; }
+    .lb-row .pts { color: #1a56db; font-weight: 700; }
+    .streak-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+    .streak-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; }
+    footer { background: #1e3a5f; color: rgba(255,255,255,0.55); text-align: center; padding: 22px; font-size: 0.78rem; margin-top: 36px; }
+    footer a { color: rgba(255,255,255,0.5); text-decoration: none; margin: 0 8px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo"><span>&#128208;</span> Nitro Math Academy</div>
+    <nav>
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Subjects</a>
+      <a href="#">Practice Tests</a>
+      <a href="#">Flashcards</a>
+      <a href="#">Leaderboard</a>
+    </nav>
+  </div>
+  <div class="banner">&#128226; <strong>Reminder:</strong> Semester midterm review packets are now available!</div>
+  <div class="hero">
+    <h1>&#128218; Welcome back, student!</h1>
+    <p>Search for any math concept, homework problem, or study topic and get step-by-step solutions instantly.</p>
+    <div class="search-bar">
+      <input type="text" placeholder="Search e.g. quadratic formula, slope, derivatives..." />
+      <button>Search</button>
+    </div>
+  </div>
+  <div class="main">
+    <div>
+      <div class="section-title">&#128216; Browse by Subject</div>
+      <div class="cards">
+        <div class="card"><div class="icon">&#10133;</div><div class="label">Algebra I &amp; II</div><div class="sub">Equations, inequalities, factoring, polynomials</div></div>
+        <div class="card"><div class="icon">&#128208;</div><div class="label">Geometry</div><div class="sub">Proofs, triangles, area, volume, circles</div></div>
+        <div class="card"><div class="icon">&#128200;</div><div class="label">Pre-Calculus</div><div class="sub">Functions, limits, trig identities, vectors</div></div>
+        <div class="card"><div class="icon">&#8747;</div><div class="label">Calculus AB/BC</div><div class="sub">Derivatives, integrals, series, theorems</div></div>
+        <div class="card"><div class="icon">&#128202;</div><div class="label">Statistics</div><div class="sub">Probability, distributions, regression, z-scores</div></div>
+        <div class="card"><div class="icon">&#128290;</div><div class="label">Arithmetic</div><div class="sub">Fractions, decimals, ratios, percentages</div></div>
+        <div class="card"><div class="icon">&#129504;</div><div class="label">SAT Math Prep</div><div class="sub">Practice with timed problems and strategies</div></div>
+        <div class="card"><div class="icon">&#128221;</div><div class="label">Word Problems</div><div class="sub">Real-world problem solving &amp; modeling</div></div>
+      </div>
+      <div class="section-title">&#128203; Your Assignments</div>
+      <div class="dash-box">
+        <ul class="assign-list">
+          <li><span class="dot red"></span><div><div>Chapter 5 Review &mdash; Quadratic Functions</div><div class="meta">Due tomorrow &middot; Algebra II</div></div></li>
+          <li><span class="dot yellow"></span><div><div>Unit 3 Practice Test &mdash; Trigonometry</div><div class="meta">Due in 3 days &middot; Pre-Calculus</div></div></li>
+          <li><span class="dot green"></span><div><div>Homework 7 &mdash; Probability Distributions</div><div class="meta">Submitted &#10004; &middot; Statistics</div></div></li>
+          <li><span class="dot yellow"></span><div><div>Midterm Review Packet &middot; Pages 12&ndash;28</div><div class="meta">Due in 5 days &middot; Calculus AB</div></div></li>
+          <li><span class="dot green"></span><div><div>Flashcard Set &mdash; Geometry Formulas</div><div class="meta">Completed &#10004; &middot; Geometry</div></div></li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="dash-box">
+        <h3>&#128202; Your Progress This Week</h3>
+        <div class="progress-item"><div class="p-label"><span>Algebra II</span><span>78%</span></div><div class="progress-bar"><div class="fill" style="width:78%;background:#1a56db;"></div></div></div>
+        <div class="progress-item"><div class="p-label"><span>Pre-Calculus</span><span>64%</span></div><div class="progress-bar"><div class="fill" style="width:64%;background:#f59e0b;"></div></div></div>
+        <div class="progress-item"><div class="p-label"><span>Statistics</span><span>91%</span></div><div class="progress-bar"><div class="fill" style="width:91%;background:#10b981;"></div></div></div>
+        <div class="progress-item"><div class="p-label"><span>SAT Prep</span><span>55%</span></div><div class="progress-bar"><div class="fill" style="width:55%;background:#ef4444;"></div></div></div>
+      </div>
+      <div class="dash-box">
+        <h3>&#127942; Class Leaderboard</h3>
+        <div class="lb-row"><span class="rank">1</span><span class="name">Alexandra M.</span><span class="pts">4,210 pts</span></div>
+        <div class="lb-row"><span class="rank">2</span><span class="name">Marcus T.</span><span class="pts">3,980 pts</span></div>
+        <div class="lb-row"><span class="rank">3</span><span class="name">Priya K.</span><span class="pts">3,745 pts</span></div>
+        <div class="lb-row"><span class="rank">4</span><span class="name">Jordan D.</span><span class="pts">3,510 pts</span></div>
+        <div class="lb-row"><span class="rank">5</span><span class="name">Sam W.</span><span class="pts">3,120 pts</span></div>
+      </div>
+      <div class="dash-box">
+        <h3>&#128293; Study Streak: 12 days</h3>
+        <div class="streak-dots">
+          <div class="streak-dot" style="background:#1a56db;color:#fff;">M</div>
+          <div class="streak-dot" style="background:#1a56db;color:#fff;">T</div>
+          <div class="streak-dot" style="background:#1a56db;color:#fff;">W</div>
+          <div class="streak-dot" style="background:#1a56db;color:#fff;">T</div>
+          <div class="streak-dot" style="background:#1a56db;color:#fff;">F</div>
+          <div class="streak-dot" style="background:#e2e8f0;color:#94a3b8;">S</div>
+          <div class="streak-dot" style="background:#e2e8f0;color:#94a3b8;">S</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    &copy; 2026 Nitro Math Academy &middot; A Student Learning Platform<br/>
+    <a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Contact Support</a><a href="#">Accessibility</a>
+  </footer>
+</body>
+</html>
