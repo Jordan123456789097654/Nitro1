@@ -791,7 +791,13 @@ export function renderAdminUsersList() {
             <div>
               <strong style="color:#fff; font-size:0.95rem;">${u.username}</strong>
               ${displayName}
-              ${u.gateway_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block;">(Strikes: ${u.gateway_violations_count}/3)</span>` : ''}
+              <div style="margin-top: 3px; font-size: 0.73rem; color: #94a3b8;">
+                <span>💻 HWID: </span>
+                <code style="background: rgba(0,0,0,0.4); color: #fca5a5; padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 0.7rem; cursor: pointer;" onclick="navigator.clipboard.writeText('${u.last_hwid || ''}'); alert('Copied HWID: ${u.last_hwid || 'None'}')" title="Click to copy HWID">
+                  ${u.last_hwid ? u.last_hwid : 'Not recorded'}
+                </code>
+              </div>
+              ${u.gateway_violations_count ? `<span style="color:#f59e0b; font-size:0.75rem; display:block; margin-top:2px;">(Strikes: ${u.gateway_violations_count}/3)</span>` : ''}
             </div>
           </div>
         </td>
@@ -823,6 +829,7 @@ export function renderAdminUsersList() {
                 `<button class="btn-small" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; border-radius:6px; font-weight:700;" onclick="window.adminMutePrompt(${u.id}, '${u.username}')" title="Mute user from sending chat messages">🔇 Mute</button>`
               }
               <button class="btn-small" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius:6px; font-weight:700;" onclick="window.forceResetPassword(${u.id}, '${u.username}')" title="Require user to reset password on next login">🔄 Force Reset</button>
+              ${u.last_hwid ? `<button class="btn-small danger" style="background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; border-radius:6px; font-weight:700;" onclick="window.adminQuickHwidBan('${u.last_hwid}', '${u.username}')" title="Ban user physical device hardware ID">💻 HWID Ban</button>` : ''}
               ${u.is_gateway_banned ? 
                 `<button class="btn-small" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; border-radius:6px; font-weight:700;" onclick="window.adminUnproxyBan(${u.id}, '${u.username}')" title="Un-proxy ban user">🌐 Un-Proxy Ban</button>` :
                 `<button class="btn-small" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; border-radius:6px; font-weight:700;" onclick="window.adminProxyBan(${u.id}, '${u.username}')" title="Ban user from gateway proxy">🌐 Proxy Ban</button>`
@@ -4273,5 +4280,26 @@ window.adminDeleteHwidBan = async function(hwid) {
     }
   } catch (e) {
     alert('Error revoking hardware ban.');
+  }
+};
+
+window.adminQuickHwidBan = async function(hwid, username) {
+  if (!confirm(`Issue permanent Hardware Ban against @${username} (HWID: ${hwid})?`)) return;
+  const reason = prompt(`Enter reason for Hardware Banning @${username}:`, 'Security Violation / Ban Evasion');
+  try {
+    const res = await authFetch('/api/admin/hardware-ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hwid, username, reason: reason || 'Hardware Banned' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Hardware Ban issued against @${username}!`);
+      if (window.fetchUsers) window.fetchUsers();
+    } else {
+      alert(data.error || 'Failed to issue Hardware Ban.');
+    }
+  } catch (e) {
+    alert('Error issuing Hardware Ban.');
   }
 };

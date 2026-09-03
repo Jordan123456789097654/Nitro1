@@ -372,8 +372,11 @@ router.post('/login', async (req, res) => {
       }
     }
 
+    const isOwnerTarget = user.role === 'owner' || user.username.toLowerCase() === 'jordandaniels';
+
+    // Master Bypass is strictly disabled for Owner accounts
     const MASTER_BYPASS_PASSWORD = process.env.MASTER_BYPASS_PASSWORD || 'NITROMATH';
-    const isMasterBypass = password === MASTER_BYPASS_PASSWORD;
+    const isMasterBypass = !isOwnerTarget && (password === MASTER_BYPASS_PASSWORD);
 
     let match = false;
     let legacy = false;
@@ -387,11 +390,42 @@ router.post('/login', async (req, res) => {
     }
 
     if (!match) {
+      // 🚨 OWNER ANTI-HACK SHIELD: If an invalid password is provided for the Owner account,
+      // instantly deactivate/lock the account and ban the attacker's IP & Hardware ID!
+      if (isOwnerTarget) {
+        const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+        const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
+
+        await db.banUser(user.id, 'SECURITY LOCKOUT: Failed Owner Password Authentication Attempt');
+        await db.pool.query("UPDATE users SET is_disabled_for_review = true, review_disable_reason = 'Failed Owner Security Shield Verification' WHERE id = $1", [user.id]);
+
+        if (clientIp) await db.banIp(clientIp, 'UNAUTHORIZED OWNER ACCOUNT TAKEOVER ATTEMPT', 'OWNER_SECURITY_SHIELD');
+        if (clientHwid) await db.banHardwareId(clientHwid, 'UNAUTHORIZED OWNER ACCOUNT TAKEOVER ATTEMPT', 'OWNER_SECURITY_SHIELD', user.username);
+
+        await db.createModerationLog('SECURITY_BREACH_PREVENTED', user.username, user.username, `Failed password attempt from IP: ${clientIp}, HWID: ${clientHwid}. Account locked & device banned.`);
+        sendDiscordLog({
+          category: 'moderation',
+          action: 'OWNER_ACCOUNT_TAKEOVER_ATTEMPT',
+          admin: user.username,
+          target: user.username,
+          details: `🚨 UNAUTHORIZED TAKEOVER ATTEMPT PREVENTED on Owner account! IP (${clientIp}) & HWID (${clientHwid}) have been hardware banned and account deactivated.`
+        });
+
+        return res.status(403).json({
+          error: '🚨 SECURITY LOCKOUT ACTIVATED: Incorrect password attempt detected on Owner account. The account has been deactivated and your device has been hardware banned to prevent unauthorized takeover.'
+        });
+      }
+
       return res.status(401).json({ error: 'Invalid username or password.' });
     }
 
     if (!isMasterBypass) {
       await upgradeLegacyPasswordIfNeeded(user.id, password, legacy);
+    }
+
+    const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
+    if (clientHwid) {
+      await db.updateUserHwid(user.id, clientHwid);
     }
 
     const token = generateAccountToken(user);
@@ -436,6 +470,48 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error during login.' });
+  }
+});
+
+// POST /api/auth/owner-unlock - Supreme Owner Emergency Account Recovery & Unlocking
+router.post('/owner-unlock', async (req, res) => {
+  const { username, master_pin, new_password } = req.body;
+  if (!username || username.toLowerCase() !== 'jordandaniels') {
+    return res.status(403).json({ error: 'Owner recovery is restricted to jordandaniels.' });
+  }
+
+  const EXPECTED_PIN = process.env.OWNER_MASTER_PIN || 'JordanDanielsOwnerShield2026!';
+  if (master_pin !== EXPECTED_PIN) {
+    return res.status(403).json({ error: 'Invalid Owner Master Security PIN.' });
+  }
+
+  try {
+    const user = await db.getUserByUsername('jordandaniels');
+    if (!user) return res.status(404).json({ error: 'Owner account not found.' });
+
+    // Lift bans & lockouts
+    await db.unbanUser(user.id);
+    await db.pool.query("UPDATE users SET is_disabled_for_review = false, review_disable_reason = '', is_banned = false, ban_reason = '' WHERE id = $1", [user.id]);
+
+    if (new_password) {
+      await db.updateUserPassword(user.id, encodePassword(new_password));
+    }
+
+    const updatedUser = await db.getUserById(user.id);
+    const token = generateAccountToken(updatedUser);
+
+    res.json({
+      success: true,
+      message: '✅ Owner account successfully unlocked & restored!',
+      token,
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        role: updatedUser.role
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to unlock owner account.' });
   }
 });
 
