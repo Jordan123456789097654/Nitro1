@@ -142,7 +142,7 @@ export function deleteCookie(name) {
 
 let lastBannedUsername = '';
 
-export function showBannedScreen(reason = 'Violation of platform guidelines', username = '') {
+export function showBannedScreen(reason = 'Violation of platform guidelines', username = '', isHardwareBanned = false) {
   if (username) {
     lastBannedUsername = username;
     localStorage.setItem('nitro_last_banned_user', username);
@@ -153,8 +153,29 @@ export function showBannedScreen(reason = 'Violation of platform guidelines', us
   currentUser = null;
 
   const overlay = document.getElementById('account-banned-overlay');
+  const titleEl = overlay ? overlay.querySelector('h1') : null;
+  const subtitleEl = overlay ? overlay.querySelector('p') : null;
   const reasonEl = document.getElementById('account-banned-reason-text');
+
   if (overlay) {
+    if (isHardwareBanned || (reason && reason.toLowerCase().includes('hardware'))) {
+      if (titleEl) {
+        titleEl.textContent = '💻 HARDWARE DEVICE BANNED';
+        titleEl.style.color = '#ef4444';
+      }
+      if (subtitleEl) {
+        subtitleEl.textContent = 'Access from this physical hardware device has been blacklisted by platform administration.';
+      }
+    } else {
+      if (titleEl) {
+        titleEl.textContent = 'Account Suspended';
+        titleEl.style.color = '#f87171';
+      }
+      if (subtitleEl) {
+        subtitleEl.textContent = 'Access has been temporarily restricted for your account due to community policy guidelines.';
+      }
+    }
+
     if (reasonEl) reasonEl.textContent = reason;
     overlay.style.display = 'flex';
   }
@@ -223,7 +244,7 @@ export async function checkSession(onUserChange) {
     const data = await res.json();
 
     if (data.is_banned && res.status === 403) {
-      showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || localStorage.getItem('nitro_remembered_username') || '');
+      showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || localStorage.getItem('nitro_remembered_username') || '', data.is_hardware_banned);
       return;
     }
 
@@ -952,7 +973,7 @@ function setupMandatoryLoginGate(onUserChange) {
         if (!res.ok) {
           if (data.is_banned) {
             toggleMandatoryGate(false);
-            showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username);
+            showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username, data.is_hardware_banned);
             return;
           }
           // Show the closed notice for 403 registration-disabled errors
@@ -1095,7 +1116,7 @@ function setupAuthModal(onUserChange) {
         if (!res.ok) {
           if (data.is_banned) {
             hideModal();
-            showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username);
+            showBannedScreen(data.reason || 'Your account has been suspended by an administrator.', data.username || username, data.is_hardware_banned);
             return;
           }
           errorMsg.textContent = data.error || 'Authentication error';

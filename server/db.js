@@ -16,10 +16,16 @@ const settingsCache = new Map();
 const ipBanCache = new Map();
 const hwidBanCache = new Map();
 
-function clearUserCache(userId) {
+function clearUserCache(userId, username) {
   if (userId) {
     userCache.delete(Number(userId));
     userCache.delete(String(userId));
+  }
+  if (username) {
+    userCache.delete(`uname_${username.trim().toLowerCase()}`);
+  }
+  if (!userId && !username) {
+    userCache.clear();
   }
 }
 
@@ -1164,26 +1170,43 @@ const db = {
 
   // Users, Profile Customization & Violations
   async getUserByUsername(username) {
-    try {
-      const res = await pool.query('SELECT * FROM users WHERE LOWER(username) = LOWER($1)', [username.trim()]);
-      return res.rows[0] || null;
-    } catch (e) {
-      return null;
-    }
-  },
-
-  async getUserById(id) {
-    if (!id) return null;
+    if (!username) return null;
+    const clean = username.trim().toLowerCase();
     const now = Date.now();
-    const cached = userCache.get(id);
+    const cached = userCache.get(`uname_${clean}`);
     if (cached && cached.expires > now) {
       return cached.user;
     }
     try {
-      const res = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+      const res = await pool.query('SELECT * FROM users WHERE LOWER(username) = $1', [clean]);
       if (res.rows && res.rows[0]) {
         const user = res.rows[0];
-        userCache.set(id, { user, expires: now + 3000 }); // cache for 3 seconds
+        userCache.set(`uname_${clean}`, { user, expires: now + 5000 });
+        userCache.set(user.id, { user, expires: now + 5000 });
+        return user;
+      }
+    } catch (e) {
+      console.error('getUserByUsername error:', e.message);
+    }
+    return null;
+  },
+
+  async getUserById(id) {
+    if (!id) return null;
+    const numId = Number(id);
+    const now = Date.now();
+    const cached = userCache.get(numId);
+    if (cached && cached.expires > now) {
+      return cached.user;
+    }
+    try {
+      const res = await pool.query('SELECT * FROM users WHERE id = $1', [numId]);
+      if (res.rows && res.rows[0]) {
+        const user = res.rows[0];
+        userCache.set(numId, { user, expires: now + 5000 });
+        if (user.username) {
+          userCache.set(`uname_${user.username.toLowerCase()}`, { user, expires: now + 5000 });
+        }
         return user;
       }
     } catch (e) {

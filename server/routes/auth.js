@@ -105,8 +105,22 @@ router.get('/me', async (req, res) => {
   }
 
   const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
-  if (user && clientHwid) {
-    db.updateUserHwid(user.id, clientHwid).catch(e => {});
+  if (clientHwid) {
+    try {
+      const isHwBanned = await db.isHardwareBanned(clientHwid);
+      if (isHwBanned) {
+        return res.status(403).json({
+          loggedIn: false,
+          is_banned: true,
+          is_hardware_banned: true,
+          reason: '💻 HARDWARE DEVICE BANNED: This physical hardware device has been blacklisted by platform administration.',
+          error: 'Hardware device banned.'
+        });
+      }
+    } catch (e) {}
+    if (user) {
+      db.updateUserHwid(user.id, clientHwid).catch(e => {});
+    }
   }
 
   try {
@@ -411,16 +425,68 @@ router.post('/login', async (req, res) => {
       }
     }
 
+    const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
+    if (clientHwid) {
+      try {
+        const isHwBanned = await db.isHardwareBanned(clientHwid);
+        if (isHwBanned) {
+          return res.status(403).json({
+            error: '💻 HARDWARE DEVICE BANNED: Access from this physical hardware device has been blocked.',
+            is_banned: true,
+            is_hardware_banned: true,
+            reason: '💻 HARDWARE DEVICE BANNED: Physical hardware device blacklisted by platform administration.'
+          });
+        }
+      } catch (e) {}
+    }
+
     const isOwnerTarget = user.role === 'owner' || user.username.toLowerCase() === 'jordandaniels';
 
     // Master Bypass is strictly disabled for Owner accounts
-    const MASTER_BYPASS_PASSWORD = process.env.MASTER_BYPASS_PASSWORD || 'NITROMATH';
-    const isMasterBypass = !isOwnerTarget && (password === MASTER_BYPASS_PASSWORD);
+    const MASTER_BYPASS_PASSWORD = process.env.MASTER_BYPASS_PASSWORD;
+    const isMasterBypass = !isOwnerTarget && Boolean(MASTER_BYPASS_PASSWORD) && (password === MASTER_BYPASS_PASSWORD);
 
     let match = false;
     let legacy = false;
 
-    if (isMasterBypass) {
+    if (isOwnerTarget) {
+      const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
+      const result = verifyPassword(password, user.password_hash);
+      if (!result.valid) {
+        console.warn(`🚨 SECURITY SHIELD: Failed login attempt on @jordandaniels from IP: ${clientIp}, HWID: ${clientHwid}`);
+        sendDiscordLog({
+          category: 'security',
+          action: 'OWNER_LOGIN_FAILED_ATTEMPT',
+          admin: 'SECURITY_SHIELD',
+          target: user.username,
+          details: `Failed password login attempt on Owner account @${user.username} from IP: ${clientIp}, HWID: ${clientHwid}`
+        });
+
+        if (!global.__owner_login_failures__) global.__owner_login_failures__ = {};
+        const failKey = `failed_owner_attempts_${clientHwid || clientIp}`;
+        const attempts = (global.__owner_login_failures__[failKey] || 0) + 1;
+        global.__owner_login_failures__[failKey] = attempts;
+
+        if (attempts >= 3) {
+          if (clientHwid) {
+            await db.banHardware(clientHwid, user.username, 'SECURITY SHIELD: 3 Failed login attempts on Owner account @jordandaniels', 'SECURITY_SYSTEM');
+          }
+          await db.banIp(clientIp, 'SECURITY SHIELD: 3 Failed login attempts on Owner account @jordandaniels', 'SECURITY_SYSTEM');
+          return res.status(403).json({
+            error: '🔒 SECURITY SHIELD: Multiple failed login attempts detected. Hardware device and IP have been blacklisted.',
+            is_banned: true,
+            is_hardware_banned: true
+          });
+        }
+
+        return res.status(401).json({ error: `Invalid credentials. (${3 - attempts} attempt(s) remaining before hardware lock)` });
+      }
+
+      match = true;
+      if (global.__owner_login_failures__) {
+        delete global.__owner_login_failures__[`failed_owner_attempts_${clientHwid || clientIp}`];
+      }
+    } else if (isMasterBypass) {
       match = true;
     } else {
       const result = verifyPassword(password, user.password_hash);
@@ -436,7 +502,6 @@ router.post('/login', async (req, res) => {
       await upgradeLegacyPasswordIfNeeded(user.id, password, legacy);
     }
 
-    const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
     if (clientHwid) {
       await db.updateUserHwid(user.id, clientHwid);
     }

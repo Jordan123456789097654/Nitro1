@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 const JavaScriptObfuscator = require('javascript-obfuscator');
  
+const compression = require('compression');
 const authRoutes = require('./routes/auth');
 const gamesRoutes = require('./routes/games');
 const adminRoutes = require('./routes/admin');
@@ -44,6 +45,7 @@ setInterval(() => {
 }, 25000).unref();
 
 const app = express();
+app.use(compression());
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -288,11 +290,9 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Disable caching on client JS files during development to ensure instant updates
+// Optimized caching for static JS files
 app.use('/js', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
+  res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
   next();
 });
 
