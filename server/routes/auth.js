@@ -9,7 +9,7 @@ const { JWT_SECRET } = require('../secrets');
 
 function generateAccountToken(user) {
   return jwt.sign(
-    { id: user.id, username: user.username, role: user.role },
+    { id: user.id, username: user.username, role: user.role, token_version: user.token_version || 1 },
     JWT_SECRET,
     { expiresIn: '14d' }
   );
@@ -67,6 +67,7 @@ async function upgradeLegacyPasswordIfNeeded(userId, plainPassword, legacy) {
 // Check active session & profile
 router.get('/me', async (req, res) => {
   let user = null;
+  let tokenVersion = null;
 
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -75,21 +76,32 @@ router.get('/me', async (req, res) => {
       const decoded = jwt.verify(token, JWT_SECRET);
       if (decoded.id) user = await db.getUserById(decoded.id);
       if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+      tokenVersion = decoded.token_version;
     } catch (e) {}
   } else if (req.cookies && req.cookies.nitro_jwt_token) {
     try {
       const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
       if (decoded.id) user = await db.getUserById(decoded.id);
       if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+      tokenVersion = decoded.token_version;
     } catch (e) {}
   }
 
   if (!user && req.session && req.session.user) {
-    user = req.session.user;
+    user = await db.getUserById(req.session.user.id);
   }
 
   if (!user) {
     return res.json({ loggedIn: false, user: null });
+  }
+
+  // 🔐 Check token version for password-reset session invalidation across all devices
+  if (tokenVersion !== undefined && tokenVersion !== null && user.token_version) {
+    if (Number(tokenVersion) < Number(user.token_version)) {
+      res.clearCookie('nitro_jwt_token', { path: '/' });
+      if (req.session) req.session.destroy(() => {});
+      return res.status(401).json({ loggedIn: false, user: null, error: 'Session expired due to password reset. Please log in again.' });
+    }
   }
 
   const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
@@ -121,23 +133,30 @@ router.get('/me', async (req, res) => {
 
 // Force Password Reset Endpoint (User triggered after admin flag)
 router.post('/force-reset-password', async (req, res) => {
-  let userId = null;
+  let user = null;
 
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      userId = decoded.id;
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+    } catch (e) {}
+  } else if (req.cookies && req.cookies.nitro_jwt_token) {
+    try {
+      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
     } catch (e) {}
   }
 
-  if (!userId && req.session && req.session.user) {
-    userId = req.session.user.id;
+  if (!user && req.session && req.session.user) {
+    user = await db.getUserById(req.session.user.id);
   }
 
-  if (!userId) {
-    return res.status(401).json({ error: 'Authentication required.' });
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication required. Please refresh and log in.' });
   }
 
   const { new_password } = req.body;
@@ -146,22 +165,34 @@ router.post('/force-reset-password', async (req, res) => {
   }
 
   try {
-    const user = await db.getUserById(userId);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-
     const encoded = encodePassword(new_password);
-    await db.updateUserPassword(userId, encoded);
+    await db.updateUserPassword(user.id, encoded);
+
+    const updatedUser = await db.getUserById(user.id);
+    const token = generateAccountToken(updatedUser);
+
+    res.cookie('nitro_jwt_token', token, { maxAge: 14 * 86400000, path: '/', sameSite: 'lax' });
 
     sendDiscordLog({
       category: 'logins',
       action: 'FORCE_PASSWORD_RESET_COMPLETED',
-      admin: user.username,
-      target: user.username,
-      details: 'User successfully completed mandatory password reset.'
+      admin: updatedUser.username,
+      target: updatedUser.username,
+      details: 'User successfully completed mandatory password reset. All previous sessions invalidated.'
     });
 
-    res.json({ success: true, message: 'Password successfully reset!' });
+    res.json({
+      success: true,
+      message: '✅ Password updated successfully! All other active sessions have been logged out.',
+      token,
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        role: updatedUser.role
+      }
+    });
   } catch (err) {
+    console.error('Force password reset error:', err);
     res.status(500).json({ error: 'Failed to update password.' });
   }
 });
@@ -255,7 +286,10 @@ router.post('/profile', async (req, res) => {
       details: `Profile updated: "${updated.display_name}", Avatar: "${updated.avatar_url || 'Preset'}"`
     });
 
-    res.json({ success: true, user: updated, message: 'Profile updated successfully!' });
+    const freshToken = generateAccountToken(updated);
+    res.cookie('nitro_jwt_token', freshToken, { maxAge: 14 * 86400000, path: '/', sameSite: 'lax' });
+
+    res.json({ success: true, user: updated, token: freshToken, message: 'Profile updated successfully!' });
   } catch (err) {
     console.error('Profile update error:', err);
     res.status(500).json({ error: 'Failed to update profile.' });

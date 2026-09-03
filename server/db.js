@@ -552,6 +552,7 @@ const db = {
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_border VARCHAR(100) DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_banner VARCHAR(255) DEFAULT '';");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_font VARCHAR(100) DEFAULT '';");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INT DEFAULT 1;");
 
       // Custom Badges tables
       await pool.query(`
@@ -1585,7 +1586,8 @@ const db = {
 
   async updateUserPassword(id, password_hash) {
     try {
-      await pool.query('UPDATE users SET password_hash = $1, force_password_reset = false WHERE id = $2', [password_hash, id]);
+      await pool.query('UPDATE users SET password_hash = $1, force_password_reset = false, token_version = COALESCE(token_version, 1) + 1 WHERE id = $2', [password_hash, id]);
+      clearUserCache(id);
       return true;
     } catch (e) {
       return false;
