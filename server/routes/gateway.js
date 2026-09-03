@@ -750,6 +750,61 @@ router.all('/', async (req, res) => {
     }
     if (setCookies) saveCookiesFromResponse(sessionKey, urlObj.hostname, setCookies);
 
+    let finalContentType = contentType;
+    const lowerPath = urlObj.pathname.toLowerCase();
+    if (lowerPath.endsWith('.css') || urlObj.href.includes('.css?') || urlObj.href.includes('/skin.css') || urlObj.href.includes('/skin/')) {
+      finalContentType = 'text/css';
+    } else if (lowerPath.endsWith('.js') || lowerPath.endsWith('.mjs') || urlObj.href.includes('.js?') || urlObj.href.includes('/b.js')) {
+      finalContentType = 'application/javascript';
+    }
+
+    const needsTransform = finalContentType.includes('text/html') || finalContentType.includes('text/css');
+
+    // -------------------------------------------------------------
+    // OPTIMIZATION: STREAM NON-HTML/CSS RESPONSES DIRECTLY
+    // Bypasses Node memory allocation completely to prevent Render 512MB OOM (Exit 137)
+    // -------------------------------------------------------------
+    if (!needsTransform) {
+      if (response.status >= 400 && response.status < 500) {
+        res.status(200);
+      } else {
+        res.status(response.status);
+      }
+
+      const restrictedStream = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
+
+      response.headers.forEach((v, k) => {
+        const l = k.toLowerCase();
+        if (!restrictedStream.includes(l)) {
+          if (l === 'location') {
+            res.setHeader('Location', proxifyTargetUrl(v, finalUrl, gatewayPrefix, authSuffix));
+          } else {
+            try { res.setHeader(k, v); } catch(e){}
+          }
+        }
+      });
+
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', '*');
+      res.setHeader('Content-Type', finalContentType);
+
+      if (response.body && typeof response.body.pipe === 'function') {
+        req.on('close', () => {
+          if (response.body && typeof response.body.destroy === 'function') {
+            try { response.body.destroy(); } catch(e){}
+          }
+        });
+        return response.body.pipe(res);
+      } else {
+        const arrayBuffer = await response.arrayBuffer();
+        return res.send(Buffer.from(arrayBuffer));
+      }
+    }
+
+    // -------------------------------------------------------------
+    // FOR HTML & CSS: READ BUFFER, DECOMPRESS, AND TRANSFORM URLS
+    // -------------------------------------------------------------
     let buffer;
     if (typeof response.buffer === 'function') {
       buffer = await response.buffer();
@@ -771,15 +826,7 @@ router.all('/', async (req, res) => {
       res.status(response.status);
     }
 
-    // Forward safe headers & strip target CORS origin & transport length headers
     const restricted = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'content-encoding', 'content-length', 'transfer-encoding', 'connection', 'keep-alive', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
-    const gatewayPrefix = `${req.protocol}://${req.get('host')}/api/gateway?url=`;
-
-    // BUGFIX: carry the auth token + chosen engine forward onto every link
-    // this page will generate, so clicking further into a site doesn't drop
-    // back to an unauthenticated Guest request on the default engine.
-    const rawToken = req.query.token || '';
-    const authSuffix = `${rawToken ? `&token=${encodeURIComponent(rawToken)}` : ''}&engine=${encodeURIComponent(engineKey)}`;
 
     response.headers.forEach((v, k) => {
       const l = k.toLowerCase();
@@ -796,27 +843,16 @@ router.all('/', async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
 
-    let finalContentType = contentType;
-    const lowerPath = urlObj.pathname.toLowerCase();
-    if (lowerPath.endsWith('.css') || urlObj.href.includes('.css?') || urlObj.href.includes('/skin.css') || urlObj.href.includes('/skin/')) {
-      finalContentType = 'text/css';
-    } else if (lowerPath.endsWith('.js') || lowerPath.endsWith('.mjs') || urlObj.href.includes('.js?') || urlObj.href.includes('/b.js')) {
-      finalContentType = 'application/javascript';
-    }
-
     if (finalContentType.includes('text/html')) {
       const htmlText = buffer.toString('utf-8');
       const transformed = transformHtmlResponse(htmlText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.send(transformed);
-    } else if (finalContentType.includes('text/css')) {
+    } else {
       const cssText = buffer.toString('utf-8');
       const transformed = rewriteCssUrls(cssText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/css; charset=utf-8');
       return res.send(transformed);
-    } else {
-      res.setHeader('Content-Type', finalContentType);
-      return res.send(buffer);
     }
   } catch (err) {
     console.error('[Gateway Proxy Error] target:', (urlObj && urlObj.href) || targetUrl, err);

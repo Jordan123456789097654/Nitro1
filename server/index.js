@@ -36,13 +36,14 @@ process.on('unhandledRejection', (reason, promise) => {
 setInterval(() => {
   const mem = process.memoryUsage();
   const heapUsedMb = Math.round(mem.heapUsed / 1024 / 1024);
-  if (heapUsedMb > 180) {
+  const rssMb = Math.round(mem.rss / 1024 / 1024);
+  if (heapUsedMb > 140 || rssMb > 210) {
     if (global.gc) {
-      console.log(`🧹 [Memory Monitor] Heap at ${heapUsedMb}MB — running manual Garbage Collection.`);
+      console.log(`🧹 [Memory Monitor] RSS: ${rssMb}MB | Heap: ${heapUsedMb}MB — running manual Garbage Collection.`);
       global.gc();
     }
   }
-}, 15000).unref();
+}, 10000).unref();
 
 const app = express();
 app.use(compression());
