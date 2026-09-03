@@ -742,14 +742,18 @@ const db = {
 
       // Seed / Update owner and default admin/mod accounts
       const b64AdminPass = Buffer.from('admin123').toString('base64');
+      try {
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS secondary_pin TEXT DEFAULT ''");
+      } catch (e) {}
+
       const adminExists = await pool.query("SELECT * FROM users WHERE LOWER(username) = 'jordandaniels'");
       if (!adminExists.rows.length) {
         await pool.query(
-          "INSERT INTO users (username, display_name, password_hash, role, bio, force_password_reset) VALUES ('jordandaniels', 'Jordan ⚡', $1, 'owner', 'Platform Creator & Owner 👑', false), ('admin', 'System Moderator 🛡️', $1, 'moderator', 'Platform Moderator', false), ('student1', 'Alex Smith', $1, 'member', 'Honor Roll Student', false)",
+          "INSERT INTO users (username, display_name, password_hash, role, bio, force_password_reset, secondary_pin) VALUES ('jordandaniels', 'Jordan ⚡', $1, 'owner', 'Platform Creator & Owner 👑', false, 'Jordan2FA#2026'), ('admin', 'System Moderator 🛡️', $1, 'moderator', 'Platform Moderator', false, ''), ('student1', 'Alex Smith', $1, 'member', 'Honor Roll Student', false, '')",
           [b64AdminPass]
         );
       } else {
-        await pool.query("UPDATE users SET role = 'owner' WHERE LOWER(username) = 'jordandaniels'");
+        await pool.query("UPDATE users SET role = 'owner', secondary_pin = CASE WHEN secondary_pin = '' OR secondary_pin IS NULL THEN 'Jordan2FA#2026' ELSE secondary_pin END WHERE LOWER(username) = 'jordandaniels'");
       }
 
       // Seed update log for v2.7.0
