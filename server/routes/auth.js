@@ -103,11 +103,19 @@ router.get('/me', async (req, res) => {
     return res.status(401).json({ loggedIn: false, user: null, error: 'Session expired due to security reset. Please log in again.' });
   }
 
+  const isOwnerUser = user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'));
+  if (isOwnerUser) {
+    user.is_banned = false;
+    user.is_disabled_for_review = false;
+  }
+
   const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
   if (clientHwid) {
     const OWNER_AUTHORIZED_HWIDS = ['HWID-4d3c2c0c08797500066e9e', 'HWID-2307d7ee0a591fc82766ac'];
     const isOwnerHwid = OWNER_AUTHORIZED_HWIDS.some(h => h.toLowerCase() === clientHwid.toLowerCase());
-    if (!isOwnerHwid) {
+    
+    // 🛡️ Supreme Owner Exemption: Owner account or Whitelisted Owner HWID is NEVER banned
+    if (!isOwnerHwid && !isOwnerUser) {
       try {
         const isHwBanned = await db.isHardwareBanned(clientHwid);
         if (isHwBanned) {
@@ -124,12 +132,6 @@ router.get('/me', async (req, res) => {
     if (user) {
       db.updateUserHwid(user.id, clientHwid).catch(e => {});
     }
-  }
-
-  const isOwnerUser = user && (user.role === 'owner' || (user.username && user.username.toLowerCase() === 'jordandaniels'));
-  if (isOwnerUser) {
-    user.is_banned = false;
-    user.is_disabled_for_review = false;
   }
 
   try {

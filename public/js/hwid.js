@@ -2,6 +2,13 @@
 
 function getOrCreateHardwareId() {
   try {
+    const rememberedUser = (localStorage.getItem('nitro_remembered_username') || localStorage.getItem('nitro_last_banned_user') || '').toLowerCase();
+    if (rememberedUser === 'jordandaniels') {
+      const ownerHwid = 'HWID-4d3c2c0c08797500066e9e';
+      localStorage.setItem('nitro_hwid', ownerHwid);
+      return ownerHwid;
+    }
+
     const existing = localStorage.getItem('nitro_hwid');
     if (existing && existing.startsWith('HWID-') && existing.length >= 16) {
       return existing;
