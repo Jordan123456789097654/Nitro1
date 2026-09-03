@@ -36,13 +36,13 @@ process.on('unhandledRejection', (reason, promise) => {
 setInterval(() => {
   const mem = process.memoryUsage();
   const heapUsedMb = Math.round(mem.heapUsed / 1024 / 1024);
-  if (heapUsedMb > 300) {
+  if (heapUsedMb > 180) {
     if (global.gc) {
       console.log(`🧹 [Memory Monitor] Heap at ${heapUsedMb}MB — running manual Garbage Collection.`);
       global.gc();
     }
   }
-}, 25000).unref();
+}, 15000).unref();
 
 const app = express();
 app.use(compression());
@@ -419,6 +419,16 @@ if (io && !isVercel) {
   initChatSocket(io);
   require('./voiceSocket')(io);
 }
+
+// Express Global JSON Error Handler (Guarantees ALL errors return clean JSON)
+app.use((err, req, res, next) => {
+  console.error('⚠️ [Server Error]:', err.message || err);
+  if (res.headersSent) return next(err);
+  res.status(err.status || 500).json({
+    error: err.message || 'An internal server error occurred.',
+    status: err.status || 500
+  });
+});
 
 // SPA Fallback Route
 app.get('*', (req, res) => {

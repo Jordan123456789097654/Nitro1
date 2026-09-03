@@ -126,6 +126,22 @@ export async function authFetch(url, options = {}) {
   return fetch(url, { ...options, headers, credentials: 'same-origin' });
 }
 
+export async function safeJsonFetch(url, options = {}) {
+  try {
+    const res = await authFetch(url, options);
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      data = { error: 'Server response: ' + (text.length > 80 ? text.slice(0, 80) + '...' : text), rawText: text };
+    }
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, status: 500, data: { error: err.message || 'Network request failed' } };
+  }
+}
+
 export function getCookie(name) {
   const nameEQ = encodeURIComponent(name) + "=";
   const ca = document.cookie.split(';');
