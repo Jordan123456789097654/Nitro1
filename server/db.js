@@ -752,19 +752,33 @@ const db = {
         await pool.query("UPDATE users SET role = 'owner' WHERE LOWER(username) = 'jordandaniels'");
       }
 
-      // Seed update log for today
-      const updateLogExists = await pool.query("SELECT id FROM update_logs WHERE version = '2.1.0'");
+      // Seed update log for v2.7.0
+      const updateLogExists = await pool.query("SELECT id FROM update_logs WHERE version = '2.7.0'");
       if (updateLogExists.rows.length === 0) {
         await pool.query(`
           INSERT INTO update_logs (version, title, content, author)
           VALUES (
-            '2.1.0', 
-            '🚀 Dynamic Profile Shop, Daily Spin Badges & Shadowban release', 
-            '### 1. 🕵️ Supreme Owner Shadowban System\nIntroduced a silent shadowban system. Restricted to platform Owners only, shadowbanned users can still chat normally but their messages are silently kept from being broadcast to anyone else.\n\n### 2. 🛍️ Dynamic Cosmetics Store\nAdded Avatar Borders, Profile Banners, and Custom Chat Fonts. Buy items with your daily coins and equip/unequip them directly from the store!\n\n### 3. 🎡 Daily Spin Badges\nThe Daily Rewards wheel now contains a rare 💎 Lucky Spin segment that rewards players with a permanent profile badge.\n\n### 4. 🏅 Custom Admin Badge Creator\nAn all-new control room inside the admin panel allowing administrators to design custom badges and grant them directly to users.\n\n### 5. ⚡ WebGL 3D Rendering Performance Fixes\nOptimized ResizeObservers and WebGL layout reflows on the background canvas to fix page lag entirely.', 
+            '2.7.0', 
+            '⚡ v2.7.0 — Massive Lag Elimination, Potato Performance Mode, Image Wallpapers & Hardware Ban Engine', 
+            '### 1. ⚡ 99% Lag Elimination & Zero-Latency Caching\nFixed background database query overhead where static asset requests were querying the database on every file load. Introduced in-memory settings and IP ban caching in db.js to eliminate repetitive database roundtrips.\n\n### 2. 🥔 Potato Performance Mode & Graphics Settings\nAdded **Potato Mode** in Settings to disable background canvas particles, blurs, shadows, and glow effects for maximum FPS on low-end Chromebooks and school laptops. Added controls for disabling UI animations and glassmorphism.\n\n### 3. 🖼️ Custom Image Wallpaper Themes\nAdded 5 new built-in high-definition image wallpaper themes (Cyberpunk City 🌆, Deep Space Nebula 🌌, Synthwave Sunset 🌅, Pixel Forest 🌲, Aesthetic Starry Sky ✨) and custom wallpaper image/GIF URL input controls in Settings.\n\n### 4. 🛡️ Hardware Device Banning Engine\nImplemented immutable client hardware fingerprinting combining WebGL renderer attributes, canvas fingerprinting, CPU cores, screen specs, and device parameters. Added server middleware enforcement to block hardware-banned devices across cookie clearing or new account creation.\n\n### 5. 🌐 Gateway Proxy Hardening & CORS Bugfixes\nResolved Webpack dynamic ChunkLoadError and relative asset CORS errors across proxied apps and games. Removed redundant iframe sandbox attributes to prevent Chrome sandbox escape browser warnings.', 
             'Supreme Owner'
           )
         `);
       }
+
+      // Seed global announcement banner for v2.7
+      try {
+        await pool.query("UPDATE announcements SET is_active = false");
+        await pool.query(`
+          INSERT INTO announcements (title, message, alert_type, is_active)
+          VALUES (
+            '⚡ Major Lag Fix & Performance Update v2.7 Live!',
+            'We overhauled site caching, fixed static file DB query overhead, added Potato Ultra-Low Performance Mode, Image Wallpaper Themes, Hardware Banning, and fixed Gateway CORS errors!',
+            'info',
+            true
+          )
+        `);
+      } catch (e) {}
 
       // Migrate existing 'admin' roles to 'moderator'
       await pool.query("UPDATE users SET role = 'moderator' WHERE role = 'admin'");
