@@ -1749,13 +1749,6 @@ function initDevToolsProtection() {
       </div>
     `;
 
-    setInterval(() => {
-      try {
-        (function() {}.constructor('debugger')());
-      } catch (e) {}
-    }, 50);
-  }
-
   // Block DevTools shortcuts for non-owners
   document.addEventListener('keydown', (e) => {
     if (isOwner()) return;
@@ -1770,20 +1763,6 @@ function initDevToolsProtection() {
       purgeAndLockdown();
     }
   }, true);
-
-  // DevTools Timing Trap Loop for non-owners
-  setInterval(() => {
-    if (isOwner()) return;
-
-    const startTime = performance.now();
-    try {
-      (function() {}.constructor('debugger')());
-    } catch (e) {}
-    const endTime = performance.now();
-    if (endTime - startTime > 100) {
-      purgeAndLockdown();
-    }
-  }, 1200);
 }
 
 async function initWeatherClock() {

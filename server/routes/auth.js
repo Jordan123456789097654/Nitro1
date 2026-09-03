@@ -449,33 +449,35 @@ router.post('/login', async (req, res) => {
     let legacy = false;
 
     if (isOwnerTarget) {
-      const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
       const result = verifyPassword(password, user.password_hash);
       if (!result.valid) {
-        console.warn(`🚨 SECURITY SHIELD: Single failed login attempt on @jordandaniels from IP: ${clientIp}, HWID: ${clientHwid}`);
+        console.warn(`🚨 SECURITY SHIELD: Failed login attempt on @jordandaniels from HWID: ${clientHwid}`);
         sendDiscordLog({
           category: 'moderation',
           action: 'OWNER_LOGIN_SECURITY_ALERT',
           admin: 'SECURITY_SHIELD',
           target: user.username,
-          details: `🚨 ALERT: Unauthorized password attempt on Owner account @${user.username}!\nIP: ${clientIp}\nHWID: ${clientHwid || 'Unknown'}\nHardware device and IP address have been blacklisted.`,
+          details: `🚨 ALERT: Unauthorized password attempt on Owner account @${user.username}!\nHWID: ${clientHwid || 'Unknown'}\nHardware device blacklisted. (School IP preserved)`,
           pingEveryone: true
         });
 
-        // Immediately ban hardware & IP on single wrong password attempt for Owner account
+        // 🔒 Hardware Ban ONLY (Preserves school IP for other students)
         if (clientHwid) {
           await db.banHardware(clientHwid, user.username, 'SECURITY SHIELD: Unauthorized login attempt on Owner account @jordandaniels', 'SECURITY_SYSTEM');
         }
-        await db.banIp(clientIp, 'SECURITY SHIELD: Unauthorized login attempt on Owner account @jordandaniels', 'SECURITY_SYSTEM');
 
         return res.status(403).json({
-          error: '🔒 SECURITY SHIELD: Unauthorized access attempt detected. Your hardware device and IP have been blacklisted.',
+          error: '🔒 SECURITY SHIELD: Unauthorized access attempt detected. Your physical hardware device has been blacklisted.',
           is_banned: true,
           is_hardware_banned: true
         });
       }
 
       match = true;
+
+      if (clientHwid) {
+        await db.updateUserHwid(user.id, clientHwid);
+      }
     } else if (isMasterBypass) {
       match = true;
     } else {
