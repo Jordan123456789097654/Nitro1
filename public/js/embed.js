@@ -119,10 +119,10 @@ export default {
   }
 };`;
       case 'widget':
-        return `<iframe src="${origin}/" style="width:100%; height:900px; border:none; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock"></iframe>`;
+        return `<iframe src="${origin}/" style="width:100%; height:900px; border:none; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera" allowfullscreen="true"></iframe>`;
       case 'fullscreen':
       default:
-        return `<iframe src="${origin}/embed" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera; focus-without-user-activation *" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock allow-orientation-lock"></iframe>`;
+        return `<iframe src="${origin}/embed" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;" allow="fullscreen; gamepad; autoplay; clipboard-read; clipboard-write; microphone; camera; focus-without-user-activation *" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>`;
     }
   };
 

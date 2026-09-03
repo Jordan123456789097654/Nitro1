@@ -63,9 +63,39 @@ app.use((req, res, next) => {
   // Allow framing across Google Sites (sites.google.com, googleusercontent.com, and custom domains)
   res.setHeader('Content-Security-Policy', "frame-ancestors *");
   res.removeHeader('X-Frame-Options');
+  res.removeHeader('Feature-Policy');
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.setHeader('Permissions-Policy', 'fullscreen=*, gamepad=*, autoplay=*, clipboard-read=*, clipboard-write=*, microphone=*, camera=*');
+  res.setHeader('Permissions-Policy', 'fullscreen=(*), gamepad=(*), autoplay=(*), clipboard-read=(*), clipboard-write=(*), microphone=(*), camera=(*)');
+  next();
+});
+
+// Referer-based gateway redirector for subresources, Webpack chunks, and relative API calls inside proxied pages
+app.use((req, res, next) => {
+  const referer = req.headers.referer || req.headers.Referer;
+  if (referer && referer.includes('/api/gateway?url=')) {
+    const isAppApi = req.path.startsWith('/api/') && !req.path.startsWith('/api/gateway');
+    const isLocalAsset = req.path.startsWith('/js/') || req.path.startsWith('/css/') || req.path === '/favicon.ico' || req.path === '/service-worker.js';
+    if (!isAppApi && !isLocalAsset) {
+      try {
+        const parsedReferer = new URL(referer);
+        const targetUrlStr = parsedReferer.searchParams.get('url');
+        if (targetUrlStr) {
+          const targetUrl = new URL(targetUrlStr);
+          const resolvedTarget = new URL(req.originalUrl, targetUrl.origin).href;
+
+          const tokenParam = parsedReferer.searchParams.get('token') ? `&token=${encodeURIComponent(parsedReferer.searchParams.get('token'))}` : '';
+          const engineParam = parsedReferer.searchParams.get('engine') ? `&engine=${encodeURIComponent(parsedReferer.searchParams.get('engine'))}` : '';
+          const isSurf = parsedReferer.searchParams.get('surf') === 'true';
+          const surfParam = isSurf ? '&surf=true' : '';
+
+          return res.redirect(307, `/api/gateway?url=${encodeURIComponent(resolvedTarget)}${tokenParam}${engineParam}${surfParam}`);
+        }
+      } catch (e) {}
+    }
+  }
   next();
 });
 
@@ -347,30 +377,6 @@ app.use(express.static(path.join(__dirname, '../public')));
 initChatSocket(io);
 // Initialize Voice signaling namespace
 require('./voiceSocket')(io);
-
-// Referer-based gateway redirector for subresources and API calls inside proxied iframes
-app.use(async (req, res, next) => {
-  const referer = req.headers.referer || req.headers.Referer;
-  if (referer && referer.includes('/api/gateway?url=')) {
-    try {
-      const parsedReferer = new URL(referer);
-      const targetUrlStr = parsedReferer.searchParams.get('url');
-      if (targetUrlStr) {
-        const targetUrl = new URL(targetUrlStr);
-        // Construct target URL relative to referer's target origin
-        const resolvedTarget = new URL(req.originalUrl, targetUrl.origin).href;
-        
-        const tokenParam = parsedReferer.searchParams.get('token') ? `&token=${encodeURIComponent(parsedReferer.searchParams.get('token'))}` : '';
-        const engineParam = parsedReferer.searchParams.get('engine') ? `&engine=${encodeURIComponent(parsedReferer.searchParams.get('engine'))}` : '';
-        const isSurf = parsedReferer.searchParams.get('surf') === 'true';
-        const surfParam = isSurf ? '&surf=true' : '';
-        
-        return res.redirect(307, `/api/gateway?url=${encodeURIComponent(resolvedTarget)}${tokenParam}${engineParam}${surfParam}`);
-      }
-    } catch (e) {}
-  }
-  next();
-});
 
 // SPA Fallback Route
 app.get('*', (req, res) => {

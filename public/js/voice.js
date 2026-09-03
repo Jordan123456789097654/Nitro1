@@ -51,7 +51,8 @@ let RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' }
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' }
   ]
 };
 
@@ -61,13 +62,8 @@ async function fetchIceConfig() {
     const data = await res.json();
     if (data && data.success && Array.isArray(data.iceServers) && data.iceServers.length) {
       RTC_CONFIG = { iceServers: data.iceServers };
-      if (!data.turnConfigured) {
-        console.warn('[Voice] No TURN server configured — voice may fail to connect on restrictive networks.');
-      }
     }
-  } catch (e) {
-    console.warn('[Voice] Failed to fetch ICE config, using default STUN-only servers:', e.message);
-  }
+  } catch (e) {}
 }
 
 window.setPeerVolume = (socketId, val) => {
