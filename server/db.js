@@ -1,5 +1,6 @@
 const path = require('path');
 const { Pool } = require('pg');
+const { GROQ_API_KEY, GROQ_ENDPOINT, GROQ_TEXT_MODEL } = require('./secrets');
 require('dotenv').config();
 
 const pool = new Pool({
@@ -1711,10 +1712,8 @@ const db = {
 
       let updatedCount = 0;
 
-      // Groq AI API details
-      const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
-      const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-      const GROQ_MODEL = process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b';
+      // Groq AI API details (Centralized via secrets.js)
+      const GROQ_MODEL = GROQ_TEXT_MODEL;
 
       const batchSize = 35;
       const allRows = res.rows;
@@ -1942,9 +1941,7 @@ JSON Format Example:
         let auditFeedback = 'AI audit could not be completed — awaiting manual review.';
 
         try {
-          const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
-          const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-          const GROQ_AUDIT_MODEL = process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b';
+          const GROQ_AUDIT_MODEL = GROQ_TEXT_MODEL;
 
           const prompt = `You are an AI Platform Security Auditor for "Nitro Games", a student academic gaming platform.
 Evaluate this administrator moderation action for appropriateness, professionalism, and potential abuse of power.

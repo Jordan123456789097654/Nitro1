@@ -2,8 +2,7 @@ const fetch = require('node-fetch');
 const systemState = require('./systemState');
 const { sendDiscordLog } = require('./discordLogger');
 
-const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
+const { GROQ_API_KEY, GROQ_ENDPOINT } = require('./secrets');
 const DEFAULT_PRIMARY_MODEL = 'openai/gpt-oss-safeguard-20b';
 const DEFAULT_FALLBACK_MODEL = 'groq/compound-mini';
 

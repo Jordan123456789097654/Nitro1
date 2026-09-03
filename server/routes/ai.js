@@ -23,14 +23,8 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LTM28fLKtWdNnUeVr
 const GEMINI_PRIMARY_MODEL = process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 const GEMINI_FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.1-flash-lite';
 
-// Fallback API: Groq
-const GROQ_ENDPOINT = process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
-// llama-3.3-70b-versatile and llama-3.2-11b-vision-preview were both decommissioned by Groq
-// (see https://console.groq.com/docs/deprecations) — every request to them now 404s with
-// "model_not_found". Migrated to Groq's current recommended replacements.
-const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b';
-const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';
+// Fallback API: Groq (Centralized via server/secrets.js)
+const { GROQ_API_KEY, GROQ_ENDPOINT, GROQ_TEXT_MODEL, GROQ_VISION_MODEL } = require('../secrets');
 
 const BASE_SYSTEM_PROMPT = `You are Nitro AI — a super chill, high-IQ, and quick-witted study co-pilot. You combine the relaxed, casual personality of a clever friend with the pedagogical precision of an elite tutor. Speak naturally, informally, and lowkey use Gen Z slang and vibes (e.g., "no cap", "fr fr", "lowkey", "highkey", "bruh", "cooking", "it's giving", "slay", "bet", "real") where appropriate, but still keep it smart and actually helpful. Avoid sounding like a dry academic textbook or a stiff formal bot.
 

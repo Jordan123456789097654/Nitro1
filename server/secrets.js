@@ -27,4 +27,23 @@ if (!secret || secret.trim().length < 16) {
   );
 }
 
-module.exports = { JWT_SECRET: secret, SESSION_SECRET: secret };
+const GROQ_API_KEY = (process.env.GROQ_API_KEY || '').trim();
+const GROQ_ENDPOINT = (process.env.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions').trim();
+const GROQ_TEXT_MODEL = (process.env.GROQ_TEXT_MODEL || 'openai/gpt-oss-120b').trim();
+const GROQ_VISION_MODEL = (process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b').trim();
+
+if (!GROQ_API_KEY) {
+  console.warn(
+    '⚠️  [AI Security Notice] GROQ_API_KEY is not set in your environment / .env file.\n' +
+    '    Configure GROQ_API_KEY in your Render dashboard / environment variables to enable Groq AI.'
+  );
+}
+
+module.exports = {
+  JWT_SECRET: secret,
+  SESSION_SECRET: secret,
+  GROQ_API_KEY,
+  GROQ_ENDPOINT,
+  GROQ_TEXT_MODEL,
+  GROQ_VISION_MODEL
+};
