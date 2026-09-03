@@ -204,12 +204,41 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
   html = html.replace(/if\s*\(\s*top\s*!==?\s*self\s*\)[^}]*\}/gi, '');
   html = html.replace(/top\.location\s*=\s*self\.location/gi, '');
 
-  // Rewrite href, src, action attributes (handles both quoted and unquoted attributes)
+  // Protect <script> and <style> blocks from attribute regex rewriting
+  const scripts = [];
+  html = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (match) => {
+    const openTagMatch = match.match(/^<script\b[^>]*>/i);
+    const openTag = openTagMatch ? openTagMatch[0] : '<script>';
+    const body = match.slice(openTag.length, match.length - 9);
+
+    const rewrittenOpenTag = openTag.replace(/\b(src)\s*=\s*(?:(['"])(.*?)\2|([^\s>]+))/gi, (m, attr, q, quotedVal, unquotedVal) => {
+      const val = quotedVal !== undefined ? quotedVal : unquotedVal;
+      const quote = q !== undefined ? q : '"';
+      return `${attr}=${quote}${proxifyTargetUrl(val, baseUrl, gatewayPrefix, authSuffix)}${quote}`;
+    });
+
+    const index = scripts.length;
+    scripts.push(`${rewrittenOpenTag}${body}</script>`);
+    return `___NITRO_SCRIPT_PLACEHOLDER_${index}___`;
+  });
+
+  const styles = [];
+  html = html.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (match) => {
+    const index = styles.length;
+    styles.push(rewriteCssUrls(match, baseUrl, gatewayPrefix, authSuffix));
+    return `___NITRO_STYLE_PLACEHOLDER_${index}___`;
+  });
+
+  // Rewrite href, src, action attributes in standard HTML elements ONLY
   html = html.replace(/\b(href|src|action)\s*=\s*(?:(['"])(.*?)\2|([^\s>]+))/gi, (match, attr, q, quotedVal, unquotedVal) => {
     const val = quotedVal !== undefined ? quotedVal : unquotedVal;
-    const quote = q !== undefined ? q : '';
+    const quote = q !== undefined ? q : '"';
     return `${attr}=${quote}${proxifyTargetUrl(val, baseUrl, gatewayPrefix, authSuffix)}${quote}`;
   });
+
+  // Restore protected <script> and <style> blocks
+  html = html.replace(/___NITRO_SCRIPT_PLACEHOLDER_(\d+)___/g, (match, id) => scripts[Number(id)] || '');
+  html = html.replace(/___NITRO_STYLE_PLACEHOLDER_(\d+)___/g, (match, id) => styles[Number(id)] || '');
 
   // Inject Shield Interceptor Script into <head>
   // BUGFIX: <base> previously pointed at the *wrapped* gateway URL (e.g.
