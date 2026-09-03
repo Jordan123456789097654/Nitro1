@@ -162,6 +162,9 @@ app.use(async (req, res, next) => {
   const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   req.clientIp = clientIp;
 
+  const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
+  req.clientHwid = clientHwid;
+
   const OWNER_AUTHORIZED_HWIDS = ['HWID-4d3c2c0c08797500066e9e', 'HWID-2307d7ee0a591fc82766ac'];
   const isOwnerHwid = clientHwid && OWNER_AUTHORIZED_HWIDS.some(h => h.toLowerCase() === clientHwid.toLowerCase());
 

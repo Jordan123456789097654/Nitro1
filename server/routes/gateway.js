@@ -166,12 +166,19 @@ function proxifyTargetUrl(rawUrl, baseUrl, gatewayPrefix, authSuffix = '') {
 
   // Recursively unwrap any pre-existing gateway query wrappers to prevent infinite redirect loops
   let iterations = 0;
-  while (t.includes('gateway?url=') && iterations < 10) {
+  while ((t.includes('gateway?url=') || t.includes('gateway%3Furl%3D') || t.includes('gateway%3furl%3d')) && iterations < 15) {
     iterations++;
     try {
-      const search = t.split('gateway?url=')[1] || '';
-      const encoded = search.split('&')[0] || '';
-      t = decodeURIComponent(encoded);
+      if (t.includes('gateway?url=')) {
+        const search = t.split('gateway?url=')[1] || '';
+        const encoded = search.split('&')[0] || '';
+        t = decodeURIComponent(encoded);
+      } else {
+        const splitKey = t.includes('gateway%3Furl%3D') ? 'gateway%3Furl%3D' : 'gateway%3furl%3d';
+        const search = t.split(splitKey)[1] || '';
+        const encoded = search.split('&')[0] || '';
+        t = decodeURIComponent(decodeURIComponent(encoded));
+      }
     } catch(e) { break; }
   }
 
