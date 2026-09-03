@@ -571,7 +571,7 @@ router.post('/login', async (req, res) => {
       details: `User signed in with role: ${user.role.toUpperCase()}`
     });
     // Log successful login IP
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     await db.logUserIp(user.id, user.username, clientIp, req.headers['user-agent'] || '');
 
     res.json({
