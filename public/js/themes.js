@@ -395,6 +395,37 @@ function setupCustomThemeCreator() {
     }
   });
 
+  
+  // Inline Custom Wallpaper Controls
+  const inlineBgImg = document.getElementById('inline-theme-bg-image');
+  const applyWallBtn = document.getElementById('apply-custom-wallpaper-btn');
+  const removeWallBtn = document.getElementById('remove-custom-wallpaper-btn');
+
+  if (inlineBgImg) {
+    inlineBgImg.value = localStorage.getItem('nitro_custom_bg_image') || '';
+  }
+
+  if (applyWallBtn) {
+    applyWallBtn.addEventListener('click', () => {
+      const url = inlineBgImg ? inlineBgImg.value.trim() : '';
+      if (!url) return alert('Please enter a valid image URL.');
+      localStorage.setItem('nitro_custom_bg_image', url);
+      const currentTheme = localStorage.getItem('nitro_theme') || 'cherry';
+      applyTheme(currentTheme);
+      alert('🖼️ Custom background wallpaper applied!');
+    });
+  }
+
+  if (removeWallBtn) {
+    removeWallBtn.addEventListener('click', () => {
+      localStorage.removeItem('nitro_custom_bg_image');
+      if (inlineBgImg) inlineBgImg.value = '';
+      const currentTheme = localStorage.getItem('nitro_theme') || 'cherry';
+      applyTheme(currentTheme);
+      alert('🗑️ Custom background wallpaper removed.');
+    });
+  }
+
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();

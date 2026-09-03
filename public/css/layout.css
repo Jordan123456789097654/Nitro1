@@ -37,11 +37,27 @@ h1, h2, h3, h4 {
 
 body {
   background-color: var(--bg-color);
+  background-image: var(--bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--bg-image-overlay, rgba(9, 10, 15, 0.65));
+  pointer-events: none;
+  z-index: -1;
+  opacity: var(--bg-image-overlay-opacity, 0);
+  transition: opacity 0.3s ease;
 }
 
 /* Background Canvas & Ambient Gradients */
