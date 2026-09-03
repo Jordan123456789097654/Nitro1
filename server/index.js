@@ -415,11 +415,16 @@ db.initPostgres().catch(err => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`===========================================`);
-  console.log(`🚀 NITRO (BETA) 2.6 Server running on port ${PORT}`);
-  console.log(`🌐 Local URL: http://localhost:${PORT}`);
-  console.log(`🛡️ Primary Admin User: jordandaniels`);
-  console.log(`🔒 Script Protection: Obfuscation Engine Active`);
-  console.log(`===========================================`);
-});
+
+if (!process.env.VERCEL) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`===========================================`);
+    console.log(`🚀 NITRO (BETA) 2.6 Server running on port ${PORT}`);
+    console.log(`🌐 Local URL: http://localhost:${PORT}`);
+    console.log(`🛡️ Primary Admin User: jordandaniels`);
+    console.log(`🔒 Script Protection: Obfuscation Engine Active`);
+    console.log(`===========================================`);
+  });
+}
+
+module.exports = app;
