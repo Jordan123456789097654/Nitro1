@@ -99,12 +99,48 @@ router.get('/', async (req, res) => {
         show_activity: true,
         is_admin: isAdmin,
         is_owner: isOwner,
+        coins: user.coins || 0,
+        xp: user.xp || 0,
+        level: Math.floor(Math.sqrt((user.xp || 0) / 50)) + 1,
+        streak_count: user.streak_count || 0,
+        last_streak_date: user.last_streak_date || null,
         created_at: Date.now()
       }
     });
   } catch (err) {
     console.error('Session verification error:', err);
     res.status(500).json({ error: 'Session verification failed.' });
+  }
+});
+
+// POST /api/me/daily-streak - Claim Daily Streak Reward
+router.post('/daily-streak', async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+
+  try {
+    const result = await db.claimDailyStreak(user.id);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to claim streak.' });
+  }
+});
+
+// POST /api/me/gift-coins - Gift coins to a classmate
+router.post('/gift-coins', async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+
+  const { toUsername, amount } = req.body;
+  if (!toUsername || !amount) return res.status(400).json({ error: 'Username and amount are required.' });
+
+  try {
+    const result = await db.giftCoins(user.id, toUsername, amount);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to complete gift transfer.' });
   }
 });
 

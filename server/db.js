@@ -546,6 +546,8 @@ const db = {
       await pool.query("ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS stock_count INT DEFAULT -1;");
       await pool.query("ALTER TABLE user_quests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_spin_at TIMESTAMP;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS streak_count INT DEFAULT 0;");
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_streak_date DATE;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_shop_banned BOOLEAN DEFAULT false;");
       await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_shadowbanned BOOLEAN DEFAULT false;");
       await pool.query("ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS is_shadowbanned BOOLEAN DEFAULT false;");
@@ -4343,6 +4345,93 @@ Respond ONLY with valid JSON matching this exact schema:
     } catch (e) {
       console.error('shadowbanUser error:', e.message);
       return false;
+    }
+  },
+
+  async claimDailyStreak(userId) {
+    try {
+      const userRes = await pool.query('SELECT streak_count, last_streak_date, coins, xp FROM users WHERE id = $1', [userId]);
+      if (!userRes.rows.length) return { error: 'User not found.' };
+
+      const user = userRes.rows[0];
+      const todayStr = new Date().toISOString().split('T')[0];
+      const lastStreakStr = user.last_streak_date ? new Date(user.last_streak_date).toISOString().split('T')[0] : null;
+
+      if (lastStreakStr === todayStr) {
+        return { error: 'You have already claimed today\'s streak reward! Check back tomorrow.' };
+      }
+
+      let nextStreak = 1;
+      if (lastStreakStr) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        if (lastStreakStr === yesterdayStr) {
+          nextStreak = (user.streak_count || 0) + 1;
+        }
+      }
+
+      const rewardsMap = [50, 75, 100, 150, 200, 300, 500];
+      const dayIndex = Math.min(nextStreak - 1, 6);
+      const rewardCoins = rewardsMap[dayIndex];
+      const rewardXp = nextStreak % 7 === 0 ? 500 : 50;
+
+      await pool.query(`
+        UPDATE users 
+        SET streak_count = $1, last_streak_date = CURRENT_DATE, coins = COALESCE(coins, 0) + $2, xp = COALESCE(xp, 0) + $3 
+        WHERE id = $4
+      `, [nextStreak, rewardCoins, rewardXp, userId]);
+
+      clearUserCache(userId);
+
+      return {
+        success: true,
+        streak: nextStreak,
+        rewardCoins,
+        rewardXp,
+        message: `🔥 Day ${nextStreak} Streak Claimed! +${rewardCoins} Coins & +${rewardXp} XP!`
+      };
+    } catch (e) {
+      console.error('claimDailyStreak error:', e.message);
+      return { error: 'Failed to claim streak reward.' };
+    }
+  },
+
+  async giftCoins(fromUserId, toUsername, amount) {
+    try {
+      const amt = parseInt(amount, 10);
+      if (isNaN(amt) || amt <= 0) return { error: 'Invalid coin amount.' };
+
+      const senderRes = await pool.query('SELECT id, username, coins FROM users WHERE id = $1', [fromUserId]);
+      if (!senderRes.rows.length) return { error: 'Sender not found.' };
+      const sender = senderRes.rows[0];
+
+      if ((sender.coins || 0) < amt) {
+        return { error: `Insufficient balance. You need ${amt} Coins but only have ${sender.coins || 0}.` };
+      }
+
+      const receiverRes = await pool.query('SELECT id, username FROM users WHERE LOWER(username) = LOWER($1)', [toUsername.trim()]);
+      if (!receiverRes.rows.length) return { error: `User "${toUsername}" not found.` };
+      const receiver = receiverRes.rows[0];
+
+      if (receiver.id === sender.id) {
+        return { error: 'You cannot gift coins to yourself.' };
+      }
+
+      await pool.query('UPDATE users SET coins = coins - $1 WHERE id = $2', [amt, sender.id]);
+      await pool.query('UPDATE users SET coins = COALESCE(coins, 0) + $1 WHERE id = $2', [amt, receiver.id]);
+
+      clearUserCache(sender.id);
+      clearUserCache(receiver.id);
+
+      return {
+        success: true,
+        message: `🎁 Successfully gifted 🪙 ${amt} Coins to @${receiver.username}!`,
+        remainingCoins: (sender.coins || 0) - amt
+      };
+    } catch (e) {
+      console.error('giftCoins error:', e.message);
+      return { error: 'Failed to complete coin transfer.' };
     }
   }
 };

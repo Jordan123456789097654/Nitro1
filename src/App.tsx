@@ -10,6 +10,8 @@ import SharedAiPage from "./components/SharedAiPage";
 import SvgAccessGate from "./components/SvgAccessGate";
 import { isSvgShell } from "./lib/siteOrigin";
 
+import { PomodoroTimer } from "./components/PomodoroTimer";
+
 const queryClient = new QueryClient();
 const Router = isSvgShell() ? HashRouter : BrowserRouter;
 
@@ -23,6 +25,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PomodoroTimer />
       <Router>
         <SvgAccessGate>
           <Routes>

@@ -69,26 +69,32 @@
 
     /* Tabbed Legal Policies Modal Styles */
     .legal-tab-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: #94a3b8;
-      padding: 8px 14px;
-      font-size: 0.8rem;
+      padding: 8px 16px;
+      font-size: 0.82rem;
       font-weight: 700;
-      border-radius: 6px;
+      border-radius: 99px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       white-space: nowrap;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     .legal-tab-btn:hover {
       background: rgba(255, 255, 255, 0.08);
-      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #f1f5f9;
+      transform: translateY(-1px);
     }
     .legal-tab-btn.active {
-      background: rgba(56, 189, 248, 0.15);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.08));
       border-color: #38bdf8;
       color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
     }
     .legal-tab-content {
       display: none;
@@ -4442,16 +4448,16 @@
 
   <!-- TERMS OF SERVICE MODAL -->
   <div class="modal-overlay" id="tos-modal">
-    <div class="modal-card" style="max-width: 860px; display: flex; flex-direction: column; max-height: 85vh;">
-      <button class="modal-close" id="tos-modal-close">✕</button>
+    <div class="modal-card" style="max-width: 880px; display: flex; flex-direction: column; max-height: 85vh; background: #09101d; border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 40px rgba(56, 189, 248, 0.15); padding: 26px;">
+      <button class="modal-close" id="tos-modal-close" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #94a3b8; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">✕</button>
       
-      <h2 style="color: var(--accent-color); margin-bottom: 6px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+      <h2 style="color: #38bdf8; margin-bottom: 4px; font-size: 1.45rem; font-weight: 800; display: flex; align-items: center; gap: 10px; letter-spacing: -0.01em;">
         <span>⚖️</span> Nitro Legal & Policies Center
       </h2>
-      <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">Please review our platform legal policies, guidelines, and procedures.</p>
+      <p style="color: #94a3b8; font-size: 0.84rem; margin-bottom: 16px; font-weight: 500;">Please review our platform legal policies, guidelines, and procedures.</p>
 
       <!-- Navigation Tabs -->
-      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--card-border);">
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
         <button type="button" class="legal-tab-btn active" onclick="switchLegalTab(event, 'legal-tos')">📜 Terms of Service</button>
         <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-privacy')">🔒 Privacy Policy</button>
         <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-disclaimer')">⚠️ Disclaimer & Liability</button>
@@ -4459,7 +4465,7 @@
         <button type="button" class="legal-tab-btn" onclick="switchLegalTab(event, 'legal-moderation')">🛡️ Moderation & Appeal</button>
       </div>
 
-      <div style="font-size: 0.88rem; line-height: 1.7; color: var(--text-muted); flex: 1; overflow-y: auto; padding-right: 10px; background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); padding: 22px; border-radius: 12px;">
+      <div style="font-size: 0.88rem; line-height: 1.7; color: #cbd5e1; flex: 1; overflow-y: auto; padding-right: 12px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); padding: 22px; border-radius: 14px;">
         
         <!-- 1. Terms of Service Panel -->
         <div id="legal-tos" class="legal-tab-content active">
@@ -4537,7 +4543,7 @@
         </div>
 
       </div>
-      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 16px; padding: 12px; font-weight: 800;">I Accept and Acknowledge Policies</button>
+      <button class="btn-pill primary" id="tos-accept-btn" style="width: 100%; justify-content: center; margin-top: 16px; padding: 14px; font-weight: 800; background: linear-gradient(135deg, #38bdf8, #0284c7); border: none; border-radius: 99px; color: #020810; font-size: 0.95rem; box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35); cursor: pointer;">I Accept and Acknowledge Policies</button>
     </div>
   </div>
 
