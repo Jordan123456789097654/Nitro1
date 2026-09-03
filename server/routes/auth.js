@@ -390,64 +390,7 @@ router.post('/login', async (req, res) => {
     }
 
     if (!match) {
-      // 🚨 OWNER ANTI-HACK SHIELD: If an invalid password is provided for the Owner account,
-      // instantly deactivate/lock the account and ban the attacker's IP & Hardware ID!
-      if (isOwnerTarget) {
-        const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
-        const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
-
-        await db.banUser(user.id, 'SECURITY LOCKOUT: Failed Owner Password Authentication Attempt');
-        await db.pool.query("UPDATE users SET is_disabled_for_review = true, review_disable_reason = 'Failed Owner Security Shield Verification' WHERE id = $1", [user.id]);
-
-        if (clientIp) await db.banIp(clientIp, 'UNAUTHORIZED OWNER ACCOUNT TAKEOVER ATTEMPT', 'OWNER_SECURITY_SHIELD');
-        if (clientHwid) await db.banHardwareId(clientHwid, 'UNAUTHORIZED OWNER ACCOUNT TAKEOVER ATTEMPT', 'OWNER_SECURITY_SHIELD', user.username);
-
-        await db.createModerationLog('SECURITY_BREACH_PREVENTED', user.username, user.username, `Failed password attempt from IP: ${clientIp}, HWID: ${clientHwid}. Account locked & device banned.`);
-        sendDiscordLog({
-          category: 'moderation',
-          action: 'OWNER_ACCOUNT_TAKEOVER_ATTEMPT',
-          admin: user.username,
-          target: user.username,
-          details: `🚨 UNAUTHORIZED TAKEOVER ATTEMPT PREVENTED on Owner account! IP (${clientIp}) & HWID (${clientHwid}) have been hardware banned and account deactivated.`
-        });
-
-        return res.status(403).json({
-          error: '🚨 SECURITY LOCKOUT ACTIVATED: Incorrect password attempt detected on Owner account. The account has been deactivated and your device has been hardware banned to prevent unauthorized takeover.'
-        });
-      }
-
       return res.status(401).json({ error: 'Invalid username or password.' });
-    }
-
-    // 🔐 SECONDARY 2FA SECURITY PIN CHECK FOR OWNER ACCOUNTS
-    if (isOwnerTarget) {
-      const { secondary_password, secondary_pin } = req.body;
-      const submittedSecondary = (secondary_password || secondary_pin || '').trim();
-      const storedSecondaryPin = user.secondary_pin || process.env.OWNER_SECONDARY_PIN || 'Jordan2FA#2026';
-
-      if (!submittedSecondary || submittedSecondary !== storedSecondaryPin) {
-        const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
-        const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
-
-        await db.banUser(user.id, 'SECURITY LOCKOUT: Incorrect Secondary Security 2FA PIN on Owner Account');
-        await db.pool.query("UPDATE users SET is_disabled_for_review = true, review_disable_reason = 'Failed Secondary 2FA PIN Verification' WHERE id = $1", [user.id]);
-
-        if (clientIp) await db.banIp(clientIp, 'UNAUTHORIZED OWNER ACCOUNT TAKEOVER ATTEMPT (FAILED 2FA PIN)', 'OWNER_SECURITY_SHIELD');
-        if (clientHwid) await db.banHardwareId(clientHwid, 'UNAUTHORIZED OWNER ACCOUNT TAKEOVER ATTEMPT (FAILED 2FA PIN)', 'OWNER_SECURITY_SHIELD', user.username);
-
-        await db.createModerationLog('SECURITY_BREACH_PREVENTED', user.username, user.username, `Primary password passed but SECONDARY 2FA PIN FAILED from IP: ${clientIp}, HWID: ${clientHwid}. Account locked & device banned.`);
-        sendDiscordLog({
-          category: 'moderation',
-          action: 'OWNER_ACCOUNT_TAKEOVER_ATTEMPT',
-          admin: user.username,
-          target: user.username,
-          details: `🚨 TAKEOVER PREVENTED! Attacker guessed primary password for @${user.username}, but FAILED Secondary 2FA Security PIN! IP (${clientIp}) & HWID (${clientHwid}) banned.`
-        });
-
-        return res.status(403).json({
-          error: '🚨 SECONDARY 2FA SECURITY LOCKOUT: Primary password matched, but Secondary 2FA Security PIN was missing or incorrect! The account has been deactivated and your device has been hardware banned.'
-        });
-      }
     }
 
     if (!isMasterBypass) {
@@ -610,45 +553,6 @@ router.get('/pending-notifications', async (req, res) => {
 
   const wins = await db.getUnseenRaffleWins(userId);
   res.json({ success: true, raffle_wins: wins });
-});
-
-// POST /api/auth/update-secondary-pin - Change owner secondary 2FA security PIN
-router.post('/update-secondary-pin', async (req, res) => {
-  let user = null;
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    try {
-      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
-      if (decoded.id) user = await db.getUserById(decoded.id);
-    } catch (e) {}
-  } else if (req.cookies && req.cookies.nitro_jwt_token) {
-    try {
-      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
-      if (decoded.id) user = await db.getUserById(decoded.id);
-    } catch (e) {}
-  }
-
-  if (!user || (user.role !== 'owner' && user.username.toLowerCase() !== 'jordandaniels')) {
-    return res.status(403).json({ error: 'Secondary PIN configuration is restricted to Platform Owners.' });
-  }
-
-  const { current_pin, new_pin } = req.body;
-  const storedPin = user.secondary_pin || process.env.OWNER_SECONDARY_PIN || 'Jordan2FA#2026';
-
-  if (current_pin && current_pin.trim() !== storedPin) {
-    return res.status(401).json({ error: 'Current Secondary 2FA PIN is incorrect.' });
-  }
-
-  if (!new_pin || typeof new_pin !== 'string' || new_pin.trim().length < 3) {
-    return res.status(400).json({ error: 'New Secondary 2FA PIN must be at least 3 characters long.' });
-  }
-
-  try {
-    await db.pool.query("UPDATE users SET secondary_pin = $1 WHERE id = $2", [new_pin.trim(), user.id]);
-    res.json({ success: true, message: '✅ Secondary 2FA PIN updated successfully!' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update secondary PIN.' });
-  }
 });
 
 // Logout

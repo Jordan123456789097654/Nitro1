@@ -453,8 +453,6 @@ export function updateNavAuthUI() {
       customThemeBtn.style.display = userLevel >= 2 ? 'block' : 'none';
     }
 
-    initOwner2FaSettings();
-
     // Level >= 6: Moderator, Owner
     if (userLevel >= 6) {
       if (adminBtn) adminBtn.style.display = 'flex';
@@ -1242,56 +1240,6 @@ function showRaffleWinPopup(win) {
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-export function initOwner2FaSettings() {
-  const box = document.getElementById('owner-2fa-settings-box');
-  const form = document.getElementById('owner-2fa-pin-form');
-  const msg = document.getElementById('owner-2fa-msg');
-
-  if (!currentUser) return;
-  const isOwner = currentUser.role === 'owner' || currentUser.username?.toLowerCase() === 'jordandaniels';
-  if (box) box.style.display = isOwner ? 'block' : 'none';
-
-  if (form && !form.dataset.listenerAttached) {
-    form.dataset.listenerAttached = 'true';
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const current_pin = document.getElementById('owner-current-2fa-pin')?.value || '';
-      const new_pin = document.getElementById('owner-new-2fa-pin')?.value || '';
-
-      try {
-        const token = localStorage.getItem('nitro_jwt_token');
-        const res = await fetch('/api/auth/update-secondary-pin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ current_pin, new_pin })
-        });
-        const data = await res.json();
-        if (msg) {
-          msg.style.display = 'block';
-          if (res.ok) {
-            msg.style.color = '#10b981';
-            msg.textContent = data.message || '✅ Secondary 2FA Security PIN successfully updated!';
-            document.getElementById('owner-current-2fa-pin').value = '';
-            document.getElementById('owner-new-2fa-pin').value = '';
-          } else {
-            msg.style.color = '#ef4444';
-            msg.textContent = data.error || 'Failed to update 2FA PIN.';
-          }
-        }
-      } catch (err) {
-        if (msg) {
-          msg.style.display = 'block';
-          msg.style.color = '#ef4444';
-          msg.textContent = 'Network error updating 2FA PIN.';
-        }
-      }
-    });
-  }
 }
 
 export { checkAndShowRaffleWinPopup };
