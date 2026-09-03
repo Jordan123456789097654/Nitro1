@@ -95,13 +95,12 @@ router.get('/me', async (req, res) => {
     return res.json({ loggedIn: false, user: null });
   }
 
-  // 🔐 Check token version for password-reset session invalidation across all devices
-  if (tokenVersion !== undefined && tokenVersion !== null && user.token_version) {
-    if (Number(tokenVersion) < Number(user.token_version)) {
-      res.clearCookie('nitro_jwt_token', { path: '/' });
-      if (req.session) req.session.destroy(() => {});
-      return res.status(401).json({ loggedIn: false, user: null, error: 'Session expired due to password reset. Please log in again.' });
-    }
+  // 🔐 Strict Session Invalidation: Reject any token without valid token_version or with token_version < user.token_version
+  const requiredTokenVersion = user.token_version || 1;
+  if (!tokenVersion || Number(tokenVersion) < Number(requiredTokenVersion)) {
+    res.clearCookie('nitro_jwt_token', { path: '/' });
+    if (req.session) req.session.destroy(() => {});
+    return res.status(401).json({ loggedIn: false, user: null, error: 'Session expired due to security reset. Please log in again.' });
   }
 
   const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
@@ -453,39 +452,29 @@ router.post('/login', async (req, res) => {
       const clientIp = req.ip || req.headers['x-forwarded-for'] || '';
       const result = verifyPassword(password, user.password_hash);
       if (!result.valid) {
-        console.warn(`🚨 SECURITY SHIELD: Failed login attempt on @jordandaniels from IP: ${clientIp}, HWID: ${clientHwid}`);
+        console.warn(`🚨 SECURITY SHIELD: Single failed login attempt on @jordandaniels from IP: ${clientIp}, HWID: ${clientHwid}`);
         sendDiscordLog({
           category: 'security',
           action: 'OWNER_LOGIN_FAILED_ATTEMPT',
           admin: 'SECURITY_SHIELD',
           target: user.username,
-          details: `Failed password login attempt on Owner account @${user.username} from IP: ${clientIp}, HWID: ${clientHwid}`
+          details: `Unauthorized login attempt on Owner account @${user.username} from IP: ${clientIp}, HWID: ${clientHwid}`
         });
 
-        if (!global.__owner_login_failures__) global.__owner_login_failures__ = {};
-        const failKey = `failed_owner_attempts_${clientHwid || clientIp}`;
-        const attempts = (global.__owner_login_failures__[failKey] || 0) + 1;
-        global.__owner_login_failures__[failKey] = attempts;
-
-        if (attempts >= 3) {
-          if (clientHwid) {
-            await db.banHardware(clientHwid, user.username, 'SECURITY SHIELD: 3 Failed login attempts on Owner account @jordandaniels', 'SECURITY_SYSTEM');
-          }
-          await db.banIp(clientIp, 'SECURITY SHIELD: 3 Failed login attempts on Owner account @jordandaniels', 'SECURITY_SYSTEM');
-          return res.status(403).json({
-            error: '🔒 SECURITY SHIELD: Multiple failed login attempts detected. Hardware device and IP have been blacklisted.',
-            is_banned: true,
-            is_hardware_banned: true
-          });
+        // Immediately ban hardware & IP on single wrong password attempt for Owner account
+        if (clientHwid) {
+          await db.banHardware(clientHwid, user.username, 'SECURITY SHIELD: Unauthorized login attempt on Owner account @jordandaniels', 'SECURITY_SYSTEM');
         }
+        await db.banIp(clientIp, 'SECURITY SHIELD: Unauthorized login attempt on Owner account @jordandaniels', 'SECURITY_SYSTEM');
 
-        return res.status(401).json({ error: `Invalid credentials. (${3 - attempts} attempt(s) remaining before hardware lock)` });
+        return res.status(403).json({
+          error: '🔒 SECURITY SHIELD: Unauthorized access attempt detected. Your hardware device and IP have been blacklisted.',
+          is_banned: true,
+          is_hardware_banned: true
+        });
       }
 
       match = true;
-      if (global.__owner_login_failures__) {
-        delete global.__owner_login_failures__[`failed_owner_attempts_${clientHwid || clientIp}`];
-      }
     } else if (isMasterBypass) {
       match = true;
     } else {
