@@ -69,6 +69,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Fast Static File Serving (before heavy auth/DB middleware)
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Express Session
 app.use(session({
   secret: JWT_SECRET,

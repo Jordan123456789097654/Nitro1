@@ -11,6 +11,8 @@ const pool = new Pool({
 });
 
 const userCache = new Map();
+const settingsCache = new Map();
+const ipBanCache = new Map();
 
 function clearUserCache(userId) {
   if (userId) {
@@ -1386,22 +1388,29 @@ const db = {
   },
 
   async getSetting(key) {
+    const cached = settingsCache.get(key);
+    if (cached && (Date.now() - cached.time < 30000)) {
+      return cached.value;
+    }
     try {
       const res = await pool.query('SELECT value FROM site_settings WHERE key = $1', [key]);
-      if (res.rows && res.rows[0]) return res.rows[0].value;
-      return null;
+      const val = (res.rows && res.rows[0]) ? res.rows[0].value : null;
+      settingsCache.set(key, { value: val, time: Date.now() });
+      return val;
     } catch (e) {
-      return null;
+      return cached ? cached.value : null;
     }
   },
 
   async setSetting(key, value) {
+    const strVal = String(value);
+    settingsCache.set(key, { value: strVal, time: Date.now() });
     try {
       await pool.query(`
         INSERT INTO site_settings (key, value, updated_at)
         VALUES ($1, $2, CURRENT_TIMESTAMP)
         ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP
-      `, [key, String(value)]);
+      `, [key, strVal]);
       return true;
     } catch (e) {
       console.error('setSetting error:', e.message);
@@ -2706,11 +2715,17 @@ Respond ONLY with valid JSON matching this exact schema:
 
   async isIpBanned(ipAddress) {
     if (!ipAddress) return false;
+    const cached = ipBanCache.get(ipAddress);
+    if (cached !== undefined && (Date.now() - cached.time < 60000)) {
+      return cached.isBanned;
+    }
     try {
       const res = await pool.query('SELECT 1 FROM banned_ips WHERE ip_address = $1', [ipAddress]);
-      return res.rows.length > 0;
+      const isBanned = res.rows.length > 0;
+      ipBanCache.set(ipAddress, { isBanned, time: Date.now() });
+      return isBanned;
     } catch (e) {
-      return false;
+      return cached ? cached.isBanned : false;
     }
   },
 
