@@ -645,10 +645,10 @@ router.all('/', async (req, res) => {
   if (engine.platform) fetchHeaders['Sec-Ch-Ua-Platform'] = engine.platform;
   fetchHeaders['Referer'] = engine.referer || urlObj.origin;
 
+  const http = require('http');
   const https = require('https');
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
+  const httpAgent = new http.Agent({ keepAlive: true });
+  const httpsAgent = new https.Agent({ rejectUnauthorized: false, keepAlive: true });
 
   const fetchOptions = {
     method: ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method) ? req.method : 'GET',
@@ -656,7 +656,10 @@ router.all('/', async (req, res) => {
     redirect: 'follow',
     timeout: 15000,
     compress: true,
-    agent
+    agent: function(_parsedURL) {
+      if (_parsedURL && _parsedURL.protocol === 'http:') return httpAgent;
+      return httpsAgent;
+    }
   };
 
   if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {

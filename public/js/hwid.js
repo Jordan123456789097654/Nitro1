@@ -1,79 +1,74 @@
 // Client-side Hardware Fingerprint Generator & Global Performance Controller
 
-async function generateHardwareId() {
-  const existing = localStorage.getItem('nitro_hwid');
-  if (existing && existing.length >= 24) {
-    return existing;
-  }
-
-  const components = [];
-
-  components.push(screen.width + 'x' + screen.height + 'x' + screen.colorDepth);
-  components.push(window.devicePixelRatio || 1);
-  components.push(navigator.hardwareConcurrency || 2);
-  components.push(navigator.deviceMemory || 4);
-  components.push(Intl.DateTimeFormat().resolvedOptions().timeZone || '');
-
+function getOrCreateHardwareId() {
   try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (gl) {
-      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      if (debugInfo) {
-        components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '');
-        components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '');
+    const existing = localStorage.getItem('nitro_hwid');
+    if (existing && existing.startsWith('HWID-') && existing.length >= 16) {
+      return existing;
+    }
+
+    const components = [
+      screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+      window.devicePixelRatio || 1,
+      navigator.hardwareConcurrency || 2,
+      navigator.deviceMemory || 4,
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.userAgent || '',
+      navigator.language || ''
+    ];
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.textBaseline = 'top';
+        ctx.font = '14px "Arial"';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('NitroOS,HWID_v1!', 2, 15);
+        ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+        ctx.fillText('NitroOS,HWID_v1!', 4, 17);
+        components.push(canvas.toDataURL());
       }
+    } catch (e) {}
+
+    const rawString = components.join('###');
+    let hash1 = 0x811c9dc5, hash2 = 0x01000193;
+    for (let i = 0; i < rawString.length; i++) {
+      const c = rawString.charCodeAt(i);
+      hash1 = Math.imul(hash1 ^ c, 0x01000193);
+      hash2 = Math.imul(hash2 ^ c, 0x811c9dc5);
     }
-  } catch (e) {}
-
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = 200;
-    canvas.height = 50;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.textBaseline = 'top';
-      ctx.font = '14px "Arial"';
-      ctx.fillStyle = '#f60';
-      ctx.fillRect(125, 1, 62, 20);
-      ctx.fillStyle = '#069';
-      ctx.fillText('NitroOS,HWID_v1!', 2, 15);
-      ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-      ctx.fillText('NitroOS,HWID_v1!', 4, 17);
-      components.push(canvas.toDataURL());
-    }
-  } catch (e) {}
-
-  const rawString = components.join('###');
-
-  let hash1 = 0x811c9dc5, hash2 = 0x01000193;
-  for (let i = 0; i < rawString.length; i++) {
-    const c = rawString.charCodeAt(i);
-    hash1 = Math.imul(hash1 ^ c, 0x01000193);
-    hash2 = Math.imul(hash2 ^ c, 0x811c9dc5);
+    
+    const hwid = 'HWID-' + Math.abs(hash1).toString(16).padStart(8, '0') + Math.abs(hash2).toString(16).padStart(8, '0') + Date.now().toString(16).slice(-6);
+    localStorage.setItem('nitro_hwid', hwid);
+    return hwid;
+  } catch (e) {
+    const fallback = 'HWID-' + Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
+    try { localStorage.setItem('nitro_hwid', fallback); } catch(err) {}
+    return fallback;
   }
-  
-  const hwid = 'HWID-' + Math.abs(hash1).toString(16).padStart(8, '0') + Math.abs(hash2).toString(16).padStart(8, '0') + Date.now().toString(16).slice(-6);
-  localStorage.setItem('nitro_hwid', hwid);
-  return hwid;
 }
 
-export const getHardwareId = () => localStorage.getItem('nitro_hwid') || 'HWID-GENERIC';
+const currentHwid = getOrCreateHardwareId();
+window.__nitro_hwid__ = currentHwid;
 
-generateHardwareId().then(hwid => {
-  window.__nitro_hwid__ = hwid;
-});
+export const getHardwareId = () => localStorage.getItem('nitro_hwid') || window.__nitro_hwid__ || currentHwid;
 
 const originalFetch = window.fetch;
 window.fetch = function(url, options = {}) {
   options = options || {};
-  options.headers = options.headers || {};
-  const hwid = localStorage.getItem('nitro_hwid') || window.__nitro_hwid__ || '';
+  const hwid = getHardwareId();
 
   if (options.headers instanceof Headers) {
     if (hwid) options.headers.set('X-Hardware-Id', hwid);
+  } else if (typeof options.headers === 'object' && options.headers !== null) {
+    options.headers['X-Hardware-Id'] = hwid;
   } else {
-    if (hwid) options.headers['X-Hardware-Id'] = hwid;
+    options.headers = { 'X-Hardware-Id': hwid };
   }
   return originalFetch.call(this, url, options);
 };

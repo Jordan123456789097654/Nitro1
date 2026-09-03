@@ -92,6 +92,11 @@ router.get('/me', async (req, res) => {
     return res.json({ loggedIn: false, user: null });
   }
 
+  const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
+  if (user && clientHwid) {
+    db.updateUserHwid(user.id, clientHwid).catch(e => {});
+  }
+
   try {
     if (user.is_banned) {
       return res.status(403).json({

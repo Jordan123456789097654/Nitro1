@@ -114,9 +114,13 @@ export function setCookie(name, value, days = 365) {
 
 export async function authFetch(url, options = {}) {
   const token = getCookie('nitro_jwt_token') || localStorage.getItem('nitro_jwt_token');
+  const hwid = localStorage.getItem('nitro_hwid') || window.__nitro_hwid__ || '';
   const headers = { ...(options.headers || {}) };
   if (token && token !== 'null' && token !== 'undefined') {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (hwid) {
+    headers['X-Hardware-Id'] = hwid;
   }
   
   return fetch(url, { ...options, headers, credentials: 'same-origin' });
