@@ -1748,6 +1748,7 @@ function initDevToolsProtection() {
         <button onclick="window.location.reload()" style="padding: 10px 24px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 99px; font-weight: 800; cursor: pointer;">🔄 Reload Site</button>
       </div>
     `;
+  }
 
   // Block DevTools shortcuts for non-owners
   document.addEventListener('keydown', (e) => {

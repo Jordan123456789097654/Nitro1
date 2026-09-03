@@ -159,11 +159,22 @@ function isKnownAdRequest(urlObj) {
 // -------------------------------------------------------------
 function proxifyTargetUrl(rawUrl, baseUrl, gatewayPrefix, authSuffix = '') {
   if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
-  const t = rawUrl.trim();
+  let t = rawUrl.trim();
   if (t.startsWith('#') || t.startsWith('javascript:') || t.startsWith('data:') || t.startsWith('blob:') || t.startsWith('mailto:')) {
     return rawUrl;
   }
-  if (t.includes('/api/gateway')) return rawUrl;
+
+  // Recursively unwrap any pre-existing gateway query wrappers to prevent infinite redirect loops
+  let iterations = 0;
+  while (t.includes('gateway?url=') && iterations < 10) {
+    iterations++;
+    try {
+      const search = t.split('gateway?url=')[1] || '';
+      const encoded = search.split('&')[0] || '';
+      t = decodeURIComponent(encoded);
+    } catch(e) { break; }
+  }
+
   try {
     const abs = new URL(t, baseUrl).href;
     return `${gatewayPrefix}${encodeURIComponent(abs)}${authSuffix}`;
@@ -255,27 +266,24 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
 
         function deproxify(u) {
           if (!u || typeof u !== 'string') return u;
-          if (u.includes('/api/gateway?url=')) {
+          var curr = u;
+          var i = 0;
+          while (curr.includes('gateway?url=') && i < 10) {
+            i++;
             try {
-              var search = u.split('?url=')[1] || '';
-              var encoded = search.split('&')[0] || '';
-              return decodeURIComponent(encoded);
-            } catch(e) {}
+              var s = curr.split('gateway?url=')[1] || '';
+              var enc = s.split('&')[0] || '';
+              curr = decodeURIComponent(enc);
+            } catch(e) { break; }
           }
-          if (u.includes('/gateway?url=')) {
-            try {
-              var search = u.split('?url=')[1] || '';
-              var encoded = search.split('&')[0] || '';
-              return decodeURIComponent(encoded);
-            } catch(e) {}
-          }
-          return u;
+          return curr;
         }
 
         function proxify(u) {
-          if (!u || typeof u !== 'string' || u.startsWith('data:') || u.startsWith('blob:') || u.includes('/api/gateway')) return u;
+          if (!u || typeof u !== 'string' || u.startsWith('data:') || u.startsWith('blob:') || u.startsWith('javascript:')) return u;
+          var clean = deproxify(u);
           try {
-            return window.__NITRO_SHIELD_PREFIX__ + encodeURIComponent(new URL(u, window.__NITRO_SHIELD_BASE__).href) + window.__NITRO_SHIELD_SUFFIX__;
+            return window.__NITRO_SHIELD_PREFIX__ + encodeURIComponent(new URL(clean, window.__NITRO_SHIELD_BASE__).href) + window.__NITRO_SHIELD_SUFFIX__;
           } catch(e) { return u; }
         }
 
