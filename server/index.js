@@ -47,22 +47,37 @@ setInterval(() => {
 const app = express();
 app.use(compression());
 
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-    credentials: true
-  },
-  transports: ['websocket', 'polling'],
-  allowEIO3: true,
-  pingTimeout: 60000,
-  pingInterval: 25000,
-  maxHttpBufferSize: 5e6, // 5MB — was 100MB which could trigger OOM on a single payload
-  cookie: false
-});
-app.set('io', io);
-global.__nitro_io__ = io; // exposed for db.js audit enforcement (avoids circular require)
+const isVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
+let server = null;
+let io = null;
+
+if (!isVercel) {
+  server = http.createServer(app);
+  io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+      credentials: true
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    maxHttpBufferSize: 5e6, // 5MB payload limit
+    cookie: false
+  });
+  app.set('io', io);
+  global.__nitro_io__ = io;
+} else {
+  const dummyIo = {
+    emit: () => {},
+    to: () => ({ emit: () => {} }),
+    in: () => ({ emit: () => {} })
+  };
+  app.set('io', dummyIo);
+  global.__nitro_io__ = dummyIo;
+}
+
 app.set('trust proxy', 1);
 
 // Middleware & Security Headers
@@ -400,9 +415,10 @@ app.get('/api/weather', async (req, res) => {
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Initialize Real-time Socket.io Chat, DMs & Live Monitoring
-initChatSocket(io);
-// Initialize Voice signaling namespace
-require('./voiceSocket')(io);
+if (io && !isVercel) {
+  initChatSocket(io);
+  require('./voiceSocket')(io);
+}
 
 // SPA Fallback Route
 app.get('*', (req, res) => {
@@ -416,7 +432,7 @@ db.initPostgres().catch(err => {
 
 const PORT = process.env.PORT || 3000;
 
-if (!process.env.VERCEL) {
+if (server && !isVercel) {
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`===========================================`);
     console.log(`🚀 NITRO (BETA) 2.6 Server running on port ${PORT}`);
