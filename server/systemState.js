@@ -4,7 +4,7 @@ const db = require('./db');
 const DEFAULT_AI_CONFIG = {
   // Chat AI Assistant
   chatEnabled: true,
-  chatModel: 'gemini-2.5-flash',
+  chatModel: 'openai/gpt-oss-120b',
   chatPersonality: 'friendly', // 'friendly' | 'professor' | 'concise' | 'socratic'
   chatTemperature: 0.7,
   chatRateLimit: 30,
@@ -37,6 +37,10 @@ async function loadPersistedAiConfig() {
       };
       
       let needsSave = false;
+      if (!currentAiConfig.chatModel || currentAiConfig.chatModel.startsWith('gemini')) {
+        currentAiConfig.chatModel = 'openai/gpt-oss-120b';
+        needsSave = true;
+      }
       if (currentAiConfig.model === 'llama-3.1-8b-instant') {
         currentAiConfig.model = 'openai/gpt-oss-safeguard-20b';
         needsSave = true;

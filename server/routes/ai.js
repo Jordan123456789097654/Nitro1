@@ -161,46 +161,7 @@ async function extractTextFromDocument(fileBase64, fileName, fileType) {
   return null;
 }
 
-async function callGemini(messages, customModel = null, temperature = 0.7) {
-  const modelToUse = customModel || GEMINI_PRIMARY_MODEL;
-  try {
-    let res = await fetch(GEMINI_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GEMINI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: modelToUse,
-        messages,
-        temperature
-      })
-    });
 
-    if (res.status === 404) {
-      res = await fetch(GEMINI_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GEMINI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: GEMINI_FALLBACK_MODEL,
-          messages,
-          temperature
-        })
-      });
-    }
-
-    if (res.ok) {
-      const data = await res.json();
-      return data?.choices?.[0]?.message?.content || null;
-    }
-  } catch (e) {
-    console.warn('Gemini API attempt failed:', e.message);
-  }
-  return null;
-}
 
 async function callGroq(messages, hasImage = false, customModel = null, temperature = 0.7) {
   try {
@@ -432,7 +393,8 @@ router.post('/ask', async (req, res) => {
   messages.push({ role: 'user', content: userContent });
 
   // 8. Dynamic Model & Hyperparameter Selection
-  const preferredModel = (isImage ? currentAiConfig.visionModel : currentAiConfig.primaryChatModel) || currentAiConfig.chatModel || 'gemini-2.5-flash';
+  const preferredModel = (isImage ? currentAiConfig.visionModel : currentAiConfig.primaryChatModel) || currentAiConfig.chatModel || GROQ_TEXT_MODEL;
+  const targetModel = preferredModel.startsWith('gemini') ? GROQ_TEXT_MODEL : preferredModel;
   
   // Subject temperature selection
   let temperature = currentAiConfig.chatTemperature !== undefined ? currentAiConfig.chatTemperature : 0.7;
@@ -440,20 +402,7 @@ router.post('/ask', async (req, res) => {
   if (activeModeKey === 'code' && currentAiConfig.codeTemperature !== undefined) temperature = currentAiConfig.codeTemperature;
   if (activeModeKey === 'writing' && currentAiConfig.writingTemperature !== undefined) temperature = currentAiConfig.writingTemperature;
 
-  let answer = null;
-
-  if (preferredModel.startsWith('gemini')) {
-    answer = await callGemini(messages, preferredModel, temperature);
-    if (!answer && currentAiConfig.autoFallbackOn429 !== false) {
-      const fallbackModel = currentAiConfig.fallbackChatModel || 'openai/gpt-oss-120b';
-      answer = await callGroq(messages, isImage, fallbackModel, temperature);
-    }
-  } else {
-    answer = await callGroq(messages, isImage, preferredModel, temperature);
-    if (!answer && currentAiConfig.autoFallbackOn429 !== false) {
-      answer = await callGemini(messages, null, temperature);
-    }
-  }
+  const answer = await callGroq(messages, isImage, targetModel, temperature);
 
   // 9. If answer received from either service
   if (answer) {
@@ -552,17 +501,11 @@ You MUST respond strictly with valid JSON conforming to this exact structure and
     { role: 'user', content: prompt }
   ];
 
-  const preferredModel = currentAiConfig.chatModel || 'gemini-2.5-flash';
+  const preferredModel = currentAiConfig.chatModel || GROQ_TEXT_MODEL;
+  const targetModel = preferredModel.startsWith('gemini') ? GROQ_TEXT_MODEL : preferredModel;
   const temperature = currentAiConfig.chatTemperature !== undefined ? currentAiConfig.chatTemperature : 0.7;
 
-  let raw = null;
-  if (preferredModel.startsWith('gemini')) {
-    raw = await callGemini(messages, preferredModel, temperature);
-    if (!raw) raw = await callGroq(messages, false, null, temperature);
-  } else {
-    raw = await callGroq(messages, false, preferredModel, temperature);
-    if (!raw) raw = await callGemini(messages, null, temperature);
-  }
+  const raw = await callGroq(messages, false, targetModel, temperature);
 
   if (!raw) {
     return res.status(503).json({ error: 'AI deck generator is currently unavailable. Please try again.' });
