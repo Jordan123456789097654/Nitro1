@@ -2144,10 +2144,21 @@
 
           <!-- Performance Optimization Preferences -->
           <div class="theme-settings-box">
-            <div class="theme-settings-title">
-              <span>⚡ PERFORMANCE OPTIMIZATION</span>
+            <div class="theme-settings-title" style="color: #38bdf8;">
+              <span>⚡ PERFORMANCE & GRAPHICS OPTIMIZATION</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 16px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.95rem; color: #fbbf24;">🥔 Potato Graphics Mode (Ultra Low-End PC / Chromebook)</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Strips heavy canvas particles, background blurs, drop shadows, and glow shaders for maximum FPS.</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="perf-potato-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+
               <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
                 <div>
                   <strong style="display: block; font-size: 0.92rem;">Disable Glassmorphism (Flat UI Mode)</strong>
@@ -2155,6 +2166,39 @@
                 </div>
                 <div class="switch">
                   <input type="checkbox" id="disable-glass-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.92rem;">Disable UI Animations & Transitions</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Turns off CSS keyframe animations, particle effects, hover scaling, and modal slide transitions.</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="perf-disable-anim-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.92rem;">Low-RAM Background Tab Suspender</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Freezes embedded background game iframes when switching browser tabs to save RAM & battery.</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="perf-tab-suspender-checkbox">
+                  <span class="slider"></span>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.92rem;">Battery Saver & Slow Network Polling</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Reduces background server heartbeat ping frequency to save bandwidth and battery.</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="perf-slow-poll-checkbox">
                   <span class="slider"></span>
                 </div>
               </label>

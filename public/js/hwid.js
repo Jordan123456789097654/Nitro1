@@ -78,6 +78,7 @@ export function initPerformanceSettings() {
   const animCheck = document.getElementById('perf-disable-anim-checkbox');
   const pollCheck = document.getElementById('perf-slow-poll-checkbox');
   const glassCheck = document.getElementById('disable-glass-checkbox');
+  const suspenderCheck = document.getElementById('perf-tab-suspender-checkbox');
 
   const prefs = JSON.parse(localStorage.getItem('nitro_perf_settings') || '{}');
 
@@ -85,6 +86,7 @@ export function initPerformanceSettings() {
   if (animCheck) animCheck.checked = Boolean(prefs.disableAnim);
   if (pollCheck) pollCheck.checked = Boolean(prefs.slowPolling);
   if (glassCheck) glassCheck.checked = Boolean(prefs.disableGlass || localStorage.getItem('nitro_disable_glass') === 'true');
+  if (suspenderCheck) suspenderCheck.checked = Boolean(prefs.tabSuspender !== false);
 
   applyPerformanceMode();
 
@@ -108,7 +110,33 @@ export function initPerformanceSettings() {
     localStorage.setItem('nitro_disable_glass', e.target.checked ? 'true' : 'false');
     applyPerformanceMode();
   });
+
+  suspenderCheck?.addEventListener('change', (e) => {
+    savePerfPref('tabSuspender', e.target.checked);
+  });
 }
+
+document.addEventListener('visibilitychange', () => {
+  const prefs = JSON.parse(localStorage.getItem('nitro_perf_settings') || '{}');
+  if (prefs.tabSuspender === false) return;
+
+  const iframes = document.querySelectorAll('iframe.game-viewport-iframe, iframe.game-iframe');
+  if (document.hidden) {
+    iframes.forEach(frame => {
+      if (frame.src && !frame.dataset.suspendedSrc && frame.src !== 'about:blank') {
+        frame.dataset.suspendedSrc = frame.src;
+        try { frame.contentWindow.stop(); } catch(e) {}
+      }
+    });
+  } else {
+    iframes.forEach(frame => {
+      if (frame.dataset.suspendedSrc) {
+        frame.src = frame.dataset.suspendedSrc;
+        delete frame.dataset.suspendedSrc;
+      }
+    });
+  }
+});
 
 function savePerfPref(key, val) {
   const prefs = JSON.parse(localStorage.getItem('nitro_perf_settings') || '{}');
