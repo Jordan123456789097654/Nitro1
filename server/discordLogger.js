@@ -92,7 +92,7 @@ const rateLimitedUntil = {};
 /**
  * Dispatch a structured Discord Embed log to the appropriate channel webhook.
  */
-async function sendDiscordLog({ category = 'moderation', action, admin, target, reason, details }) {
+async function sendDiscordLog({ category = 'moderation', action, admin, target, reason, details, pingEveryone = false }) {
   try {
     const catKey = (category || 'moderation').toLowerCase();
     const now = Date.now();
@@ -178,6 +178,7 @@ async function sendDiscordLog({ category = 'moderation', action, admin, target, 
     const payload = {
       username: config.botName,
       avatar_url: config.avatarUrl,
+      content: pingEveryone ? '🚨 @everyone 🚨 **SECURITY ALERT: Unauthorized access attempt detected on Owner account!**' : undefined,
       embeds: [embed]
     };
 

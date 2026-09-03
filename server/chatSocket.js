@@ -811,20 +811,47 @@ function initChatSocket(io) {
   });
 
   socket.on('get_dm_history', async (data) => {
-    const { username1, username2 } = data;
-    if (!username1 || !username2) return;
+    const { username1, username2, user } = data;
+    const authCheck = await authenticateSocketUser(socket, user || socket.user);
+    if (!authCheck.valid || !authCheck.dbUser) {
+      return socket.emit('dm_history', { otherUser: username2, messages: [] });
+    }
+
+    const requesterName = authCheck.dbUser.username.toLowerCase();
+    const u1 = (username1 || '').toLowerCase();
+    const u2 = (username2 || '').toLowerCase();
+
+    // 🔒 Strict Privacy Lock: Only allow users to view DM histories where they are sender or receiver
+    const isParticipant = (requesterName === u1 || requesterName === u2);
+    const isOwnerReq = isOwner(authCheck.dbUser);
+
+    if (!isParticipant && !isOwnerReq) {
+      return socket.emit('dm_history', { error: 'Access denied. You can only view your own direct message conversations.', messages: [] });
+    }
+
     try {
       const history = await db.getDMs(username1, username2);
-      socket.emit('dm_history', { otherUser: username2, messages: history });
+      socket.emit('dm_history', { otherUser: (requesterName === u1 ? username2 : username1), messages: history });
     } catch (e) {
       console.error('DM history error:', e);
     }
   });
 
-  socket.on('get_open_dms', async ({ username }) => {
-    if (!username) return;
+  socket.on('get_open_dms', async ({ username, user }) => {
+    const authCheck = await authenticateSocketUser(socket, user || socket.user);
+    if (!authCheck.valid || !authCheck.dbUser) {
+      return socket.emit('open_dms_list', []);
+    }
+
+    const requesterName = authCheck.dbUser.username.toLowerCase();
+    const targetName = (username || requesterName).toLowerCase();
+
+    if (requesterName !== targetName && !isOwner(authCheck.dbUser)) {
+      return socket.emit('open_dms_list', []);
+    }
+
     try {
-      const convos = await db.getUserConversations(username);
+      const convos = await db.getUserConversations(authCheck.dbUser.username);
       socket.emit('open_dms_list', convos);
     } catch (e) {
       socket.emit('open_dms_list', []);

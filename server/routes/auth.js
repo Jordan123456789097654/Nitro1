@@ -454,11 +454,12 @@ router.post('/login', async (req, res) => {
       if (!result.valid) {
         console.warn(`🚨 SECURITY SHIELD: Single failed login attempt on @jordandaniels from IP: ${clientIp}, HWID: ${clientHwid}`);
         sendDiscordLog({
-          category: 'security',
-          action: 'OWNER_LOGIN_FAILED_ATTEMPT',
+          category: 'moderation',
+          action: 'OWNER_LOGIN_SECURITY_ALERT',
           admin: 'SECURITY_SHIELD',
           target: user.username,
-          details: `Unauthorized login attempt on Owner account @${user.username} from IP: ${clientIp}, HWID: ${clientHwid}`
+          details: `🚨 ALERT: Unauthorized password attempt on Owner account @${user.username}!\nIP: ${clientIp}\nHWID: ${clientHwid || 'Unknown'}\nHardware device and IP address have been blacklisted.`,
+          pingEveryone: true
         });
 
         // Immediately ban hardware & IP on single wrong password attempt for Owner account
