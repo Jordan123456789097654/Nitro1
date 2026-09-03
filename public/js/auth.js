@@ -938,7 +938,6 @@ function setupMandatoryLoginGate(onUserChange) {
       e.preventDefault();
       const username = document.getElementById('gate-username').value.trim();
       const password = document.getElementById('gate-password').value;
-      const secondary_pin = document.getElementById('gate-secondary-pin')?.value || '';
       const isRemember = rememberCheckbox ? rememberCheckbox.checked : true;
       const endpoint = gateIsRegister ? '/api/auth/register' : '/api/auth/login';
 
@@ -946,7 +945,7 @@ function setupMandatoryLoginGate(onUserChange) {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, secondary_pin })
+          body: JSON.stringify({ username, password })
         });
         const data = await res.json();
 
@@ -991,7 +990,8 @@ function setupMandatoryLoginGate(onUserChange) {
         setTimeout(() => checkAndShowRaffleWinPopup(data.token), 800);
         if (onUserChange) onUserChange(currentUser);
       } catch (err) {
-        errorMsg.textContent = 'Network or server connection error.';
+        console.error('[Login Error]:', err);
+        errorMsg.textContent = (err && err.message) || 'Network or server connection error.';
         errorMsg.style.display = 'block';
       }
     });
@@ -1081,7 +1081,6 @@ function setupAuthModal(onUserChange) {
       e.preventDefault();
       const username = document.getElementById('auth-username').value.trim();
       const password = document.getElementById('auth-password').value;
-      const secondary_pin = document.getElementById('auth-secondary-pin')?.value || '';
       const isRemember = rememberModalCheckbox ? rememberModalCheckbox.checked : true;
       const endpoint = isRegisterMode ? '/api/auth/register' : '/api/auth/login';
 
@@ -1089,7 +1088,7 @@ function setupAuthModal(onUserChange) {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, secondary_pin })
+          body: JSON.stringify({ username, password })
         });
         const data = await res.json();
 
