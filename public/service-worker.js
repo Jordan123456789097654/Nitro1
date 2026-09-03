@@ -41,10 +41,11 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   
-  // Do not cache API endpoints, socket.io communication, or voice signalling
+  // Do not cache API endpoints, socket.io communication, proxy gateway, or voice signalling
   if (
     url.pathname.startsWith('/api') || 
     url.pathname.startsWith('/socket.io') || 
+    url.pathname.startsWith('/gateway') || 
     url.pathname.startsWith('/voice')
   ) {
     return;
