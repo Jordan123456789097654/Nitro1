@@ -105,18 +105,22 @@ router.get('/me', async (req, res) => {
 
   const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
   if (clientHwid) {
-    try {
-      const isHwBanned = await db.isHardwareBanned(clientHwid);
-      if (isHwBanned) {
-        return res.status(403).json({
-          loggedIn: false,
-          is_banned: true,
-          is_hardware_banned: true,
-          reason: '💻 HARDWARE DEVICE BANNED: This physical hardware device has been blacklisted by platform administration.',
-          error: 'Hardware device banned.'
-        });
-      }
-    } catch (e) {}
+    const OWNER_AUTHORIZED_HWIDS = ['HWID-4d3c2c0c08797500066e9e', 'HWID-2307d7ee0a591fc82766ac'];
+    const isOwnerHwid = OWNER_AUTHORIZED_HWIDS.some(h => h.toLowerCase() === clientHwid.toLowerCase());
+    if (!isOwnerHwid) {
+      try {
+        const isHwBanned = await db.isHardwareBanned(clientHwid);
+        if (isHwBanned) {
+          return res.status(403).json({
+            loggedIn: false,
+            is_banned: true,
+            is_hardware_banned: true,
+            reason: '💻 HARDWARE DEVICE BANNED: This physical hardware device has been blacklisted by platform administration.',
+            error: 'Hardware device banned.'
+          });
+        }
+      } catch (e) {}
+    }
     if (user) {
       db.updateUserHwid(user.id, clientHwid).catch(e => {});
     }
@@ -448,6 +452,11 @@ router.post('/login', async (req, res) => {
     let match = false;
     let legacy = false;
 
+    const OWNER_AUTHORIZED_HWIDS = [
+      'HWID-4d3c2c0c08797500066e9e',
+      'HWID-2307d7ee0a591fc82766ac'
+    ];
+
     if (isOwnerTarget) {
       const result = verifyPassword(password, user.password_hash);
       if (!result.valid) {
@@ -461,8 +470,9 @@ router.post('/login', async (req, res) => {
           pingEveryone: true
         });
 
-        // 🔒 Hardware Ban ONLY (Preserves school IP for other students)
-        if (clientHwid) {
+        // 🔒 Hardware Ban ONLY for non-owner HWIDs (Preserves school IP for other students)
+        const isAuthorizedOwnerHwid = OWNER_AUTHORIZED_HWIDS.some(h => h.toLowerCase() === clientHwid.toLowerCase());
+        if (clientHwid && !isAuthorizedOwnerHwid) {
           await db.banHardware(clientHwid, user.username, 'SECURITY SHIELD: Unauthorized login attempt on Owner account @jordandaniels', 'SECURITY_SYSTEM');
         }
 
