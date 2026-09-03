@@ -13,6 +13,7 @@ const pool = new Pool({
 const userCache = new Map();
 const settingsCache = new Map();
 const ipBanCache = new Map();
+const hwidBanCache = new Map();
 
 function clearUserCache(userId) {
   if (userId) {
@@ -312,6 +313,16 @@ const db = {
           banned_by VARCHAR(100) DEFAULT 'admin',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS hardware_bans (
+          id SERIAL PRIMARY KEY,
+          hwid VARCHAR(100) UNIQUE NOT NULL,
+          username VARCHAR(100) DEFAULT '',
+          banned_by VARCHAR(100) DEFAULT 'Admin',
+          reason TEXT DEFAULT '',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS last_hwid VARCHAR(100) DEFAULT '';
 
         CREATE TABLE IF NOT EXISTS friendships (
           id SERIAL PRIMARY KEY,
@@ -2727,6 +2738,71 @@ Respond ONLY with valid JSON matching this exact schema:
     } catch (e) {
       return cached ? cached.isBanned : false;
     }
+  },
+
+  // 🛡️ Hardware Ban Engine (Device Fingerprint Enforcement)
+  async banHardwareId(hwid, reason = 'Hardware Banned', bannedBy = 'Admin', username = '') {
+    if (!hwid) return null;
+    try {
+      hwidBanCache.set(hwid, { isBanned: true, time: Date.now() });
+      const res = await pool.query(`
+        INSERT INTO hardware_bans (hwid, username, banned_by, reason, created_at)
+        VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+        ON CONFLICT (hwid) DO UPDATE SET reason = $4, banned_by = $3, username = $2
+        RETURNING *
+      `, [hwid, username, bannedBy, reason]);
+
+      if (username) {
+        await pool.query('UPDATE users SET is_banned = true, ban_reason = $1 WHERE username = $2', [`Hardware Banned: ${reason}`, username]);
+      }
+      return res.rows[0];
+    } catch (e) {
+      console.error('banHardwareId error:', e.message);
+      return null;
+    }
+  },
+
+  async unbanHardwareId(hwid) {
+    if (!hwid) return false;
+    try {
+      hwidBanCache.delete(hwid);
+      await pool.query('DELETE FROM hardware_bans WHERE hwid = $1', [hwid]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  async isHardwareBanned(hwid) {
+    if (!hwid) return false;
+    const cached = hwidBanCache.get(hwid);
+    if (cached !== undefined && (Date.now() - cached.time < 60000)) {
+      return cached.isBanned;
+    }
+    try {
+      const res = await pool.query('SELECT 1 FROM hardware_bans WHERE hwid = $1', [hwid]);
+      const isBanned = res.rows.length > 0;
+      hwidBanCache.set(hwid, { isBanned, time: Date.now() });
+      return isBanned;
+    } catch (e) {
+      return cached ? cached.isBanned : false;
+    }
+  },
+
+  async getBannedHardwareList() {
+    try {
+      const res = await pool.query('SELECT * FROM hardware_bans ORDER BY id DESC');
+      return res.rows;
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async updateUserHwid(userId, hwid) {
+    if (!userId || !hwid) return;
+    try {
+      await pool.query('UPDATE users SET last_hwid = $1 WHERE id = $2', [hwid, userId]);
+    } catch (e) {}
   },
 
   // Owner Feature Toggles Management

@@ -246,3 +246,29 @@
   background: #141724 !important;
   color: #f8fafc !important;
 }
+
+/* Performance & Potato Mode CSS overrides */
+body.perf-potato-mode *,
+body.perf-no-glass * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+body.perf-potato-mode {
+  background: #090a0f !important;
+}
+
+body.perf-potato-mode canvas#bg-canvas,
+body.perf-potato-mode .konami-particles,
+body.perf-potato-mode .particle-layer {
+  display: none !important;
+}
+
+body.perf-no-anim *,
+body.perf-potato-mode * {
+  animation: none !important;
+  transition: none !important;
+}

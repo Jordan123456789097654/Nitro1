@@ -89,6 +89,35 @@ app.use(async (req, res, next) => {
   const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   req.clientIp = clientIp;
 
+  const clientHwid = (req.headers['x-hardware-id'] || req.headers['x-hwid'] || req.query.hwid || '').trim();
+  req.clientHwid = clientHwid;
+
+  // Check global Hardware Ban
+  if (clientHwid && await db.isHardwareBanned(clientHwid)) {
+    return res.status(403).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Hardware Banned</title>
+        <style>
+          body { background: #090a0f; color: #fff; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+          .card { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 40px; border-radius: 16px; max-width: 480px; box-shadow: 0 0 30px rgba(239,68,68,0.3); }
+          h2 { color: #ef4444; margin-top: 0; font-size: 1.6rem; }
+          p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; }
+          code { background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px; color: #fca5a5; font-size: 0.85rem; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2>🚫 Device Hardware Banned</h2>
+          <p>This physical device (HWID: <code>${clientHwid.substring(0, 16)}...</code>) has been permanently restricted from accessing the platform due to severe safety or terms of service violations.</p>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
   // Check global IP Ban
   if (clientIp && await db.isIpBanned(clientIp)) {
     return res.status(403).send(`

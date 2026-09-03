@@ -4201,3 +4201,77 @@ window.adminDeleteBadge = async function(key) {
     alert('Network error deleting badge.');
   }
 };
+
+// 🛡️ Hardware Ban Admin Controller Functions
+window.adminFetchHwidBans = async function() {
+  const tbody = document.getElementById('admin-hwid-bans-tbody');
+  if (!tbody) return;
+  try {
+    const res = await authFetch('/api/admin/hardware-bans');
+    const data = await res.json();
+    if (!data.success || !data.bans || data.bans.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">No active hardware bans.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.bans.map(b => `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px; color: var(--text-muted);">${b.id}</td>
+        <td style="padding: 10px; font-family: monospace; color: #f87171; font-weight: 700;">${escapeHtml(b.hwid)}</td>
+        <td style="padding: 10px; font-weight: 700; color: #fff;">${escapeHtml(b.username || 'N/A')}</td>
+        <td style="padding: 10px; color: var(--text-muted);">${escapeHtml(b.reason || 'None')}</td>
+        <td style="padding: 10px; color: #38bdf8;">${escapeHtml(b.banned_by || 'Admin')}</td>
+        <td style="padding: 10px; color: var(--text-muted);">${new Date(b.created_at).toLocaleDateString()}</td>
+        <td style="padding: 10px; text-align: right;">
+          <button class="btn-small danger" onclick="window.adminDeleteHwidBan('${escapeHtml(b.hwid)}')">Revoke Ban</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #ef4444;">Error fetching hardware bans.</td></tr>';
+  }
+};
+
+window.promptIssueHwidBan = async function() {
+  const hwidOrUser = prompt('Enter the User Name OR Hardware Fingerprint (HWID) to Hardware Ban:');
+  if (!hwidOrUser) return;
+  const reason = prompt('Enter reason for Hardware Ban (e.g. Severe violation / Ban evasion):', 'Hardware Banned');
+
+  try {
+    let payload = { reason: reason || 'Hardware Banned' };
+    if (hwidOrUser.startsWith('HWID-')) {
+      payload.hwid = hwidOrUser;
+    } else {
+      payload.username = hwidOrUser;
+    }
+
+    const res = await authFetch('/api/admin/hardware-ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message || 'Hardware ban issued successfully!');
+      window.adminFetchHwidBans();
+    } else {
+      alert(data.error || 'Failed to issue hardware ban.');
+    }
+  } catch (e) {
+    alert('Error issuing hardware ban.');
+  }
+};
+
+window.adminDeleteHwidBan = async function(hwid) {
+  if (!confirm(`Revoke Hardware Ban for HWID: ${hwid}?`)) return;
+  try {
+    const res = await authFetch(`/api/admin/hardware-ban/${encodeURIComponent(hwid)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      window.adminFetchHwidBans();
+    } else {
+      alert(data.error || 'Failed to revoke hardware ban.');
+    }
+  } catch (e) {
+    alert('Error revoking hardware ban.');
+  }
+};

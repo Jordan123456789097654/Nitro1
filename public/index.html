@@ -2478,6 +2478,7 @@
               <button class="admin-tab-btn" data-tab="users">👥 Users & Accounts</button>
               <button class="admin-tab-btn" data-tab="wordfilters">🤬 Word & Punishment Rules</button>
               <button class="admin-tab-btn" data-tab="domains">🚫 Gateway Domain Filters</button>
+              <button class="admin-tab-btn" data-tab="hwidbans" onclick="window.adminFetchHwidBans()" style="border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239,68,68,0.1); color: #ef4444; font-weight: 800;">💻 Hardware Bans</button>
             </div>
           </div>
 
@@ -2501,6 +2502,38 @@
               <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
               <button class="admin-tab-btn" data-tab="admintournaments" onclick="window.adminFetchTournaments()">🏆 Tournaments (Jams)</button>
               <button class="admin-tab-btn" data-tab="adminraffles" onclick="window.adminFetchRaffles()">🎟️ Manage Raffles</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tab: Hardware Bans -->
+        <div class="admin-tab-content" id="tab-hwidbans" style="display: none;">
+          <div style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="color: #ef4444; font-size: 1.15rem; margin: 0;">💻 Hardware Ban Management (Device Fingerprints)</h3>
+              <p style="color: var(--text-muted); font-size: 0.84rem; margin-top: 4px;">Enforce permanent hardware device bans across browsers, incognito sessions, and VPNs.</p>
+            </div>
+            <button class="btn-pill primary" onclick="window.promptIssueHwidBan()" style="background: #ef4444; border: none; font-weight: 800;">+ Issue Hardware Ban</button>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px;">
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+                    <th style="padding: 10px;">ID</th>
+                    <th style="padding: 10px;">Hardware Fingerprint (HWID)</th>
+                    <th style="padding: 10px;">Target User</th>
+                    <th style="padding: 10px;">Reason</th>
+                    <th style="padding: 10px;">Banned By</th>
+                    <th style="padding: 10px;">Date</th>
+                    <th style="padding: 10px; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-hwid-bans-tbody">
+                  <tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">Loading hardware bans...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -4869,6 +4902,7 @@
 
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/js/hwid.js"></script>
   <script type="module" src="/js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -2721,4 +2721,53 @@ router.delete('/badges/:key', async (req, res) => {
   }
 });
 
+// GET /api/admin/hardware-bans - List all hardware bans
+router.get('/hardware-bans', async (req, res) => {
+  try {
+    const bans = await db.getBannedHardwareList();
+    res.json({ success: true, bans });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch hardware bans.' });
+  }
+});
+
+// POST /api/admin/hardware-ban - Issue hardware ban by HWID or username
+router.post('/hardware-ban', async (req, res) => {
+  const { hwid, username, reason } = req.body;
+  try {
+    let targetHwid = hwid;
+    let targetUsername = username || '';
+
+    if (!targetHwid && targetUsername) {
+      const u = await db.getUserByUsername(targetUsername);
+      if (u && u.last_hwid) {
+        targetHwid = u.last_hwid;
+      }
+    }
+
+    if (!targetHwid) {
+      return res.status(400).json({ error: 'Hardware ID or valid user with recorded Hardware ID is required.' });
+    }
+
+    const banRecord = await db.banHardwareId(targetHwid, reason || 'Hardware Banned', req.adminUser.username, targetUsername);
+    await db.createModerationLog('HARDWARE_BAN', req.adminUser.username, targetUsername || targetHwid, `Banned HWID: ${targetHwid}. Reason: ${reason || 'None'}`);
+
+    res.json({ success: true, message: 'Hardware ban issued successfully!', ban: banRecord });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to issue hardware ban.' });
+  }
+});
+
+// DELETE /api/admin/hardware-ban/:hwid - Revoke hardware ban
+router.delete('/hardware-ban/:hwid', async (req, res) => {
+  const targetHwid = req.params.hwid;
+  try {
+    await db.unbanHardwareId(targetHwid);
+    await db.createModerationLog('HARDWARE_UNBAN', req.adminUser.username, targetHwid, `Revoked hardware ban for HWID: ${targetHwid}`);
+    res.json({ success: true, message: 'Hardware ban revoked successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to revoke hardware ban.' });
+  }
+});
+
 module.exports = router;
