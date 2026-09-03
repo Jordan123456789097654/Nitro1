@@ -679,6 +679,9 @@ const db = {
         `);
       }
 
+      // Always purge profile banners from shop items as requested
+      await pool.query("DELETE FROM shop_items WHERE category = 'profile_banner';");
+
       // Seed new Dynamic Shop items if they don't exist
       const checkBorders = await pool.query("SELECT id FROM shop_items WHERE category = 'avatar_border'");
       if (checkBorders.rows.length === 0) {
@@ -687,10 +690,6 @@ const db = {
           ('👑 Golden Crown Border', 'A shiny golden border around your user avatar', 250, 'avatar_border', '3px solid #fbbf24'),
           ('🌌 Galactic Neon Border', 'A glowing purple/blue neon border around your user avatar', 350, 'avatar_border', '3px solid #a855f7'),
           ('🌸 Sakura Pink Border', 'A soft pastel pink border around your user avatar', 150, 'avatar_border', '3px solid #f472b6'),
-          
-          ('🌈 Rainbow Pride Banner', 'A beautiful rainbow gradient background for your profile', 400, 'profile_banner', 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7)'),
-          ('🌃 Cyberpunk City Banner', 'A high-contrast neon purple and yellow profile banner', 300, 'profile_banner', 'linear-gradient(135deg, #1e1b4b, #311042)'),
-          ('❄️ Ice Frost Banner', 'A crisp cool cyan profile banner', 200, 'profile_banner', 'linear-gradient(135deg, #0891b2, #0284c7)'),
           
           ('👾 Retro 8-bit Chat Font', 'Displays your chat messages in classic arcade font style', 450, 'chat_font', '\"Press Start 2P\", cursive'),
           ('✍️ Handwritten Chat Font', 'Displays your chat messages in custom cursive handwritten font', 300, 'chat_font', '\"Architects Daughter\", cursive'),
@@ -3245,7 +3244,7 @@ Respond ONLY with valid JSON matching this exact schema:
     try {
       // Only top-level items: items stashed inside a sub-store (store_id set)
       // are fetched separately via getStoreItems() when that store is opened.
-      const res = await pool.query('SELECT * FROM shop_items WHERE is_active = true AND store_id IS NULL ORDER BY price ASC');
+      const res = await pool.query("SELECT * FROM shop_items WHERE is_active = true AND store_id IS NULL AND category != 'profile_banner' ORDER BY price ASC");
       return res.rows;
     } catch (e) {
       console.error('getShopItems error:', e.message);

@@ -190,11 +190,10 @@ function renderStoreItems(items, inventory, containerId = 'shop-items-grid', the
       if (item.category === 'chat_glow' && user.pro_chat_glow === item.perk_value) isEquipped = true;
       else if (item.category === 'custom_flair' && user.pro_custom_flair === item.perk_value) isEquipped = true;
       else if (item.category === 'avatar_border' && user.avatar_border === item.perk_value) isEquipped = true;
-      else if (item.category === 'profile_banner' && user.profile_banner === item.perk_value) isEquipped = true;
       else if (item.category === 'chat_font' && user.chat_font === item.perk_value) isEquipped = true;
     }
 
-    const isEquipable = ['chat_glow', 'custom_flair', 'avatar_border', 'profile_banner', 'chat_font'].includes(item.category);
+    const isEquipable = ['chat_glow', 'custom_flair', 'avatar_border', 'chat_font'].includes(item.category);
 
     let actionBtn = '';
     if (item.is_store_front) {
@@ -491,7 +490,6 @@ window.equipShopItem = async function(itemId, action) {
       if (data.category === 'chat_glow') user.pro_chat_glow = data.value;
       else if (data.category === 'custom_flair') user.pro_custom_flair = data.value;
       else if (data.category === 'avatar_border') user.avatar_border = data.value;
-      else if (data.category === 'profile_banner') user.profile_banner = data.value;
       else if (data.category === 'chat_font') user.chat_font = data.value;
     }
 

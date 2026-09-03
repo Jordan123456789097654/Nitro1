@@ -771,8 +771,8 @@ router.all('/', async (req, res) => {
       res.status(response.status);
     }
 
-    // Forward safe headers & strip target CORS origin headers
-    const restricted = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'content-encoding', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
+    // Forward safe headers & strip target CORS origin & transport length headers
+    const restricted = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'content-encoding', 'content-length', 'transfer-encoding', 'connection', 'keep-alive', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
     const gatewayPrefix = `${req.protocol}://${req.get('host')}/api/gateway?url=`;
 
     // BUGFIX: carry the auth token + chosen engine forward onto every link
