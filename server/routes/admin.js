@@ -84,19 +84,63 @@ const requireAdmin = async (req, res, next) => {
   next();
 };
 
-const requireOwner = (req, res, next) => {
-  const user = req.adminUser;
+const requireOwner = async (req, res, next) => {
+  let user = req.adminUser || req.user || (req.session && req.session.user);
+
+  if (!user && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    const token = req.headers.authorization.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+    } catch (e) {}
+  }
+
+  if (!user && req.cookies && req.cookies.nitro_jwt_token) {
+    try {
+      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+    } catch (e) {}
+  }
+
   if (!isOwner(user)) {
     return res.status(403).json({ error: 'Owner privileges required for this action.' });
   }
+
+  req.adminUser = user;
+  if (!req.session) req.session = {};
+  req.session.user = user;
   next();
 };
 
-const requireStrictAdmin = (req, res, next) => {
-  const user = req.adminUser || req.user;
+const requireStrictAdmin = async (req, res, next) => {
+  let user = req.adminUser || req.user || (req.session && req.session.user);
+
+  if (!user && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    const token = req.headers.authorization.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+    } catch (e) {}
+  }
+
+  if (!user && req.cookies && req.cookies.nitro_jwt_token) {
+    try {
+      const decoded = jwt.verify(req.cookies.nitro_jwt_token, JWT_SECRET);
+      if (decoded.id) user = await db.getUserById(decoded.id);
+      if (!user && decoded.username) user = await db.getUserByUsername(decoded.username);
+    } catch (e) {}
+  }
+
   if (!isModeratorOrOwner(user)) {
     return res.status(403).json({ error: 'Access denied. Moderator privileges required.' });
   }
+
+  req.adminUser = user;
+  if (!req.session) req.session = {};
+  req.session.user = user;
   next();
 };
 
