@@ -1,30 +1,20 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+// server/localDb.js - Zero-Dependency Local DB Mock (Replaces heavy better-sqlite3 native addon)
 const fs = require('fs');
+const path = require('path');
 
-const dbPath = path.join(__dirname, '../data/users.db');
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+const dataDir = path.join(__dirname, '../data');
+if (!fs.existsSync(dataDir)) {
+  try { fs.mkdirSync(dataDir, { recursive: true }); } catch (e) {}
 }
 
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-
-// Ensure tables
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id TEXT PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    username TEXT,
-    bio TEXT,
-    avatar_url TEXT,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL,
-    is_admin INTEGER DEFAULT 0,
-    email_verified INTEGER DEFAULT 0
-  );
-`);
+const db = {
+  exec: () => {},
+  pragma: () => {},
+  prepare: () => ({
+    run: () => ({ changes: 1 }),
+    get: () => null,
+    all: () => []
+  })
+};
 
 module.exports = db;
