@@ -160,7 +160,19 @@ function isKnownAdRequest(urlObj) {
 function proxifyTargetUrl(rawUrl, baseUrl, gatewayPrefix, authSuffix = '') {
   if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
   let t = rawUrl.trim();
-  if (t.startsWith('#') || t.startsWith('javascript:') || t.startsWith('data:') || t.startsWith('blob:') || t.startsWith('mailto:')) {
+  if (
+    t.startsWith('#') || 
+    t.startsWith('javascript:') || 
+    t.startsWith('data:') || 
+    t.startsWith('blob:') || 
+    t.startsWith('mailto:') ||
+    t.includes(';') ||
+    t.includes('===') ||
+    t.includes('function(') ||
+    t.includes('return ') ||
+    t.includes('{') ||
+    t.includes('}')
+  ) {
     return rawUrl;
   }
 
@@ -236,11 +248,12 @@ function transformHtmlResponse(htmlText, baseUrl, gatewayPrefix, authSuffix = ''
     return `___NITRO_STYLE_PLACEHOLDER_${index}___`;
   });
 
-  // Rewrite href, src, action attributes in standard HTML elements ONLY
-  html = html.replace(/\b(href|src|action)\s*=\s*(?:(['"])(.*?)\2|([^\s>]+))/gi, (match, attr, q, quotedVal, unquotedVal) => {
+  // Rewrite href, src, action attributes in standard HTML element tags ONLY
+  html = html.replace(/<([a-z1-6]+)\b([^>]*?)\b(href|src|action)\s*=\s*(?:(['"])(.*?)\4|([^\s>]+))([^>]*?)>/gi, (match, tagName, preAttr, attrName, q, quotedVal, unquotedVal, postAttr) => {
+    if (tagName.toLowerCase() === 'script' || tagName.toLowerCase() === 'style') return match;
     const val = quotedVal !== undefined ? quotedVal : unquotedVal;
     const quote = q !== undefined ? q : '"';
-    return `${attr}=${quote}${proxifyTargetUrl(val, baseUrl, gatewayPrefix, authSuffix)}${quote}`;
+    return `<${tagName}${preAttr}${attrName}=${quote}${proxifyTargetUrl(val, baseUrl, gatewayPrefix, authSuffix)}${quote}${postAttr}>`;
   });
 
   // Restore protected <script> and <style> blocks
