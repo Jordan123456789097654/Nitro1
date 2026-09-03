@@ -32,14 +32,18 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('🛡️ [Safety] Unhandled Rejection caught at:', promise, 'reason:', reason);
 });
 
-// Memory Optimization Monitor for Render 512MB RAM Limit (Prevents Exit 137 OOM)
+// Memory Optimization & Emergency Relief Valve for Render 512MB RAM Limit (Prevents Exit 137 OOM)
 setInterval(() => {
   const mem = process.memoryUsage();
   const heapUsedMb = Math.round(mem.heapUsed / 1024 / 1024);
   const rssMb = Math.round(mem.rss / 1024 / 1024);
   if (heapUsedMb > 140 || rssMb > 210) {
+    console.log(`🧹 [Memory Monitor] RSS: ${rssMb}MB | Heap: ${heapUsedMb}MB — Triggering Emergency Relief Valve.`);
+    try {
+      if (db.clearUserCache) db.clearUserCache();
+      if (gatewayRoutes.clearCookieJar) gatewayRoutes.clearCookieJar();
+    } catch (e) {}
     if (global.gc) {
-      console.log(`🧹 [Memory Monitor] RSS: ${rssMb}MB | Heap: ${heapUsedMb}MB — running manual Garbage Collection.`);
       global.gc();
     }
   }
@@ -47,6 +51,29 @@ setInterval(() => {
 
 const app = express();
 app.use(compression());
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  const mem = process.memoryUsage();
+  res.json({
+    status: 'ok',
+    uptime_seconds: Math.round(process.uptime()),
+    memory: {
+      rss_mb: Math.round(mem.rss / 1024 / 1024),
+      heap_used_mb: Math.round(mem.heapUsed / 1024 / 1024)
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 24/7 Keep-Alive Heartbeat Pinger (prevents Render instance cold sleeps)
+setInterval(() => {
+  const port = process.env.PORT || 3000;
+  const selfUrl = `http://127.0.0.1:${port}/api/health`;
+  http.get(selfUrl, (res) => {
+    // Keep alive ping acknowledged
+  }).on('error', () => {});
+}, 14 * 60 * 1000).unref();
 
 const isVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
 let server = null;

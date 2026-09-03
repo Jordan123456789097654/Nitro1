@@ -2838,4 +2838,28 @@ router.delete('/hardware-ban/:hwid', async (req, res) => {
   }
 });
 
+// POST /api/admin/takedown - Execute instant DMCA/Content Takedown
+router.post('/takedown', async (req, res) => {
+  const { targetType, targetId, reason } = req.body;
+  if (!targetType || !targetId) {
+    return res.status(400).json({ error: 'Target type and target ID are required.' });
+  }
+
+  try {
+    if (targetType === 'game') {
+      await db.takedownGame(targetId, reason || 'DMCA / Content Safety Takedown');
+      await db.createModerationLog('GAME_TAKEDOWN', req.adminUser.username, `Game ID ${targetId}`, reason || 'Takedown');
+      return res.json({ success: true, message: `Game ID ${targetId} taken down successfully.` });
+    } else if (targetType === 'domain') {
+      await db.blockDomain(targetId, reason || 'Host Safety Takedown');
+      await db.createModerationLog('DOMAIN_BLOCK', req.adminUser.username, targetId, reason || 'Takedown');
+      return res.json({ success: true, message: `Domain "${targetId}" blocked from proxy gateway successfully.` });
+    } else {
+      return res.status(400).json({ error: 'Invalid target type.' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to process takedown.' });
+  }
+});
+
 module.exports = router;

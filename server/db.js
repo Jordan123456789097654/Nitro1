@@ -7,9 +7,12 @@ const { encryptText, decryptText } = require('./cryptoHelper');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres.xulngyyikaymnmxitzto:ZgrsG1hhXsOuv4ac@aws-0-ca-central-1.pooler.supabase.com:6543/postgres',
   ssl: { rejectUnauthorized: false },
-  max: 6,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000
+  max: 8,
+  idleTimeoutMillis: 15000,
+  connectionTimeoutMillis: 3000,
+  statement_timeout: 6000,
+  query_timeout: 6000,
+  allowExitOnIdle: true
 });
 
 const userCache = new Map();
@@ -40,6 +43,18 @@ setInterval(() => {
   }
 }, 60 * 1000).unref();
 
+// Database Auto-Cleaner Sweep (runs every 6 hours to prevent Supabase storage inflation)
+setInterval(async () => {
+  try {
+    await pool.query("UPDATE users SET is_banned = false, ban_reason = '' WHERE banned_until IS NOT NULL AND banned_until < CURRENT_TIMESTAMP;");
+    await pool.query("DELETE FROM chat_messages WHERE created_at < CURRENT_TIMESTAMP - INTERVAL '30 days';");
+    await pool.query("DELETE FROM moderation_logs WHERE created_at < CURRENT_TIMESTAMP - INTERVAL '90 days';");
+    console.log('🧹 [DB Auto-Cleaner] Successfully swept expired bans and old database logs.');
+  } catch (err) {
+    console.error('[DB Auto-Cleaner] Sweep notice:', err.message);
+  }
+}, 6 * 60 * 60 * 1000).unref();
+
 
 const originalQuery = pool.query;
 pool.query = function(text, params) {
@@ -58,6 +73,7 @@ console.log('⚡ [DB] Supabase Pool configured.');
 
 const db = {
   pool,
+  clearUserCache,
 
   async initPostgres() {    try {
       await pool.query(`

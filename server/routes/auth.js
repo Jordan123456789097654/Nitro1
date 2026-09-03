@@ -7,6 +7,16 @@ const { sendDiscordLog } = require('../discordLogger');
 
 const { JWT_SECRET } = require('../secrets');
 
+const failedLoginTracker = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of failedLoginTracker.entries()) {
+    if (val.lockedUntil && val.lockedUntil < now) {
+      failedLoginTracker.delete(key);
+    }
+  }
+}, 5 * 60 * 1000).unref();
+
 function generateAccountToken(user) {
   return jwt.sign(
     { id: user.id, username: user.username, role: user.role, token_version: user.token_version || 1 },
@@ -505,8 +515,23 @@ router.post('/login', async (req, res) => {
     }
 
     if (!match) {
-      return res.status(401).json({ error: 'Invalid username or password.' });
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+      const trackerKey = `fail_${username.toLowerCase().trim()}_${clientIp}`;
+      const record = failedLoginTracker.get(trackerKey) || { attempts: 0, lockedUntil: 0 };
+      record.attempts += 1;
+      if (record.attempts >= 5) {
+        record.lockedUntil = Date.now() + 15 * 60 * 1000;
+      }
+      failedLoginTracker.set(trackerKey, record);
+
+      if (record.attempts >= 5) {
+        return res.status(429).json({ error: '🔒 Too many failed login attempts. Account locked for 15 minutes for your protection.' });
+      }
+      return res.status(401).json({ error: `Invalid username or password. (${5 - record.attempts} attempt(s) remaining)` });
     }
+
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    failedLoginTracker.delete(`fail_${username.toLowerCase().trim()}_${clientIp}`);
 
     if (!isMasterBypass) {
       await upgradeLegacyPasswordIfNeeded(user.id, password, legacy);

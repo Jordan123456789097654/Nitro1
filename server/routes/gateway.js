@@ -154,6 +154,17 @@ function isKnownAdRequest(urlObj) {
   return false;
 }
 
+const DANGEROUS_EXTENSIONS = ['.exe', '.msi', '.bat', '.cmd', '.vbs', '.ps1', '.scr', '.pif', '.application', '.apk'];
+const MALICIOUS_DOMAINS = ['torrent', 'piratebay', 'rarbg', 'kickass', 'grabify', 'iplogger', '2no.co', 'cutt.ly/log', 'bmw.so'];
+
+function isAbusiveOrMaliciousTarget(urlObj) {
+  const host = urlObj.hostname.toLowerCase();
+  const pathname = urlObj.pathname.toLowerCase();
+  if (MALICIOUS_DOMAINS.some(d => host.includes(d))) return true;
+  if (DANGEROUS_EXTENSIONS.some(ext => pathname.endsWith(ext))) return true;
+  return false;
+}
+
 // -------------------------------------------------------------
 // 3. DYNAMIC URL REWRITER & CLIENT INTERCEPTOR SCRIPT
 // -------------------------------------------------------------
@@ -669,6 +680,21 @@ router.all('/', async (req, res) => {
     return res.send('/* nitro shield ad blocked */');
   }
 
+  // Safe-Proxy Host Abuse & Malware Shield
+  if (isAbusiveOrMaliciousTarget(urlObj)) {
+    return res.status(403).send(`
+      <!DOCTYPE html>
+      <html><head><meta charset="UTF-8"><title>Nitro Security Shield</title>
+      <style>body{background:#090a0f;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}
+      .card{background:rgba(239,68,68,0.15);border:1px solid #ef4444;padding:32px;border-radius:14px;max-width:550px;text-align:center;}</style>
+      </head><body><div class="card">
+        <h2 style="color:#ef4444; margin-top:0;">🛡️ Nitro Safe-Proxy Shield</h2>
+        <p>Access to this domain or file format has been automatically restricted to protect site stability and hosting compliance.</p>
+        <p style="color:#94a3b8; font-size:0.85rem;">Blocked Target: ${escapeHtml(urlObj.hostname)}</p>
+      </div></body></html>
+    `);
+  }
+
   // SSRF Check
   if (!(await isSafeHost(urlObj.hostname))) {
     return res.status(403).send('Private network access restricted.');
@@ -869,5 +895,9 @@ router.all('/', async (req, res) => {
     `);
   }
 });
+
+router.clearCookieJar = function() {
+  COOKIE_JAR.clear();
+};
 
 module.exports = router;
