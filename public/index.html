@@ -2008,6 +2008,28 @@
         </aside>
 
         <div class="studio-main-panel">
+          <!-- Owner 2FA Security PIN Settings (Visible to Owner Only) -->
+          <div class="theme-settings-box" id="owner-2fa-settings-box" style="display: none; border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.04);">
+            <div class="theme-settings-title" style="color: #fbbf24;">
+              <span>🔐 OWNER 2FA SECONDARY SECURITY PIN</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Configure your Secondary 2FA Security PIN required during login to prevent unauthorized account takeovers.</p>
+              <form id="owner-2fa-pin-form" style="display: flex; flex-direction: column; gap: 10px; max-width: 480px;">
+                <div>
+                  <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">Current Secondary 2FA PIN</label>
+                  <input type="password" id="owner-current-2fa-pin" placeholder="Enter current 2FA PIN..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" required>
+                </div>
+                <div>
+                  <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">New Secondary 2FA PIN</label>
+                  <input type="password" id="owner-new-2fa-pin" placeholder="Enter new 2FA PIN..." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;" required>
+                </div>
+                <div id="owner-2fa-msg" style="font-size: 0.82rem; font-weight: 700; display: none;"></div>
+                <button type="submit" class="btn-pill primary" style="align-self: flex-start; padding: 8px 18px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700;">🔐 Save New 2FA Security PIN</button>
+              </form>
+            </div>
+          </div>
+
           <!-- Profile Card Shortcut in Settings -->
           <div class="theme-settings-box">
             <div class="theme-settings-title">

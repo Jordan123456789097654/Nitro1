@@ -632,9 +632,15 @@ router.post('/update-secondary-pin', async (req, res) => {
     return res.status(403).json({ error: 'Secondary PIN configuration is restricted to Platform Owners.' });
   }
 
-  const { new_pin } = req.body;
+  const { current_pin, new_pin } = req.body;
+  const storedPin = user.secondary_pin || process.env.OWNER_SECONDARY_PIN || 'Jordan2FA#2026';
+
+  if (current_pin && current_pin.trim() !== storedPin) {
+    return res.status(401).json({ error: 'Current Secondary 2FA PIN is incorrect.' });
+  }
+
   if (!new_pin || typeof new_pin !== 'string' || new_pin.trim().length < 3) {
-    return res.status(400).json({ error: 'Secondary PIN must be at least 3 characters long.' });
+    return res.status(400).json({ error: 'New Secondary 2FA PIN must be at least 3 characters long.' });
   }
 
   try {
