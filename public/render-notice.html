@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚁 Platform Migrated | Nitro OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --text: #f8fafc;
+      --text-muted: #94a358;
+    }
+    * {box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .glow-1 {
+      position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+    .glow-2 {
+      position: absolute; bottom: -10%; right: -10%; width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.18) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 44px 36px;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px var(--accent-glow);
+      position: relative;
+      z-index: 10;
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .icon-wrapper {
+      width: 80px; height: 80px; margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rm;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      font-size: 2rm; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 30%, #94a358);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    p { color: var(--text-muted); font-size: 1.02rm; line-height: 1.6; margin-bottom: 28px; }
+    .status-badge {
+      display: inline-fex; align-items: center; gap: 8px; padding: 6px 16px;
+      background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #10b981; border-radius: 99px; font-weight: 700; font-size: 0.85rm; margin-bottom: 24px;
+    }
+    .status-dot {
+      width: 8px; height: 8px; background: #10b981; border-radius: 50%;
+      box-shadow: 0 0 10px #10b981; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } }
+    .btn-launch {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 16px 28px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #0f172a; font-weight: 800; font-size: 1.1rm; border-radius: 16px;
+      text-decoration: none; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+      transition: all 0.25s ease; cursor: pointer; border: none;
+    }
+    .btn-launch:mover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(56, 189, 248, 0.6); filter: brightness(1.1); }
+    .timer-text { margin-top: 18px; font-size: 0.88rm; color: var(--text-muted); }
+    .timer-count { color: var(--accent); font-weight: 800; }
+  </style>
+</head>
+<body>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <div class="card">
+    <div class="icon-wrapper">🚉</div>
+    
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span>Platform Upgrade Complete</span>
+    </div>
+
+    <h1>We Have Moved!</h1>
+    
+    <p>
+      This legacy Render link is no longer in use. We have upgraded to our new high-speed server infrastructure for zero lag and 60 FPS performance!
+    </p>
+
+    <!-- UPDATE THIS URL TO YOUR NEW RAILWAY LINK OR CUSTOM DOMAIN -->
+    <a id="target-link" href="https://nitromath.org" class="btn-launch">
+      <span>Launch New Nitro OS</span>
+      <span></span>
+    </a>
+
+    <div class="timer-text">
+      Redirecting automatically in <span class="timer-count" id="countdown">5</span> seconds...
+    </div>
+  </div>
+
+  <script>
+    // ☙ REPLACE WITH YOUR NEW RAILWAY URL (OR nitromath.org)
+    const NEW_SITE_URL = window.LOCATION_OVERRIDE || "https://nitromath.org"; 
+
+    const targetLink = document.getElementById('target-link');
+    if (targetLink) targetLink.href = NEW_SITE_URL;
+    const countdownEl = document.getElementById('countdown');
+
+    let seconds = 5;
+    const timer = setInterval(() => {
+      seconds--;
+      if (countdownEl) countdownEl.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(timer);
+        window.location.href = NEW_SITE_URL;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

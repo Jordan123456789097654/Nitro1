@@ -221,6 +221,17 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Render Migration Notice Mode (Serves render-notice.html if RENDER_MIGRATED=true or visiting /migration-notice)
+app.use((req, res, next) => {
+  const isRenderHost = (req.headers.host || '').includes('onrender.com');
+  const isMigratedEnv = process.env.RENDER_MIGRATED === 'true' || process.env.IS_RENDER_MIGRATED === 'true';
+
+  if (req.path === '/migration-notice' || (isMigratedEnv && isRenderHost && !req.path.startsWith('/api'))) {
+    return res.sendFile(path.join(__dirname, '../public/render-notice.html'));
+  }
+  next();
+});
+
 // Authentication Enforcement Middleware for API routes
 app.use('/api', (req, res, next) => {
   const openPaths = [
