@@ -4,7 +4,7 @@
   "description": "NITRO (BETA) Full-Stack Web Games Hub with Supabase, Admin Panel, PRO Tier, Unfiltered Proxy, JWT Tokens, Announcements, and about:blank Cloak.",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "node --max-old-space-size=384 --expose-gc server/index.js",
     "dev": "node --watch server/index.js",
     "build": "vite build && powershell -Command \"Copy-Item dist/music.html public/games/music.html -Force; Copy-Item dist/assets/* public/assets/ -Recurse -Force\"",
     "build:viteOnly": "vite build",

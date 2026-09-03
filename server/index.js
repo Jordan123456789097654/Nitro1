@@ -31,6 +31,18 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('🛡️ [Safety] Unhandled Rejection caught at:', promise, 'reason:', reason);
 });
 
+// Memory Optimization Monitor for Render 512MB RAM Limit (Prevents Exit 137 OOM)
+setInterval(() => {
+  const mem = process.memoryUsage();
+  const heapUsedMb = Math.round(mem.heapUsed / 1024 / 1024);
+  if (heapUsedMb > 300) {
+    if (global.gc) {
+      console.log(`🧹 [Memory Monitor] Heap at ${heapUsedMb}MB — running manual Garbage Collection.`);
+      global.gc();
+    }
+  }
+}, 25000).unref();
+
 const app = express();
 
 const server = http.createServer(app);
