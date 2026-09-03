@@ -2638,6 +2638,24 @@
             </div>
           </div>
 
+          <!-- Discord Webhook Testing Control Box -->
+          <div style="background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.35); border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h4 style="margin: 0; color: #f8fafc; font-size: 1.1rem; font-weight: 800;">
+                  📢 Discord Webhooks Health Check
+                  <span style="font-size: 0.72rem; color: #5865F2; background: rgba(88, 101, 242, 0.2); border: 1px solid #5865F2; padding: 2px 8px; border-radius: 6px; margin-left: 6px; font-weight: 800;">TELEMETRY VERIFICATION</span>
+                </h4>
+              </div>
+              <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.84rem;">Dispatches a live test telemetry payload across all configured Discord webhook channels.</p>
+            </div>
+            <div>
+              <button id="admin-test-webhooks-btn" onclick="window.adminTestWebhooks()" class="btn-pill primary" style="font-weight: 800; padding: 10px 22px; font-size: 0.88rem; background: #5865F2; border: none; cursor: pointer; color: #fff;">
+                🧪 Test All Discord Webhooks
+              </button>
+            </div>
+          </div>
+
           <div id="admin-radar-content"></div>
         </div>
 

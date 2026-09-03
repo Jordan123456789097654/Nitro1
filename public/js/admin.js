@@ -4303,3 +4303,28 @@ window.adminQuickHwidBan = async function(hwid, username) {
     alert('Error issuing Hardware Ban.');
   }
 };
+
+window.adminTestWebhooks = async function() {
+  const btn = document.getElementById('admin-test-webhooks-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ Dispatching Webhook Tests...';
+  }
+
+  try {
+    const res = await authFetch('/api/admin/webhooks/test', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message || '✅ Discord Webhook Test complete! Check your Discord channels.');
+    } else {
+      alert(data.error || 'Failed to test webhooks.');
+    }
+  } catch (err) {
+    alert('Error testing Discord webhooks: ' + (err.message || 'Network error'));
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '🧪 Test All Discord Webhooks';
+    }
+  }
+};

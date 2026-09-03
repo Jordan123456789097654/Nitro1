@@ -2,6 +2,7 @@ const path = require('path');
 const { Pool } = require('pg');
 const { GROQ_API_KEY, GROQ_ENDPOINT, GROQ_TEXT_MODEL } = require('./secrets');
 require('dotenv').config();
+const { encryptText, decryptText } = require('./cryptoHelper');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres.xulngyyikaymnmxitzto:ZgrsG1hhXsOuv4ac@aws-0-ca-central-1.pooler.supabase.com:6543/postgres',
@@ -2490,15 +2491,19 @@ Respond ONLY with valid JSON matching this exact schema:
     }
   },
 
-  // Direct Messages (DMs)
+  // Direct Messages (DMs) — Transparent AES-256-GCM Encrypted at Rest
   async createDM(senderId, receiverId, senderUsername, receiverUsername, content, imageUrl = '', audioUrl = '') {
+    const encryptedContent = encryptText(content);
     try {
       const res = await pool.query(`
         INSERT INTO direct_messages (sender_id, receiver_id, sender_username, receiver_username, content, message, image_url, audio_url)
         VALUES ($1, $2, $3, $4, $5, $5, $6, $7)
         RETURNING id, sender_id, receiver_id, sender_username, receiver_username, COALESCE(content, message) as content, image_url, audio_url, created_at
-      `, [senderId, receiverId, senderUsername, receiverUsername, content, imageUrl || '', audioUrl || '']);
-      return res.rows[0];
+      `, [senderId, receiverId, senderUsername, receiverUsername, encryptedContent, imageUrl || '', audioUrl || '']);
+      
+      const row = res.rows[0];
+      if (row) row.content = content; // Return plaintext to active sender/receiver
+      return row;
     } catch (e) {
       console.error('createDM error:', e.message);
       return {
@@ -2524,7 +2529,11 @@ Respond ONLY with valid JSON matching this exact schema:
            OR (LOWER(sender_username) = LOWER($2) AND LOWER(receiver_username) = LOWER($1))
         ORDER BY id ASC LIMIT 100
       `, [username1, username2]);
-      return res.rows;
+
+      return res.rows.map(row => {
+        row.content = decryptText(row.content);
+        return row;
+      });
     } catch (e) {
       console.error('getDMs error:', e.message);
       return [];
@@ -2549,7 +2558,11 @@ Respond ONLY with valid JSON matching this exact schema:
         ) sub
         ORDER BY other_user, created_at DESC
       `, [username]);
-      return res.rows;
+
+      return res.rows.map(row => {
+        row.message = decryptText(row.message);
+        return row;
+      });
     } catch (e) {
       console.error('getUserConversations error:', e.message);
       return [];

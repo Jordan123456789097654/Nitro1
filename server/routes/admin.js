@@ -575,6 +575,30 @@ router.post('/webhooks', requireOwner, async (req, res) => {
   }
 });
 
+// Test All Configured Discord Webhooks
+router.post('/webhooks/test', requireOwner, async (req, res) => {
+  try {
+    const categories = ['moderation', 'audit', 'logins', 'gateway', 'suggestions', 'bugs', 'updates', 'ai', 'chat'];
+    let sentCount = 0;
+
+    for (const cat of categories) {
+      const ok = await sendDiscordLog({
+        category: cat,
+        action: 'WEBHOOK_HEALTH_CHECK',
+        admin: req.adminUser.username,
+        target: `Test Channel (${cat.toUpperCase()})`,
+        details: `🧪 Discord Webhook Health Check triggered by Owner @${req.adminUser.username}.\nAll telemetry pipeline services operational.`
+      });
+      if (ok) sentCount++;
+    }
+
+    res.json({ success: true, message: `✅ Discord Webhook Test complete! ${sentCount} webhook(s) dispatched successfully.` });
+  } catch (err) {
+    console.error('Webhook test error:', err);
+    res.status(500).json({ error: 'Failed to test Discord webhooks.' });
+  }
+});
+
 // Toggle Site Maintenance Mode
 router.get('/maintenance', requireOwner, async (req, res) => {
   const isMaintenance = await db.getMaintenanceMode();
