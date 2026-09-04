@@ -502,6 +502,104 @@ export async function checkStatusAndAnnouncements() {
   } catch (e) {}
 }
 
+window.handleLiveBroadcastAnnouncement = function(data) {
+  if (!data || !data.is_active) {
+    const annBanner = document.getElementById('announcement-banner');
+    if (annBanner) annBanner.style.display = 'none';
+    return;
+  }
+
+  const isDisabledByUser = localStorage.getItem('nitro_disable_announcements') === 'true';
+  if (isDisabledByUser) return;
+
+  const annBanner = document.getElementById('announcement-banner');
+  const annTitle = document.getElementById('ann-banner-title');
+  const annMsg = document.getElementById('ann-banner-msg');
+  const annClose = document.getElementById('ann-banner-close');
+
+  if (annBanner && annTitle && annMsg) {
+    annTitle.textContent = data.title;
+    annMsg.textContent = data.message;
+    annBanner.style.display = 'flex';
+
+    if (annClose) {
+      annClose.onclick = () => {
+        annBanner.style.display = 'none';
+        if (data.id) sessionStorage.setItem('dismissed_ann_' + data.id, 'true');
+      };
+    }
+  }
+
+  if (window.playSoundEffect) {
+    window.playSoundEffect('victorychime');
+  }
+};
+
+window.handleGlobalSiteEvent = function(data) {
+  if (!data || !data.title) return;
+
+  if (window.playSoundEffect && data.sound_effect) {
+    window.playSoundEffect(data.sound_effect);
+  }
+
+  let toast = document.getElementById('global-site-event-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'global-site-event-toast';
+    toast.style.cssText = `
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      z-index: 99999;
+      background: linear-gradient(135deg, rgba(20, 24, 40, 0.95), rgba(12, 14, 24, 0.98));
+      border: 2px solid #fbbf24;
+      box-shadow: 0 0 35px rgba(251, 191, 36, 0.5), 0 10px 40px rgba(0, 0, 0, 0.8);
+      border-radius: 16px;
+      padding: 16px 28px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      backdrop-filter: blur(16px);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 540px;
+      width: 90%;
+    `;
+    document.body.appendChild(toast);
+  }
+
+  const iconMap = {
+    coin_burst: '💰',
+    drop_party: '🎉',
+    double_exp: '⭐',
+    alert_surge: '🚨',
+    default: '🏆'
+  };
+  const icon = iconMap[data.event_type] || iconMap.default;
+
+  toast.innerHTML = `
+    <div style="font-size: 2.8rem; filter: drop-shadow(0 0 10px #fbbf24);">${icon}</div>
+    <div style="flex: 1;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; font-weight: 900; font-size: 0.68rem; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;">LIVE GLOBAL EVENT</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">From @${data.author || 'Admin'}</span>
+      </div>
+      <strong style="color: #fff; font-size: 1.1rem; display: block;">${data.title}</strong>
+      <p style="color: #cbd5e1; font-size: 0.85rem; margin: 2px 0 0; line-height: 1.3;">${data.message}</p>
+    </div>
+    <button onclick="this.parentElement.style.transform='translateX(-50%) translateY(-200px)'" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 4px;">✕</button>
+  `;
+
+  setTimeout(() => {
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  }, 50);
+
+  setTimeout(() => {
+    if (toast) toast.style.transform = 'translateX(-50%) translateY(-200px)';
+  }, 8000);
+};
+
 window.setDisguisePreset = function(presetKey) {
   const PRESETS = {
     classroom: { title: 'Classes', icon: FAVICON_MAP.classroom },

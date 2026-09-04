@@ -26,6 +26,23 @@ export function getSharedSocket() {
         showBannedScreen(data.reason || 'Your account has been permanently suspended by an administrator.');
       }
     });
+
+    sharedSocket.on('live_broadcast_announcement', (annData) => {
+      if (window.handleLiveBroadcastAnnouncement) {
+        window.handleLiveBroadcastAnnouncement(annData);
+      }
+    });
+
+    sharedSocket.on('live_broadcast_announcement_disable', () => {
+      const annBanner = document.getElementById('announcement-banner');
+      if (annBanner) annBanner.style.display = 'none';
+    });
+
+    sharedSocket.on('global_site_event', (eventData) => {
+      if (window.handleGlobalSiteEvent) {
+        window.handleGlobalSiteEvent(eventData);
+      }
+    });
   }
   return sharedSocket;
 }

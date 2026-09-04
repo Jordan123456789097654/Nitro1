@@ -739,6 +739,17 @@ router.post('/announcements', requireOwner, async (req, res) => {
       details: message
     });
 
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('live_broadcast_announcement', {
+        id: ann ? ann.id : Date.now(),
+        title,
+        message,
+        alert_type: alert_type || 'info',
+        is_active: is_active !== false && is_active !== 'false'
+      });
+    }
+
     res.json({ success: true, announcement: ann });
   } catch (err) {
     res.status(500).json({ error: 'Failed to set announcement.' });
@@ -751,9 +762,54 @@ router.post('/announcements/disable', requireOwner, async (req, res) => {
   try {
     await db.pool.query('UPDATE announcements SET is_active = false');
     await db.createModerationLog('DISABLE_ANNOUNCEMENTS', admin, 'SYSTEM', 'Disabled all active site announcements');
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('live_broadcast_announcement_disable', {});
+    }
+
     res.json({ success: true, message: 'All announcements disabled.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to disable announcements.' });
+  }
+});
+
+// Trigger Live Platform Global Site Events
+router.post('/global-event', requireOwner, async (req, res) => {
+  const { event_type, title, message, sound_effect } = req.body;
+  const admin = req.adminUser.username;
+
+  if (!event_type || !title) {
+    return res.status(400).json({ error: 'Event type and title are required.' });
+  }
+
+  try {
+    await db.createModerationLog('TRIGGER_GLOBAL_EVENT', admin, event_type, title);
+
+    sendDiscordLog({
+      category: 'updates',
+      action: 'GLOBAL_SITE_EVENT_TRIGGERED',
+      admin,
+      target: `[${event_type.toUpperCase()}] ${title}`,
+      details: message || 'Live platform event triggered by administrator'
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('global_site_event', {
+        event_type,
+        title,
+        message: message || '',
+        sound_effect: sound_effect || 'victorychime',
+        author: admin,
+        timestamp: Date.now()
+      });
+    }
+
+    res.json({ success: true, message: `🎉 Global Event "${title}" broadcasted to all connected players!` });
+  } catch (err) {
+    console.error('Trigger global event error:', err);
+    res.status(500).json({ error: 'Failed to trigger global event.' });
   }
 });
 

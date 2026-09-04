@@ -340,18 +340,30 @@ window.switchSoundboardTab = function(tab) {
   }
 };
 
-export function initSoundboard() {
-  const socket = getSharedSocket();
-  if (socket) {
-    socket.on('sound_effect_broadcast', ({ soundKey, audioUrl }) => {
-      if (soundKey && SOUND_EFFECTS[soundKey]) {
-        SOUND_EFFECTS[soundKey]();
-      } else if (audioUrl) {
-        playAudioUrl(audioUrl);
-      }
-    });
+window.playSoundEffect = function(soundKey, audioUrl) {
+  const ctx = getAudioContext();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().catch(() => {});
   }
+  if (soundKey && SOUND_EFFECTS[soundKey]) {
+    SOUND_EFFECTS[soundKey]();
+  } else if (audioUrl) {
+    playAudioUrl(audioUrl);
+  }
+};
 
+export function initSoundboard() {
+  const setupSocketListeners = () => {
+    const socket = getSharedSocket();
+    if (socket) {
+      socket.off('sound_effect_broadcast');
+      socket.on('sound_effect_broadcast', ({ soundKey, audioUrl }) => {
+        window.playSoundEffect(soundKey, audioUrl);
+      });
+    }
+  };
+
+  setupSocketListeners();
   setupMasterVolumeControls();
   setupSearchInput();
   setupUploadModal();

@@ -715,22 +715,33 @@ function setupAnnouncementForm() {
   });
 }
 
-function setupAnnouncementDisableControls() {
-  const disableBtn = document.getElementById('admin-disable-ann-btn');
-  if (disableBtn) {
-    disableBtn.addEventListener('click', async () => {
-      try {
-        const res = await authFetch('/api/admin/announcements/disable', { method: 'POST' });
-        if (res.ok) {
-          alert('🚫 All site announcements disabled and cleared.');
-          checkStatusAndAnnouncements();
-        }
-      } catch (e) {
-        alert('Error disabling announcements.');
-      }
+window.triggerGlobalEvent = async function(eventType, defaultTitle, defaultMsg, defaultSound) {
+  const title = prompt('Enter Global Event Title:', defaultTitle);
+  if (!title || !title.trim()) return;
+  const message = prompt('Enter Global Event Message:', defaultMsg);
+  if (message === null) return;
+
+  try {
+    const res = await authFetch('/api/admin/global-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: eventType,
+        title: title.trim(),
+        message: (message || '').trim(),
+        sound_effect: defaultSound || 'victorychime'
+      })
     });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+    } else {
+      alert(data.error || 'Failed to trigger global event.');
+    }
+  } catch (e) {
+    alert('Error broadcasting global event.');
   }
-}
+};
 
 async function fetchBlockedDomains() {
   try {

@@ -528,18 +528,20 @@ function createPeerConnection(targetSocketId) {
       audioEl = document.createElement('audio');
       audioEl.id = `audio-peer-${targetSocketId}`;
       audioEl.autoplay = true;
+      audioEl.playsInline = true;
       audioEl.style.display = 'none';
       document.body.appendChild(audioEl);
     }
     audioEl.srcObject = stream;
+    audioEl.muted = isDeafened;
+    audioEl.volume = Math.min(1.0, Math.max(0.0, peerVolumes[targetSocketId] ?? 1.0));
 
-    let routedToWebAudio = false;
     try {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
       if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().catch(() => {});
       }
 
       if (isSpatialAudioEnabled) {
@@ -549,19 +551,10 @@ function createPeerConnection(targetSocketId) {
         const panVal = Math.max(-0.8, Math.min(0.8, (peerCount % 2 === 0 ? 0.6 : -0.6) * (0.5 + (peerCount * 0.15))));
         panner.pan.setValueAtTime(panVal, audioCtx.currentTime);
         peerSource.connect(panner);
-        panner.connect(audioCtx.destination);
         peerPannerNodes[targetSocketId] = panner;
-        routedToWebAudio = true;
       }
     } catch (e) {
-      console.warn('Web Audio spatial panning routing failed, falling back to direct HTML audio:', e);
-    }
-
-    if (routedToWebAudio) {
-      audioEl.muted = true;
-    } else {
-      audioEl.muted = isDeafened;
-      audioEl.volume = Math.min(1.0, Math.max(0.0, peerVolumes[targetSocketId] ?? 1.0));
+      console.warn('Web Audio spatial panning setup warning:', e);
     }
 
     audioEl.play().catch(err => console.warn(`Peer audio playback deferred for ${targetSocketId}:`, err.message));
