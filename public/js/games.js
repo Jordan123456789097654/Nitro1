@@ -279,13 +279,45 @@ export async function loadProGames() {
   }
 }
 
-export function renderGames(games, targetGridId) {
+const gridPageStore = {};
+
+window.setCatalogPage = function(page, targetGridId) {
+  if (!gridPageStore[targetGridId]) gridPageStore[targetGridId] = { page: 1, games: [] };
+  gridPageStore[targetGridId].page = page;
+  renderGames(gridPageStore[targetGridId].games, targetGridId, page);
+  const gridEl = document.getElementById(targetGridId);
+  if (gridEl) {
+    gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+export function renderGames(games, targetGridId, requestedPage) {
   const grid = document.getElementById(targetGridId);
   if (!grid) return;
 
+  if (!gridPageStore[targetGridId]) {
+    gridPageStore[targetGridId] = { page: 1, games: games };
+  }
+
+  if (gridPageStore[targetGridId].games !== games) {
+    gridPageStore[targetGridId].games = games;
+    if (requestedPage === undefined) {
+      gridPageStore[targetGridId].page = 1;
+    }
+  }
+
+  let currentPage = requestedPage !== undefined ? requestedPage : (gridPageStore[targetGridId].page || 1);
+  const GAMES_PER_PAGE = 50;
+  const totalItems = games.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / GAMES_PER_PAGE));
+
+  if (currentPage < 1) currentPage = 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  gridPageStore[targetGridId].page = currentPage;
+
   grid.innerHTML = ''; // Clear existing tiles
 
-  if (games.length === 0) {
+  if (totalItems === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
         <p style="font-size: 1.2rem; margin-bottom: 8px; color: #fbbf24; font-weight: 800;">We are currently making games</p>
@@ -295,85 +327,93 @@ export function renderGames(games, targetGridId) {
     return;
   }
 
-  const BATCH_SIZE = 30;
-  let renderedCount = 0;
+  const startIdx = (currentPage - 1) * GAMES_PER_PAGE;
+  const endIdx = Math.min(startIdx + GAMES_PER_PAGE, totalItems);
+  const pageGames = games.slice(startIdx, endIdx);
 
-  function renderNextBatch() {
-    const nextBatch = games.slice(renderedCount, renderedCount + BATCH_SIZE);
-    if (nextBatch.length === 0) return;
+  const buildPaginationBar = (positionKey) => {
+    if (totalPages <= 1) return '';
 
-    const html = nextBatch.map(game => {
-      const isFav = favorites.includes(game.id);
-      const clickCount = parseInt(game.clicks || 0, 10);
-      const itemSlug = game.slug || game.id;
-      return `
-        <div class="game-card" data-slug="${itemSlug}" data-game-id="${game.id}">
-          <div class="game-thumb-wrap">
-            <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
-            ${game.is_vip ? `<span class="game-badge-vip" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:800;">👑 PRO</span>` : ''}
-            <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game-id="${game.id}" title="Toggle Favorite">★</button>
-          </div>
-          <div class="game-info-wrap">
-            <div class="game-title" title="${game.title}">${game.title}</div>
-            <div class="game-meta-row">
-              <span>${game.author || 'Community'}</span>
-              <span class="game-clicks" id="clicks-${game.id}">🔥 ${clickCount} clicks</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-
-    // Use Array.from(tempDiv.children) to ensure we only loop over Element nodes
-    // and completely avoid Text nodes (whitespace/newlines) which would crash.
-    Array.from(tempDiv.children).forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.game-fav-btn')) return;
-        const slug = card.dataset.slug || card.dataset.gameId;
-        openGame(slug);
-      });
-
-      const favBtn = card.querySelector('.game-fav-btn');
-      if (favBtn) {
-        favBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const gid = parseInt(favBtn.dataset.gameId, 10);
-          toggleFavorite(gid, targetGridId);
-        });
+    let pagesToRender = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pagesToRender.push(i);
+    } else {
+      pagesToRender.push(1);
+      if (currentPage > 3) pagesToRender.push('...');
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        if (!pagesToRender.includes(i)) pagesToRender.push(i);
       }
-
-      grid.appendChild(card);
-    });
-
-    renderedCount += nextBatch.length;
-  }
-
-  // Initial load
-  renderNextBatch();
-
-  // Infinite Scroll Listener
-  const scrollContainer = grid.parentElement;
-  if (scrollContainer) {
-    if (grid._onScrollHandler) {
-      scrollContainer.removeEventListener('scroll', grid._onScrollHandler);
-      window.removeEventListener('scroll', grid._onScrollHandler);
+      if (currentPage < totalPages - 2) pagesToRender.push('...');
+      pagesToRender.push(totalPages);
     }
 
-    const onScroll = () => {
-      const containerAtBottom = scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 300;
-      const windowAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300;
-      if (containerAtBottom || windowAtBottom) {
-        renderNextBatch();
+    const pageBtnsHtml = pagesToRender.map(p => {
+      if (p === '...') {
+        return `<span style="color:var(--text-muted); padding:0 4px; font-weight:bold;">...</span>`;
       }
-    };
+      const isCurrent = p === currentPage;
+      return `<button class="btn-pill" style="min-width:34px; padding:4px 10px; font-weight:700; ${isCurrent ? 'background:#fbbf24; color:#000; border-color:#fbbf24;' : 'background:rgba(255,255,255,0.06); color:#fff; border:1px solid var(--card-border);'}" onclick="window.setCatalogPage(${p}, '${targetGridId}')">${p}</button>`;
+    }).join('');
 
-    scrollContainer.addEventListener('scroll', onScroll);
-    window.addEventListener('scroll', onScroll);
-    grid._onScrollHandler = onScroll;
-  }
+    return `
+      <div class="catalog-pagination-bar" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 18px; background: rgba(18, 22, 38, 0.75); border: 1px solid var(--card-border); border-radius: var(--radius-md); backdrop-filter: blur(12px); margin-${positionKey === 'top' ? 'bottom: 8px' : 'top: 16px'};">
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+          Showing <strong style="color:#fff;">${startIdx + 1}–${endIdx}</strong> of <strong style="color:#fff;">${totalItems}</strong> games & apps (Page ${currentPage} of ${totalPages})
+        </span>
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <button class="btn-pill" ${currentPage <= 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} onclick="window.setCatalogPage(${currentPage - 1}, '${targetGridId}')">◀ Prev</button>
+          ${pageBtnsHtml}
+          <button class="btn-pill" ${currentPage >= totalPages ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} onclick="window.setCatalogPage(${currentPage + 1}, '${targetGridId}')">Next ▶</button>
+        </div>
+      </div>
+    `;
+  };
+
+  const topPaginationHtml = buildPaginationBar('top');
+  const bottomPaginationHtml = buildPaginationBar('bottom');
+
+  const gamesHtml = pageGames.map(game => {
+    const isFav = favorites.includes(game.id);
+    const clickCount = parseInt(game.clicks || 0, 10);
+    const itemSlug = game.slug || game.id;
+    return `
+      <div class="game-card" data-slug="${itemSlug}" data-game-id="${game.id}">
+        <div class="game-thumb-wrap">
+          <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
+          ${game.is_vip ? `<span class="game-badge-vip" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:800;">👑 PRO</span>` : ''}
+          <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game-id="${game.id}" title="Toggle Favorite">★</button>
+        </div>
+        <div class="game-info-wrap">
+          <div class="game-title" title="${game.title}">${game.title}</div>
+          <div class="game-meta-row">
+            <span>${game.author || 'Community'}</span>
+            <span class="game-clicks" id="clicks-${game.id}">🔥 ${clickCount} clicks</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.innerHTML = topPaginationHtml + gamesHtml + bottomPaginationHtml;
+
+  Array.from(grid.querySelectorAll('.game-card')).forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.game-fav-btn')) return;
+      const slug = card.dataset.slug || card.dataset.gameId;
+      openGame(slug);
+    });
+
+    const favBtn = card.querySelector('.game-fav-btn');
+    if (favBtn) {
+      favBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const gid = parseInt(favBtn.dataset.gameId, 10);
+        toggleFavorite(gid, targetGridId);
+      });
+    }
+  });
 }
 
 function toggleFavorite(gameId, targetGridId) {
@@ -383,10 +423,11 @@ function toggleFavorite(gameId, targetGridId) {
     favorites.push(gameId);
   }
   localStorage.setItem('nitro_favorites', JSON.stringify(favorites));
+  const currentPage = gridPageStore[targetGridId]?.page || 1;
   if (targetGridId === 'pro-games-grid') {
-    renderGames(allProGames, 'pro-games-grid');
+    renderGames(allProGames, 'pro-games-grid', currentPage);
   } else {
-    renderGames(allStandardGames, 'games-grid');
+    renderGames(allStandardGames, 'games-grid', currentPage);
   }
 }
 

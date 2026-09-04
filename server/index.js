@@ -140,7 +140,7 @@ app.use((req, res, next) => {
   if (referer && referer.includes('/api/gateway?url=')) {
     const isAppApi = req.path.startsWith('/api/') && !req.path.startsWith('/api/gateway');
     const isLocalAsset = req.path.startsWith('/js/') || req.path.startsWith('/css/') || req.path === '/favicon.ico' || req.path === '/service-worker.js';
-    if (!isAppApi && !isLocalAsset) {
+    if (!isAppApi && !isLocalAsset && !req.path.startsWith('/api/gateway')) {
       try {
         const parsedReferer = new URL(referer);
         const targetUrlStr = parsedReferer.searchParams.get('url');
