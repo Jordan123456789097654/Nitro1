@@ -263,7 +263,8 @@ app.use('/api', (req, res, next) => {
     '/ai/status', '/api/ai/status',
     '/weather', '/api/weather',
     '/gateway', '/api/gateway',
-    '/music/search', '/api/music/search'
+    '/music/search', '/api/music/search',
+    '/pro-config', '/api/pro-config'
   ];
   if (openPaths.some(p => req.path === p || req.path.startsWith(p) || req.originalUrl.startsWith(p))) return next();
 
@@ -351,6 +352,16 @@ app.get('/api/status', async (req, res) => {
       visits_count: 128,
       features: {}
     });
+  }
+});
+
+// Public PRO Lounge Page Configuration Endpoint
+app.get('/api/pro-config', async (req, res) => {
+  try {
+    const config = await db.getProPageConfig();
+    res.json({ success: true, config });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch PRO page config.' });
   }
 });
 

@@ -28,6 +28,8 @@ export function initAdmin() {
   window.adminDeleteHwidRule = adminDeleteHwidRule;
   window.updateUserSelectionCount = updateUserSelectionCount;
   window.applyBatchRole = applyBatchRole;
+  window.adminFetchProConfig = adminFetchProConfig;
+  window.adminResetProPerksDefaults = adminResetProPerksDefaults;
   setupAdminTabs();
   setupAdminActions();
   setupMaintenanceToggle();
@@ -48,6 +50,7 @@ export function initAdmin() {
   setupAiModerationStudio();
   setupEditFilterModal();
   setupAppealsReviewStudio();
+  setupProConfigForm();
   connectAdminSocket();
 }
 
@@ -4446,3 +4449,83 @@ window.adminTestWebhooks = async function() {
     }
   }
 };
+
+export async function adminFetchProConfig() {
+  try {
+    const res = await authFetch('/api/admin/pro-page-config');
+    const data = await res.json();
+    if (data.success && data.config) {
+      const cfg = data.config;
+      const iconEl = document.getElementById('admin-pro-icon');
+      const badgeEl = document.getElementById('admin-pro-badge');
+      const titleEl = document.getElementById('admin-pro-title');
+      const descEl = document.getElementById('admin-pro-description');
+      const btnTextEl = document.getElementById('admin-pro-btn-text');
+      const btnLinkEl = document.getElementById('admin-pro-btn-link');
+      const perksJsonEl = document.getElementById('admin-pro-perks-json');
+
+      if (iconEl) iconEl.value = cfg.icon || '👑';
+      if (badgeEl) badgeEl.value = cfg.badge || 'Nitrogames Premium & VIP Perks';
+      if (titleEl) titleEl.value = cfg.title || 'NITRO PRO LOUNGE & ELITE CLUB';
+      if (descEl) descEl.value = cfg.description || 'Unlock 2x Multipliers, Custom Username Glows, Stealth Boss Key, & Exclusive PRO Catalog Access.';
+      if (btnTextEl) btnTextEl.value = cfg.buttonText || '⚡ Become a PRO Member';
+      if (btnLinkEl) btnLinkEl.value = cfg.buttonLink || '#view-upgrades';
+      if (perksJsonEl) perksJsonEl.value = JSON.stringify(cfg.perks || [], null, 2);
+    }
+  } catch (err) {
+    console.error('adminFetchProConfig error:', err);
+  }
+}
+
+export function adminResetProPerksDefaults() {
+  const perksJsonEl = document.getElementById('admin-pro-perks-json');
+  const defaults = [
+    { title: "2x Coins & XP Multiplier", description: "Double all coin rewards, daily streak bonuses, and XP earned across the entire platform.", icon: "🪙", badge: "2x ECO BOOST" },
+    { title: "Animated Username Glows", description: "Stand out in global chat with Chroma, Fire, Matrix, Ice, and Void animated text effects.", icon: "✨", badge: "CHAT FX" },
+    { title: "1-Click Stealth Boss Key", description: "Instantly disguise your browser screen as Google Docs or Canvas with press of Esc or ~ key.", icon: "🕵️", badge: "PRIVACY MAX" },
+    { title: "Exclusive PRO & Beta Catalog", description: "Early access pass to newly released HTML5 games, unblocked proxies, and PRO-locked titles.", icon: "🔒", badge: "EARLY ACCESS" },
+    { title: "Priority Proxy Gateway", description: "Ultra-low latency dedicated proxy nodes with enhanced header encryption and speed boost.", icon: "🚀", badge: "TURBO NODE" },
+    { title: "Daily PRO Bonus Drop", description: "Claim +250 free coins every 24 hours directly from your PRO dashboard card.", icon: "🎁", badge: "+250 COINS/DAY" }
+  ];
+  if (perksJsonEl) perksJsonEl.value = JSON.stringify(defaults, null, 2);
+}
+
+function setupProConfigForm() {
+  const form = document.getElementById('admin-pro-config-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const icon = document.getElementById('admin-pro-icon')?.value.trim();
+    const badge = document.getElementById('admin-pro-badge')?.value.trim();
+    const title = document.getElementById('admin-pro-title')?.value.trim();
+    const description = document.getElementById('admin-pro-description')?.value.trim();
+    const buttonText = document.getElementById('admin-pro-btn-text')?.value.trim();
+    const buttonLink = document.getElementById('admin-pro-btn-link')?.value.trim();
+    const perksJsonStr = document.getElementById('admin-pro-perks-json')?.value.trim();
+
+    let perks = [];
+    try {
+      perks = JSON.parse(perksJsonStr);
+    } catch (err) {
+      alert('Invalid JSON format in Perks Showcase List. Please check syntax.');
+      return;
+    }
+
+    try {
+      const res = await authFetch('/api/admin/pro-page-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ icon, badge, title, description, buttonText, buttonLink, perks })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || '✅ PRO Lounge Page Configuration saved!');
+        if (window.loadProPageConfig) window.loadProPageConfig();
+      } else {
+        alert(data.error || 'Failed to save PRO Page Configuration.');
+      }
+    } catch (err) {
+      alert('Network error saving PRO Page Configuration.');
+    }
+  });
+}

@@ -1515,6 +1515,45 @@ const db = {
     return await this.setSetting('signups_enabled', Boolean(enabled) ? 'true' : 'false');
   },
 
+  async getProPageConfig() {
+    const badge = (await this.getSetting('pro_badge_text')) || 'Nitrogames Premium & VIP Perks';
+    const title = (await this.getSetting('pro_title_text')) || 'NITRO PRO LOUNGE & ELITE CLUB';
+    const description = (await this.getSetting('pro_description_text')) || 'Unlock 2x Multipliers, Custom Username Glows, Stealth Boss Key, & Exclusive PRO Catalog Access.';
+    const buttonText = (await this.getSetting('pro_button_text')) || '⚡ Unlock Nitro PRO';
+    const buttonLink = (await this.getSetting('pro_button_link')) || '#view-upgrades';
+    const icon = (await this.getSetting('pro_icon')) || '👑';
+    let perks = [];
+    try {
+      const rawPerks = await this.getSetting('pro_perks_json');
+      if (rawPerks) perks = JSON.parse(rawPerks);
+    } catch (e) {}
+    if (!perks || !Array.isArray(perks) || perks.length === 0) {
+      perks = [
+        { title: "2x Coins & XP Multiplier", description: "Double all coin rewards, daily streak bonuses, and XP earned across the entire platform.", icon: "🪙", badge: "2x ECO BOOST" },
+        { title: "Animated Username Glows", description: "Stand out in global chat with Chroma, Fire, Matrix, Ice, and Void animated text effects.", icon: "✨", badge: "CHAT FX" },
+        { title: "1-Click Stealth Boss Key", description: "Instantly disguise your browser screen as Google Docs or Canvas with press of Esc or ~ key.", icon: "🕵️", badge: "PRIVACY MAX" },
+        { title: "Exclusive PRO & Beta Catalog", description: "Early access pass to newly released HTML5 games, unblocked proxies, and PRO-locked titles.", icon: "🔒", badge: "EARLY ACCESS" },
+        { title: "Priority Proxy Gateway", description: "Ultra-low latency dedicated proxy nodes with enhanced header encryption and speed boost.", icon: "🚀", badge: "TURBO NODE" },
+        { title: "Daily PRO Bonus Drop", description: "Claim +250 free coins every 24 hours directly from your PRO dashboard card.", icon: "🎁", badge: "+250 COINS/DAY" }
+      ];
+    }
+    return { badge, title, description, buttonText, buttonLink, icon, perks };
+  },
+
+  async setProPageConfig(config) {
+    if (config.badge !== undefined) await this.setSetting('pro_badge_text', config.badge);
+    if (config.title !== undefined) await this.setSetting('pro_title_text', config.title);
+    if (config.description !== undefined) await this.setSetting('pro_description_text', config.description);
+    if (config.buttonText !== undefined) await this.setSetting('pro_button_text', config.buttonText);
+    if (config.buttonLink !== undefined) await this.setSetting('pro_button_link', config.buttonLink);
+    if (config.icon !== undefined) await this.setSetting('pro_icon', config.icon);
+    if (config.perks !== undefined) {
+      const perksStr = typeof config.perks === 'string' ? config.perks : JSON.stringify(config.perks);
+      await this.setSetting('pro_perks_json', perksStr);
+    }
+    return true;
+  },
+
 
 
   async deleteUser(userId) {

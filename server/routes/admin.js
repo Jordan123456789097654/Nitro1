@@ -407,11 +407,31 @@ router.post('/features', requireOwner, async (req, res) => {
     if (!key) return res.status(400).json({ error: 'Feature key required.' });
 
     await db.updateFeatureSetting(key, enabled === true || enabled === 'true');
-    await db.createModerationLog('UPDATE_FEATURE_TOGGLE', req.adminUser.username, key, `Set enabled to ${enabled}`);
-
     res.json({ success: true, key, enabled });
   } catch (e) {
     res.status(500).json({ error: 'Failed to update feature setting.' });
+  }
+});
+
+// PRO Lounge Page Configuration (Admin & Owner)
+router.get('/pro-page-config', requireAdmin, async (req, res) => {
+  try {
+    const config = await db.getProPageConfig();
+    res.json({ success: true, config });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch PRO page configuration.' });
+  }
+});
+
+router.post('/pro-page-config', requireAdmin, async (req, res) => {
+  try {
+    const { badge, title, description, buttonText, buttonLink, icon, perks } = req.body;
+    await db.setProPageConfig({ badge, title, description, buttonText, buttonLink, icon, perks });
+    await db.createModerationLog('UPDATE_PRO_PAGE_CONFIG', req.adminUser.username, 'PRO Lounge', 'Updated PRO Lounge text, icon, and perks');
+    const updated = await db.getProPageConfig();
+    res.json({ success: true, config: updated, message: 'PRO Page configuration saved successfully!' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update PRO page configuration.' });
   }
 });
 

@@ -1611,22 +1611,52 @@
 
     <!-- SECTION 2: PRO & ROLE TIERS HEADQUARTERS -->
     <section class="page-view" id="view-pro">
-      <div style="max-width: 800px; margin: 40px auto; text-align: center; background: linear-gradient(145deg, rgba(20, 24, 38, 0.9), rgba(10, 12, 22, 0.95)); border: 2px solid rgba(251, 191, 36, 0.4); border-radius: var(--radius-lg); padding: 48px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);">
-        <div style="font-size: 3.8rem; margin-bottom: 12px; filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.4));">🚧</div>
-        <span style="display: inline-block; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); color: #fbbf24; font-size: 0.8rem; font-weight: 800; padding: 4px 14px; border-radius: 99px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">
-          Nitrogames Premium & VIP Perks
-        </span>
-        <h1 style="font-size: 2.2rem; margin: 0 0 12px 0; background: linear-gradient(90deg, #fbbf24, #ec4899, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900;">
-          PREMIUM FEATURES COMING SOON
-        </h1>
-        <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.6; max-width: 600px; margin: 0 auto 28px;">
-          We are building the next generation of Nitro Premium — featuring exclusive theme customs, background audio docks, custom profile flairs, and priority high-speed unblocked proxy nodes.
-        </p>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-          <button class="btn-pill primary" onclick="document.querySelector('.nav-btn[data-view=\'library\']')?.click()" style="padding: 10px 24px; font-weight: 800;">
-            🎮 Return to Main Library
+      <div style="max-width: 1100px; margin: 30px auto; padding: 0 16px;">
+        
+        <!-- PRO Lounge Hero Banner Card -->
+        <div style="text-align: center; background: linear-gradient(145deg, rgba(20, 24, 38, 0.95), rgba(10, 12, 22, 0.98)); border: 2px solid rgba(251, 191, 36, 0.4); border-radius: 20px; padding: 48px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden; margin-bottom: 32px;">
+          <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(251, 191, 36, 0.15), transparent 70%); pointer-events: none;"></div>
+          <div id="pro-page-icon" style="font-size: 3.8rem; margin-bottom: 12px; filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.4));">👑</div>
+          <span id="pro-page-badge" style="display: inline-block; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); color: #fbbf24; font-size: 0.8rem; font-weight: 800; padding: 4px 14px; border-radius: 99px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">
+            Nitrogames Premium & VIP Perks
+          </span>
+          <h1 id="pro-page-title" style="font-size: 2.5rem; margin: 0 0 14px 0; background: linear-gradient(90deg, #fbbf24, #ec4899, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; letter-spacing: -0.5px;">
+            NITRO PRO LOUNGE & ELITE CLUB
+          </h1>
+          <p id="pro-page-description" style="color: #cbd5e1; font-size: 1.05rem; line-height: 1.65; max-width: 680px; margin: 0 auto 28px;">
+            Unlock 2x Multipliers, Custom Username Glows, Stealth Boss Key, & Exclusive PRO Catalog Access.
+          </p>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <button id="pro-page-btn" class="btn-pill primary" onclick="document.querySelector('.nav-btn[data-view=\'upgrades\']')?.click()" style="padding: 12px 28px; font-weight: 800; font-size: 0.95rem; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; border: none; box-shadow: 0 6px 20px rgba(251,191,36,0.3);">
+              ⚡ Become a PRO Member
+            </button>
+            <button class="btn-pill secondary" onclick="document.querySelector('.nav-btn[data-view=\'library\']')?.click()" style="padding: 12px 24px; font-weight: 800; font-size: 0.95rem;">
+              🎮 Main Catalog
+            </button>
+          </div>
+        </div>
+
+        <!-- Daily PRO Bonus Claim Box -->
+        <div id="pro-daily-bonus-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(56, 189, 248, 0.1)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 22px 28px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h3 style="color: #10b981; margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+              🎁 Daily PRO Bonus Drop (+250 Coins)
+            </h3>
+            <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0;">PRO members can claim 250 free coins every 24 hours!</p>
+          </div>
+          <button id="claim-pro-bonus-btn" onclick="window.claimProBonus && window.claimProBonus()" class="btn-pill primary" style="background: #10b981; border-color: #10b981; color: #000; font-weight: 800; padding: 10px 22px; font-size: 0.9rem;">
+            💰 Claim +250 Coins
           </button>
         </div>
+
+        <!-- Dynamic Perks Grid Container -->
+        <h2 style="font-size: 1.4rem; color: #f8fafc; font-weight: 800; margin-bottom: 20px; text-align: center;">
+          ⚡ Exclusive Membership Perks
+        </h2>
+        <div id="pro-page-perks-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+          <!-- Loaded dynamically from PRO page config -->
+        </div>
+
       </div>
     </section>
 
@@ -2594,8 +2624,68 @@
               <button class="admin-tab-btn" data-tab="polls">📊 Poll Builder</button>
               <button class="admin-tab-btn" data-tab="admintournaments" onclick="window.adminFetchTournaments()">🏆 Tournaments (Jams)</button>
               <button class="admin-tab-btn" data-tab="adminraffles" onclick="window.adminFetchRaffles()">🎟️ Manage Raffles</button>
+              <button class="admin-tab-btn" data-tab="proconfig" onclick="window.adminFetchProConfig()">👑 PRO Lounge Manager</button>
             </div>
           </div>
+        </div>
+
+        <!-- Admin Tab: PRO Lounge Page Manager -->
+        <div class="admin-tab-content" id="tab-proconfig" style="display: none;">
+          <div style="margin-bottom: 16px;">
+            <h3 style="color: #fbbf24; margin: 0; font-size: 1.25rem;">👑 PRO Lounge & VIP Perks Manager</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Customize the text, headline, icon, action button, and perks showcase grid displayed on the public PRO page (#view-pro).</p>
+          </div>
+
+          <form id="admin-pro-config-form" style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; max-width: 800px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">PRO Page Icon / Emoji</label>
+                <input type="text" id="admin-pro-icon" required placeholder="e.g. 👑 or ⚡" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">Badge Tag Text</label>
+                <input type="text" id="admin-pro-badge" required placeholder="Nitrogames Premium & VIP Perks" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">Main Headline / Title</label>
+              <input type="text" id="admin-pro-title" required placeholder="NITRO PRO LOUNGE & ELITE CLUB" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">Subtitle / Description Text</label>
+              <textarea id="admin-pro-description" rows="3" required placeholder="Unlock 2x Multipliers, Custom Username Glows, Stealth Boss Key, & Exclusive PRO Catalog Access." style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">Button Action Text</label>
+                <input type="text" id="admin-pro-btn-text" required placeholder="⚡ Become a PRO Member" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">Button Target Link / View</label>
+                <input type="text" id="admin-pro-btn-link" required placeholder="#view-upgrades" style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #fff; border-radius: 6px;">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <label style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">Perks Showcase List (JSON Format)</label>
+                <button type="button" class="btn-small secondary" onclick="window.adminResetProPerksDefaults()" style="font-size: 0.72rem; padding: 2px 8px;">Reset Perks Template</button>
+              </div>
+              <textarea id="admin-pro-perks-json" rows="8" required style="width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); color: #38bdf8; font-family: monospace; font-size: 0.8rem; border-radius: 6px; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <button type="submit" class="btn-pill primary" style="background: #fbbf24; color: #000; font-weight: 800; border: none; padding: 10px 24px;">
+                💾 Save PRO Page Config
+              </button>
+              <button type="button" class="btn-pill secondary" onclick="document.querySelector('.nav-btn[data-view=\'pro\']')?.click()" style="padding: 10px 20px; font-weight: 700;">
+                👁️ Preview Live PRO Lounge
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- Admin Tab: Hardware Bans -->

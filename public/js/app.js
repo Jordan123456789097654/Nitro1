@@ -95,12 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       alert('Error claiming PRO bonus drop.');
     }
-  };
+  window.claimProBonus = window.claimProDailyBonus;
+  window.loadProPageConfig = loadProPageConfig;
+  loadProPageConfig();
 
   initAuth((user) => {
     checkStatusAndAnnouncements();
     checkUpdateLogs();
     loadProGames();
+    loadProPageConfig();
     updateMusicPlayerVisibility();
     if (user && ['admin', 'owner'].includes(user.role)) {
       loadAdminData();
@@ -125,6 +128,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setInterval(checkStatusAndAnnouncements, 15000);
 });
+
+export async function loadProPageConfig() {
+  try {
+    const res = await fetch('/api/pro-config');
+    const data = await res.json();
+    if (data && (data.config || data.badge || data.title)) {
+      const cfg = data.config || data;
+      const iconEl = document.getElementById('pro-page-icon');
+      const badgeEl = document.getElementById('pro-page-badge');
+      const titleEl = document.getElementById('pro-page-title');
+      const descEl = document.getElementById('pro-page-description');
+      const btnEl = document.getElementById('pro-page-btn');
+      const gridEl = document.getElementById('pro-page-perks-grid');
+
+      if (iconEl && cfg.icon) iconEl.textContent = cfg.icon;
+      if (badgeEl && cfg.badge) badgeEl.textContent = cfg.badge;
+      if (titleEl && cfg.title) titleEl.textContent = cfg.title;
+      if (descEl && cfg.description) descEl.textContent = cfg.description;
+      if (btnEl) {
+        if (cfg.buttonText) btnEl.textContent = cfg.buttonText;
+        if (cfg.buttonLink) {
+          btnEl.onclick = () => {
+            if (cfg.buttonLink.startsWith('#')) {
+              const viewName = cfg.buttonLink.replace('#view-', '').replace('#', '');
+              document.querySelector(`.nav-btn[data-view='${viewName}']`)?.click();
+            } else {
+              window.location.href = cfg.buttonLink;
+            }
+          };
+        }
+      }
+
+      function escapeHtmlStr(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      if (gridEl && Array.isArray(cfg.perks)) {
+        gridEl.innerHTML = cfg.perks.map(perk => `
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(251,191,36,0.25); border-radius: 16px; padding: 24px; transition: transform 0.2s ease, border-color 0.2s ease; display: flex; flex-direction: column; justify-content: space-between;" onmouseenter="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(251,191,36,0.6)'" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(251,191,36,0.25)'">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <span style="font-size: 2.2rem; filter: drop-shadow(0 0 8px rgba(251,191,36,0.3));">${escapeHtmlStr(perk.icon || '⚡')}</span>
+                <span style="font-size: 0.7rem; font-weight: 800; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4); color: #fbbf24; padding: 3px 10px; border-radius: 99px; text-transform: uppercase;">${escapeHtmlStr(perk.badge || 'PRO PERK')}</span>
+              </div>
+              <h3 style="color: #f8fafc; font-size: 1.15rem; font-weight: 800; margin: 0 0 8px 0;">${escapeHtmlStr(perk.title || '')}</h3>
+              <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.5; margin: 0;">${escapeHtmlStr(perk.description || '')}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadProPageConfig error:', err);
+  }
+}
 
 // Visitor Counter
 async function initVisitorCounter() {
@@ -807,7 +871,10 @@ window.switchView = function(targetView) {
   if (targetView === 'chat' && typeof window.refreshChatViewOnNavigate === 'function') {
     window.refreshChatViewOnNavigate();
   }
-  if (targetView === 'pro') loadProGames();
+  if (targetView === 'pro') {
+    loadProGames();
+    loadProPageConfig();
+  }
   if (targetView === 'apps') {
     import('./apps.js').then(m => m.loadApps?.());
   }
