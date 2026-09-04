@@ -112,6 +112,8 @@ const db = {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS last_pro_bonus_date TIMESTAMP;
+
         CREATE TABLE IF NOT EXISTS user_profiles (
           id SERIAL PRIMARY KEY,
           user_id INT,
@@ -4359,7 +4361,7 @@ Respond ONLY with valid JSON matching this exact schema:
 
   async claimDailyStreak(userId) {
     try {
-      const userRes = await pool.query('SELECT streak_count, last_streak_date, coins, xp FROM users WHERE id = $1', [userId]);
+      const userRes = await pool.query('SELECT role, streak_count, last_streak_date, coins, xp FROM users WHERE id = $1', [userId]);
       if (!userRes.rows.length) return { error: 'User not found.' };
 
       const user = userRes.rows[0];
@@ -4382,8 +4384,12 @@ Respond ONLY with valid JSON matching this exact schema:
 
       const rewardsMap = [50, 75, 100, 150, 200, 300, 500];
       const dayIndex = Math.min(nextStreak - 1, 6);
-      const rewardCoins = rewardsMap[dayIndex];
-      const rewardXp = nextStreak % 7 === 0 ? 500 : 50;
+
+      const isProTier = ['pro', 'vip', 'premium_vip', 'elite_patron', 'owner', 'admin'].includes((user.role || '').toLowerCase());
+      const multiplier = isProTier ? 2 : 1;
+
+      const rewardCoins = rewardsMap[dayIndex] * multiplier;
+      const rewardXp = (nextStreak % 7 === 0 ? 500 : 50) * multiplier;
 
       await pool.query(`
         UPDATE users 
@@ -4398,11 +4404,53 @@ Respond ONLY with valid JSON matching this exact schema:
         streak: nextStreak,
         rewardCoins,
         rewardXp,
-        message: `🔥 Day ${nextStreak} Streak Claimed! +${rewardCoins} Coins & +${rewardXp} XP!`
+        isProBonus: isProTier,
+        message: `🔥 Day ${nextStreak} Streak Claimed! +${rewardCoins} Coins & +${rewardXp} XP! ${isProTier ? '⚡ (2x PRO Multiplier Active!)' : ''}`
       };
     } catch (e) {
       console.error('claimDailyStreak error:', e.message);
       return { error: 'Failed to claim streak reward.' };
+    }
+  },
+
+  async claimProBonus(userId) {
+    try {
+      const userRes = await pool.query('SELECT role, last_pro_bonus_date FROM users WHERE id = $1', [userId]);
+      if (!userRes.rows.length) return { error: 'User not found.' };
+      const user = userRes.rows[0];
+
+      const isProTier = ['pro', 'vip', 'premium_vip', 'elite_patron', 'owner', 'admin'].includes((user.role || '').toLowerCase());
+      if (!isProTier) {
+        return { error: 'Nitro PRO rank required to claim daily PRO bonus drops!' };
+      }
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const lastBonusStr = user.last_pro_bonus_date ? new Date(user.last_pro_bonus_date).toISOString().split('T')[0] : null;
+
+      if (lastBonusStr === todayStr) {
+        return { error: 'Already claimed today\'s +250 Coins PRO bonus drop! Check back tomorrow.' };
+      }
+
+      const bonusCoins = 250;
+      const bonusXp = 200;
+
+      await pool.query(`
+        UPDATE users
+        SET last_pro_bonus_date = CURRENT_DATE, coins = COALESCE(coins, 0) + $1, xp = COALESCE(xp, 0) + $2
+        WHERE id = $3
+      `, [bonusCoins, bonusXp, userId]);
+
+      clearUserCache(userId);
+
+      return {
+        success: true,
+        bonusCoins,
+        bonusXp,
+        message: `⚡ PRO Daily Bonus Claimed! +${bonusCoins} Coins & +${bonusXp} XP!`
+      };
+    } catch (e) {
+      console.error('claimProBonus error:', e.message);
+      return { error: 'Failed to claim PRO bonus drop.' };
     }
   },
 

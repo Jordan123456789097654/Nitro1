@@ -11,6 +11,7 @@ import SvgAccessGate from "./components/SvgAccessGate";
 import { isSvgShell } from "./lib/siteOrigin";
 
 import { PomodoroTimer } from "./components/PomodoroTimer";
+import { BossKeyOverlay } from "./components/BossKeyOverlay";
 
 const queryClient = new QueryClient();
 const Router = isSvgShell() ? HashRouter : BrowserRouter;
@@ -26,6 +27,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <PomodoroTimer />
+      <BossKeyOverlay />
       <Router>
         <SvgAccessGate>
           <Routes>

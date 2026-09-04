@@ -127,6 +127,20 @@ router.post('/daily-streak', async (req, res) => {
   }
 });
 
+// POST /api/me/claim-pro-bonus - Claim Daily PRO Bonus Drop
+router.post('/claim-pro-bonus', async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+
+  try {
+    const result = await db.claimProBonus(user.id);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to claim PRO bonus.' });
+  }
+});
+
 // POST /api/me/gift-coins - Gift coins to a classmate
 router.post('/gift-coins', async (req, res) => {
   const user = await getAuthUser(req);

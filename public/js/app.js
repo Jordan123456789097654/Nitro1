@@ -73,6 +73,30 @@ document.addEventListener('DOMContentLoaded', () => {
   initSuggestAndBugModals();
   initWeatherClock();
 
+  window.openProUpgradeModal = () => {
+    const modal = document.getElementById('pro-upgrade-modal');
+    if (modal) modal.style.display = 'flex';
+  };
+
+  window.claimProDailyBonus = async () => {
+    const user = getCurrentUser();
+    if (!user) return alert('Please log in to claim your daily PRO bonus.');
+
+    try {
+      const authFetchModule = await import('./auth.js');
+      const res = await authFetchModule.authFetch('/api/me/claim-pro-bonus', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(data.message);
+        if (authFetchModule.checkSession) authFetchModule.checkSession();
+      } else {
+        alert(data.error || 'Failed to claim PRO bonus drop.');
+      }
+    } catch (e) {
+      alert('Error claiming PRO bonus drop.');
+    }
+  };
+
   initAuth((user) => {
     checkStatusAndAnnouncements();
     checkUpdateLogs();
