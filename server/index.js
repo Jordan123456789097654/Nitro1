@@ -129,17 +129,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Render Decommission Notice Middleware (Triggers for ALL visitors regardless of account / auth state)
+// Render Decommission Notice Middleware disabled per user request
 app.use((req, res, next) => {
-  const host = (req.headers.host || '').toLowerCase();
-  const isRenderHost = host.includes('onrender.com') || host.includes('render.com');
-  const isMigratedEnv = process.env.RENDER_MIGRATED === 'true' || process.env.IS_RENDER_MIGRATED === 'true' || process.env.MIGRATED === 'true';
-
-  const isNoticePath = req.path === '/migration-notice' || req.path === '/migrated' || req.path === '/render-notice';
-
-  if (isNoticePath || (isMigratedEnv && isRenderHost && !req.path.startsWith('/api'))) {
-    return res.sendFile(path.join(__dirname, '../public/render-notice.html'));
-  }
   next();
 });
 
