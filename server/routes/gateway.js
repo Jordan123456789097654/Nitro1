@@ -804,7 +804,7 @@ router.all('/', async (req, res) => {
         res.status(response.status);
       }
 
-      const restrictedStream = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
+      const restrictedStream = ['x-frame-options', 'content-security-policy', 'cross-origin-opener-policy', 'content-encoding', 'content-length', 'transfer-encoding', 'connection', 'keep-alive', 'set-cookie', 'access-control-allow-origin', 'access-control-allow-credentials', 'access-control-allow-headers', 'access-control-allow-methods'];
 
       response.headers.forEach((v, k) => {
         const l = k.toLowerCase();

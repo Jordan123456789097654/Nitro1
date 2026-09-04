@@ -715,6 +715,23 @@ function setupAnnouncementForm() {
   });
 }
 
+function setupAnnouncementDisableControls() {
+  const disableBtn = document.getElementById('admin-disable-ann-btn');
+  if (disableBtn) {
+    disableBtn.addEventListener('click', async () => {
+      try {
+        const res = await authFetch('/api/admin/announcements/disable', { method: 'POST' });
+        if (res.ok) {
+          alert('🚫 All site announcements disabled and cleared.');
+          checkStatusAndAnnouncements();
+        }
+      } catch (e) {
+        alert('Error disabling announcements.');
+      }
+    });
+  }
+}
+
 window.triggerGlobalEvent = async function(eventType, defaultTitle, defaultMsg, defaultSound) {
   const title = prompt('Enter Global Event Title:', defaultTitle);
   if (!title || !title.trim()) return;
