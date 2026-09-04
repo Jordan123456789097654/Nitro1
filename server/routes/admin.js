@@ -909,6 +909,86 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
   }
 });
 
+// HWID Device Rules (Bans & Whitelists)
+router.get('/hwid-rules', requireAdmin, async (req, res) => {
+  try {
+    const rules = await db.getHwidRules();
+    res.json({ success: true, rules });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch HWID rules.' });
+  }
+});
+
+router.post('/hwid-rules', requireAdmin, async (req, res) => {
+  const { hwid, rule_type, reason } = req.body;
+  const admin = req.adminUser.username;
+
+  if (!hwid) return res.status(400).json({ error: 'HWID is required.' });
+
+  try {
+    const result = await db.addHwidRule(hwid, rule_type || 'ban', reason || 'Admin restriction', admin);
+    if (result.error) return res.status(400).json({ error: result.error });
+
+    await db.createModerationLog('HWID_RULE_ADD', admin, hwid, `${(rule_type || 'ban').toUpperCase()}: ${reason || 'Standard Rule'}`);
+
+    sendDiscordLog({
+      category: 'moderation',
+      action: 'HWID_RULE_ADD',
+      admin: admin,
+      target: hwid,
+      details: `Rule: ${(rule_type || 'ban').toUpperCase()} — ${reason || 'No reason provided'}`
+    });
+
+    res.status(201).json({ success: true, rule: result.rule });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to save HWID rule.' });
+  }
+});
+
+router.delete('/hwid-rules/:id', requireAdmin, async (req, res) => {
+  const admin = req.adminUser.username;
+  try {
+    await db.deleteHwidRule(req.params.id);
+    await db.createModerationLog('HWID_RULE_DELETE', admin, `ID #${req.params.id}`, 'Removed HWID rule');
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to delete HWID rule.' });
+  }
+});
+
+// Batch User Role Operations
+router.post('/users/batch-role', requireAdmin, async (req, res) => {
+  const { userIds, role } = req.body;
+  const admin = req.adminUser.username;
+
+  if (!Array.isArray(userIds) || !userIds.length) {
+    return res.status(400).json({ error: 'Select at least one user.' });
+  }
+  if (!role || !ALLOWED_ROLES.includes(role.toLowerCase().trim())) {
+    return res.status(400).json({ error: 'Invalid role selection.' });
+  }
+
+  const cleanRole = role.toLowerCase().trim();
+  const isOwnerActor = isOwner(req.adminUser);
+  const actorWeight = isOwnerActor ? 99 : (ROLE_WEIGHTS[req.adminUser.role] || 1);
+  const targetWeight = ROLE_WEIGHTS[cleanRole] || 1;
+
+  if (!isOwnerActor && targetWeight > actorWeight) {
+    return res.status(403).json({ error: 'You cannot promote users to a role higher than your own.' });
+  }
+
+  try {
+    const result = await db.batchUpdateUserRoles(userIds, cleanRole);
+    if (result.error) return res.status(400).json({ error: result.error });
+
+    await db.createModerationLog('BATCH_UPDATE_ROLE', admin, `${userIds.length} users`, `Batch set role to: ${cleanRole.toUpperCase()}`);
+
+    res.json({ success: true, message: `Successfully updated ${result.count} users to ${cleanRole.toUpperCase()}!` });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to process batch role update.' });
+  }
+});
+
 // Admin Configure User Profile (on behalf of user)
 router.post('/users/:id/profile', requireOwner, async (req, res) => {
   const targetId = req.params.id;

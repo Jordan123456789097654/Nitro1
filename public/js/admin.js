@@ -23,6 +23,11 @@ export function initAdmin() {
   window.fetchUsers = fetchUsers;
   window.adminFetchConnections = fetchLiveConnections;
   window.fetchLiveConnections = fetchLiveConnections;
+  window.adminFetchHwidBans = adminFetchHwidBans;
+  window.promptIssueHwidBan = promptIssueHwidBan;
+  window.adminDeleteHwidRule = adminDeleteHwidRule;
+  window.updateUserSelectionCount = updateUserSelectionCount;
+  window.applyBatchRole = applyBatchRole;
   setupAdminTabs();
   setupAdminActions();
   setupMaintenanceToggle();
@@ -44,6 +49,116 @@ export function initAdmin() {
   setupEditFilterModal();
   setupAppealsReviewStudio();
   connectAdminSocket();
+}
+
+export async function adminFetchHwidBans() {
+  const tbody = document.getElementById('admin-hwid-bans-tbody');
+  if (!tbody) return;
+
+  try {
+    const res = await authFetch('/api/admin/hwid-rules');
+    if (!res.ok) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Failed to load HWID rules.</td></tr>';
+      return;
+    }
+    const data = await res.json();
+    const rules = data.rules || [];
+
+    if (!rules.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No active hardware fingerprint bans.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rules.map(r => `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px;">#${r.id}</td>
+        <td style="padding: 10px;"><code style="color:#f87171; background:rgba(0,0,0,0.4); padding:3px 6px; border-radius:4px;">${r.hwid}</code></td>
+        <td style="padding: 10px;">${r.created_by || 'Admin'}</td>
+        <td style="padding: 10px;"><span style="color:#cbd5e1;">${r.reason || 'None'}</span></td>
+        <td style="padding: 10px;"><span style="color:#38bdf8;">${r.rule_type ? r.rule_type.toUpperCase() : 'BAN'}</span></td>
+        <td style="padding: 10px; color:#94a3b8; font-size:0.8rem;">${new Date(r.created_at).toLocaleDateString()}</td>
+        <td style="padding: 10px; text-align: right;">
+          <button class="btn-small danger" onclick="window.adminDeleteHwidRule(${r.id})">Remove Rule</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;">Error loading HWID rules.</td></tr>';
+  }
+}
+
+export async function promptIssueHwidBan() {
+  const hwid = prompt('Enter Device Hardware Fingerprint (HWID):');
+  if (!hwid || !hwid.trim()) return;
+  const reason = prompt('Enter Ban Reason:', 'Violation of terms / multi-account ban');
+
+  try {
+    const res = await authFetch('/api/admin/hwid-rules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hwid: hwid.trim(), rule_type: 'ban', reason: reason || 'Admin ban' })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('💻 Hardware Ban issued successfully!');
+      adminFetchHwidBans();
+    } else {
+      alert(data.error || 'Failed to issue hardware ban.');
+    }
+  } catch (e) {
+    alert('Error issuing hardware ban.');
+  }
+}
+
+export async function adminDeleteHwidRule(id) {
+  if (!confirm(`Delete HWID Rule #${id}?`)) return;
+
+  try {
+    const res = await authFetch(`/api/admin/hwid-rules/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      alert('✅ HWID rule removed.');
+      adminFetchHwidBans();
+    } else {
+      alert('Failed to delete HWID rule.');
+    }
+  } catch (e) {
+    alert('Error deleting HWID rule.');
+  }
+}
+
+export function updateUserSelectionCount() {
+  const checkboxes = document.querySelectorAll('.admin-user-checkbox:checked');
+  const countSpan = document.getElementById('admin-user-selected-count');
+  if (countSpan) countSpan.textContent = checkboxes.length;
+}
+
+export async function applyBatchRole() {
+  const checkboxes = document.querySelectorAll('.admin-user-checkbox:checked');
+  const userIds = Array.from(checkboxes).map(cb => parseInt(cb.dataset.userid, 10));
+  const roleSelect = document.getElementById('admin-batch-role-select');
+  const role = roleSelect ? roleSelect.value : '';
+
+  if (!userIds.length) return alert('Select at least one user using the checkboxes.');
+  if (!role) return alert('Select a role to apply from the batch dropdown.');
+
+  if (!confirm(`Apply role "${role.toUpperCase()}" to ${userIds.length} selected user(s)?`)) return;
+
+  try {
+    const res = await authFetch('/api/admin/users/batch-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userIds, role })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      if (window.fetchUsers) window.fetchUsers();
+    } else {
+      alert(data.error || 'Failed to process batch role update.');
+    }
+  } catch (e) {
+    alert('Error applying batch role.');
+  }
 }
 
 
@@ -785,6 +900,9 @@ export function renderAdminUsersList() {
 
     return `
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s ease;">
+        <td style="padding: 12px 14px; width: 40px;">
+          <input type="checkbox" class="admin-user-checkbox" data-userid="${u.id}" onchange="window.updateUserSelectionCount()" style="cursor: pointer;">
+        </td>
         <td style="padding: 12px 14px;">
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="background:rgba(255,255,255,0.1); color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:800;">#${u.id}</span>

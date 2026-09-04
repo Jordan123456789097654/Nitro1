@@ -254,6 +254,15 @@ const db = {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS hwid_rules (
+          id SERIAL PRIMARY KEY,
+          hwid VARCHAR(255) UNIQUE NOT NULL,
+          rule_type VARCHAR(50) DEFAULT 'ban',
+          reason TEXT DEFAULT '',
+          created_by VARCHAR(100) DEFAULT 'admin',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS game_suggestions (
           id SERIAL PRIMARY KEY,
           user_id INT,
@@ -4432,6 +4441,56 @@ Respond ONLY with valid JSON matching this exact schema:
     } catch (e) {
       console.error('giftCoins error:', e.message);
       return { error: 'Failed to complete coin transfer.' };
+    }
+  },
+
+  async getHwidRules() {
+    try {
+      const res = await pool.query('SELECT * FROM hwid_rules ORDER BY created_at DESC');
+      return res.rows;
+    } catch (e) {
+      console.error('getHwidRules error:', e.message);
+      return [];
+    }
+  },
+
+  async addHwidRule(hwid, ruleType = 'ban', reason = '', createdBy = 'admin') {
+    try {
+      const cleanHwid = (hwid || '').trim();
+      if (!cleanHwid) return { error: 'HWID is required.' };
+      const res = await pool.query(`
+        INSERT INTO hwid_rules (hwid, rule_type, reason, created_by)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (hwid) DO UPDATE SET rule_type = $2, reason = $3, created_by = $4, created_at = CURRENT_TIMESTAMP
+        RETURNING *
+      `, [cleanHwid, ruleType, reason, createdBy]);
+      return { success: true, rule: res.rows[0] };
+    } catch (e) {
+      console.error('addHwidRule error:', e.message);
+      return { error: 'Failed to add HWID rule.' };
+    }
+  },
+
+  async deleteHwidRule(id) {
+    try {
+      await pool.query('DELETE FROM hwid_rules WHERE id = $1', [id]);
+      return { success: true };
+    } catch (e) {
+      console.error('deleteHwidRule error:', e.message);
+      return { error: 'Failed to delete HWID rule.' };
+    }
+  },
+
+  async batchUpdateUserRoles(userIds, newRole) {
+    try {
+      if (!Array.isArray(userIds) || !userIds.length) return { error: 'No user IDs provided.' };
+      const cleanRole = (newRole || '').trim().toLowerCase();
+      await pool.query('UPDATE users SET role = $1 WHERE id = ANY($2::int[])', [cleanRole, userIds]);
+      userIds.forEach(id => clearUserCache(id));
+      return { success: true, count: userIds.length };
+    } catch (e) {
+      console.error('batchUpdateUserRoles error:', e.message);
+      return { error: 'Failed to update batch roles.' };
     }
   }
 };

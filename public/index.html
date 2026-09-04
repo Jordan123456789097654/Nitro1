@@ -2711,10 +2711,33 @@
             </form>
           </div>
 
+          <!-- Batch Role Operations Toolbar -->
+          <div id="admin-batch-toolbar" style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 10px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <label style="font-size: 0.82rem; color: #38bdf8; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="admin-user-select-all" onclick="document.querySelectorAll('.admin-user-checkbox').forEach(cb => cb.checked = this.checked); window.updateUserSelectionCount()" style="cursor: pointer;">
+                Select All (<span id="admin-user-selected-count">0</span> selected)
+              </label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <select id="admin-batch-role-select" style="padding: 6px 10px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.8rem;">
+                <option value="">-- Batch Set Role --</option>
+                <option value="member">Member</option>
+                <option value="early_member">Early Supporter</option>
+                <option value="pro">PRO</option>
+                <option value="vip">VIP</option>
+                <option value="moderator">Moderator</option>
+                <option value="admin">Administrator</option>
+              </select>
+              <button class="btn-small primary" onclick="window.applyBatchRole()" style="font-weight: 800; padding: 6px 14px;">⚡ Apply Batch Role</button>
+            </div>
+          </div>
+
           <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 12px;">
             <table class="admin-table" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background: rgba(255,255,255,0.05); text-align: left; border-bottom: 1px solid var(--card-border);">
+                  <th style="padding: 12px 14px; width: 40px;"><input type="checkbox" id="admin-user-select-all-hdr" onclick="document.querySelectorAll('.admin-user-checkbox').forEach(cb => cb.checked = this.checked); window.updateUserSelectionCount()" style="cursor: pointer;"></th>
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">User & Account</th>
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Role & Tier</th>
                   <th style="padding: 12px 14px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase;">Status / Moderation</th>
