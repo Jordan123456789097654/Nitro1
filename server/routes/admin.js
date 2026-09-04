@@ -865,10 +865,11 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
   }
 
   const cleanRole = role.toLowerCase().trim();
-  const actorWeight = ROLE_WEIGHTS[req.adminUser.role] || 1;
+  const isOwnerActor = isOwner(req.adminUser);
+  const actorWeight = isOwnerActor ? 99 : (ROLE_WEIGHTS[req.adminUser.role] || 1);
   const targetWeight = ROLE_WEIGHTS[cleanRole] || 1;
 
-  if (targetWeight > actorWeight) {
+  if (!isOwnerActor && targetWeight > actorWeight) {
     return res.status(403).json({ error: 'Access denied. You cannot promote any user to a role higher than your own.' });
   }
 
@@ -877,8 +878,8 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
     if (!targetUser) return res.status(404).json({ error: 'User not found.' });
 
     const currentWeight = ROLE_WEIGHTS[targetUser.role] || 1;
-    // Allow modifying equal/higher roles ONLY if modifying their own account (e.g. self-demotion)
-    if (currentWeight >= actorWeight && targetUser.id !== req.adminUser.id) {
+    // Allow modifying equal/higher roles ONLY if modifying their own account (e.g. self-demotion) or if Owner
+    if (!isOwnerActor && currentWeight >= actorWeight && targetUser.id !== req.adminUser.id) {
       return res.status(403).json({ error: 'Access denied. You cannot modify a user with equal or higher privileges.' });
     }
 

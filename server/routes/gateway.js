@@ -589,7 +589,9 @@ router.all('/', async (req, res) => {
     user = { id: null, username: 'Guest', role: 'member', is_banned: false };
   }
 
-  const gatewayPrefix = `${req.baseUrl || '/api/gateway'}?url=`;
+  const host = req.get('x-forwarded-host') || req.get('host') || 'nitromath.org';
+  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const gatewayPrefix = `${protocol}://${host}${req.baseUrl || '/api/gateway'}?url=`;
   const tokenParam = req.query.token ? `&token=${encodeURIComponent(req.query.token)}` : '';
   const engineParam = engineKey ? `&engine=${encodeURIComponent(engineKey)}` : '';
   const authSuffix = `${tokenParam}${engineParam}`;
