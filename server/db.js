@@ -16,9 +16,18 @@ const pool = new Pool({
 });
 
 const userCache = new Map();
+const MAX_USER_CACHE_SIZE = 100;
 const settingsCache = new Map();
 const ipBanCache = new Map();
 const hwidBanCache = new Map();
+
+function safeUserCacheSet(key, value) {
+  if (userCache.size >= MAX_USER_CACHE_SIZE) {
+    const firstKey = userCache.keys().next().value;
+    if (firstKey) userCache.delete(firstKey);
+  }
+  userCache.set(key, value);
+}
 
 function clearUserCache(userId, username) {
   if (userId) {
@@ -33,7 +42,7 @@ function clearUserCache(userId, username) {
   }
 }
 
-// Periodically evict expired userCache entries (TTL = 3s, sweep every 60s)
+// Periodically evict expired userCache entries (TTL = 3s, sweep every 15s)
 setInterval(() => {
   const now = Date.now();
   for (const [key, cached] of userCache.entries()) {
@@ -41,7 +50,7 @@ setInterval(() => {
       userCache.delete(key);
     }
   }
-}, 60 * 1000).unref();
+}, 15 * 1000).unref();
 
 // Database Auto-Cleaner Sweep (runs every 6 hours to prevent Supabase storage inflation)
 setInterval(async () => {
@@ -1223,8 +1232,8 @@ const db = {
       const res = await pool.query('SELECT * FROM users WHERE LOWER(username) = $1', [clean]);
       if (res.rows && res.rows[0]) {
         const user = res.rows[0];
-        userCache.set(`uname_${clean}`, { user, expires: now + 5000 });
-        userCache.set(user.id, { user, expires: now + 5000 });
+        safeUserCacheSet(`uname_${clean}`, { user, expires: now + 5000 });
+        safeUserCacheSet(user.id, { user, expires: now + 5000 });
         return user;
       }
     } catch (e) {
@@ -1245,9 +1254,9 @@ const db = {
       const res = await pool.query('SELECT * FROM users WHERE id = $1', [numId]);
       if (res.rows && res.rows[0]) {
         const user = res.rows[0];
-        userCache.set(numId, { user, expires: now + 5000 });
+        safeUserCacheSet(numId, { user, expires: now + 5000 });
         if (user.username) {
-          userCache.set(`uname_${user.username.toLowerCase()}`, { user, expires: now + 5000 });
+          safeUserCacheSet(`uname_${user.username.toLowerCase()}`, { user, expires: now + 5000 });
         }
         return user;
       }

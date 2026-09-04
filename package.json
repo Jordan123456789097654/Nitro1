@@ -4,7 +4,7 @@
   "description": "NITRO (BETA) Full-Stack Web Games Hub with Supabase, Admin Panel, PRO Tier, Unfiltered Proxy, JWT Tokens, Announcements, and about:blank Cloak.",
   "main": "server/index.js",
   "scripts": {
-    "start": "node --max-old-space-size=256 --expose-gc server/index.js",
+    "start": "NODE_OPTIONS='--max-old-space-size=256 --expose-gc' node --max-old-space-size=256 --expose-gc server/index.js",
     "dev": "node --watch server/index.js",
     "build": "vite build && node scripts/copy-build-assets.js",
     "build:viteOnly": "vite build",

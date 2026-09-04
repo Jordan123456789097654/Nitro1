@@ -67,6 +67,10 @@ function getCookiesForRequest(sessionKey, targetDomain) {
 function saveCookiesFromResponse(sessionKey, targetDomain, setCookieHeader) {
   if (!setCookieHeader) return;
   if (!COOKIE_JAR.has(sessionKey)) {
+    if (COOKIE_JAR.size >= 100) {
+      const firstKey = COOKIE_JAR.keys().next().value;
+      if (firstKey) COOKIE_JAR.delete(firstKey);
+    }
     COOKIE_JAR.set(sessionKey, { cookies: new Map(), lastAccessed: Date.now() });
   }
   const session = COOKIE_JAR.get(sessionKey);
@@ -881,12 +885,26 @@ router.all('/', async (req, res) => {
     res.setHeader('Access-Control-Allow-Headers', '*');
 
     if (finalContentType.includes('text/html')) {
+      if (buffer.length > 5 * 1024 * 1024) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        const resBuf = res.send(buffer);
+        buffer = null;
+        return resBuf;
+      }
       const htmlText = buffer.toString('utf-8');
+      buffer = null;
       const transformed = transformHtmlResponse(htmlText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.send(transformed);
     } else {
+      if (buffer.length > 5 * 1024 * 1024) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+        const resBuf = res.send(buffer);
+        buffer = null;
+        return resBuf;
+      }
       const cssText = buffer.toString('utf-8');
+      buffer = null;
       const transformed = rewriteCssUrls(cssText, finalUrl, gatewayPrefix, authSuffix);
       res.setHeader('Content-Type', 'text/css; charset=utf-8');
       return res.send(transformed);

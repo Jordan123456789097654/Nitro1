@@ -1,3 +1,9 @@
+const v8 = require('v8');
+try {
+  v8.setFlagsFromString('--max_old_space_size=256');
+  v8.setFlagsFromString('--expose_gc');
+} catch (e) {}
+
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
@@ -32,22 +38,22 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('🛡️ [Safety] Unhandled Rejection caught at:', promise, 'reason:', reason);
 });
 
-// Memory Optimization & Emergency Relief Valve for Render 512MB RAM Limit (Prevents Exit 137 OOM)
+// Hardened Memory Optimization & Active Relief Valve for Render 512MB RAM Limit (Prevents Exit 137 OOM)
 setInterval(() => {
   const mem = process.memoryUsage();
   const heapUsedMb = Math.round(mem.heapUsed / 1024 / 1024);
   const rssMb = Math.round(mem.rss / 1024 / 1024);
-  if (heapUsedMb > 140 || rssMb > 210) {
+  if (heapUsedMb > 130 || rssMb > 190) {
     console.log(`🧹 [Memory Monitor] RSS: ${rssMb}MB | Heap: ${heapUsedMb}MB — Triggering Emergency Relief Valve.`);
     try {
       if (db.clearUserCache) db.clearUserCache();
       if (gatewayRoutes.clearCookieJar) gatewayRoutes.clearCookieJar();
     } catch (e) {}
     if (global.gc) {
-      global.gc();
+      try { global.gc(); } catch(e){}
     }
   }
-}, 10000).unref();
+}, 4000).unref();
 
 const app = express();
 app.use(compression());
