@@ -635,3 +635,18 @@
   padding: 8px 12px;
   margin-bottom: 6px;
 }
+
+/* Modern Performance & Rendering Deferral Rules */
+.shop-item-card, .quest-card, .game-review-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 220px;
+}
+
+/* Inactive SPA Page Views - Defer Layout & Rendering Calculations */
+.page-view:not(.active) {
+  content-visibility: hidden;
+}
+
+.page-view.active {
+  content-visibility: visible;
+}

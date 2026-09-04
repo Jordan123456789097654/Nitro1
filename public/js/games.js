@@ -309,7 +309,7 @@ export function renderGames(games, targetGridId) {
       return `
         <div class="game-card" data-slug="${itemSlug}" data-game-id="${game.id}">
           <div class="game-thumb-wrap">
-            <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
+            <img class="game-thumb-img" src="${game.thumbnail_url}" alt="${game.title}" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60'">
             ${game.is_vip ? `<span class="game-badge-vip" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight:800;">👑 PRO</span>` : ''}
             <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game-id="${game.id}" title="Toggle Favorite">★</button>
           </div>

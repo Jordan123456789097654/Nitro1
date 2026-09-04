@@ -822,6 +822,10 @@ router.all('/', async (req, res) => {
       res.setHeader('Access-Control-Allow-Headers', '*');
       res.setHeader('Content-Type', finalContentType);
 
+      if (finalContentType.includes('image/') || finalContentType.includes('font/') || finalContentType.includes('audio/') || finalContentType.includes('video/') || lowerPath.endsWith('.png') || lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg') || lowerPath.endsWith('.webp') || lowerPath.endsWith('.wasm') || lowerPath.endsWith('.woff2') || lowerPath.endsWith('.js') || lowerPath.endsWith('.css')) {
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+      }
+
       if (response.body && typeof response.body.pipe === 'function') {
         req.on('close', () => {
           if (response.body && typeof response.body.destroy === 'function') {
