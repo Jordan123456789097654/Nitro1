@@ -1380,11 +1380,17 @@ function appendRoomMessage(msg) {
   enforceChatDomLimit();
 }
 
+let isChatScrollScheduled = false;
 function scrollChatToBottom() {
-  const container = document.getElementById('chat-messages');
-  if (container) {
-    container.scrollTop = container.scrollHeight;
-  }
+  if (isChatScrollScheduled) return;
+  isChatScrollScheduled = true;
+  requestAnimationFrame(() => {
+    const container = document.getElementById('chat-messages');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+    isChatScrollScheduled = false;
+  });
 }
 
 function escapeHtml(text) {

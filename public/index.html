@@ -28,7 +28,20 @@
   <link rel="stylesheet" href="/css/browser.css">
   <link rel="stylesheet" href="/css/upgrades.css">
   
-  <style>
+    /* Performance & Rendering Acceleration Optimizations */
+    .game-card, .app-card {
+      content-visibility: auto;
+      contain-intrinsic-size: 0 280px;
+    }
+    .chat-msg-item, .chat-message, .game-review-item {
+      content-visibility: auto;
+      contain-intrinsic-size: 0 56px;
+    }
+    .modal-content, .drawer, #soundboard-modal, #browser-modal {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+  </style>
     /* Premium Login & Signup Card Theme */
     .auth-gate-card {
       background: radial-gradient(120% 120% at 50% 0%, rgba(20, 24, 45, 0.9) 0%, rgba(10, 12, 22, 0.98) 100%) !important;
@@ -1346,6 +1359,10 @@
             <span style="font-size: 1.1rem;">🎵</span>
             <span class="nav-btn-text" style="color: #fbbf24;">Music</span>
           </button>
+          <button class="nav-btn" id="btn-fps-hud-toggle" onclick="window.toggleFpsMonitor()" title="Toggle Real-Time FPS & Memory HUD" style="color: #10b981;">
+            <span style="font-size: 1.1rem;">📊</span>
+            <span class="nav-btn-text" style="color: #10b981;">FPS</span>
+          </button>
         </div>
 
         <div class="nav-cluster-divider"></div>
@@ -2145,6 +2162,17 @@
               <span>⚡ PERFORMANCE & GRAPHICS OPTIMIZATION</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 16px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                <div>
+                  <strong style="display: block; font-size: 0.95rem; color: #10b981;">📊 Real-Time FPS & Memory Monitor HUD</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Displays real-time frame rates, frame times, and JS heap RAM usage in the top right corner.</span>
+                </div>
+                <div class="switch">
+                  <input type="checkbox" id="fps-monitor-checkbox" onchange="window.toggleFpsMonitor(this.checked)">
+                  <span class="slider"></span>
+                </div>
+              </label>
+
               <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
                 <div>
                   <strong style="display: block; font-size: 0.95rem; color: #fbbf24;">🥔 Potato Graphics Mode (Ultra Low-End PC / Chromebook)</strong>

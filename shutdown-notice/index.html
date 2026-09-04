@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Offline & Maintenance | Nitro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #07090e;
+      --card-bg: rgba(15, 20, 32, 0.85);
+      --card-border: rgba(56, 189, 248, 0.2);
+      --accent-color: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --warning-color: #fbbf24;
+      --danger-color: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+      padding: 24px;
+    }
+
+    /* Ambient Background Glow */
+    .bg-glow-1 {
+      position: absolute;
+      top: -15%;
+      left: 20%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow-2 {
+      position: absolute;
+      bottom: -15%;
+      right: 20%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Main Container Card */
+    .maintenance-card {
+      position: relative;
+      z-index: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 640px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      animation: fadeInCard 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Status Badge Header */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: var(--warning-color);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--warning-color);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--warning-color);
+      animation: pulseDot 1.8s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    /* Main Title */
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Subtitle & Reason Text */
+    .notice-text {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Configurable Reason Card */
+    .reason-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .reason-box-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .reason-box-header strong {
+      font-size: 0.92rem;
+      color: #f1f5f9;
+    }
+
+    .reason-box-desc {
+      font-size: 0.88rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Countdown Grid */
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .countdown-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 6px;
+    }
+
+    .countdown-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-color);
+      line-height: 1;
+    }
+
+    .countdown-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    /* Action Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 99px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #3b82f6);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.5);
+      filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Footer text */
+    .footer-note {
+      margin-top: 28px;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    @media (max-width: 480px) {
+      .maintenance-card { padding: 32px 20px; }
+      h1 { font-size: 1.9rem; }
+      .countdown-number { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <main class="maintenance-card">
+    <!-- Status Badge -->
+    <div class="status-badge" id="status-badge">
+      <span class="pulse-dot"></span>
+      <span id="status-badge-text">Scheduled Server Maintenance</span>
+    </div>
+
+    <!-- Main Headline -->
+    <h1 id="headline">Website Temporarily Offline</h1>
+
+    <!-- Subtitle -->
+    <p class="notice-text" id="subtext">
+      We are currently conducting essential server upgrades and platform maintenance to deliver faster speeds and improved stability.
+    </p>
+
+    <!-- Shutdown / Maintenance Reason Card -->
+    <div class="reason-box">
+      <div class="reason-box-header">
+        <span>📋</span>
+        <strong id="reason-title">Maintenance Reason & Scope</strong>
+      </div>
+      <p class="reason-box-desc" id="reason-desc">
+        Database optimization, security enhancements, and server infrastructure updates are in progress. All user profiles, coins, XP, and game saves are safe and fully preserved.
+      </p>
+    </div>
+
+    <!-- Estimated Time / Countdown Timer -->
+    <div class="countdown-grid" id="countdown-wrapper">
+      <div class="countdown-item">
+        <div class="countdown-number" id="cd-hours">02</div>
+        <div class="countdown-label">Hours</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-number" id="cd-minutes">45</div>
+        <div class="countdown-label">Minutes</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-number" id="cd-seconds">00</div>
+        <div class="countdown-label">Seconds</div>
+      </div>
+      <div class="countdown-item">
+        <div class="countdown-number" id="cd-status">EST</div>
+        <div class="countdown-label">Status</div>
+      </div>
+    </div>
+
+    <!-- Action Links -->
+    <div class="btn-group">
+      <a href="https://discord.gg" target="_blank" class="btn btn-primary" id="discord-link">
+        💬 Join Discord for Live Updates
+      </a>
+      <button onclick="location.reload()" class="btn btn-secondary">
+        🔄 Refresh Page
+      </button>
+    </div>
+
+    <!-- Footer Note -->
+    <p class="footer-note" id="footer-text">
+      Nitro Platform • System Status Operational Checks
+    </p>
+  </main>
+
+  <script>
+    // Live Countdown Timer (Set target return time)
+    // Customize target date here:
+    const targetReturnTime = new Date(Date.now() + 3 * 60 * 60 * 1000).getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = targetReturnTime - now;
+
+      if (distance < 0) {
+        document.getElementById('cd-hours').textContent = '00';
+        document.getElementById('cd-minutes').textContent = '00';
+        document.getElementById('cd-seconds').textContent = '00';
+        document.getElementById('cd-status').textContent = 'LIVE';
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>

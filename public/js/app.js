@@ -129,7 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  setInterval(checkStatusAndAnnouncements, 15000);
+  setInterval(() => {
+    if (!document.hidden) {
+      checkStatusAndAnnouncements();
+    }
+  }, 15000);
 });
 
 export async function loadProPageConfig() {

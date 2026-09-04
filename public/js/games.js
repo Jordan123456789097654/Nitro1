@@ -1823,13 +1823,17 @@ export async function loadApps() {
   renderGames(filtered, 'apps-grid');
 }
 
-// Add oninput listener for Apps search input
+// Add debounced oninput listener for Apps search input
 const origSetupFilterAndSearch = setupFilterAndSearch;
 setupFilterAndSearch = function() {
   origSetupFilterAndSearch();
   const appSearchInput = document.getElementById('app-search-input');
+  let appSearchTimeout = null;
   if (appSearchInput) {
-    appSearchInput.addEventListener('input', () => loadApps());
+    appSearchInput.addEventListener('input', () => {
+      clearTimeout(appSearchTimeout);
+      appSearchTimeout = setTimeout(() => loadApps(), 250);
+    });
   }
 };
 

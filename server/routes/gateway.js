@@ -47,10 +47,13 @@ async function isSafeHost(hostname) {
   } catch (err) {
     return true;
   }
-}
+const SOUNDBOARD_ALLOWED_DOMAINS = [
+  'soundbuttonsworld.com', 'myinstants.com', 'soundbuttons.com', 'soundboard.com',
+  'cloudflareinsights.com'
+];
 
 const AD_TRACKER_PATTERNS = [
-  'doubleclick.net', 'googlesyndication.com', 'google-analytics.com',
+  'doubleclick.net', 'googlesyndication.com',
   'googletagservices.com', 'pagead2.googlesyndication.com',
   'pubads.g.doubleclick.net', 'adservice.google.com', 'amazon-adsystem.com'
 ];
@@ -101,9 +104,27 @@ router.all('/', async (req, res) => {
     return res.status(400).send('Invalid URL format.');
   }
 
-  // Restrict general search engine browsing
   const targetHostLower = urlObj.hostname.toLowerCase();
-  if (GENERAL_WEB_BROWSING_DOMAINS.some(d => targetHostLower.endsWith(d))) {
+  const isSoundboardDomain = SOUNDBOARD_ALLOWED_DOMAINS.some(d => targetHostLower.endsWith(d));
+
+  // Handle ad tracker or sub-resource search requests gracefully
+  if (isKnownAdRequest(urlObj)) {
+    const isCss = urlObj.pathname.endsWith('.css');
+    res.setHeader('Content-Type', isCss ? 'text/css' : 'application/javascript');
+    return res.status(200).send('/* nitro ad blocked */');
+  }
+
+  // Restrict general search engine browsing (unless it is a Soundboard sub-resource)
+  if (!isSoundboardDomain && GENERAL_WEB_BROWSING_DOMAINS.some(d => targetHostLower.endsWith(d))) {
+    const acceptHeader = req.headers.accept || '';
+    const isSubResource = !acceptHeader.includes('text/html') || urlObj.pathname.endsWith('.js') || urlObj.pathname.endsWith('.css') || urlObj.pathname.endsWith('.png') || urlObj.pathname.endsWith('.jpg') || urlObj.pathname.endsWith('.json');
+    
+    if (isSubResource) {
+      const isCss = urlObj.pathname.endsWith('.css');
+      res.setHeader('Content-Type', isCss ? 'text/css' : 'application/javascript');
+      return res.status(200).send('/* nitro gateway stub */');
+    }
+
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>
@@ -126,11 +147,6 @@ router.all('/', async (req, res) => {
       </body>
       </html>
     `);
-  }
-
-  if (isKnownAdRequest(urlObj)) {
-    res.setHeader('Content-Type', urlObj.pathname.endsWith('.css') ? 'text/css' : 'application/javascript');
-    return res.send('/* nitro ad blocked */');
   }
 
   if (!(await isSafeHost(urlObj.hostname))) {
