@@ -1468,6 +1468,9 @@ function setupAdminTabs() {
       if (targetTab === 'admintournaments') {
         if (window.adminFetchTournaments) window.adminFetchTournaments();
       }
+      if (targetTab === 'proconfig') {
+        if (window.adminFetchProConfig) window.adminFetchProConfig();
+      }
     });
   });
 
