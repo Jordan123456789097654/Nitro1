@@ -95,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       alert('Error claiming PRO bonus drop.');
     }
+  };
+
   window.claimProBonus = window.claimProDailyBonus;
   window.loadProPageConfig = loadProPageConfig;
   loadProPageConfig();
