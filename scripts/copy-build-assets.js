@@ -17,9 +17,10 @@ function copyRecursive(src, dest) {
 }
 
 try {
+  copyRecursive('public/index.html', 'dist/index.html');
   copyRecursive('dist/music.html', 'public/games/music.html');
   copyRecursive('dist/assets', 'public/assets');
-  console.log('坕 Build assets copied successfully to public/');
+  console.log('⚡ Build assets copied successfully to public/ and dist/');
 } catch (e) {
-  console.error('Copy build assets warning;', e.message);
+  console.error('Copy build assets warning:', e.message);
 }
