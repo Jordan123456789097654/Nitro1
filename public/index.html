@@ -155,7 +155,46 @@
       color: var(--text-muted);
       font-size: 0.95rem;
       line-height: 1.6;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
+    }
+
+    /* Platform Accomplishments Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 6px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(244, 63, 94, 0.4);
+      background: rgba(244, 63, 94, 0.06);
+    }
+
+    .stat-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #f43f5e;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     /* Shutdown Statement Box */
@@ -165,7 +204,7 @@
       border-radius: 16px;
       padding: 22px;
       text-align: left;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .reason-box-header {
@@ -215,9 +254,10 @@
       color: #64748b;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 580px) {
       .maintenance-card { padding: 32px 20px; }
       h1 { font-size: 1.8rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     }
   </style>
 </head>
@@ -240,6 +280,26 @@
     <p class="notice-text">
       The Nitro Platform has officially concluded operations and is now offline.
     </p>
+
+    <!-- Platform Accomplishments & Archive Counter Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">1,081+</div>
+        <div class="stat-label">🌐 Total Visits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">🎮 Games & Apps</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">28+</div>
+        <div class="stat-label">👥 Player Accounts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">🔒 Data Preserved</div>
+      </div>
+    </div>
 
     <!-- Official Statement Card -->
     <div class="reason-box">
