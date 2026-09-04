@@ -589,6 +589,11 @@ router.all('/', async (req, res) => {
     user = { id: null, username: 'Guest', role: 'member', is_banned: false };
   }
 
+  const gatewayPrefix = `${req.baseUrl || '/api/gateway'}?url=`;
+  const tokenParam = req.query.token ? `&token=${encodeURIComponent(req.query.token)}` : '';
+  const engineParam = engineKey ? `&engine=${encodeURIComponent(engineKey)}` : '';
+  const authSuffix = `${tokenParam}${engineParam}`;
+
   // Check explicit Proxy Ban set by Admin
   if (user.is_gateway_banned) {
     return res.status(200).send(`

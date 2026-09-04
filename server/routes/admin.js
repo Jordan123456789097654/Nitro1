@@ -855,7 +855,7 @@ const ROLE_WEIGHTS = {
 };
 
 // Update Role (Promote / Demote to any tiered role)
-router.post('/users/:id/role', requireOwner, async (req, res) => {
+router.post('/users/:id/role', requireAdmin, async (req, res) => {
   const { role } = req.body;
   const targetId = req.params.id;
   const admin = req.adminUser.username;
