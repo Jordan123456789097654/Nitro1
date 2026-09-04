@@ -6,7 +6,7 @@ import { initAdmin, loadAdminData, fetchUsers } from './admin.js';
 import { initBrowser } from './browser.js';
 import { initMusicPlayer, updateMusicPlayerVisibility } from './music.js';
 import { initPolls } from './polls.js';
-import { initStudyTimer, initPaintCanvas } from './widgets.js';
+import { initStudyTimer, initPaintCanvas, initFpsMonitor } from './widgets.js';
 import { initAiHelper } from './ai.js';
 import { initSoundboard } from './soundboard.js';
 import { initVoiceRooms } from './voice.js';
@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMusicPlayer();
   initPolls();
   initStudyTimer();
+  initFpsMonitor();
   initAiHelper();
   initSoundboard();
   initVoiceRooms();

@@ -271,14 +271,19 @@ function setupSocketListeners() {
   });
 
   socket.on('initial_messages', (messages) => {
-    cachedGlobalMessages = messages || [];
+    cachedGlobalMessages = (messages || []).slice(-100);
     if (activeChatMode === 'global') {
       renderGlobalChatMessages();
     }
   });
 
   socket.on('new_message', (msg) => {
-    if (msg) cachedGlobalMessages.push(msg);
+    if (msg) {
+      cachedGlobalMessages.push(msg);
+      if (cachedGlobalMessages.length > 100) {
+        cachedGlobalMessages = cachedGlobalMessages.slice(-100);
+      }
+    }
     if (activeChatMode === 'global') {
       appendChatMessage(msg);
       scrollChatToBottom();
@@ -1311,6 +1316,20 @@ function appendChatMessage(msg) {
 
   container.appendChild(row);
   renderAvatarElement(row.querySelector(`#msg-avatar-${msg.id || Date.now()}`), msg.avatar_url, '👤');
+  enforceChatDomLimit();
+}
+
+function enforceChatDomLimit() {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+  const rows = container.querySelectorAll('.chat-message-row');
+  const MAX_DOM_ROWS = 100;
+  if (rows.length > MAX_DOM_ROWS) {
+    const overflowCount = rows.length - MAX_DOM_ROWS;
+    for (let i = 0; i < overflowCount; i++) {
+      rows[i].remove();
+    }
+  }
 }
 
 function appendDmMessage(dm) {
@@ -1338,10 +1357,12 @@ function appendDmMessage(dm) {
   `;
 
   container.appendChild(row);
+  enforceChatDomLimit();
 }
 
 function appendRoomMessage(msg) {
   const container = document.getElementById('chat-messages');
+  if (!container) return;
   const row = document.createElement('div');
   row.className = 'chat-message-row';
   const isPro = msg.role === 'pro' || msg.role === 'vip';
@@ -1356,6 +1377,7 @@ function appendRoomMessage(msg) {
   `;
 
   container.appendChild(row);
+  enforceChatDomLimit();
 }
 
 function scrollChatToBottom() {

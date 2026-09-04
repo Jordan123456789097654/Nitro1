@@ -459,6 +459,10 @@ function initChatSocket(io) {
       }
     });
 
+    socket.on('ping_check', (cb) => {
+      if (typeof cb === 'function') cb();
+    });
+
     socket.on('get_initial_messages', async () => {
       try {
         const recentMessages = await db.getRecentChatMessages(handshakeUser ? handshakeUser.id : null);

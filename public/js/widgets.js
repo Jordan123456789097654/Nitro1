@@ -537,3 +537,122 @@ function checkTTTWin(player) {
     return window.tttBoard[a] === player && window.tttBoard[b] === player && window.tttBoard[c] === player;
   });
 }
+
+export function initFpsMonitor() {
+  let hud = document.getElementById('fps-monitor-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'fps-monitor-hud';
+    hud.style.cssText = `
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 999999;
+      background: rgba(12, 16, 28, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), 0 8px 32px rgba(0, 0, 0, 0.6);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 0.78rem;
+      backdrop-filter: blur(12px);
+      display: none;
+      min-width: 180px;
+      pointer-events: auto;
+    `;
+    hud.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <span style="color: #38bdf8; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.5px;">⚡ FPS & RAM MONITOR</span>
+        <button onclick="window.toggleFpsMonitor(false)" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.8rem; padding: 0 2px;">✕</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;">
+        <div>FPS: <strong id="fps-val" style="color: #10b981;">60</strong></div>
+        <div>RAM: <strong id="ram-val" style="color: #fbbf24;">--</strong></div>
+        <div>DOM: <strong id="dom-val" style="color: #c084fc;">--</strong></div>
+        <div>PING: <strong id="ping-val" style="color: #38bdf8;">--</strong></div>
+      </div>
+    `;
+    document.body.appendChild(hud);
+  }
+
+  let frameCount = 0;
+  let lastTime = performance.now();
+  let fps = 60;
+  let animId = null;
+
+  function updateLoop() {
+    frameCount++;
+    const now = performance.now();
+    const delta = now - lastTime;
+
+    if (delta >= 1000) {
+      fps = Math.round((frameCount * 1000) / delta);
+      frameCount = 0;
+      lastTime = now;
+
+      const fpsEl = document.getElementById('fps-val');
+      const ramEl = document.getElementById('ram-val');
+      const domEl = document.getElementById('dom-val');
+      const pingEl = document.getElementById('ping-val');
+
+      if (fpsEl) {
+        fpsEl.textContent = fps;
+        fpsEl.style.color = fps >= 45 ? '#10b981' : fps >= 25 ? '#fbbf24' : '#ef4444';
+      }
+
+      if (ramEl) {
+        if (performance.memory && performance.memory.usedJSHeapSize) {
+          const usedMb = Math.round(performance.memory.usedJSHeapSize / 1048576);
+          ramEl.textContent = `${usedMb} MB`;
+        } else {
+          ramEl.textContent = 'N/A';
+        }
+      }
+
+      if (domEl) {
+        const totalNodes = document.getElementsByTagName('*').length;
+        domEl.textContent = totalNodes;
+      }
+
+      if (pingEl && window.getSharedSocket) {
+        const socket = window.getSharedSocket();
+        if (socket && socket.connected) {
+          const start = performance.now();
+          socket.emit('ping_check', () => {
+            const latency = Math.round(performance.now() - start);
+            const pEl = document.getElementById('ping-val');
+            if (pEl) pEl.textContent = `${latency}ms`;
+          });
+        }
+      }
+    }
+
+    if (hud.style.display !== 'none') {
+      animId = requestAnimationFrame(updateLoop);
+    }
+  }
+
+  window.toggleFpsMonitor = (show) => {
+    const isVisible = show !== undefined ? show : hud.style.display === 'none';
+    hud.style.display = isVisible ? 'block' : 'none';
+    localStorage.setItem('nitro_fps_monitor', isVisible ? 'true' : 'false');
+
+    const checkbox = document.getElementById('fps-monitor-checkbox');
+    if (checkbox) checkbox.checked = isVisible;
+
+    if (isVisible) {
+      frameCount = 0;
+      lastTime = performance.now();
+      cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(updateLoop);
+    } else {
+      cancelAnimationFrame(animId);
+    }
+  };
+
+  const isEnabled = localStorage.getItem('nitro_fps_monitor') === 'true';
+  if (isEnabled) {
+    window.toggleFpsMonitor(true);
+  }
+}
