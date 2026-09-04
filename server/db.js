@@ -807,19 +807,32 @@ const db = {
         `);
       }
 
-      // Seed global announcement banner for v2.7
-      try {
-        await pool.query("UPDATE announcements SET is_active = false");
+      // Seed update log for v2.8.0
+      const updateLog28Exists = await pool.query("SELECT id FROM update_logs WHERE version = '2.8.0'");
+      if (updateLog28Exists.rows.length === 0) {
         await pool.query(`
-          INSERT INTO announcements (title, message, alert_type, is_active)
+          INSERT INTO update_logs (version, title, content, author)
           VALUES (
-            '⚡ Major Lag Fix & Performance Update v2.7 Live!',
-            'We overhauled site caching, fixed static file DB query overhead, added Potato Ultra-Low Performance Mode, Image Wallpaper Themes, Hardware Banning, and fixed Gateway CORS errors!',
-            'info',
-            true
+            '2.8.0', 
+            '👑 v2.8.0 — Nitro PRO Lounge Suite, Dynamic Admin Configurator, 2x ECO Boosts & Stealth Boss Key', 
+            '### 1. 👑 Dynamic Nitro PRO Lounge Hub (#view-pro)\nComplete redesign of the PRO page into a dynamic glassmorphic headquarters featuring custom hero banner, badge tag, main title, subtitle, action buttons, and a responsive VIP Perks Showcase Grid.\n\n### 2. 🛠️ Admin Panel PRO Page Configurator\nAdded dedicated **👑 PRO Lounge Manager** tab in the Admin Panel (#tab-proconfig) allowing owners and admins to edit Page Icon, Badge Tag, Headline, Subtitle, Action Button text/link, and JSON Perks list with live reset and preview options.\n\n### 3. 🎁 Daily PRO Bonus Drop (+250 Coins / 24h)\nPRO members can now claim **+250 free coins** and **+200 XP** every 24 hours directly from their PRO Lounge card.\n\n### 4. 🪙 2x Coin & XP Progression Boost\nPRO and VIP members automatically receive a **2x Multiplier** on Daily Login Streaks, quest completions, and gaming time rewards across the platform.\n\n### 5. ✨ Elite Chat Customization & Username Glows\nAdded 5 animated chat username glows (*Rainbow Chroma, Solar Flare, Matrix Green, Ice Frost, Void Purple*) for PRO members in global chat.\n\n### 6. 🕵️ 1-Click Stealth Boss Key Overlay (Esc / ~)\nPressing **Esc** or **~** (tilde) instantly disguises your browser screen as a realistic Google Docs / Canvas assignment overlay.\n\n### 7. 🛡️ Hardware Banning & Batch User Role Toolbar\nAdmins can now issue permanent device fingerprint bans (HWID) and select multiple users to apply batch role updates from the Admin Users Table.', 
+            'Supreme Owner'
           )
         `);
-      } catch (e) {}
+
+        try {
+          await pool.query("UPDATE announcements SET is_active = false");
+          await pool.query(`
+            INSERT INTO announcements (title, message, alert_type, is_active)
+            VALUES (
+              '👑 Nitro PRO Lounge Suite & Admin Panel Configurator v2.8.0 Live!',
+              'We launched the dynamic PRO Lounge page, Admin PRO Page Configurator, Daily PRO Bonus Drops (+250 Coins/24h), 2x Rewards Multipliers, Animated Chat Glows, and the 1-Click Stealth Boss Key!',
+              'info',
+              true
+            )
+          `);
+        } catch (e) {}
+      }
 
       // Migrate existing 'admin' roles to 'moderator'
       await pool.query("UPDATE users SET role = 'moderator' WHERE role = 'admin'");
