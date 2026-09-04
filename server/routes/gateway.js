@@ -47,6 +47,8 @@ async function isSafeHost(hostname) {
   } catch (err) {
     return true;
   }
+}
+
 const SOUNDBOARD_ALLOWED_DOMAINS = [
   'soundbuttonsworld.com', 'myinstants.com', 'soundbuttons.com', 'soundboard.com',
   'cloudflareinsights.com'
