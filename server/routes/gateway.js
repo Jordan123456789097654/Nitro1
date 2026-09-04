@@ -681,6 +681,39 @@ router.all('/', async (req, res) => {
     return res.status(400).send('Invalid URL format.');
   }
 
+  // General Web Search & General Web Browsing Restriction (Proxy reserved strictly for games & game assets)
+  const GENERAL_WEB_BROWSING_DOMAINS = [
+    'google.com', 'google.ca', 'google.co.uk', 'google.org',
+    'bing.com', 'duckduckgo.com', 'search.brave.com', 'wikipedia.org',
+    'yahoo.com', 'reddit.com', 'facebook.com', 'twitter.com', 'x.com',
+    'instagram.com', 'tiktok.com'
+  ];
+  const targetHostLower = urlObj.hostname.toLowerCase();
+  if (GENERAL_WEB_BROWSING_DOMAINS.some(d => targetHostLower.endsWith(d))) {
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8"><title>🕹️ Proxy Dedicated to Games</title>
+      <style>
+        body { background: #07090e; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #38bdf8; margin-top: 0; font-size: 1.6rem; }
+        p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; }
+        .icon { font-size: 3rem; margin-bottom: 12px; display: block; }
+      </style>
+      </head>
+      <body>
+        <div class="card">
+          <span class="icon">🕹️</span>
+          <h2>Proxy Dedicated to Games</h2>
+          <p>General web browsing proxying has been disabled to preserve maximum speed and zero lag across platform games.</p>
+          <p style="font-size:0.85rem; color:#94a3b8; margin-top:16px;">The proxy engine is now reserved exclusively for loading unblocked games and game subresources.</p>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
   // Ad Blocker Filtering
   if (isKnownAdRequest(urlObj)) {
     if (urlObj.pathname.endsWith('.css')) {

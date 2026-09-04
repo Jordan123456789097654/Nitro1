@@ -19,14 +19,10 @@ let isSplitViewActive = false;
 let bookmarks = [];
 
 const DEFAULT_SPEED_DIALS = [
-  { name: 'Google Search', url: 'https://www.google.com', icon: '🔍', desc: 'Web Search' },
-  { name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Main_Page', icon: '🌐', desc: 'Free Encyclopedia' },
-  { name: 'Desmos Math', url: 'https://www.desmos.com/calculator', icon: '📐', desc: 'Graphing Calculator' },
+  { name: 'Desmos Math Calculator', url: 'https://www.desmos.com/calculator', icon: '📐', desc: 'Graphing Calculator' },
   { name: 'Khan Academy', url: 'https://www.khanacademy.org', icon: '📚', desc: 'Lessons & Exercises' },
-  { name: 'WolframAlpha', url: 'https://www.wolframalpha.com', icon: '🧮', desc: 'Computational Intelligence' },
-  { name: 'Google Classroom', url: 'https://classroom.google.com', icon: '🎓', desc: 'Student Portal' },
-  { name: 'GitHub', url: 'https://github.com', icon: '💻', desc: 'Code Repository' },
-  { name: 'Canva Studio', url: 'https://www.canva.com', icon: '🎨', desc: 'Design & Graphics' }
+  { name: 'Scratch Games', url: 'https://scratch.mit.edu', icon: '🐱', desc: 'Community Games' },
+  { name: 'GitHub Code', url: 'https://github.com', icon: '💻', desc: 'Developer Repositories' }
 ];
 
 export function initBrowser() {
