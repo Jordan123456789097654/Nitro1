@@ -1979,75 +1979,7 @@
       </div>
     </section>
 
-    <!-- SECTION 5: REMADE MULTI-TAB SANDBOXED BROWSER -->
-    <section class="page-view" id="view-browser">
-      <div class="header-title-section">
-        <h1>NITRO SHIELD BROWSER v3.0</h1>
-      </div>
-      <div class="browser-view-container">
-        <!-- Multi-Tab Strip -->
-        <div class="browser-tabs-header">
-          <div class="browser-tabs-strip" id="browser-tabs-strip"></div>
-          <button class="browser-new-tab-btn" id="browser-new-tab-btn" title="Open New Tab">＋</button>
-        </div>
 
-        <div class="browser-top-bar">
-          <div class="browser-controls">
-            <button class="browser-btn" id="browser-back" title="Back">◀</button>
-            <button class="browser-btn" id="browser-forward" title="Forward">▶</button>
-            <button class="browser-btn" id="browser-refresh" title="Reload">🔄</button>
-            <button class="browser-btn" id="browser-home" title="Speed Dial Home">🏠</button>
-            <button class="browser-btn" id="browser-split-view-btn" title="Toggle Dual-Pane Split View" style="color: #38bdf8; font-weight: 800;">↔️ Dual View</button>
-            <button class="browser-btn" id="browser-open-blank-btn" title="Open in about:blank disguise" style="color: #fbbf24;">🚀 Cloak</button>
-          </div>
-
-          <!-- Gateway now runs a single Chrome-based engine; the multi-profile
-               selector (including "Academic Disguise") was removed. -->
-          <select id="browser-search-engine-select" class="browser-engine-select" title="Search Engine">
-            <option value="duckduckgo">🦆 DuckDuckGo</option>
-            <option value="brave">🦁 Brave Search</option>
-            <option value="bing">🌐 Bing</option>
-            <option value="google">🔍 Google</option>
-            <option value="wikipedia">📖 Wikipedia</option>
-            <option value="wolfram">🧮 WolframAlpha</option>
-          </select>
-
-          <div class="browser-address-bar">
-            <span style="font-size: 0.85rem; color: #10b981; padding-left: 10px;" title="Encrypted Stealth Proxy Active">🔒</span>
-            <input type="text" id="browser-url-input" placeholder="Enter web address or search query...">
-            <button id="browser-bookmark-star-btn" style="background: transparent; border: none; font-size: 1.1rem; cursor: pointer; padding-right: 10px; color: #94a3b8;" title="Bookmark Page">☆</button>
-          </div>
-          <button class="btn-pill primary" id="browser-go-btn" style="font-weight: 800; padding: 8px 18px;">Go</button>
-        </div>
-
-        <!-- Speed Dial Grid (Shown on New Tab) -->
-        <div class="browser-speed-dial" id="browser-speed-dial">
-          <div class="speed-dial-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-            <div>
-              <h2 style="color: #fff; font-size: 1.25rem; font-weight: 800; margin: 0;">⚡ Quick Launch Bookmarks & Speed Dial</h2>
-              <p style="color: #94a3b8; font-size: 0.82rem; margin: 4px 0 0;">Select a study bookmark below or type a web address in the omnibox</p>
-            </div>
-            <button class="btn-pill primary" id="speed-dial-add-btn" style="background: #38bdf8; color: #000; border: none; font-weight: 800; font-size: 0.82rem;">＋ Add Custom Bookmark</button>
-          </div>
-          <div class="speed-dial-grid" id="browser-speed-dial-grid"></div>
-        </div>
-
-        <!-- Primary Single Viewport -->
-        <div class="browser-viewport" id="browser-viewport-single">
-          <iframe id="browser-iframe" class="browser-iframe" allow="autoplay; fullscreen; clipboard-write; encrypted-media; gamepad; microphone; camera" style="display: none; width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-
-        <!-- Dual-Pane Split Screen Viewport Wrapper -->
-        <div id="browser-viewport-split-wrapper" style="display: none; width: 100%; height: 600px; gap: 12px; border-radius: 14px; overflow: hidden;">
-          <div style="flex: 1; height: 100%; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; background: #000;">
-            <iframe id="browser-iframe-primary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media; gamepad; microphone; camera"></iframe>
-          </div>
-          <div style="flex: 1; height: 100%; border: 1px solid #38bdf8; border-radius: 12px; overflow: hidden; background: #000;">
-            <iframe id="browser-iframe-secondary" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen; clipboard-write; encrypted-media; gamepad; microphone; camera"></iframe>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- SECTION 6: THEME STUDIO, PANIC KEY & PERSONAL SETTINGS -->
     <section class="page-view" id="view-settings">
