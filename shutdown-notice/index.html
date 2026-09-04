@@ -262,26 +262,28 @@
 
   <main class="maintenance-card">
     <!-- Status Badge -->
-    <div class="status-badge" id="status-badge" style="background: rgba(244, 63, 94, 0.14); border-color: rgba(244, 63, 94, 0.4); color: #f43f5e;">
+    <div class="status-badge" id="status-badge" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.35); color: #f43f5e; padding: 6px 18px;">
       <span class="pulse-dot" style="background-color: #f43f5e; box-shadow: 0 0 10px #f43f5e;"></span>
-      <span id="status-badge-text">Platform Comeback Announcement</span>
+      <span id="status-badge-text">PLATFORM CLOSURE / SHUTDOWN</span>
     </div>
 
     <!-- Main Headline -->
-    <h1 id="headline">Platform Temporarily Offline</h1>
+    <h1 id="headline" style="font-size: 2.2rem; line-height: 1.25; margin-bottom: 12px; background: #ffffff; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900;">
+      Platform Closure Notice: Operations Cease Due to Unsustainable Infrastructure Costs
+    </h1>
 
     <!-- Subtitle -->
-    <p class="notice-text" id="subtext">
-      Aiming for our comeback by <strong>October 31st</strong>. All active platform data has been securely archived.
+    <p class="notice-text" id="subtext" style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 28px;">
+      The Nitro Platform has officially concluded operations and is now offline.
     </p>
 
     <!-- Shutdown / Maintenance Reason Card -->
-    <div class="reason-box">
-      <div class="reason-box-header">
-        <span>🛑</span>
-        <strong id="reason-title">Official Shutdown Statement</strong>
+    <div class="reason-box" style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 22px; text-align: left;">
+      <div class="reason-box-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+        <span style="display: inline-block; width: 12px; height: 12px; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 10px #f43f5e;"></span>
+        <strong id="reason-title" style="color: #ffffff; font-size: 0.95rem;">Shutdown Notice & Information</strong>
       </div>
-      <p class="reason-box-desc" id="reason-desc">
+      <p class="reason-box-desc" id="reason-desc" style="color: #94a3b8; font-size: 0.88rem; line-height: 1.6;">
         We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to $100 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by October 31st. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
       </p>
     </div>
