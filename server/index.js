@@ -285,11 +285,11 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-// Owner Maintenance Mode Protection Middleware
+// Owner & Admin Bypass Maintenance Mode Protection Middleware
 app.use(async (req, res, next) => {
-  // Allow health checks, status check, auth login/logout endpoints
-  const allowedPaths = ['/health', '/api/status', '/api/auth/login', '/api/auth/me', '/api/auth/logout'];
-  if (allowedPaths.includes(req.path)) {
+  // Allow health checks, status check, auth endpoints
+  const allowedPaths = ['/health', '/api/status', '/api/auth/login', '/api/auth/me', '/api/auth/logout', '/api/pro-config', '/api/updates/latest', '/api/weather', '/api/ai/status', '/api/admin/signups-status'];
+  if (allowedPaths.includes(req.path) || allowedPaths.some(p => req.path.startsWith(p))) {
     return next();
   }
 
@@ -297,7 +297,9 @@ app.use(async (req, res, next) => {
     const isMaintenance = await db.getMaintenanceMode();
     if (isMaintenance) {
       const isOwner = req.user && (req.user.role === 'owner' || (req.user.username && req.user.username.toLowerCase() === 'jordandaniels'));
-      if (!isOwner) {
+      const isAdminBypass = (req.cookies && req.cookies.nitro_admin_bypass === 'true') || req.headers['x-admin-bypass'] === 'true';
+      
+      if (!isOwner && !isAdminBypass) {
         if (req.path.startsWith('/api/')) {
           return res.status(503).json({ error: 'Maintenance Mode is active. Access is temporarily restricted to the platform Owner.', maintenance: true });
         }
