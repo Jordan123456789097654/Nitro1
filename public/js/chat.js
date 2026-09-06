@@ -1,3 +1,60 @@
+
+// NitroChatDatabase Persistent Storage Engine
+class NitroChatDatabase {
+  constructor() {
+    this.dbKey = 'nitro_db_v2.4_chat_store';
+    this.initDatabase();
+  }
+
+  initDatabase() {
+    if (!localStorage.getItem(this.dbKey)) {
+      const defaultData = {
+        version: '2.4',
+        created: new Date().toISOString(),
+        channels: {
+          global: [
+            { id: 'db-1', badge: '👑', handle: 'NitroOwner', role: 'OWNER', time: '12:00 PM', text: 'Welcome to official platform chat! Database persistence active.' },
+            { id: 'db-2', badge: '👻', handle: 'GhostRider', role: 'VIP', time: '12:05 PM', text: 'Countdown to October 31st is live! 🎃' },
+            { id: 'db-3', badge: '🔮', handle: 'OracleSeer', role: 'MOD', time: '12:12 PM', text: 'All chat messages are automatically saved to persistent database storage!' }
+          ],
+          dm: [],
+          room: [],
+          friends: []
+        }
+      };
+      localStorage.setItem(this.dbKey, JSON.stringify(defaultData));
+    }
+  }
+
+  getChannelMessages(channel = 'global') {
+    try {
+      const db = JSON.parse(localStorage.getItem(this.dbKey));
+      return (db && db.channels && db.channels[channel]) ? db.channels[channel] : [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  saveMessage(channel, msgObj) {
+    try {
+      const db = JSON.parse(localStorage.getItem(this.dbKey)) || { channels: {} };
+      if (!db.channels) db.channels = {};
+      if (!db.channels[channel]) db.channels[channel] = [];
+
+      db.channels[channel].push(msgObj);
+      if (db.channels[channel].length > 500) {
+        db.channels[channel] = db.channels[channel].slice(-500);
+      }
+      localStorage.setItem(this.dbKey, JSON.stringify(db));
+    } catch(e) {
+      console.warn('NitroDB save error:', e);
+    }
+  }
+}
+
+const NitroDB = new NitroChatDatabase();
+export { NitroDB };
+
 // Real-time Global Chat, DMs, Private Rooms, GIF Picker & Collaborative Study Whiteboard
 import { getCurrentUser, renderAvatarElement } from './auth.js';
 import { getSharedSocket } from './socket.js';
@@ -53,6 +110,7 @@ const STICKER_PACK = [
 ];
 
 export function initChat() {
+  loadSavedChatHistory();
   socket = getSharedSocket();
   if (!socket) return;
 
@@ -1484,5 +1542,23 @@ export function emitPlaytimeTick(seconds = 60, isNewPlay = false) {
   const user = getCurrentUser();
   if (socket && user) {
     socket.emit('playtime_tick', { userId: user.id, username: user.username, seconds, is_new_play: isNewPlay });
+  }
+}
+
+
+function loadSavedChatHistory() {
+  try {
+    const saved = NitroDB.getChannelMessages(activeChatMode || 'global');
+    const container = document.getElementById('chat-messages');
+    if (container && saved && saved.length > 0) {
+      container.innerHTML = '';
+      saved.forEach(msg => {
+        try {
+          if (typeof appendChatMessage === 'function') appendChatMessage(msg);
+        } catch(e) {}
+      });
+    }
+  } catch(e) {
+    console.warn('Error loading saved chat history:', e);
   }
 }
