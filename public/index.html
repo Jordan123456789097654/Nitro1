@@ -245,7 +245,7 @@
       left: 20%;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -256,7 +256,7 @@
       right: 20%;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -269,8 +269,8 @@
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
-      padding: 48px 40px;
-      max-width: 660px;
+      padding: 44px 38px;
+      max-width: 680px;
       width: 100%;
       text-align: center;
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -295,7 +295,7 @@
       text-transform: uppercase;
       padding: 6px 18px;
       border-radius: 99px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .pulse-dot {
@@ -314,33 +314,87 @@
 
     .maintenance-card h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2.1rem;
       font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1.25;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: #ffffff;
     }
 
     .notice-text {
       color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      margin-bottom: 24px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .relaunch-countdown-card {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.14), rgba(236, 72, 153, 0.1));
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: 18px;
+      padding: 16px 20px;
+      margin-bottom: 22px;
+    }
+
+    .relaunch-countdown-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #c084fc;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .countdown-timer-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .countdown-unit {
+      text-align: center;
+      min-width: 55px;
+    }
+
+    .countdown-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      margin-bottom: 4px;
+      text-shadow: 0 0 12px rgba(192, 132, 252, 0.4);
+    }
+
+    .countdown-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+    }
+
+    .countdown-divider {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #a855f7;
+      margin-top: -12px;
     }
 
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      margin-bottom: 26px;
+      margin-bottom: 22px;
     }
 
     .stat-card {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
-      padding: 14px 6px;
+      padding: 12px 6px;
       text-align: center;
       transition: all 0.25s ease;
     }
@@ -371,9 +425,9 @@
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
-      padding: 22px;
+      padding: 20px;
       text-align: left;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .reason-box-header {
@@ -389,9 +443,9 @@
     }
 
     .reason-box-desc {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: #94a3b8;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
     .btn-release {
@@ -447,8 +501,10 @@
 
     @media (max-width: 580px) {
       .maintenance-card { padding: 32px 20px; }
-      .maintenance-card h1 { font-size: 1.8rem; }
+      .maintenance-card h1 { font-size: 1.7rem; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .countdown-unit { min-width: 42px; }
+      .countdown-number { font-size: 1.35rem; }
     }
   </style>
 </head>
@@ -484,6 +540,34 @@
       <p class="notice-text">
         The Nitro Platform has officially concluded operations and is now offline.
       </p>
+
+      <!-- October 31st Automated Relaunch Countdown Card -->
+      <div class="relaunch-countdown-card">
+        <div class="relaunch-countdown-title">
+          ⏳ Official Relaunch Countdown • October 31st, 2026
+        </div>
+        <div class="countdown-timer-grid">
+          <div class="countdown-unit">
+            <div class="countdown-number" id="timer-days">--</div>
+            <div class="countdown-label">DAYS</div>
+          </div>
+          <div class="countdown-divider">:</div>
+          <div class="countdown-unit">
+            <div class="countdown-number" id="timer-hours">--</div>
+            <div class="countdown-label">HOURS</div>
+          </div>
+          <div class="countdown-divider">:</div>
+          <div class="countdown-unit">
+            <div class="countdown-number" id="timer-mins">--</div>
+            <div class="countdown-label">MINS</div>
+          </div>
+          <div class="countdown-divider">:</div>
+          <div class="countdown-unit">
+            <div class="countdown-number" id="timer-secs" style="color: #f43f5e;">--</div>
+            <div class="countdown-label">SECS</div>
+          </div>
+        </div>
+      </div>
 
       <!-- Platform Accomplishments & Archive Counter Grid -->
       <div class="stats-grid">
@@ -561,6 +645,20 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- OCTOBER RELAUNCH WELCOME BACK MODAL -->
+  <div id="relaunch-welcome-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999998; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 27, 75, 0.98)); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 24px; padding: 40px 32px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 30px 90px rgba(124, 58, 237, 0.3); animation: fadeInCard 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
+      <div style="font-size: 2.8rem; margin-bottom: 12px;">🎃🚀</div>
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #ffffff; margin-bottom: 8px;">Welcome Back to Nitro Platform!</h2>
+      <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;">
+        We are officially <strong>REOPENED & LIVE</strong>! Thank you for your patience while we upgraded our infrastructure. All 100% of your account data, games, and saved progression are fully intact!
+      </p>
+      <button type="button" onclick="document.getElementById('relaunch-welcome-modal').style.display='none'" style="padding: 12px 32px; background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #ffffff; border-radius: 99px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 6px 20px rgba(219, 39, 119, 0.4); transition: all 0.2s ease;">
+        🎮 Jump Into Games
+      </button>
     </div>
   </div>
 
@@ -5562,6 +5660,49 @@
 
 
   <script id="shutdown-overlay-script">
+    // Automated October 31st Relaunch Date Checker & Timer Logic
+    (function() {
+      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
+
+      function updateCountdown() {
+        const now = Date.now();
+        const diff = relaunchTargetDate - now;
+
+        // Auto-Lift Shutdown Screen on or after October 31st
+        if (diff <= 0) {
+          const overlay = document.getElementById('shutdown-overlay');
+          if (overlay) overlay.style.display = 'none';
+          document.body.style.overflow = 'auto';
+          
+          // Show Welcome Back Modal once
+          if (!localStorage.getItem('nitro_relaunch_welcomed')) {
+            const welcomeModal = document.getElementById('relaunch-welcome-modal');
+            if (welcomeModal) welcomeModal.style.display = 'flex';
+            localStorage.setItem('nitro_relaunch_welcomed', 'true');
+          }
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const elDays = document.getElementById('timer-days');
+        const elHours = document.getElementById('timer-hours');
+        const elMins = document.getElementById('timer-mins');
+        const elSecs = document.getElementById('timer-secs');
+
+        if (elDays) elDays.textContent = String(days).padStart(2, '0');
+        if (elHours) elHours.textContent = String(hours).padStart(2, '0');
+        if (elMins) elMins.textContent = String(mins).padStart(2, '0');
+        if (elSecs) elSecs.textContent = String(secs).padStart(2, '0');
+      }
+
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+    })();
+
     // Interactive Cosmic Particle Mesh Canvas
     (function() {
       const canvas = document.getElementById('bg-canvas');
@@ -5789,13 +5930,17 @@
     };
 
     window.applyBypassState = function() {
-      const isBypassed = localStorage.getItem('nitro_admin_bypass') === 'true' || document.cookie.includes('nitro_admin_bypass=true');
+      const now = Date.now();
+      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
+      const isRelaunchPassed = now >= relaunchTargetDate;
+
+      const isBypassed = isRelaunchPassed || localStorage.getItem('nitro_admin_bypass') === 'true' || document.cookie.includes('nitro_admin_bypass=true');
       const overlay = document.getElementById('shutdown-overlay');
       const adminBar = document.getElementById('admin-testing-bar');
 
       if (isBypassed) {
         if (overlay) overlay.style.display = 'none';
-        if (adminBar) adminBar.style.display = 'flex';
+        if (adminBar && !isRelaunchPassed) adminBar.style.display = 'flex';
         document.body.style.overflow = 'auto';
       } else {
         if (overlay) overlay.style.display = 'flex';

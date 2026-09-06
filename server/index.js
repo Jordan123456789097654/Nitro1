@@ -325,9 +325,9 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Optimized caching for static JS files
-app.use('/js', (req, res, next) => {
-  res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+// Optimized caching for static assets (JS, CSS, Media, Assets) to save Render bandwidth & RAM
+app.use(['/js', '/css', '/assets', '/soundboard', '/games'], (req, res, next) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
   next();
 });
 
