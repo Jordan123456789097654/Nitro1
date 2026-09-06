@@ -244,22 +244,29 @@
       position: absolute;
       top: -15%;
       left: 20%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
+      animation: pulseGlow 8s infinite alternate ease-in-out;
     }
 
     .bg-glow-2 {
       position: absolute;
       bottom: -15%;
       right: 20%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(244, 63, 94, 0.14) 0%, rgba(0, 0, 0, 0) 70%);
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(244, 63, 94, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
+      animation: pulseGlow 10s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.9) translate(0, 0); opacity: 0.7; }
+      100% { transform: scale(1.15) translate(15px, -15px); opacity: 1; }
     }
 
     .maintenance-card {
@@ -297,6 +304,13 @@
       padding: 6px 18px;
       border-radius: 99px;
       margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .status-badge:hover {
+      background: rgba(244, 63, 94, 0.22);
+      transform: scale(1.04);
     }
 
     .pulse-dot {
@@ -455,6 +469,7 @@
       margin-top: -12px;
     }
 
+    /* STATS GRID & SLIDE-UP ANIMATIONS */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -466,25 +481,40 @@
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
-      padding: 12px 6px;
+      padding: 14px 8px;
       text-align: center;
-      transition: all 0.25s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
+      opacity: 0;
+      transform: translateY(35px);
+      animation: slideUpStat 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideUpStat {
+      from { opacity: 0; transform: translateY(35px) scale(0.92); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .stat-card:hover {
-      border-color: rgba(244, 63, 94, 0.4);
-      background: rgba(244, 63, 94, 0.08);
-      transform: translateY(-2px);
+      border-color: rgba(244, 63, 94, 0.5);
+      background: rgba(244, 63, 94, 0.12);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 10px 24px rgba(244, 63, 94, 0.2);
     }
 
     .stat-number {
       font-family: 'Outfit', sans-serif;
-      font-size: 1.45rem;
+      font-size: 1.55rem;
       font-weight: 800;
       color: #f43f5e;
       line-height: 1.1;
       margin-bottom: 4px;
+      text-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
     }
 
     .stat-label {
@@ -687,11 +717,11 @@
   </style>
 </head>
 <body>
-  <!-- FLOATING INTERACTIVE WIDGET: AD-FREE LO-FI SYNTH & CANVAS THEMES & SFX -->
+  <!-- FLOATING INTERACTIVE WIDGET: CANVAS THEMES, RESET CANVAS & LO-FI SYNTH -->
   <div id="floating-control-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
     
-    <!-- Canvas Theme Selector Dropdown -->
-    <div style="background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
+    <!-- Canvas Theme Selector & Reset Particles Row -->
+    <div style="background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
       <span style="font-size: 0.85rem;">🎨</span>
       <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
         <option value="cosmic">🌌 Cosmic Constellation</option>
@@ -699,6 +729,9 @@
         <option value="sunset">🌅 Synthwave Sunset</option>
         <option value="spooky">🎃 Halloween Ember Glow</option>
       </select>
+      <button type="button" onclick="resetCanvasParticles()" title="Reset Particles & Canvas" style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
+        🔄 Reset Particles
+      </button>
     </div>
 
     <!-- Ad-Free Procedural Lo-Fi Beats & Audio Widget -->
@@ -800,23 +833,23 @@
           </div>
         </div>
 
-        <!-- Platform Accomplishments & Archive Counter Grid -->
-        <div class="stats-grid">
+        <!-- Platform Accomplishments & Slide-Up Animated Archive Counter Grid -->
+        <div class="stats-grid" id="stats-grid-container">
           <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number">1,081+</div>
-            <div class="stat-label">🌐 Total Visits</div>
+            <div class="stat-number" id="stat-num-1" data-target="1081">0</div>
+            <div class="stat-label">🌐 TOTAL VISITS</div>
           </div>
           <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">🎮 Games & Apps</div>
+            <div class="stat-number" id="stat-num-2" data-target="500">0</div>
+            <div class="stat-label">🎮 GAMES & APPS</div>
           </div>
           <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number">28+</div>
-            <div class="stat-label">👥 Player Accounts</div>
+            <div class="stat-number" id="stat-num-3" data-target="28">0</div>
+            <div class="stat-label">👥 PLAYER ACCOUNTS</div>
           </div>
           <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number">100%</div>
-            <div class="stat-label">🔒 Data Preserved</div>
+            <div class="stat-number" id="stat-num-4" data-target="100">0</div>
+            <div class="stat-label">🔒 DATA PRESERVED</div>
           </div>
         </div>
 
@@ -991,7 +1024,7 @@
     </main>
   </div>
 
-  <!-- ADMIN LOGIN MODAL (CLEAN & SECURE) -->
+  <!-- ADMIN LOGIN MODAL -->
   <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000000; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 24px; padding: 36px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9); animation: fadeInCard 0.3s ease;">
       <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 50%; color: #38bdf8; font-size: 1.6rem; margin-bottom: 16px;">
@@ -6087,7 +6120,6 @@
         if (btn) btn.textContent = '⏸';
         if (text) text.textContent = 'Playing Ambient Lo-Fi 🎵';
 
-        // Play relaxing ambient lo-fi synth chord progression (Seventh chords: Cmaj7, Am7, Dm7, G7)
         const chords = [
           [261.63, 329.63, 392.00, 493.88], // Cmaj7
           [220.00, 261.63, 329.63, 392.00], // Am7
@@ -6109,8 +6141,6 @@
 
               osc.type = i === 0 ? 'sine' : 'triangle';
               osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-              // Low-pass filter for cozy warm lo-fi warmth
               filter.type = 'lowpass';
               filter.frequency.setValueAtTime(700, audioCtx.currentTime);
 
@@ -6133,6 +6163,46 @@
       }
     };
 
+    // 🚀 DYNAMIC COUNT-UP ANIMATION FOR STAT CARDS ON STARTUP & RE-SLIDE
+    function animateStatNumbers() {
+      const stats = [
+        { id: 'stat-num-1', target: 1081, suffix: '+', icon: '🌐 ' },
+        { id: 'stat-num-2', target: 500, suffix: '+', icon: '🎮 ' },
+        { id: 'stat-num-3', target: 28, suffix: '+', icon: '👥 ' },
+        { id: 'stat-num-4', target: 100, suffix: '%', icon: '🔒 ' }
+      ];
+
+      stats.forEach((item, index) => {
+        const el = document.getElementById(item.id);
+        if (!el) return;
+        
+        let start = 0;
+        const duration = 1500;
+        const startTime = performance.now();
+
+        function updateCounter(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic
+          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          const currentVal = Math.floor(easeProgress * item.target);
+          
+          el.textContent = currentVal.toLocaleString() + item.suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+          } else {
+            el.textContent = item.target.toLocaleString() + item.suffix;
+            if (index === 0) playTone(783.99, 'sine', 0.08, 0.05);
+          }
+        }
+        setTimeout(() => requestAnimationFrame(updateCounter), index * 100);
+      });
+    }
+
+    // Trigger stat animation on page load
+    setTimeout(animateStatNumbers, 400);
+
     // Tab Switcher Controller
     window.switchShutdownTab = function(tabId) {
       playTone(440, 'sine', 0.08, 0.08);
@@ -6146,7 +6216,9 @@
       const targetPanel = document.getElementById(tabId);
       if (targetPanel) targetPanel.classList.add('active');
 
-      if (tabId === 'tab-minigames') {
+      if (tabId === 'tab-notice') {
+        animateStatNumbers();
+      } else if (tabId === 'tab-minigames') {
         setTimeout(startSnakeGame, 100);
       }
     };
@@ -6240,7 +6312,6 @@
         if (!snakeRunning) return;
         snakeInterval = requestAnimationFrame(snakeLoop);
 
-        // Slow loop to 15 FPS for retro arcade feel
         if (++count < 6) return;
         count = 0;
 
@@ -6250,7 +6321,6 @@
         snake.x += snake.dx;
         snake.y += snake.dy;
 
-        // Wrap around edges
         if (snake.x < 0) snake.x = snakeCanvas.width - grid;
         else if (snake.x >= snakeCanvas.width) snake.x = 0;
         if (snake.y < 0) snake.y = snakeCanvas.height - grid;
@@ -6262,19 +6332,16 @@
           snake.cells.pop();
         }
 
-        // Draw Apple (Neon Pink/Red)
         snakeCtx.fillStyle = '#f43f5e';
         snakeCtx.shadowColor = '#f43f5e';
         snakeCtx.shadowBlur = 8;
         snakeCtx.fillRect(apple.x, apple.y, grid - 1, grid - 1);
         snakeCtx.shadowBlur = 0;
 
-        // Draw Snake Body
         snake.cells.forEach(function(cell, index) {
           snakeCtx.fillStyle = index === 0 ? '#34d399' : '#10b981';
           snakeCtx.fillRect(cell.x, cell.y, grid - 1, grid - 1);
 
-          // Check if snake ate apple
           if (cell.x === apple.x && cell.y === apple.y) {
             playTone(523.25, 'triangle', 0.1, 0.1);
             snake.maxCells++;
@@ -6288,7 +6355,6 @@
             apple.y = getRandomInt(0, snakeCanvas.height / grid) * grid;
           }
 
-          // Check collision with self
           for (let i = index + 1; i < snake.cells.length; i++) {
             if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
               playTone(150, 'sawtooth', 0.3, 0.15);
@@ -6341,7 +6407,6 @@
           return;
         }
 
-        // Groq AI Turn
         document.getElementById('ttt-status').textContent = '🤖 Groq AI is thinking...';
         setTimeout(() => {
           const diffSelect = document.getElementById('ttt-difficulty');
@@ -6352,7 +6417,6 @@
             let aiMove = null;
 
             if (difficulty === 'hard') {
-              // Winning move or block move
               aiMove = findWinningOrBlockingMove('O') || findWinningOrBlockingMove('X');
             }
             if (aiMove === null) {
@@ -6422,18 +6486,16 @@
       };
     })();
 
-    // Emergency Stealth Panic Key (~ or Esc) & about:blank Cloaker & Konami Code Easter Egg
+    // Stealth Panic Key (~ or Esc) & Cloaker & Konami Code
     (function() {
       const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
       let konamiIdx = 0;
 
       window.addEventListener('keydown', function(e) {
-        // Panic key
         if (e.code === 'Backquote' || e.key === '~' || e.key === 'Escape') {
           window.location.href = 'https://classroom.google.com';
         }
 
-        // Konami code tracker
         if (e.key === konamiCode[konamiIdx] || e.key.toLowerCase() === konamiCode[konamiIdx]) {
           konamiIdx++;
           if (konamiIdx === konamiCode.length) {
@@ -6513,23 +6575,30 @@
       updateCountdown();
     })();
 
-    // Dynamic Background Canvas Engine (Cosmic, Matrix, Sunset, Spooky Glow)
+    // 🌌 ADVANCED COSMIC CANVAS ENGINE WITH SHOOTING METEORS, METEOR SHOWERS & AUTO-RESPAWN
     let currentCanvasTheme = 'cosmic';
+    let resetCanvasParticlesFunc = null;
+
     window.changeCanvasTheme = function(themeName) {
       currentCanvasTheme = themeName;
       playTone(523.25, 'sine', 0.08, 0.08);
+    };
+
+    window.resetCanvasParticles = function() {
+      if (resetCanvasParticlesFunc) resetCanvasParticlesFunc();
+      playTone(783.99, 'triangle', 0.15, 0.12);
     };
 
     (function() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [];
+      let width, height, particles = [], meteors = [];
 
       const mouse = {
         x: null,
         y: null,
-        radius: 180,
+        radius: 200,
         isPressed: false
       };
 
@@ -6537,8 +6606,37 @@
         if (!canvas) return;
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
+        initParticles();
       }
       window.addEventListener('resize', resizeCanvas);
+
+      function initParticles() {
+        particles = [];
+        const baseCount = Math.min(Math.floor((width * height) / 12000), 100);
+        for (let i = 0; i < Math.max(baseCount, 75); i++) {
+          particles.push(createBaseParticle());
+        }
+      }
+
+      function createBaseParticle() {
+        return {
+          x: Math.random() * (width || window.innerWidth),
+          y: Math.random() * (height || window.innerHeight),
+          vx: (Math.random() - 0.5) * 0.7,
+          vy: (Math.random() - 0.5) * 0.7,
+          radius: Math.random() * 2.8 + 1,
+          alpha: Math.random() * 0.6 + 0.35,
+          decay: 0,
+          isSpawned: false
+        };
+      }
+
+      resetCanvasParticlesFunc = function() {
+        initParticles();
+        meteors = [];
+        spawnBurst(width / 2, height / 2, 25);
+      };
+
       resizeCanvas();
 
       window.addEventListener('mousemove', (e) => {
@@ -6554,8 +6652,8 @@
 
       window.addEventListener('mousedown', (e) => {
         mouse.isPressed = true;
-        spawnBurst(e.clientX, e.clientY, 14);
-        playTone(600 + Math.random() * 200, 'sine', 0.05, 0.05);
+        spawnBurst(e.clientX, e.clientY, 16);
+        playTone(600 + Math.random() * 250, 'sine', 0.05, 0.05);
       });
 
       window.addEventListener('mouseup', () => {
@@ -6566,7 +6664,7 @@
         if (e.touches.length > 0) {
           mouse.x = e.touches[0].clientX;
           mouse.y = e.touches[0].clientY;
-          spawnBurst(mouse.x, mouse.y, 12);
+          spawnBurst(mouse.x, mouse.y, 14);
         }
       });
 
@@ -6585,34 +6683,33 @@
       function spawnBurst(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 5 + 1.5;
+          const speed = Math.random() * 5.5 + 1.8;
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            radius: Math.random() * 3.5 + 1.5,
-            alpha: 0.9,
-            decay: Math.random() * 0.006 + 0.002,
+            radius: Math.random() * 3.8 + 1.5,
+            alpha: 0.95,
+            decay: Math.random() * 0.007 + 0.003,
             isSpawned: true
           });
         }
-        if (particles.length > 140) {
-          particles.splice(0, particles.length - 140);
+        if (particles.length > 160) {
+          particles.splice(0, particles.length - 160);
         }
       }
 
-      for (let i = 0; i < 70; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.6,
-          vy: (Math.random() - 0.5) * 0.6,
-          radius: Math.random() * 2.5 + 1,
-          alpha: Math.random() * 0.5 + 0.35,
-          decay: 0,
-          isSpawned: false
-        });
+      function spawnMeteor() {
+        if (Math.random() < 0.02) {
+          meteors.push({
+            x: Math.random() * width,
+            y: 0,
+            length: Math.random() * 80 + 40,
+            speed: Math.random() * 8 + 6,
+            alpha: 1
+          });
+        }
       }
 
       function animateParticles() {
@@ -6624,6 +6721,33 @@
 
         ctx.clearRect(0, 0, width, height);
 
+        // Render Shooting Meteors in Cosmic theme
+        if (currentCanvasTheme === 'cosmic' || currentCanvasTheme === 'spooky') {
+          spawnMeteor();
+          for (let i = meteors.length - 1; i >= 0; i--) {
+            const m = meteors[i];
+            m.x += m.speed * 0.7;
+            m.y += m.speed;
+            m.alpha -= 0.015;
+
+            if (m.alpha <= 0 || m.y > height || m.x > width) {
+              meteors.splice(i, 1);
+              continue;
+            }
+
+            const grad = ctx.createLinearGradient(m.x, m.y, m.x - m.length * 0.7, m.y - m.length);
+            grad.addColorStop(0, currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.9)' : 'rgba(192, 132, 252, 0.9)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            ctx.beginPath();
+            ctx.moveTo(m.x, m.y);
+            ctx.lineTo(m.x - m.length * 0.7, m.y - m.length);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2.2;
+            ctx.stroke();
+          }
+        }
+
         // Render Matrix Code Rain mode if selected
         if (currentCanvasTheme === 'matrix') {
           ctx.fillStyle = 'rgba(34, 197, 94, 0.85)';
@@ -6634,10 +6758,16 @@
           }
         }
 
+        // Ensure minimum base particle population NEVER vanishes
+        const baseParticles = particles.filter(p => !p.isSpawned);
+        if (baseParticles.length < 50) {
+          particles.push(createBaseParticle());
+        }
+
         if (mouse.x !== null && mouse.y !== null) {
           ctx.beginPath();
-          ctx.arc(mouse.x, mouse.y, mouse.isPressed ? 14 : 8, 0, Math.PI * 2);
-          ctx.fillStyle = currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.8)' : (mouse.isPressed ? 'rgba(244, 63, 94, 0.8)' : 'rgba(255, 255, 255, 0.4)');
+          ctx.arc(mouse.x, mouse.y, mouse.isPressed ? 16 : 9, 0, Math.PI * 2);
+          ctx.fillStyle = currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.8)' : (mouse.isPressed ? 'rgba(244, 63, 94, 0.85)' : 'rgba(255, 255, 255, 0.45)');
           ctx.fill();
         }
 
@@ -6669,19 +6799,19 @@
               const maxDistance = mouse.radius;
               const force = (maxDistance - dist) / maxDistance;
               
-              const pushMultiplier = mouse.isPressed ? -6.0 : 2.5;
+              const pushMultiplier = mouse.isPressed ? -6.5 : 2.8;
               const directionX = forceDirectionX * force * pushMultiplier;
               const directionY = forceDirectionY * force * pushMultiplier;
 
               p.x -= directionX;
               p.y -= directionY;
 
-              if (dist < 150) {
+              if (dist < 160) {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 150) * 0.45})` : `rgba(244, 63, 94, ${(1 - dist / 150) * 0.45})`;
-                ctx.lineWidth = 1.0;
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 160) * 0.5})` : `rgba(244, 63, 94, ${(1 - dist / 160) * 0.5})`;
+                ctx.lineWidth = 1.1;
                 ctx.stroke();
               }
             }
@@ -6702,8 +6832,8 @@
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 140) * 0.22})` : `rgba(244, 63, 94, ${(1 - dist / 140) * 0.22})`;
-              ctx.lineWidth = 0.9;
+              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 140) * 0.24})` : `rgba(244, 63, 94, ${(1 - dist / 140) * 0.24})`;
+              ctx.lineWidth = 0.95;
               ctx.stroke();
             }
           }
@@ -6713,7 +6843,7 @@
       animateParticles();
     })();
 
-    // Admin Auth & Testing Mode Bypass Handler (SANITY CLEAN: NO PASSWORD LEAKS)
+    // Admin Auth Handler (SANITY CLEAN: NO PASSWORD LEAKS)
     window.openAdminModal = function() {
       playTone(440, 'sine', 0.08, 0.08);
       const modal = document.getElementById('admin-login-modal');
