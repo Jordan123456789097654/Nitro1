@@ -6699,6 +6699,12 @@
     };
 
     // DISTINCT MULTI-STATION LO-FI STREAMING AUDIO PLAYER & PROCEDURAL SYNTH ENGINE
+    var resetCanvasParticlesFunc = null;
+    var triggerCanvasShockwaveFunc = null;
+    var spawnBurstFunc = null;
+    var particleInsanityVal = 10;
+    var currentCanvasTheme = 'spooky';
+
     const lofiAudioPlayer = document.getElementById('lofi-audio-player');
     let isLofiPlaying = false;
     let lofiFallbackTimer = null;
@@ -7810,16 +7816,15 @@
       if (elSecs) elSecs.textContent = String(secs).padStart(2, '0');
     }
 
-    loadSavedAdminConfig();
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
     // 🌌 EXTREME PARTICLE INSANITY CONTROLLER & WEBSITE CRASH MODE
-    let particleInsanityVal = 10; // Default 10x
-    let currentCanvasTheme = 'spooky';
-    let resetCanvasParticlesFunc = null;
-    let triggerCanvasShockwaveFunc = null;
-    let spawnBurstFunc = null;
+    // particleInsanityVal initialized above
+    // currentCanvasTheme initialized above
+    // resetCanvasParticlesFunc initialized above
+    // triggerCanvasShockwaveFunc initialized above
+    // spawnBurstFunc initialized above
 
     window.setParticleInsanityLevel = function(val) {
       particleInsanityVal = parseInt(val, 10);
@@ -8352,6 +8357,7 @@
       }
     };
 
+    loadSavedAdminConfig();
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', applyBypassState);
     } else {
