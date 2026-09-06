@@ -469,7 +469,7 @@
       margin-top: -12px;
     }
 
-    /* STATS GRID & SLIDE-UP ANIMATIONS */
+    /* STATS GRID & UPWARD ROLLING NUMBERS ANIMATION */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -488,6 +488,8 @@
       opacity: 0;
       transform: translateY(35px);
       animation: slideUpStat 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      overflow: hidden;
+      position: relative;
     }
 
     .stat-card:nth-child(1) { animation-delay: 0.1s; }
@@ -507,14 +509,33 @@
       box-shadow: 0 10px 24px rgba(244, 63, 94, 0.2);
     }
 
+    .stat-number-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.1rem;
+      margin-bottom: 4px;
+      overflow: hidden;
+    }
+
     .stat-number {
       font-family: 'Outfit', sans-serif;
       font-size: 1.55rem;
       font-weight: 800;
       color: #f43f5e;
       line-height: 1.1;
-      margin-bottom: 4px;
-      text-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+      text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+      transition: transform 0.1s ease;
+    }
+
+    .stat-number.rolling {
+      animation: rollNumberUp 0.12s infinite linear;
+    }
+
+    @keyframes rollNumberUp {
+      0% { transform: translateY(12px); opacity: 0.6; }
+      50% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-12px); opacity: 0.6; }
     }
 
     .stat-label {
@@ -717,7 +738,7 @@
   </style>
 </head>
 <body>
-  <!-- FLOATING INTERACTIVE WIDGET: CANVAS THEMES, RESET CANVAS & LO-FI SYNTH -->
+  <!-- FLOATING INTERACTIVE WIDGET: CANVAS THEMES, MULTI-TRACK LO-FI BEATS & SHOCKWAVE CANNON -->
   <div id="floating-control-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
     
     <!-- Canvas Theme Selector & Reset Particles Row -->
@@ -729,17 +750,26 @@
         <option value="sunset">🌅 Synthwave Sunset</option>
         <option value="spooky">🎃 Halloween Ember Glow</option>
       </select>
-      <button type="button" onclick="resetCanvasParticles()" title="Reset Particles & Canvas" style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
-        🔄 Reset Particles
+      <button type="button" onclick="triggerCanvasShockwave()" title="Trigger Gravity Shockwave Cannon" style="background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); color: #f43f5e; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
+        💥 Shockwave Blast
+      </button>
+      <button type="button" onclick="resetCanvasParticles()" title="Reset Particles" style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
+        🔄 Reset
       </button>
     </div>
 
-    <!-- Ad-Free Procedural Lo-Fi Beats & Audio Widget -->
-    <div id="lofi-music-widget" style="background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 14px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+    <!-- Ad-Free Procedural Multi-Track Lo-Fi Beats & Audio Widget -->
+    <div id="lofi-music-widget" style="background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 14px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); flex-wrap: wrap;">
       <span style="font-size: 1rem;">🎧</span>
       <div style="display: flex; flex-direction: column;">
-        <span style="font-size: 0.78rem; font-weight: 800; color: #c084fc; line-height: 1.1;">100% Ad-Free Lo-Fi Synth</span>
-        <span style="font-size: 0.68rem; color: #94a3b8;" id="lofi-status-text">Click Play to Listen</span>
+        <!-- Lo-Fi Track Style Dropdown -->
+        <select id="lofi-track-select" onchange="changeLofiTrack(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
+          <option value="jazz">🎷 Midnight Chill (Jazz 7ths)</option>
+          <option value="synthwave">🌌 Synthwave Night (80s Arp)</option>
+          <option value="spooky">🎃 Spooky Lo-Fi (Minor Suspense)</option>
+          <option value="cafe">☕ Rain Day Cafe (Warm Acoustic)</option>
+        </select>
+        <span style="font-size: 0.65rem; color: #94a3b8;" id="lofi-status-text">100% Ad-Free • Select Track</span>
       </div>
       <button type="button" onclick="toggleLofiSynth()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transition: all 0.2s ease;">▶</button>
       <button type="button" onclick="toggleSFX()" id="sfx-toggle-btn" title="Toggle Sound FX" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #34d399; border-radius: 50%; width: 26px; height: 26px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">🔊</button>
@@ -833,22 +863,30 @@
           </div>
         </div>
 
-        <!-- Platform Accomplishments & Slide-Up Animated Archive Counter Grid -->
+        <!-- Platform Accomplishments & Upward Rolling Numbers Counter Grid -->
         <div class="stats-grid" id="stats-grid-container">
-          <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number" id="stat-num-1" data-target="1081">0</div>
+          <div class="stat-card" onclick="triggerRollNumbersUp(0)">
+            <div class="stat-number-wrapper">
+              <div class="stat-number" id="stat-num-1">0</div>
+            </div>
             <div class="stat-label">🌐 TOTAL VISITS</div>
           </div>
-          <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number" id="stat-num-2" data-target="500">0</div>
+          <div class="stat-card" onclick="triggerRollNumbersUp(1)">
+            <div class="stat-number-wrapper">
+              <div class="stat-number" id="stat-num-2">0</div>
+            </div>
             <div class="stat-label">🎮 GAMES & APPS</div>
           </div>
-          <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number" id="stat-num-3" data-target="28">0</div>
+          <div class="stat-card" onclick="triggerRollNumbersUp(2)">
+            <div class="stat-number-wrapper">
+              <div class="stat-number" id="stat-num-3">0</div>
+            </div>
             <div class="stat-label">👥 PLAYER ACCOUNTS</div>
           </div>
-          <div class="stat-card" onclick="triggerStatPulse(this)">
-            <div class="stat-number" id="stat-num-4" data-target="100">0</div>
+          <div class="stat-card" onclick="triggerRollNumbersUp(3)">
+            <div class="stat-number-wrapper">
+              <div class="stat-number" id="stat-num-4">0</div>
+            </div>
             <div class="stat-label">🔒 DATA PRESERVED</div>
           </div>
         </div>
@@ -6067,11 +6105,12 @@
 
 
   <script id="shutdown-overlay-script">
-    // Web Audio Sound FX & Procedural Ad-Free Lo-Fi Music Synthesizer
+    // Web Audio Sound FX & Procedural Multi-Track Lo-Fi Music Synthesizer
     let audioCtx = null;
     let sfxEnabled = true;
     let lofiSynthPlaying = false;
     let lofiInterval = null;
+    let currentLofiStyle = 'jazz';
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -6103,7 +6142,16 @@
       } catch (e) {}
     };
 
-    // 100% Ad-Free Procedural Chill Lo-Fi Synth Synthesizer
+    window.changeLofiTrack = function(style) {
+      currentLofiStyle = style;
+      playTone(587.33, 'sine', 0.1, 0.1);
+      if (lofiSynthPlaying) {
+        if (lofiInterval) clearInterval(lofiInterval);
+        startLofiLoop();
+      }
+    };
+
+    // 100% Ad-Free Procedural Multi-Style Chill Lo-Fi Synthesizer
     window.toggleLofiSynth = function() {
       const btn = document.getElementById('lofi-toggle-btn');
       const text = document.getElementById('lofi-status-text');
@@ -6118,90 +6166,137 @@
       } else {
         lofiSynthPlaying = true;
         if (btn) btn.textContent = '⏸';
-        if (text) text.textContent = 'Playing Ambient Lo-Fi 🎵';
-
-        const chords = [
-          [261.63, 329.63, 392.00, 493.88], // Cmaj7
-          [220.00, 261.63, 329.63, 392.00], // Am7
-          [293.66, 349.23, 440.00, 523.25], // Dm7
-          [196.00, 246.94, 293.66, 349.23]  // G7
-        ];
-        let chordIdx = 0;
-
-        function playLoFiChord() {
-          if (!lofiSynthPlaying) return;
-          const currentChord = chords[chordIdx % chords.length];
-          chordIdx++;
-
-          currentChord.forEach((freq, i) => {
-            try {
-              const osc = audioCtx.createOscillator();
-              const filter = audioCtx.createBiquadFilter();
-              const gain = audioCtx.createGain();
-
-              osc.type = i === 0 ? 'sine' : 'triangle';
-              osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-              filter.type = 'lowpass';
-              filter.frequency.setValueAtTime(700, audioCtx.currentTime);
-
-              gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-              gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.4);
-              gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.6);
-
-              osc.connect(filter);
-              filter.connect(gain);
-              gain.connect(audioCtx.destination);
-
-              osc.start();
-              osc.stop(audioCtx.currentTime + 3.8);
-            } catch (err) {}
-          });
-        }
-
-        playLoFiChord();
-        lofiInterval = setInterval(playLoFiChord, 3800);
+        if (text) text.textContent = 'Playing Live Beat 🎵';
+        startLofiLoop();
       }
     };
 
-    // 🚀 DYNAMIC COUNT-UP ANIMATION FOR STAT CARDS ON STARTUP & RE-SLIDE
-    function animateStatNumbers() {
-      const stats = [
-        { id: 'stat-num-1', target: 1081, suffix: '+', icon: '🌐 ' },
-        { id: 'stat-num-2', target: 500, suffix: '+', icon: '🎮 ' },
-        { id: 'stat-num-3', target: 28, suffix: '+', icon: '👥 ' },
-        { id: 'stat-num-4', target: 100, suffix: '%', icon: '🔒 ' }
-      ];
-
-      stats.forEach((item, index) => {
-        const el = document.getElementById(item.id);
-        if (!el) return;
-        
-        let start = 0;
-        const duration = 1500;
-        const startTime = performance.now();
-
-        function updateCounter(currentTime) {
-          const elapsed = currentTime - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          // Ease out cubic
-          const easeProgress = 1 - Math.pow(1 - progress, 3);
-          const currentVal = Math.floor(easeProgress * item.target);
-          
-          el.textContent = currentVal.toLocaleString() + item.suffix;
-
-          if (progress < 1) {
-            requestAnimationFrame(updateCounter);
-          } else {
-            el.textContent = item.target.toLocaleString() + item.suffix;
-            if (index === 0) playTone(783.99, 'sine', 0.08, 0.05);
-          }
+    function startLofiLoop() {
+      const trackPresets = {
+        jazz: {
+          chords: [
+            [261.63, 329.63, 392.00, 493.88], // Cmaj7
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [293.66, 349.23, 440.00, 523.25], // Dm7
+            [196.00, 246.94, 293.66, 349.23]  // G7
+          ],
+          tempo: 3800,
+          filter: 750,
+          type: 'triangle'
+        },
+        synthwave: {
+          chords: [
+            [130.81, 196.00, 261.63, 329.63], // C major synth arp
+            [174.61, 261.63, 349.23, 440.00], // F major synth arp
+            [146.83, 220.00, 293.66, 349.23], // D minor synth arp
+            [196.00, 293.66, 392.00, 493.88]  // G major synth arp
+          ],
+          tempo: 2400,
+          filter: 1200,
+          type: 'sawtooth'
+        },
+        spooky: {
+          chords: [
+            [146.83, 174.61, 220.00, 261.63], // Dm (Dark minor)
+            [138.59, 164.81, 207.65, 246.94], // C#dim (Suspense)
+            [164.81, 196.00, 246.94, 293.66], // Em (Spooky low)
+            [130.81, 155.56, 196.00, 233.08]  // Cm (Eerie resonance)
+          ],
+          tempo: 4200,
+          filter: 550,
+          type: 'sine'
+        },
+        cafe: {
+          chords: [
+            [261.63, 329.63, 392.00], // C major warm
+            [220.00, 261.63, 329.63], // A minor warm
+            [174.61, 220.00, 261.63], // F major warm
+            [196.00, 246.94, 293.66]  // G major warm
+          ],
+          tempo: 3400,
+          filter: 650,
+          type: 'triangle'
         }
-        setTimeout(() => requestAnimationFrame(updateCounter), index * 100);
-      });
+      };
+
+      let chordIdx = 0;
+      const preset = trackPresets[currentLofiStyle] || trackPresets.jazz;
+
+      function playLoFiBeatStep() {
+        if (!lofiSynthPlaying) return;
+        const currentChord = preset.chords[chordIdx % preset.chords.length];
+        chordIdx++;
+
+        currentChord.forEach((freq, i) => {
+          try {
+            const osc = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            osc.type = i === 0 ? 'sine' : preset.type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(preset.filter, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 0.3);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (preset.tempo / 1000) - 0.2);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + (preset.tempo / 1000));
+          } catch (err) {}
+        });
+      }
+
+      playLoFiBeatStep();
+      lofiInterval = setInterval(playLoFiBeatStep, preset.tempo);
     }
 
-    // Trigger stat animation on page load
-    setTimeout(animateStatNumbers, 400);
+    // 🚀 HIGH-ENERGY UPWARD ROLLING SLOT NUMBERS ENGINE ("numbers go up")
+    const statTargets = [
+      { id: 'stat-num-1', target: 1081, suffix: '+' },
+      { id: 'stat-num-2', target: 500, suffix: '+' },
+      { id: 'stat-num-3', target: 28, suffix: '+' },
+      { id: 'stat-num-4', target: 100, suffix: '%' }
+    ];
+
+    window.triggerRollNumbersUp = function(statIndex) {
+      const items = statIndex !== undefined ? [statTargets[statIndex]] : statTargets;
+      
+      items.forEach((item, idx) => {
+        const el = document.getElementById(item.id);
+        if (!el) return;
+
+        playTone(500 + idx * 100, 'square', 0.1, 0.08);
+        el.classList.add('rolling');
+
+        let current = 0;
+        const target = item.target;
+        const steps = 30;
+        const increment = Math.ceil(target / steps);
+        
+        const rollTimer = setInterval(() => {
+          current += increment + Math.floor(Math.random() * 5);
+          if (current >= target) {
+            current = target;
+            clearInterval(rollTimer);
+            el.classList.remove('rolling');
+            el.textContent = target.toLocaleString() + item.suffix;
+            playTone(880 + idx * 80, 'sine', 0.15, 0.1);
+          } else {
+            el.textContent = current.toLocaleString() + item.suffix;
+          }
+        }, 35);
+      });
+    };
+
+    // Trigger number roll up on startup
+    setTimeout(() => window.triggerRollNumbersUp(), 500);
 
     // Tab Switcher Controller
     window.switchShutdownTab = function(tabId) {
@@ -6217,7 +6312,7 @@
       if (targetPanel) targetPanel.classList.add('active');
 
       if (tabId === 'tab-notice') {
-        animateStatNumbers();
+        window.triggerRollNumbersUp();
       } else if (tabId === 'tab-minigames') {
         setTimeout(startSnakeGame, 100);
       }
@@ -6575,9 +6670,10 @@
       updateCountdown();
     })();
 
-    // 🌌 ADVANCED COSMIC CANVAS ENGINE WITH SHOOTING METEORS, METEOR SHOWERS & AUTO-RESPAWN
+    // 🌌 ADVANCED COSMIC CANVAS ENGINE WITH SHOCKWAVE CANNON, METEORS & INTERACTIVE PITCH SYNTH
     let currentCanvasTheme = 'cosmic';
     let resetCanvasParticlesFunc = null;
+    let triggerCanvasShockwaveFunc = null;
 
     window.changeCanvasTheme = function(themeName) {
       currentCanvasTheme = themeName;
@@ -6589,16 +6685,21 @@
       playTone(783.99, 'triangle', 0.15, 0.12);
     };
 
+    window.triggerCanvasShockwave = function() {
+      if (triggerCanvasShockwaveFunc) triggerCanvasShockwaveFunc();
+      playTone(300, 'sawtooth', 0.3, 0.2);
+    };
+
     (function() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [], meteors = [];
+      let width, height, particles = [], meteors = [], shockwaves = [];
 
       const mouse = {
         x: null,
         y: null,
-        radius: 200,
+        radius: 220,
         isPressed: false
       };
 
@@ -6612,8 +6713,8 @@
 
       function initParticles() {
         particles = [];
-        const baseCount = Math.min(Math.floor((width * height) / 12000), 100);
-        for (let i = 0; i < Math.max(baseCount, 75); i++) {
+        const baseCount = Math.min(Math.floor((width * height) / 11000), 110);
+        for (let i = 0; i < Math.max(baseCount, 80); i++) {
           particles.push(createBaseParticle());
         }
       }
@@ -6622,9 +6723,9 @@
         return {
           x: Math.random() * (width || window.innerWidth),
           y: Math.random() * (height || window.innerHeight),
-          vx: (Math.random() - 0.5) * 0.7,
-          vy: (Math.random() - 0.5) * 0.7,
-          radius: Math.random() * 2.8 + 1,
+          vx: (Math.random() - 0.5) * 0.75,
+          vy: (Math.random() - 0.5) * 0.75,
+          radius: Math.random() * 3 + 1,
           alpha: Math.random() * 0.6 + 0.35,
           decay: 0,
           isSpawned: false
@@ -6634,7 +6735,15 @@
       resetCanvasParticlesFunc = function() {
         initParticles();
         meteors = [];
-        spawnBurst(width / 2, height / 2, 25);
+        shockwaves = [];
+        spawnBurst(width / 2, height / 2, 30);
+      };
+
+      triggerCanvasShockwaveFunc = function() {
+        const cx = mouse.x || width / 2;
+        const cy = mouse.y || height / 2;
+        shockwaves.push({ x: cx, y: cy, radius: 10, maxRadius: 350, alpha: 0.9 });
+        spawnBurst(cx, cy, 35);
       };
 
       resizeCanvas();
@@ -6652,12 +6761,19 @@
 
       window.addEventListener('mousedown', (e) => {
         mouse.isPressed = true;
-        spawnBurst(e.clientX, e.clientY, 16);
-        playTone(600 + Math.random() * 250, 'sine', 0.05, 0.05);
+        spawnBurst(e.clientX, e.clientY, 18);
+
+        // Dynamic Pitch bender synth based on cursor position X
+        const pitchFreq = 300 + (e.clientX / width) * 700;
+        playTone(pitchFreq, 'sine', 0.08, 0.08);
       });
 
       window.addEventListener('mouseup', () => {
         mouse.isPressed = false;
+      });
+
+      window.addEventListener('dblclick', (e) => {
+        triggerCanvasShockwaveFunc();
       });
 
       window.addEventListener('touchstart', (e) => {
@@ -6683,30 +6799,30 @@
       function spawnBurst(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 5.5 + 1.8;
+          const speed = Math.random() * 6 + 2;
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            radius: Math.random() * 3.8 + 1.5,
+            radius: Math.random() * 4 + 1.5,
             alpha: 0.95,
             decay: Math.random() * 0.007 + 0.003,
             isSpawned: true
           });
         }
-        if (particles.length > 160) {
-          particles.splice(0, particles.length - 160);
+        if (particles.length > 180) {
+          particles.splice(0, particles.length - 180);
         }
       }
 
       function spawnMeteor() {
-        if (Math.random() < 0.02) {
+        if (Math.random() < 0.025) {
           meteors.push({
             x: Math.random() * width,
             y: 0,
-            length: Math.random() * 80 + 40,
-            speed: Math.random() * 8 + 6,
+            length: Math.random() * 90 + 45,
+            speed: Math.random() * 9 + 6,
             alpha: 1
           });
         }
@@ -6720,6 +6836,35 @@
         }
 
         ctx.clearRect(0, 0, width, height);
+
+        // Render Shockwaves
+        for (let i = shockwaves.length - 1; i >= 0; i--) {
+          const sw = shockwaves[i];
+          sw.radius += 10;
+          sw.alpha -= 0.025;
+
+          if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+            shockwaves.splice(i, 1);
+            continue;
+          }
+
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(244, 63, 94, ' + sw.alpha + ')';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          // Push particles away with shockwave force
+          particles.forEach(p => {
+            const dx = p.x - sw.x;
+            const dy = p.y - sw.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (Math.abs(dist - sw.radius) < 25 && dist > 0) {
+              p.vx += (dx / dist) * 3;
+              p.vy += (dy / dist) * 3;
+            }
+          });
+        }
 
         // Render Shooting Meteors in Cosmic theme
         if (currentCanvasTheme === 'cosmic' || currentCanvasTheme === 'spooky') {
@@ -6743,7 +6888,7 @@
             ctx.moveTo(m.x, m.y);
             ctx.lineTo(m.x - m.length * 0.7, m.y - m.length);
             ctx.strokeStyle = grad;
-            ctx.lineWidth = 2.2;
+            ctx.lineWidth = 2.4;
             ctx.stroke();
           }
         }
@@ -6752,22 +6897,22 @@
         if (currentCanvasTheme === 'matrix') {
           ctx.fillStyle = 'rgba(34, 197, 94, 0.85)';
           ctx.font = '14px monospace';
-          for (let i = 0; i < 35; i++) {
+          for (let i = 0; i < 38; i++) {
             const char = String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96));
-            ctx.fillText(char, (i * (width / 35)), (Date.now() / 15 + i * 40) % height);
+            ctx.fillText(char, (i * (width / 38)), (Date.now() / 15 + i * 40) % height);
           }
         }
 
         // Ensure minimum base particle population NEVER vanishes
         const baseParticles = particles.filter(p => !p.isSpawned);
-        if (baseParticles.length < 50) {
+        if (baseParticles.length < 55) {
           particles.push(createBaseParticle());
         }
 
         if (mouse.x !== null && mouse.y !== null) {
           ctx.beginPath();
-          ctx.arc(mouse.x, mouse.y, mouse.isPressed ? 16 : 9, 0, Math.PI * 2);
-          ctx.fillStyle = currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.8)' : (mouse.isPressed ? 'rgba(244, 63, 94, 0.85)' : 'rgba(255, 255, 255, 0.45)');
+          ctx.arc(mouse.x, mouse.y, mouse.isPressed ? 18 : 10, 0, Math.PI * 2);
+          ctx.fillStyle = currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.85)' : (mouse.isPressed ? 'rgba(244, 63, 94, 0.9)' : 'rgba(255, 255, 255, 0.5)');
           ctx.fill();
         }
 
@@ -6799,18 +6944,18 @@
               const maxDistance = mouse.radius;
               const force = (maxDistance - dist) / maxDistance;
               
-              const pushMultiplier = mouse.isPressed ? -6.5 : 2.8;
+              const pushMultiplier = mouse.isPressed ? -7.0 : 3.0;
               const directionX = forceDirectionX * force * pushMultiplier;
               const directionY = forceDirectionY * force * pushMultiplier;
 
               p.x -= directionX;
               p.y -= directionY;
 
-              if (dist < 160) {
+              if (dist < 170) {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 160) * 0.5})` : `rgba(244, 63, 94, ${(1 - dist / 160) * 0.5})`;
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 170) * 0.5})` : `rgba(244, 63, 94, ${(1 - dist / 170) * 0.5})`;
                 ctx.lineWidth = 1.1;
                 ctx.stroke();
               }
@@ -6832,7 +6977,7 @@
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 140) * 0.24})` : `rgba(244, 63, 94, ${(1 - dist / 140) * 0.24})`;
+              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 140) * 0.25})` : `rgba(244, 63, 94, ${(1 - dist / 140) * 0.25})`;
               ctx.lineWidth = 0.95;
               ctx.stroke();
             }
