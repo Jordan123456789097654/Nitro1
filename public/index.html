@@ -1044,7 +1044,7 @@
       <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 10px; margin-top: 4px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
           <span class="float-group-title" style="color: #f87171;">💥 PARTICLE INSANITY SLIDER</span>
-          <span id="insanity-level-label" style="font-size: 0.75rem; font-weight: 900; color: #ef4444;">10x (800 Particles)</span>
+          <span id="insanity-level-label" style="font-size: 0.75rem; font-weight: 900; color: #ef4444;">10x (10,000 Particles)</span>
         </div>
 
         <input type="range" id="particle-insanity-slider" min="1" max="100" value="10" class="insanity-slider" oninput="setParticleInsanityLevel(this.value)">
@@ -8033,7 +8033,7 @@
     };
 
     window.triggerWebsiteCrashMode = function() {
-      const confirmCrash = confirm("⚠️ WARNING: Triggering WEBSITE CRASH MODE will spawn 25,000+ moving glowing particles & intense physics loops simultaneously! This WILL freeze or crash your browser tab on your end!\n\nDo you want to unleash full tab meltdown?");
+      const confirmCrash = confirm("⚠️ WARNING: Triggering 100,000 PARTICLE CRASH MODE will render 100,000 active glowing particles simultaneously! This WILL freeze or crash your browser tab on your end!\n\nDo you want to unleash 100,000 particle tab meltdown?");
       if (confirmCrash) {
         const slider = document.getElementById('particle-insanity-slider');
         if (slider) slider.value = 100;
