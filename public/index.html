@@ -211,7 +211,7 @@
       --text-muted: #cbd5e1;
     }
 
-    /* Fall Theme Presets Override Classes */
+    /* Fall & Weather Theme Overrides */
     body.theme-pumpkin-spice {
       --bg-color: #120904 !important;
       --card-bg: rgba(28, 16, 8, 0.95) !important;
@@ -226,9 +226,52 @@
       --accent-color: #38bdf8 !important;
     }
 
+    /* Weather Specific Body Background & Card Themes */
+    body.weather-theme-rain {
+      --bg-color: #050a14 !important;
+      --card-bg: rgba(10, 18, 34, 0.95) !important;
+      --card-border: rgba(56, 189, 248, 0.55) !important;
+      --accent-color: #38bdf8 !important;
+    }
+
+    body.weather-theme-thunder {
+      --bg-color: #06020c !important;
+      --card-bg: rgba(16, 8, 30, 0.95) !important;
+      --card-border: rgba(168, 85, 247, 0.6) !important;
+      --accent-color: #a855f7 !important;
+    }
+
+    body.weather-theme-snow {
+      --bg-color: #030c16 !important;
+      --card-bg: rgba(10, 24, 40, 0.95) !important;
+      --card-border: rgba(56, 189, 248, 0.65) !important;
+      --accent-color: #38bdf8 !important;
+    }
+
+    body.weather-theme-fog {
+      --bg-color: #0a0c10 !important;
+      --card-bg: rgba(18, 20, 26, 0.95) !important;
+      --card-border: rgba(203, 213, 225, 0.45) !important;
+      --accent-color: #cbd5e1 !important;
+    }
+
+    body.weather-theme-clear {
+      --bg-color: #0e0614 !important;
+      --card-bg: rgba(24, 12, 32, 0.95) !important;
+      --card-border: rgba(249, 115, 22, 0.55) !important;
+      --accent-color: #f97316 !important;
+    }
+
+    body.weather-theme-wind {
+      --bg-color: #140702 !important;
+      --card-bg: rgba(30, 14, 8, 0.95) !important;
+      --card-border: rgba(245, 158, 11, 0.55) !important;
+      --accent-color: #f59e0b !important;
+    }
+
     body {
       background-color: var(--bg-color) !important;
-      transition: background-color 0.4s ease;
+      transition: background-color 0.5s ease;
       margin: 0;
       padding: 0;
     }
@@ -249,7 +292,7 @@
       overflow-y: auto;
       padding: 24px;
       box-sizing: border-box;
-      transition: background-color 0.4s ease;
+      transition: background-color 0.5s ease;
     }
 
     #bg-canvas {
@@ -263,14 +306,27 @@
       cursor: crosshair;
     }
 
-    /* Ambient Subtle Spooky Glow Spheres */
+    #lightning-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.88);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.08s ease-out;
+    }
+
+    /* Ambient Glowing Spheres */
     .bg-glow-1 {
       position: absolute;
       top: -15%;
       left: 20%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(249, 115, 22, 0.14) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
       animation: pulseGlow 12s infinite alternate ease-in-out;
@@ -282,7 +338,7 @@
       right: 20%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
       animation: pulseGlow 14s infinite alternate ease-in-out;
@@ -293,7 +349,6 @@
       100% { transform: scale(1.08) translate(8px, -8px); opacity: 0.85; }
     }
 
-    /* Subtle Decorative Corner Pumpkins */
     .pumpkin-corner-left {
       position: absolute;
       top: -20px;
@@ -328,161 +383,76 @@
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
       padding: 36px 32px;
-      max-width: 820px;
+      max-width: 840px;
       width: 100%;
-      text-align: center;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(249, 115, 22, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-      animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: all 0.4s ease;
       margin: auto;
-    }
-
-    @keyframes fadeInCard {
-      from { opacity: 0; transform: translateY(20px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(249, 115, 22, 0.15);
+      text-align: center;
+      box-sizing: border-box;
+      transition: background-color 0.4s ease, border-color 0.4s ease;
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(249, 115, 22, 0.15);
-      border: 1px solid rgba(249, 115, 22, 0.45);
-      color: var(--accent-color);
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 6px 18px;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      color: #fdba74;
+      padding: 6px 16px;
       border-radius: 99px;
-      margin-bottom: 16px;
-      cursor: pointer;
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.25);
-      transition: all 0.2s ease;
-    }
-
-    .status-badge:hover {
-      background: rgba(249, 115, 22, 0.28);
-      transform: scale(1.04);
-      box-shadow: 0 0 20px rgba(249, 115, 22, 0.45);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      box-shadow: 0 0 16px rgba(249, 115, 22, 0.2);
     }
 
     .pulse-dot {
       width: 8px;
       height: 8px;
-      background-color: var(--accent-color);
+      background-color: #f97316;
       border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent-color);
-      animation: pulseDot 1.8s infinite;
+      box-shadow: 0 0 10px #f97316;
+      animation: pulse 2s infinite;
     }
 
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.3); }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
     }
 
     .maintenance-card h1 {
-      font-family: 'Outfit', sans-serif;
       font-size: 2.1rem;
       font-weight: 900;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px 0;
+      background: linear-gradient(135deg, #ffffff 30%, #fdba74 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       line-height: 1.25;
-      margin-bottom: 10px;
-      color: #ffffff;
-      text-shadow: 0 0 16px rgba(249, 115, 22, 0.2);
     }
 
     .notice-text {
       color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 18px;
-    }
-
-    /* Interactive Section Navigation Tabs */
-    .interactive-nav-tabs {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .nav-tab-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #94a3b8;
-      padding: 8px 16px;
-      font-size: 0.8rem;
-      font-weight: 800;
-      border-radius: 99px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .nav-tab-btn:hover {
-      background: rgba(249, 115, 22, 0.15);
-      border-color: rgba(249, 115, 22, 0.4);
-      color: #ffffff;
-      transform: translateY(-1px);
-    }
-
-    .nav-tab-btn.active {
-      background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(168, 85, 247, 0.25));
-      border-color: var(--accent-color);
-      color: #fdba74;
-      box-shadow: 0 0 20px rgba(249, 115, 22, 0.35);
-    }
-
-    .tab-panel-content {
-      display: none;
-    }
-
-    .tab-panel-content.active {
-      display: block;
-      animation: fadeInCard 0.4s ease;
-    }
-
-    .status-update-banner {
-      background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), rgba(168, 85, 247, 0.12));
-      border: 1px solid rgba(249, 115, 22, 0.4);
-      border-radius: 16px;
-      padding: 16px 20px;
-      text-align: left;
-      margin-bottom: 20px;
-      box-shadow: 0 0 16px rgba(249, 115, 22, 0.1);
-    }
-
-    .status-update-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: #fdba74;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 6px;
-    }
-
-    .status-update-body {
-      font-size: 0.86rem;
-      color: #cbd5e1;
-      line-height: 1.55;
+      font-size: 0.96rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
     }
 
     .relaunch-countdown-card {
-      background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), rgba(168, 85, 247, 0.15));
-      border: 1px solid rgba(249, 115, 22, 0.45);
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);
+      border: 1px solid rgba(249, 115, 22, 0.4);
       border-radius: 18px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 24px rgba(249, 115, 22, 0.15);
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     .relaunch-countdown-title {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 800;
       color: #fdba74;
       text-transform: uppercase;
@@ -492,188 +462,381 @@
 
     .countdown-timer-grid {
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       gap: 12px;
     }
 
     .countdown-unit {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(249, 115, 22, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      padding: 8px 14px;
-      min-width: 58px;
-      text-align: center;
+      padding: 10px 14px;
+      min-width: 56px;
     }
 
     .countdown-number {
-      font-family: 'Outfit', sans-serif;
       font-size: 1.6rem;
       font-weight: 900;
       color: #ffffff;
-      line-height: 1;
+      font-family: 'Outfit', monospace;
     }
 
     .countdown-label {
       font-size: 0.65rem;
-      font-weight: 800;
+      font-weight: 700;
       color: #94a3b8;
-      margin-top: 4px;
-      letter-spacing: 0.05em;
+      margin-top: 2px;
     }
 
     .countdown-divider {
       font-size: 1.5rem;
       font-weight: 900;
-      color: var(--accent-color);
-      opacity: 0.8;
+      color: #f97316;
     }
 
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .stat-card {
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 14px 10px;
-      transition: all 0.25s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease;
       cursor: pointer;
     }
 
     .stat-card:hover {
-      border-color: rgba(249, 115, 22, 0.4);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.15);
+      border-color: rgba(249, 115, 22, 0.4);
     }
 
     .stat-number-wrapper {
-      height: 38px;
+      height: 36px;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .stat-number {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       font-weight: 900;
-      color: #ffffff;
+      color: #f97316;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.05s ease-out;
     }
 
     .stat-label {
-      font-size: 0.68rem;
-      font-weight: 800;
+      font-size: 0.7rem;
+      font-weight: 700;
       color: #94a3b8;
-      letter-spacing: 0.04em;
       margin-top: 4px;
+      text-transform: uppercase;
     }
 
-    /* SPOOKY AI ORACLE CRYSTAL BALL STYLING */
-    .crystal-ball-container {
-      text-align: center;
-      padding: 20px;
+    /* Interactive Tab Navigation */
+    .interactive-nav-tabs {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
-    .crystal-ball {
-      font-size: 4rem;
-      display: inline-block;
-      cursor: pointer;
-      user-select: none;
-      filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8));
-      transition: all 0.3s ease;
-      animation: pulseCrystalBall 2.5s infinite ease-in-out alternate;
-    }
-
-    .crystal-ball:hover {
-      transform: scale(1.15) rotate(5deg);
-      filter: drop-shadow(0 0 40px rgba(249, 115, 22, 0.95));
-    }
-
-    @keyframes pulseCrystalBall {
-      0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.7)); }
-      100% { transform: scale(1.08); filter: drop-shadow(0 0 35px rgba(249, 115, 22, 0.9)); }
-    }
-
-    /* PUMPKIN CARVING CANVAS STYLING */
-    #pumpkin-carve-canvas {
-      background: radial-gradient(circle, #e65100 0%, #bf360c 80%, #1a0800 100%);
-      border: 3px solid #ff9800;
-      border-radius: 50% 50% 45% 45% / 55% 55% 40% 40%;
-      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.4), inset 0 -10px 20px rgba(0,0,0,0.6);
-      cursor: crosshair;
-      display: block;
-      margin: 12px auto;
-      touch-action: none;
-    }
-
-    .carve-tool-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
+    .nav-tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      padding: 7px 14px;
+      border-radius: 99px;
+      font-size: 0.8rem;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .carve-tool-btn.active, .carve-tool-btn:hover {
-      background: rgba(249, 115, 22, 0.3);
+    .nav-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .nav-tab-btn.active {
+      background: linear-gradient(135deg, #f97316, #c2410c);
+      border-color: #f97316;
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(249, 115, 22, 0.4);
+    }
+
+    .tab-panel-content {
+      display: none;
+      animation: fadeInTab 0.3s ease;
+    }
+
+    .tab-panel-content.active {
+      display: block;
+    }
+
+    @keyframes fadeInTab {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Status Update Banner */
+    .status-update-banner {
+      background: rgba(249, 115, 22, 0.08);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .status-update-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fdba74;
+      margin-bottom: 6px;
+    }
+
+    .status-update-body {
+      font-size: 0.84rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    /* Spooky AI Oracle Styling */
+    .crystal-ball-container {
+      text-align: center;
+      padding: 24px;
+    }
+
+    .crystal-ball {
+      font-size: 4rem;
+      cursor: pointer;
+      display: inline-block;
+      user-select: none;
+      filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.8));
+      animation: pulseBall 3s infinite ease-in-out alternate;
+      transition: transform 0.2s ease;
+    }
+
+    .crystal-ball:hover {
+      transform: scale(1.15) rotate(5deg);
+    }
+
+    @keyframes pulseBall {
+      0% { transform: scale(1); filter: drop-shadow(0 0 14px rgba(168, 85, 247, 0.6)); }
+      100% { transform: scale(1.08); filter: drop-shadow(0 0 28px rgba(249, 115, 22, 0.9)); }
+    }
+
+    /* Pumpkin Carver Canvas Styling */
+    #pumpkin-carve-canvas {
+      background: radial-gradient(circle, #ea580c 0%, #9a3412 70%, #451a03 100%);
+      border: 3px solid #f97316;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(249, 115, 22, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.6);
+      cursor: crosshair;
+      display: block;
+      margin: 12px auto;
+      max-width: 100%;
+    }
+
+    .carve-tool-btn {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .carve-tool-btn.active {
+      background: rgba(249, 115, 22, 0.25);
       border-color: #f97316;
       color: #fdba74;
     }
 
-    /* GHOST COMPANION FLOATING WIDGET */
+    /* SPOOKY COMMUNITY CHATROOM STYLING */
+    .chat-container {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+    }
+
+    .chat-messages-box {
+      height: 280px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      animation: fadeInMsg 0.25s ease;
+    }
+
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-avatar {
+      font-size: 1.3rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .chat-content-box {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 8px 12px;
+    }
+
+    .chat-header-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .chat-username {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #fdba74;
+    }
+
+    .chat-timestamp {
+      font-size: 0.65rem;
+      color: #64748b;
+    }
+
+    .chat-text {
+      font-size: 0.84rem;
+      color: #f1f5f9;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      border-radius: 99px;
+      padding: 8px 16px;
+      color: #fff;
+      font-size: 0.84rem;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+    }
+
+    /* Floating Pet Ghost Companion */
     #ghost-companion {
       position: fixed;
-      top: 100px;
-      left: 20px;
+      bottom: 24px;
+      left: 24px;
       z-index: 9999999;
       font-size: 2.2rem;
       cursor: pointer;
       user-select: none;
       filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
-      transition: transform 0.1s linear, top 2s ease-out, left 2s ease-out;
-      animation: floatGhost 3s infinite ease-in-out alternate;
+      animation: floatGhost 4s infinite ease-in-out alternate;
+      transition: transform 0.2s ease;
+    }
+
+    #ghost-companion:hover {
+      transform: scale(1.25) rotate(-10deg);
     }
 
     @keyframes floatGhost {
-      0% { transform: translateY(0) scale(1); }
-      100% { transform: translateY(-10px) scale(1.05); }
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-12px) rotate(8deg); }
     }
 
-    /* Minigame Pumpkin Patch Grid */
-    .pumpkin-patch-grid {
+    /* Mini-Games Grid */
+    .minigames-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
       margin-top: 10px;
     }
 
-    .pumpkin-patch-item {
-      background: rgba(249, 115, 22, 0.12);
-      border: 1px solid rgba(249, 115, 22, 0.3);
-      border-radius: 12px;
+    .minigame-card {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
       padding: 14px;
+      text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .minigame-card:hover {
+      transform: translateY(-2px);
+      border-color: #f97316;
+    }
+
+    .minigame-icon {
       font-size: 2rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
+      margin-bottom: 6px;
     }
 
-    .pumpkin-patch-item:hover {
-      background: rgba(249, 115, 22, 0.28);
-      transform: scale(1.08);
-      box-shadow: 0 0 16px rgba(249, 115, 22, 0.4);
+    .minigame-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
     }
 
-    /* Memory Match Grid */
+    .minigame-desc {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    /* Memory Matching Grid */
     .memory-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -838,7 +1001,7 @@
       border: 1px solid rgba(249, 115, 22, 0.45);
       border-radius: 18px;
       padding: 16px;
-      width: 320px;
+      width: 330px;
       max-width: 90vw;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(249, 115, 22, 0.2);
       backdrop-filter: blur(20px);
@@ -903,17 +1066,20 @@
   <!-- HIDDEN REAL LO-FI STREAM AUDIO PLAYER -->
   <audio id="lofi-audio-player" preload="none" crossorigin="anonymous"></audio>
 
+  <!-- LIGHTNING FLASH OVERLAY FOR THUNDERSTORMS -->
+  <div id="lightning-flash"></div>
+
   <!-- FLOATING GHOST PET COMPANION -->
   <div id="ghost-companion" onclick="interactWithGhost()" title="Click me for Candy!">👻</div>
 
-  <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET (SOUNDBOARD REMOVED) -->
+  <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET -->
   <div id="floating-control-widget">
     
     <!-- Expandable Control Panel Box -->
     <div id="float-panel-box" class="float-panel-box" style="display: none;">
       
       <div class="float-panel-header">
-        <span>🎧 Audio, Weather & FX Panel</span>
+        <span>🎧 Audio, Weather & Energetic Particles</span>
         <button type="button" onclick="toggleFloatPanel()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; font-weight: 800;">✕</button>
       </div>
 
@@ -939,9 +1105,9 @@
         </div>
       </div>
 
-      <!-- 2. Dynamic Weather API & Override Selector -->
+      <!-- 2. Dynamic Weather Engine with ALL Condition Themes -->
       <div>
-        <div class="float-group-title">🌦️ Dynamic Weather Engine</div>
+        <div class="float-group-title">🌦️ Dynamic Weather Theme Engine</div>
         <div style="display: flex; align-items: center; gap: 6px;">
           <select id="weather-select" class="float-select" onchange="changeWeatherMode(this.value)">
             <option value="auto" selected>🌍 Auto-Detect (IP Weather API)</option>
@@ -949,30 +1115,31 @@
             <option value="thunder">⛈️ Spooky Thunderstorm</option>
             <option value="snow">❄️ Frosty Snowfall</option>
             <option value="fog">☁️ Eerie Foggy Mist</option>
-            <option value="clear">☀️ Golden Autumn Sun</option>
+            <option value="clear">☀️ Golden Twilight / Stars</option>
+            <option value="wind">🍂 Autumn Leaf Gale</option>
           </select>
         </div>
         <div id="weather-status-badge" style="font-size: 0.7rem; color: #38bdf8; margin-top: 4px; font-weight: 700;">Weather API: Detecting location...</div>
       </div>
 
-      <!-- 3. Themes & Canvas Particle Selector -->
+      <!-- 3. Themes & High-Energy Particle System Controls -->
       <div>
-        <div class="float-group-title">🎨 Theme & Particles</div>
+        <div class="float-group-title">🔥 Particle Speed & Density (High Energy)</div>
         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
           <select class="float-select" onchange="changeFallThemePreset(this.value)">
             <option value="midnight" selected>🎃 Spooky Midnight</option>
             <option value="pumpkin">🍁 Pumpkin Spice</option>
             <option value="mansion">👻 Haunted Mansion</option>
           </select>
-          <select class="float-select" onchange="changeCanvasTheme(this.value)">
-            <option value="spooky" selected>🍂 Autumn Leaves</option>
-            <option value="cosmic">🌌 Cosmic Stars</option>
-            <option value="matrix">🟢 Matrix Rain</option>
+          <select id="particle-density-select" class="float-select" onchange="changeParticleDensity(this.value)">
+            <option value="insane" selected>🔥 High-Energy Blast (350+ Particles)</option>
+            <option value="dense">🎆 Ultra Dense (250 Particles)</option>
+            <option value="hyper">⚡ Hyper Storm (500+ Particles)</option>
           </select>
         </div>
         <div style="display: flex; gap: 6px;">
-          <button type="button" onclick="triggerCanvasShockwave()" style="flex: 1; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #f97316; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">💥 Pumpkin Blast</button>
-          <button type="button" onclick="resetCanvasParticles()" style="flex: 1; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">🔄 Reset</button>
+          <button type="button" onclick="triggerCanvasShockwave()" style="flex: 1; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #f97316; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">💥 Fireworks Blast</button>
+          <button type="button" onclick="resetCanvasParticles()" style="flex: 1; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">🔄 Re-Energize FX</button>
         </div>
       </div>
 
@@ -1028,12 +1195,12 @@
         The Nitro Platform has officially concluded operations and is now offline for our Fall Infrastructure Upgrade.
       </p>
 
-      <!-- Interactive Section Navigation Tabs -->
+      <!-- Interactive Section Navigation Tabs (FORUM REPLACED WITH CHAT) -->
       <div class="interactive-nav-tabs">
         <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-oracle')">🔮 AI Oracle</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-carver')">🎃 Carve Pumpkin</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-forum')">💬 Forum</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-chat')">💬 Spooky Chat</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Mini-Games</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Alert</button>
@@ -1044,7 +1211,7 @@
       <div id="tab-notice" class="tab-panel-content active">
         <div class="status-update-banner">
           <div class="status-update-header">
-            <span>🎃</span>
+            <span id="weather-banner-icon">🎃</span>
             <span id="status-banner-title">Status Update • Launch Schedule Adjustment</span>
           </div>
           <div class="status-update-body" id="status-banner-body">
@@ -1165,323 +1332,267 @@
         </div>
       </div>
 
-      <!-- TAB 4: COMMUNITY FORUM & GUESTBOOK -->
-      <div id="tab-forum" class="tab-panel-content">
-        <div class="reason-box forum-container">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-            <div style="font-size: 1rem; font-weight: 800; color: #fdba74;">💬 Community Forum & Wishlist Board</div>
-            <button type="button" onclick="toggleNewThreadForm()" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; padding: 5px 14px; border-radius: 99px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">+ Create Thread</button>
+      <!-- TAB 4: SPOOKY LIVE COMMUNITY CHATROOM -->
+      <div id="tab-chat" class="tab-panel-content">
+        <div class="chat-container">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 1rem; font-weight: 800; color: #fdba74; display: flex; align-items: center; gap: 8px;">
+              <span>💬</span>
+              <span>Spooky Community Chatroom (Live)</span>
+              <span style="font-size: 0.7rem; background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 2px 8px; border-radius: 99px; font-weight: 700;">LIVE • 24 ONLINE</span>
+            </div>
+
+            <!-- Nickname & Badge Customizer -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <select id="chat-badge-select" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); color: #fff; border-radius: 8px; padding: 4px 6px; font-size: 0.78rem; outline: none;">
+                <option value="🎃">🎃 Pumpkin</option>
+                <option value="👻">👻 Ghost</option>
+                <option value="🦇">🦇 Bat</option>
+                <option value="🔮">🔮 Oracle</option>
+                <option value="🧙">🧙 Witch</option>
+                <option value="💀">💀 Skeleton</option>
+                <option value="🍬">🍬 Candy</option>
+              </select>
+              <input type="text" id="chat-handle-input" placeholder="Your Handle..." value="SpookyGamer" style="width: 110px; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 4px 8px; color: #fdba74; font-size: 0.78rem; font-weight: 700; outline: none;">
+            </div>
           </div>
 
-          <!-- New Thread Creation Form -->
-          <div id="new-thread-form" style="display: none; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-            <h4 style="color: #fff; margin: 0 0 10px 0; font-size: 0.9rem;">Post a New Community Thread / Wish</h4>
-            <form onsubmit="handleNewThreadSubmit(event)">
-              <input type="text" id="forum-author-input" placeholder="Your Name / Tag..." required style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; margin-bottom: 8px; box-sizing: border-box;">
-              <input type="text" id="forum-title-input" placeholder="Thread Title (e.g. Please add Mario Kart GBA!)..." required style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; margin-bottom: 8px; box-sizing: border-box;">
-              <textarea id="forum-content-input" placeholder="Write your post details or feedback..." required rows="3" style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; margin-bottom: 10px; box-sizing: border-box; resize: vertical;"></textarea>
-              <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                <button type="button" onclick="toggleNewThreadForm()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; cursor: pointer;">Cancel</button>
-                <button type="submit" style="background: #f97316; border: none; color: #fff; padding: 6px 16px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">Post Thread 🎃</button>
-              </div>
-            </form>
-          </div>
+          <!-- Chat Stream Log -->
+          <div id="chat-messages-box" class="chat-messages-box"></div>
 
-          <!-- Forum Thread List Container -->
-          <div id="forum-threads-list"></div>
+          <!-- Chat Input Bar -->
+          <form onsubmit="handleSendSpookyChatMessage(event)" class="chat-input-bar">
+            <input type="text" id="chat-message-input" placeholder="Say something spooky or ask about relaunch..." required autocomplete="off" class="chat-input">
+            <button type="submit" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 8px 18px; border-radius: 99px; cursor: pointer; flex-shrink: 0;">Send 🎃</button>
+          </form>
         </div>
       </div>
 
-      <!-- TAB 5: PLAYABLE MINI-GAMES -->
+      <!-- TAB 5: HALLOWEEN MINI-GAMES SUITE -->
       <div id="tab-minigames" class="tab-panel-content">
-        <div class="reason-box">
-          <div class="reason-box-header">
-            <span style="font-size: 1.3rem;">🎃</span>
-            <strong>1. Interactive Pumpkin Patch Clicker Mini-Game</strong>
-          </div>
-          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
-            Click on growing jack-o'-lanterns below to harvest pumpkins and earn Candy Corn points!
-          </p>
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; font-weight: 800; color: #fdba74; margin-bottom: 6px;">
-            <span id="pumpkin-harvest-score">Pumpkins Harvested: 0 🎃</span>
-            <button type="button" onclick="triggerTrickOrTreat()" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; padding: 4px 14px; border-radius: 99px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">🍬 Trick or Treat!</button>
-          </div>
-          <div id="trick-or-treat-banner" style="display: none; background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.4); padding: 8px 12px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; color: #fdba74; margin-bottom: 8px; text-align: center;"></div>
-          <div class="pumpkin-patch-grid">
-            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
-            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
-            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
-            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
-          </div>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
-
-        <!-- SNAKE GAME -->
-        <div class="reason-box">
-          <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">🐍</span>
-            <strong>2. Playable Retro Arcade Snake Game</strong>
-          </div>
-          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
-            Use Arrow Keys, WASD, or the D-Pad below to steer the snake and eat glowing neon pumpkins!
+        <div class="reason-box" style="text-align: center;">
+          <h3 style="color: #fff; margin: 0 0 4px 0; font-size: 1.1rem;">🎃 Halloween Arcades & Mini-Games</h3>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
+            Play instant unblocked mini-games right here while waiting for October 31st!
           </p>
 
-          <div style="text-align: center;">
-            <canvas id="snake-canvas" width="300" height="220"></canvas>
-            <div style="display: flex; align-items: center; justify-content: space-between; max-width: 300px; margin: 0 auto 8px auto; font-size: 0.82rem; font-weight: 800; color: #fdba74;">
-              <span id="snake-score-text">Score: 0</span>
-              <span id="snake-high-text">High Score: 0</span>
+          <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 14px;">
+            <button type="button" class="nav-tab-btn active" id="btn-mg-snake" onclick="switchMinigame('snake')">🐍 Spooky Snake</button>
+            <button type="button" class="nav-tab-btn" id="btn-mg-ttt" onclick="switchMinigame('ttt')">❌ Groq AI Tic-Tac-Toe</button>
+            <button type="button" class="nav-tab-btn" id="btn-mg-memory" onclick="switchMinigame('memory')">🧠 Spooky Memory</button>
+          </div>
+
+          <!-- 1. SPOOKY SNAKE -->
+          <div id="mg-panel-snake">
+            <div style="display: flex; justify-content: space-between; align-items: center; max-width: 320px; margin: 0 auto 6px auto; font-size: 0.85rem; color: #fdba74; font-weight: 800;">
+              <span>Score: <span id="snake-score">0</span></span>
+              <span>High Score: <span id="snake-highscore">0</span></span>
             </div>
-            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 8px;">
-              <button type="button" onclick="startSnakeGame()" style="background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 6px 18px; border-radius: 99px; font-weight: 800; font-size: 0.8rem; cursor: pointer;">▶ Start / Restart Snake</button>
-            </div>
-            
+            <canvas id="snake-canvas" width="300" height="300"></canvas>
+
             <div class="snake-dpad">
               <div></div>
-              <div class="dpad-btn" onclick="setSnakeDir('UP')">▲</div>
+              <button class="dpad-btn" onclick="setSnakeDir('UP')">▲</button>
               <div></div>
-              <div class="dpad-btn" onclick="setSnakeDir('LEFT')">◀</div>
-              <div class="dpad-btn" onclick="setSnakeDir('DOWN')">▼</div>
-              <div class="dpad-btn" onclick="setSnakeDir('RIGHT')">▶</div>
+              <button class="dpad-btn" onclick="setSnakeDir('LEFT')">◀</button>
+              <button class="dpad-btn" onclick="setSnakeDir('DOWN')">▼</button>
+              <button class="dpad-btn" onclick="setSnakeDir('RIGHT')">▶</button>
             </div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">Controls: Arrow Keys or W A S D</div>
           </div>
-        </div>
 
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+          <!-- 2. GROQ AI TIC TAC TOE -->
+          <div id="mg-panel-ttt" style="display: none;">
+            <div style="margin-bottom: 8px; font-size: 0.82rem; color: #fdba74; font-weight: 700;">
+              <span id="ttt-status">Your turn! Click any box (Player: X vs Groq AI: O)</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+              <select id="ttt-difficulty" class="float-select" style="width: auto; padding: 4px 10px; display: inline-block;">
+                <option value="easy">Easy AI</option>
+                <option value="medium" selected>Medium AI</option>
+                <option value="hard">Hard Groq AI</option>
+              </select>
+            </div>
+            <div class="ttt-grid">
+              <div class="ttt-cell" onclick="playTTT(0)"></div>
+              <div class="ttt-cell" onclick="playTTT(1)"></div>
+              <div class="ttt-cell" onclick="playTTT(2)"></div>
+              <div class="ttt-cell" onclick="playTTT(3)"></div>
+              <div class="ttt-cell" onclick="playTTT(4)"></div>
+              <div class="ttt-cell" onclick="playTTT(5)"></div>
+              <div class="ttt-cell" onclick="playTTT(6)"></div>
+              <div class="ttt-cell" onclick="playTTT(7)"></div>
+              <div class="ttt-cell" onclick="playTTT(8)"></div>
+            </div>
+            <button type="button" onclick="resetTTT()" style="background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #f97316; padding: 5px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; margin-top: 8px;">Reset Board</button>
+          </div>
 
-        <!-- SPOOKY MEMORY MATCH GAME -->
-        <div class="reason-box">
-          <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">🃏</span>
-            <strong>3. Spooky Halloween Memory Pair Match</strong>
+          <!-- 3. SPOOKY MEMORY MATCH -->
+          <div id="mg-panel-memory" style="display: none;">
+            <div style="margin-bottom: 8px; font-size: 0.84rem; color: #fdba74; font-weight: 800;">
+              Matches Found: <span id="memory-matches">0</span> / 6
+            </div>
+            <div class="memory-grid" id="memory-grid-container"></div>
+            <button type="button" onclick="resetMemoryGame()" style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 5px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; margin-top: 8px;">New Memory Deck 🃏</button>
           </div>
-          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
-            Match all 6 pairs of spooky Halloween cards in the fewest moves possible!
-          </p>
-          <div style="display: flex; align-items: center; justify-content: space-between; max-width: 320px; margin: 0 auto 6px auto; font-size: 0.82rem; font-weight: 800; color: #fdba74;">
-            <span id="memory-moves-text">Moves: 0</span>
-            <button type="button" onclick="startMemoryMatchGame()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 2px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">Restart Game</button>
-          </div>
-          <div id="memory-grid" class="memory-grid"></div>
-        </div>
 
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
-
-        <!-- TIC TAC TOE GAME -->
-        <div class="reason-box">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8;">4. Tic-Tac-Toe vs Groq AI Bot</div>
-            <select id="ttt-difficulty" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-weight: 800; font-size: 0.75rem; border-radius: 6px; padding: 2px 6px; outline: none;">
-              <option value="medium">Medium Bot</option>
-              <option value="hard">Impossible Bot</option>
-              <option value="easy">Easy Bot</option>
-            </select>
-          </div>
-          
-          <div class="ttt-grid">
-            <div class="ttt-cell" onclick="playTTT(0)"></div>
-            <div class="ttt-cell" onclick="playTTT(1)"></div>
-            <div class="ttt-cell" onclick="playTTT(2)"></div>
-            <div class="ttt-cell" onclick="playTTT(3)"></div>
-            <div class="ttt-cell" onclick="playTTT(4)"></div>
-            <div class="ttt-cell" onclick="playTTT(5)"></div>
-            <div class="ttt-cell" onclick="playTTT(6)"></div>
-            <div class="ttt-cell" onclick="playTTT(7)"></div>
-            <div class="ttt-cell" onclick="playTTT(8)"></div>
-          </div>
-          <div id="ttt-status" style="font-size: 0.82rem; font-weight: 700; color: #fdba74;">Your turn! Click any box (Player: X vs Groq AI: O)</div>
-          <button type="button" onclick="resetTTT()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Reset Tic-Tac-Toe</button>
         </div>
       </div>
 
-      <!-- TAB 6: ROADMAP & TIMELINE -->
+      <!-- TAB 6: RELAUNCH ROADMAP -->
       <div id="tab-roadmap" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">🎃</span>
-            <strong>October 31st Halloween Comeback Plan</strong>
+            <span style="font-size: 1.1rem;">📜</span>
+            <strong>October 31st Halloween Relaunch Roadmap</strong>
           </div>
-          <p class="reason-box-desc">
-            We are working around the clock to rebuild our stack from the ground up! Here is our official roadmap leading up to the October 31st Halloween relaunch:
-          </p>
-
-          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px; text-align: left;">
-            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #34d399; padding: 10px 14px; border-radius: 0 10px 10px 0;">
-              <strong style="color: #34d399; font-size: 0.85rem;">✅ Phase 1: Database Migration & Cloud Hosting Overhaul</strong>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Migrated from expensive 00/mo provider to high-performance zero-cost infrastructure with automated hourly backups.</p>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem; color: #fdba74; margin-bottom: 4px;">
+                <span>Phase 1: Database Migration & Zero-Cost Architecture</span>
+                <span style="color: #4ade80;">COMPLETE ✓</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #94a3b8;">Migrated off expensive 00/mo database to high-speed zero-cost local storage and optimized caching layer.</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #f97316; padding: 10px 14px; border-radius: 0 10px 10px 0;">
-              <strong style="color: #f97316; font-size: 0.85rem;">🚧 Phase 2: Retro Arcade Emulators & 1v1 Games (In Progress)</strong>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Integrating GBA/SNES HTML5 WebAssembly emulators and instant 1v1 multiplayer matchmaking.</p>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem; color: #fdba74; margin-bottom: 4px;">
+                <span>Phase 2: Retro Emulator & Flash Ruffle Integration</span>
+                <span style="color: #f97316;">IN PROGRESS 🚀</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #94a3b8;">Adding GBA, N64, NES emulators alongside Ruffle Flash player for 100% web game compatibility.</div>
             </div>
-            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #a855f7; padding: 10px 14px; border-radius: 0 10px 10px 0;">
-              <strong style="color: #a855f7; font-size: 0.85rem;">🔒 Phase 3: AI Homework Assistant & Cloaker Upgrade (Oct 20)</strong>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Deploying Groq AI homework solver tool and enhanced stealth Tab Cloaker for seamless browser integration.</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 10px 10px 0;">
-              <strong style="color: #f59e0b; font-size: 0.85rem;">🎃 Phase 4: GRAND HALLOWEEN RELAUNCH (Oct 31, 2026)</strong>
-              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Public launch of the all-new Nitro Games Platform with 100+ unblocked games!</p>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem; color: #fdba74; margin-bottom: 4px;">
+                <span>Phase 3: 1v1 Multiplayer Arena & AI Homework Helper</span>
+                <span style="color: #c084fc;">OCTOBER 31ST 🎃</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #94a3b8;">Launch real-time 1v1 game matchmaking and AI-powered step-by-step math solver tools.</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- TAB 7: RELAUNCH NOTIFICATION -->
+      <!-- TAB 7: NOTIFY ME ALERT -->
       <div id="tab-notify" class="tab-panel-content">
         <div class="reason-box" style="text-align: center;">
-          <span style="font-size: 2rem;">🔔</span>
-          <h3 style="color: #fff; font-size: 1.1rem; margin: 8px 0;">Get Alerted When We Go Live!</h3>
-          <p style="font-size: 0.85rem; color: #94a3b8; max-width: 480px; margin: 0 auto 16px auto;">
-            Leave your Discord username or email below to receive an instant alert on October 31st when Nitro Games officially re-opens!
+          <div style="font-size: 2.2rem; margin-bottom: 6px;">🔔</div>
+          <h3 style="color: #fff; margin: 0 0 6px 0; font-size: 1.1rem;">Get Notified on October 31st Relaunch</h3>
+          <p style="font-size: 0.84rem; color: #94a3b8; max-width: 440px; margin: 0 auto 14px auto;">
+            Save a reminder or subscribe to instant browser push notification alerts when Nitro Games comes back online!
           </p>
 
           <form onsubmit="handleNotifySubmit(event)" style="display: flex; gap: 8px; max-width: 420px; margin: 0 auto;">
-            <input type="text" id="notify-input" placeholder="Discord Tag (e.g. user#1234) or Email..." required style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 99px; padding: 10px 16px; color: #fff; outline: none; font-size: 0.85rem;">
-            <button type="submit" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 10px 20px; border-radius: 99px; cursor: pointer; transition: all 0.2s ease;">Notify Me 🎃</button>
+            <input type="email" id="notify-email-input" placeholder="Enter your email for relaunch alert..." required style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 99px; padding: 10px 16px; color: #fff; outline: none; font-size: 0.84rem;">
+            <button type="submit" style="background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 10px 18px; border-radius: 99px; cursor: pointer;">Subscribe 🔔</button>
           </form>
-          <div id="notify-feedback" style="display: none; margin-top: 12px; font-size: 0.82rem; color: #34d399; font-weight: 700;"></div>
+          <div id="notify-success-msg" style="display: none; font-size: 0.84rem; color: #4ade80; margin-top: 10px; font-weight: 700;">🎉 You are subscribed! We will notify you the exact moment servers unlock!</div>
         </div>
       </div>
 
-      <!-- TAB 8: FAQ & TRIVIA -->
+      <!-- TAB 8: FREQUENTLY ASKED QUESTIONS -->
       <div id="tab-faq" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">❓</span>
+            <span style="font-size: 1.1rem;">❓</span>
             <strong>Frequently Asked Questions</strong>
           </div>
-
-          <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-top: 10px;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
-              <div onclick="toggleFAQ(this)" style="font-weight: 800; font-size: 0.86rem; color: #fdba74; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                <span>Q: What happened to my game saves and account high scores?</span>
-                <span>▼</span>
-              </div>
-              <div style="display: none; font-size: 0.82rem; color: #cbd5e1; margin-top: 8px; line-height: 1.5;">
-                All local browser game saves, player accounts, and leaderboard entries have been backed up in our offline archive. They will be restored automatically when you log in on October 31st!
-              </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            <div>
+              <div style="font-weight: 800; font-size: 0.85rem; color: #fdba74;">Q: Are my saved games, stats, and achievements safe?</div>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">Yes! All player accounts and local saved game data remain safely preserved.</div>
             </div>
-
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
-              <div onclick="toggleFAQ(this)" style="font-weight: 800; font-size: 0.86rem; color: #fdba74; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                <span>Q: Can administrators still sign in for maintenance testing?</span>
-                <span>▼</span>
-              </div>
-              <div style="display: none; font-size: 0.82rem; color: #cbd5e1; margin-top: 8px; line-height: 1.5;">
-                Yes! Click the button at the bottom of the notice card to open the Admin Sign In panel.
-              </div>
+            <div>
+              <div style="font-weight: 800; font-size: 0.85rem; color: #fdba74;">Q: Why are we offline until October 31st?</div>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">We are migrating away from paid cloud databases and upgrading to zero-cost server hosting so Nitro Games will stay online 100% free forever without ads!</div>
             </div>
-
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
-              <div onclick="toggleFAQ(this)" style="font-weight: 800; font-size: 0.86rem; color: #fdba74; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                <span>Q: How do I activate Panic Cloak Mode?</span>
-                <span>▼</span>
-              </div>
-              <div style="display: none; font-size: 0.82rem; color: #cbd5e1; margin-top: 8px; line-height: 1.5;">
-                Press the <strong>~</strong> (tilde) key or <strong>Escape</strong> at any time to immediately redirect your tab to Google Classroom!
-              </div>
+            <div>
+              <div style="font-weight: 800; font-size: 0.85rem; color: #fdba74;">Q: Can I still play mini-games while waiting?</div>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">Yes! Click the 🎮 Mini-Games tab to play Spooky Snake, Tic-Tac-Toe, or Spooky Memory Match right now!</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Action Buttons Row -->
-      <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
-        <a href="https://github.com/jordan-nitro-games/nitro-games/releases" target="_blank" class="btn-release">
-          <span>📦 View Relaunch Release Notes</span>
-        </a>
-        <button class="btn-admin-signin" onclick="openAdminModal()">
-          🔑 Admin Sign In & Config Panel
-        </button>
+      <!-- Footer Info -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.76rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
+        <div>Nitro Hub • Fall Infrastructure & Halloween Relaunch Suite v16</div>
+        <div style="display: flex; gap: 12px;">
+          <a href="#" onclick="openAdminModal(); return false;" style="color: #94a3b8; text-decoration: none; font-weight: 700;">⚙️ Admin</a>
+          <a href="#" onclick="openAboutBlankCloak(); return false;" style="color: #94a3b8; text-decoration: none; font-weight: 700;">🕶️ Cloak</a>
+        </div>
       </div>
 
-      <div class="footer-note" style="margin-top: 16px;">
-        Nitro Games Infrastructure Team • Relaunch Scheduled October 31st, 2026 🎃
-      </div>
     </main>
-
   </div>
 
-  <!-- ADMIN AUTH & CONFIGURATION DASHBOARD MODAL -->
-  <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999; background: rgba(0,0,0,0.88); backdrop-filter: blur(16px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; box-sizing: border-box;">
-    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.6); border-radius: 24px; padding: 28px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
-      
-      <!-- State 1: Password Auth Form -->
+  <!-- ADMIN LOGIN & CONFIGURATION MODAL -->
+  <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: rgba(18, 12, 26, 0.98); border: 1px solid #f97316; border-radius: 20px; padding: 28px; max-width: 440px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 30px rgba(249,115,22,0.3); text-align: left; position: relative;">
+      <button type="button" onclick="closeAdminModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; font-weight: 800;">✕</button>
+
+      <!-- Step 1: Admin Password Form -->
       <div id="admin-auth-step-1">
-        <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
-        <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.2rem;">Admin Master Authentication</h3>
-        <p style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 16px;">Enter master password to access live site configuration and test bypass mode.</p>
-        
-        <form onsubmit="handleAdminAuth(event)">
-          <input type="password" id="admin-pass-input" placeholder="Enter Admin Password..." style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 12px; box-sizing: border-box;">
-          <div id="admin-auth-error" style="display: none; color: #ef4444; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px;"></div>
-          <div style="display: flex; gap: 8px;">
-            <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancel</button>
-            <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer;">Authenticate</button>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+          <span style="font-size: 1.8rem;">🔒</span>
+          <div>
+            <h3 style="margin: 0; color: #fff; font-size: 1.15rem; font-weight: 800;">Nitro Admin Access</h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">Enter password to edit live relaunch settings</div>
           </div>
+        </div>
+
+        <form onsubmit="handleAdminAuth(event)">
+          <input type="password" id="admin-pass-input" placeholder="Enter Admin Password..." required style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 10px; box-sizing: border-box;">
+          <div id="admin-auth-error" style="display: none; color: #ef4444; font-size: 0.78rem; font-weight: 700; margin-bottom: 10px;"></div>
+          <button type="submit" style="width: 100%; background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; font-weight: 800; font-size: 0.88rem; padding: 10px; border-radius: 10px; cursor: pointer;">Unlock Admin Dashboard 🔓</button>
         </form>
       </div>
 
-      <!-- State 2: Admin Live Configuration Dashboard -->
-      <div id="admin-auth-step-2" style="display: none; text-align: left;">
-        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 14px;">
-          <div style="font-weight: 900; font-size: 1.05rem; color: #fdba74; display: flex; align-items: center; gap: 8px;">
-            <span>⚙️</span>
-            <span>Admin Site Configuration Panel</span>
+      <!-- Step 2: Live Configuration Controls -->
+      <div id="admin-auth-step-2" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+          <span style="font-size: 1.6rem;">⚙️</span>
+          <div>
+            <h3 style="margin: 0; color: #fdba74; font-size: 1.1rem; font-weight: 800;">Live Admin Configuration</h3>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Update relaunch date, visits counter, weather & status</div>
           </div>
-          <button type="button" onclick="closeAdminModal()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer;">✕</button>
         </div>
 
-        <form onsubmit="handleSaveAdminConfig(event)" style="display: flex; flex-direction: column; gap: 12px;">
-          <div>
-            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">📅 Relaunch Target Date:</label>
-            <input type="datetime-local" id="config-relaunch-date" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; outline: none; box-sizing: border-box;">
+        <form onsubmit="handleSaveAdminConfig(event)">
+          <div style="margin-bottom: 10px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-bottom: 4px;">📅 Official Relaunch Date & Time:</label>
+            <input type="datetime-local" id="config-relaunch-date" style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box;">
           </div>
 
-          <div>
-            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">🌐 Total Visits Counter Target:</label>
-            <input type="number" id="config-visits-target" placeholder="10609" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; outline: none; box-sizing: border-box;">
+          <div style="margin-bottom: 10px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-bottom: 4px;">🌐 Visits Counter Target (Current: 10,609):</label>
+            <input type="number" id="config-visits-target" value="10609" style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box;">
           </div>
 
-          <div>
-            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">🌤️ Weather System Mode:</label>
-            <select id="config-weather-mode" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fdba74; font-weight: 700; font-size: 0.85rem; outline: none; box-sizing: border-box;">
-              <option value="auto">🌍 Auto-Detect (IP Weather API)</option>
-              <option value="rain">🌧️ Rainy Autumn Day</option>
-              <option value="thunder">⛈️ Spooky Thunderstorm</option>
-              <option value="snow">❄️ Frosty Snowfall</option>
-              <option value="fog">☁️ Eerie Foggy Mist</option>
-              <option value="clear">☀️ Golden Autumn Sun</option>
+          <div style="margin-bottom: 10px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-bottom: 4px;">🌦️ Weather Theme Override:</label>
+            <select id="config-weather-mode" style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box;">
+              <option value="auto">Auto-Detect Real Location</option>
+              <option value="rain">Rainy Autumn Day</option>
+              <option value="thunder">Spooky Thunderstorm</option>
+              <option value="snow">Frosty Snowfall</option>
+              <option value="fog">Eerie Foggy Mist</option>
+              <option value="clear">Golden Twilight / Stars</option>
+              <option value="wind">Autumn Leaf Gale</option>
             </select>
           </div>
 
-          <div>
-            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">📢 Live Status Banner Message:</label>
-            <textarea id="config-status-msg" rows="2" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box; resize: vertical;"></textarea>
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-bottom: 4px;">📢 Status Notice Message:</label>
+            <textarea id="config-status-msg" rows="3" style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box; resize: vertical;"></textarea>
           </div>
 
-          <div style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer;">Close</button>
-            <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer;">Save Config Changes ⚡</button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">Cancel</button>
+            <button type="submit" style="flex: 1.5; background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.8rem; padding: 8px; border-radius: 8px; cursor: pointer;">Save Live Config 💾</button>
           </div>
         </form>
       </div>
 
-    </div>
-  </div>
-
-  <!-- RELAUNCH WELCOME MODAL -->
-  <div id="relaunch-welcome-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999999; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); align-items: center; justify-content: center;">
-    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.6); border-radius: 24px; padding: 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(249, 115, 22, 0.4);">
-      <div style="font-size: 2.8rem; margin-bottom: 10px;">🎃 🎉</div>
-      <h2 style="color: #fff; margin-bottom: 8px; font-size: 1.5rem;">WE ARE BACK ONLINE!</h2>
-      <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.55; margin-bottom: 20px;">
-        Happy Halloween! The Nitro Games Platform has officially completed maintenance and is now live with 100+ unblocked games, retro emulators, and fast servers!
-      </p>
-      <button type="button" onclick="document.getElementById('relaunch-welcome-modal').style.display='none'" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 900; font-size: 0.95rem; padding: 12px 32px; border-radius: 99px; cursor: pointer; box-shadow: 0 4px 20px rgba(249, 115, 22, 0.6);">
-        🎮 Start Playing Now!
-      </button>
     </div>
   </div>
 
@@ -6482,729 +6593,686 @@
   </div>
 
 
-  <script id="shutdown-overlay-script">
-    // 🎧 REAL STREAMING LO-FI AUDIO PLAYER ENGINE WITH WATCHDOG & BACKUP
-    const lofiStreams = {
-      og_lofi: 'https://stream.zeno.fm/0r0xa792kwzuv',
-      chillhop: 'https://streams.ilovemusic.de/iloveradio17.mp3',
-      spooky: 'https://stream.zeno.fm/a843p94ed0hvv',
-      synthwave: 'https://stream.zeno.fm/4621p549618uv',
-      rain: 'https://stream.zeno.fm/3r28u679618uv'
+  <script>
+    // Tab Switching Functionality
+    window.switchShutdownTab = function(tabId) {
+      const tabs = document.querySelectorAll('.nav-tab-btn');
+      const panels = document.querySelectorAll('.tab-panel-content');
+
+      tabs.forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      panels.forEach(panel => {
+        if (panel.id === tabId) {
+          panel.classList.add('active');
+        } else {
+          panel.classList.remove('active');
+        }
+      });
+
+      if (tabId === 'tab-minigames') {
+        const snakeCanvas = document.getElementById('snake-canvas');
+        if (snakeCanvas && typeof initSnakeGame === 'function') {
+          initSnakeGame();
+        }
+      }
+      if (tabId === 'tab-carver') {
+        initPumpkinCarverOnce();
+      }
+      if (tabId === 'tab-chat') {
+        initSpookyChatOnce();
+      }
     };
 
-    const backupStreams = {
-      og_lofi: 'https://streams.ilovemusic.de/iloveradio17.mp3',
-      chillhop: 'https://stream.zeno.fm/0r0xa792kwzuv',
-      spooky: 'https://stream.zeno.fm/0r0xa792kwzuv',
-      synthwave: 'https://streams.ilovemusic.de/iloveradio17.mp3',
-      rain: 'https://streams.ilovemusic.de/iloveradio17.mp3'
-    };
-
-    let isLofiPlaying = false;
-    let audioWatchdogTimer = null;
-
+    // Toggle Floating Control Panel Box
     window.toggleFloatPanel = function() {
-      const box = document.getElementById('float-panel-box');
-      if (box) {
-        box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+      const panel = document.getElementById('float-panel-box');
+      if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
       }
     };
 
-    function setupAudioEvents() {
-      const audio = document.getElementById('lofi-audio-player');
-      if (!audio || audio._eventsSetup) return;
-      audio._eventsSetup = true;
+    // REAL STREAMING AUDIO PLAYER WITH WATCHDOG FALLBACK
+    const lofiAudioPlayer = document.getElementById('lofi-audio-player');
+    let isLofiPlaying = false;
+    let lofiFallbackTimer = null;
 
-      audio.addEventListener('playing', function() {
-        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
-        isLofiPlaying = true;
-        const btn = document.getElementById('lofi-toggle-btn');
-        const text = document.getElementById('lofi-status-text');
-        if (btn) btn.textContent = '⏸';
-        if (text) text.textContent = 'Playing Live Radio Stream 🎧';
-      });
+    const lofiStreams = {
+      og_lofi: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      chillhop: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      spooky: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      synthwave: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      rain: 'https://stream.zeno.fm/f3wvbbqmdg8uv'
+    };
 
-      audio.addEventListener('pause', function() {
-        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
-        isLofiPlaying = false;
-        const btn = document.getElementById('lofi-toggle-btn');
-        const text = document.getElementById('lofi-status-text');
-        if (btn) btn.textContent = '▶';
-        if (text) text.textContent = 'Paused Radio Stream 🎧';
-      });
-
-      audio.addEventListener('error', function() {
-        triggerStreamBackupFallback();
-      });
-    }
-
-    function triggerStreamBackupFallback() {
-      const audio = document.getElementById('lofi-audio-player');
-      const text = document.getElementById('lofi-status-text');
-      const trackSelect = document.getElementById('lofi-track-select');
-      const selectedKey = trackSelect ? trackSelect.value : 'og_lofi';
-
-      if (!audio) return;
-      const backupUrl = backupStreams[selectedKey] || 'https://streams.ilovemusic.de/iloveradio17.mp3';
-
-      if (audio.src !== backupUrl) {
-        if (text) text.textContent = 'Connecting Backup Stream... 🎧';
-        audio.src = backupUrl;
-        audio.load();
-        audio.play().catch(err => {
-          if (text) text.textContent = 'Click ▶ to Allow Radio 🎧';
-        });
-      } else {
-        if (text) text.textContent = 'Click ▶ to Allow Radio 🎧';
-      }
-    }
+    const lofiBackupMp3 = '/audio/iloveradio17.mp3';
 
     window.toggleLofiAudio = function() {
-      setupAudioEvents();
-      const audio = document.getElementById('lofi-audio-player');
       const btn = document.getElementById('lofi-toggle-btn');
-      const text = document.getElementById('lofi-status-text');
-      const trackSelect = document.getElementById('lofi-track-select');
-      const selectedKey = trackSelect ? trackSelect.value : 'og_lofi';
+      const statusText = document.getElementById('lofi-status-text');
 
-      if (!audio) return;
+      if (!lofiAudioPlayer) return;
 
       if (isLofiPlaying) {
-        audio.pause();
+        lofiAudioPlayer.pause();
+        isLofiPlaying = false;
+        if (btn) btn.textContent = '▶';
+        if (statusText) statusText.textContent = 'Paused. Click Play for OG Lo-Fi 🎧';
+        if (lofiFallbackTimer) clearTimeout(lofiFallbackTimer);
       } else {
-        const primaryUrl = lofiStreams[selectedKey] || lofiStreams.og_lofi;
-        if (!audio.src || audio.src === '' || (!audio.src.includes(primaryUrl) && !audio.src.includes('ilovemusic'))) {
-          audio.src = primaryUrl;
-        }
-        audio.volume = parseFloat(document.getElementById('lofi-volume')?.value || 0.75);
-        if (text) text.textContent = 'Connecting to Radio... 🎧';
+        const select = document.getElementById('lofi-track-select');
+        const trackKey = select ? select.value : 'og_lofi';
+        const streamUrl = lofiStreams[trackKey] || lofiStreams.og_lofi;
 
-        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
-        audioWatchdogTimer = setTimeout(() => {
-          if (!isLofiPlaying) triggerStreamBackupFallback();
-        }, 3500);
+        lofiAudioPlayer.src = streamUrl;
+        if (statusText) statusText.textContent = 'Connecting live stream... ⏳';
 
-        audio.play().catch(err => {
-          triggerStreamBackupFallback();
+        lofiAudioPlayer.play().then(() => {
+          isLofiPlaying = true;
+          if (btn) btn.textContent = '⏸';
+          if (statusText) statusText.textContent = '🔴 LIVE: OG Lo-Fi Radio Stream 🎧';
+        }).catch(err => {
+          console.warn('Primary stream connection error, switching to reliable backup MP3...', err);
+          lofiAudioPlayer.src = lofiBackupMp3;
+          lofiAudioPlayer.play().then(() => {
+            isLofiPlaying = true;
+            if (btn) btn.textContent = '⏸';
+            if (statusText) statusText.textContent = '🔴 LIVE: OG Lo-Fi Radio (Backup) 🎧';
+          }).catch(e => {
+            if (statusText) statusText.textContent = 'Tap screen to enable audio playback 🔊';
+          });
         });
+
+        if (lofiFallbackTimer) clearTimeout(lofiFallbackTimer);
+        lofiFallbackTimer = setTimeout(() => {
+          if (isLofiPlaying && lofiAudioPlayer.paused) {
+            console.warn('Stream watchdog triggered: switching to backup audio stream');
+            lofiAudioPlayer.src = lofiBackupMp3;
+            lofiAudioPlayer.play().catch(() => {});
+          }
+        }, 3500);
       }
     };
 
     window.changeLofiTrack = function(trackKey) {
-      setupAudioEvents();
-      const audio = document.getElementById('lofi-audio-player');
-      const text = document.getElementById('lofi-status-text');
-      if (!audio) return;
-
-      const newUrl = lofiStreams[trackKey] || lofiStreams.og_lofi;
-      audio.src = newUrl;
-      audio.volume = parseFloat(document.getElementById('lofi-volume')?.value || 0.75);
-
-      if (isLofiPlaying || audio.src) {
-        if (text) text.textContent = 'Switching Radio Stream... 🎧';
-        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
-        audioWatchdogTimer = setTimeout(() => {
-          if (audio.paused) triggerStreamBackupFallback();
-        }, 3500);
-
-        audio.play().catch(err => {
-          triggerStreamBackupFallback();
-        });
+      if (isLofiPlaying) {
+        isLofiPlaying = false;
+        toggleLofiAudio();
       }
     };
 
     window.setLofiVolume = function(val) {
-      const audio = document.getElementById('lofi-audio-player');
-      if (audio) audio.volume = parseFloat(val);
+      if (lofiAudioPlayer) {
+        lofiAudioPlayer.volume = parseFloat(val);
+      }
     };
 
-    // 🔮 SPOOKY AI HALLOWEEN ORACLE & FORTUNE TELLER
-    const oracleFortunes = [
-      '🔮 The Oracle foresees great fortune! On October 31st, your favorite game will load instantly with 0 lag.',
-      '✨ The Halloween spirits reveal: A high score of epic proportions awaits you on relaunch day!',
-      '🎃 Beware of black cats... but rejoice! Nitro Games is building 100+ unblocked retro emulators for you!',
-      '👻 The Oracle senses immense gaming luck in your aura. Victory in Tic-Tac-Toe vs Groq AI is within reach!',
-      '🌌 Beyond the fog, the stars align: Your data and game saves have been 100% preserved in our vault!',
-      '📜 A secret Halloween prophecy: Your homework will be solved in seconds by our new Groq AI homework tool!'
+    // STRICT SEQUENTIAL 1-BY-1 INTEGER COUNTING STATS ENGINE
+    const statTargets = [
+      { id: 'stat-num-1', target: 10609, current: 0, suffix: '+' },
+      { id: 'stat-num-2', target: 150, current: 0, suffix: '+' },
+      { id: 'stat-num-3', target: 5000, current: 0, suffix: '+' },
+      { id: 'stat-num-4', target: 100, current: 0, suffix: '%' }
     ];
 
-    window.handleOracleFormSubmit = function(e) {
-      if (e) e.preventDefault();
-      consultAIOracle();
-    };
+    let countingActive = false;
 
-    window.consultAIOracle = function() {
-      const icon = document.getElementById('crystal-ball-icon');
-      const responseBox = document.getElementById('oracle-response-box');
-      const qInput = document.getElementById('oracle-question-input');
-      const qText = qInput ? qInput.value.trim() : '';
+    function animateStatsSequentially() {
+      if (countingActive) return;
+      countingActive = true;
 
-      if (icon) {
-        icon.style.transform = 'scale(1.25) rotate(15deg)';
-        setTimeout(() => icon.style.transform = 'none', 400);
-      }
+      statTargets.forEach(item => {
+        const el = document.getElementById(item.id);
+        if (!el) return;
 
-      if (responseBox) {
-        responseBox.style.display = 'block';
-        responseBox.textContent = '🔮 Spooky AI Oracle is gazing into the crystal ball...';
+        const target = item.target;
+        const duration = 2200;
+        const startTime = performance.now();
 
-        setTimeout(() => {
-          const randomFortune = oracleFortunes[Math.floor(Math.random() * oracleFortunes.length)];
-          const prefix = qText ? 'Regarding "' + escapeHTML(qText) + '":\n' : '';
-          responseBox.innerHTML = prefix + randomFortune;
-        }, 750);
-      }
-    };
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          const currentVal = Math.floor(progress * target);
+          el.textContent = currentVal.toLocaleString() + item.suffix;
 
-    // 🎃 INTERACTIVE JACK-O'-LANTERN PUMPKIN CARVING CANVAS TOY
-    let carveCanvas, carveCtx;
-    let currentCarveTool = 'glow'; // 'glow', 'yellow', 'purple', 'eraser'
-    let isCarving = false;
-
-    function initPumpkinCarver() {
-      carveCanvas = document.getElementById('pumpkin-carve-canvas');
-      if (!carveCanvas) return;
-      carveCtx = carveCanvas.getContext('2d');
-
-      carveCanvas.onmousedown = startCarving;
-      carveCanvas.onmousemove = drawCarving;
-      carveCanvas.onmouseup = stopCarving;
-      carveCanvas.onmouseleave = stopCarving;
-
-      carveCanvas.ontouchstart = (e) => { startCarving(e.touches[0]); };
-      carveCanvas.ontouchmove = (e) => { drawCarving(e.touches[0]); e.preventDefault(); };
-      carveCanvas.ontouchend = stopCarving;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = target.toLocaleString() + item.suffix;
+          }
+        }
+        requestAnimationFrame(step);
+      });
     }
 
-    window.setCarveTool = function(tool, btn) {
-      currentCarveTool = tool;
-      const btns = document.querySelectorAll('.carve-tool-btn');
-      btns.forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-    };
+    window.triggerRollNumbersUp = function(index) {
+      const item = statTargets[index];
+      if (!item) return;
+      const el = document.getElementById(item.id);
+      if (!el) return;
 
-    function startCarving(e) {
-      isCarving = true;
-      drawCarving(e);
-    }
+      const duration = 1500;
+      const startTime = performance.now();
+      const target = item.target;
 
-    function drawCarving(e) {
-      if (!isCarving || !carveCtx) return;
-      const rect = carveCanvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentVal = Math.floor(progress * target);
+        el.textContent = currentVal.toLocaleString() + item.suffix;
 
-      carveCtx.lineWidth = currentCarveTool === 'eraser' ? 22 : 12;
-      carveCtx.lineCap = 'round';
-      carveCtx.lineJoin = 'round';
-
-      if (currentCarveTool === 'glow') {
-        carveCtx.strokeStyle = '#ff9900';
-        carveCtx.shadowColor = '#ff5722';
-        carveCtx.shadowBlur = 12;
-      } else if (currentCarveTool === 'yellow') {
-        carveCtx.strokeStyle = '#ffeb3b';
-        carveCtx.shadowColor = '#ffc107';
-        carveCtx.shadowBlur = 14;
-      } else if (currentCarveTool === 'purple') {
-        carveCtx.strokeStyle = '#c084fc';
-        carveCtx.shadowColor = '#a855f7';
-        carveCtx.shadowBlur = 14;
-      } else if (currentCarveTool === 'eraser') {
-        carveCtx.strokeStyle = '#d84315';
-        carveCtx.shadowBlur = 0;
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = target.toLocaleString() + item.suffix;
+        }
       }
-
-      carveCtx.beginPath();
-      carveCtx.arc(x, y, carveCtx.lineWidth / 2, 0, Math.PI * 2);
-      carveCtx.fillStyle = carveCtx.strokeStyle;
-      carveCtx.fill();
-    }
-
-    function stopCarving() {
-      isCarving = false;
-    }
-
-    window.stampCarveShape = function(shape) {
-      if (!carveCtx) return;
-      carveCtx.fillStyle = '#ffeb3b';
-      carveCtx.shadowColor = '#ff9800';
-      carveCtx.shadowBlur = 16;
-      carveCtx.font = shape === 'eyes' ? '36px sans-serif' : '42px sans-serif';
-      carveCtx.textAlign = 'center';
-      carveCtx.textBaseline = 'middle';
-
-      if (shape === 'eyes') {
-        carveCtx.fillText('🔺', 110, 110);
-        carveCtx.fillText('🔺', 230, 110);
-      } else if (shape === 'mouth') {
-        carveCtx.fillText('👄', 170, 180);
-      }
+      requestAnimationFrame(step);
     };
 
-    window.resetPumpkinCarveCanvas = function() {
-      if (!carveCtx) return;
-      carveCtx.clearRect(0, 0, carveCanvas.width, carveCanvas.height);
-    };
+    setTimeout(animateStatsSequentially, 400);
 
-    window.downloadCarvedPumpkin = function() {
-      if (!carveCanvas) return;
-      const link = document.createElement('a');
-      link.download = 'my-jack-o-lantern-carving.png';
-      link.href = carveCanvas.toDataURL();
-      link.click();
-    };
-
-    // 🌦️ DYNAMIC WEATHER API ENGINE & CANVAS OVERLAY
+    // DYNAMIC WEATHER ENGINE WITH FULL VISUAL THEMES FOR ALL CONDITIONS
     let currentWeatherMode = 'auto';
     let activeWeatherEffect = 'clear';
+
+    const weatherThemeClasses = {
+      rain: 'weather-theme-rain',
+      thunder: 'weather-theme-thunder',
+      snow: 'weather-theme-snow',
+      fog: 'weather-theme-fog',
+      clear: 'weather-theme-clear',
+      wind: 'weather-theme-wind'
+    };
 
     window.changeWeatherMode = function(mode) {
       currentWeatherMode = mode;
       updateWeatherVisuals();
     };
 
-    function initWeatherAPI() {
+    function updateWeatherVisuals() {
       const badge = document.getElementById('weather-status-badge');
-      fetch('https://ipapi.co/json/')
+      const icon = document.getElementById('weather-banner-icon');
+
+      // Clear existing weather theme classes on body
+      Object.values(weatherThemeClasses).forEach(cls => document.body.classList.remove(cls));
+
+      if (currentWeatherMode === 'auto') {
+        fetchRealIPWeather();
+        return;
+      }
+
+      activeWeatherEffect = currentWeatherMode;
+      const bodyClass = weatherThemeClasses[activeWeatherEffect] || 'weather-theme-clear';
+      document.body.classList.add(bodyClass);
+
+      const labels = {
+        rain: '🌧️ Rainy Autumn Day • Active Theme',
+        thunder: '⛈️ Spooky Thunderstorm • Active Theme',
+        snow: '❄️ Frosty Snowfall • Active Theme',
+        fog: '☁️ Eerie Foggy Mist • Active Theme',
+        clear: '☀️ Golden Twilight & Twinkling Stars • Active Theme',
+        wind: '🍂 Autumn Leaf Gale • Active Theme'
+      };
+
+      const icons = {
+        rain: '🌧️', thunder: '⛈️', snow: '❄️', fog: '☁️', clear: '☀️', wind: '🍂'
+      };
+
+      if (badge) badge.textContent = labels[activeWeatherEffect] || 'Weather FX active';
+      if (icon) icon.textContent = icons[activeWeatherEffect] || '🎃';
+
+      if (typeof resetCanvasParticlesFunc === 'function') {
+        resetCanvasParticlesFunc();
+      }
+    }
+
+    function fetchRealIPWeather() {
+      const badge = document.getElementById('weather-status-badge');
+      if (badge) badge.textContent = 'Weather API: Fetching local weather... 🌍';
+
+      fetch('https://wttr.in/?format=j1')
         .then(res => res.json())
         .then(data => {
-          if (data && data.latitude && data.longitude) {
-            return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + data.latitude + '&longitude=' + data.longitude + '&current_weather=true');
-          }
-          throw new Error('IP geolocation unavailable');
-        })
-        .then(res => res.json())
-        .then(weatherData => {
-          if (weatherData && weatherData.current_weather) {
-            const code = weatherData.current_weather.weathercode;
-            let detected = 'clear';
-            let desc = '☀️ Clear Autumn Sky';
+          if (data && data.current_condition && data.current_condition[0]) {
+            const cond = data.current_condition[0];
+            const tempF = cond.temp_F || '62';
+            const desc = cond.weatherDesc[0].value || 'Clear';
+            const area = (data.nearest_area && data.nearest_area[0] && data.nearest_area[0].areaName[0].value) || 'Local Area';
 
-            if (code >= 51 && code <= 67) { detected = 'rain'; desc = '🌧️ Rainy Autumn Day'; }
-            else if (code >= 80 && code <= 82) { detected = 'rain'; desc = '🌧️ Heavy Autumn Rain'; }
-            else if (code >= 95) { detected = 'thunder'; desc = '⛈️ Spooky Thunderstorm'; }
-            else if (code >= 71 && code <= 77) { detected = 'snow'; desc = '❄️ Frosty Snowfall'; }
-            else if (code === 45 || code === 48) { detected = 'fog'; desc = '☁️ Eerie Foggy Mist'; }
+            const descLower = desc.toLowerCase();
+            if (descLower.includes('rain') || descLower.includes('drizzle')) activeWeatherEffect = 'rain';
+            else if (descLower.includes('thunder') || descLower.includes('storm')) activeWeatherEffect = 'thunder';
+            else if (descLower.includes('snow') || descLower.includes('ice') || descLower.includes('flurry')) activeWeatherEffect = 'snow';
+            else if (descLower.includes('fog') || descLower.includes('mist')) activeWeatherEffect = 'fog';
+            else if (descLower.includes('wind') || descLower.includes('gale')) activeWeatherEffect = 'wind';
+            else activeWeatherEffect = 'clear';
 
-            if (badge) badge.textContent = 'Weather API (' + (weatherData.current_weather.temperature || 60) + '°F): ' + desc;
-            if (currentWeatherMode === 'auto') activeWeatherEffect = detected;
+            const bodyClass = weatherThemeClasses[activeWeatherEffect] || 'weather-theme-clear';
+            document.body.classList.add(bodyClass);
+
+            if (badge) badge.textContent = `🌍 Auto Weather: ${desc} (${tempF}°F) • ${area}`;
+            if (typeof resetCanvasParticlesFunc === 'function') resetCanvasParticlesFunc();
           }
         })
         .catch(err => {
-          if (badge) badge.textContent = 'Weather API: 🌧️ Cozy Autumn Rain (Default)';
-          if (currentWeatherMode === 'auto') activeWeatherEffect = 'rain';
+          activeWeatherEffect = 'clear';
+          document.body.classList.add('weather-theme-clear');
+          if (badge) badge.textContent = '🌍 Weather API: Clear Autumn Night (Salem, MA 62°F)';
         });
     }
 
-    function updateWeatherVisuals() {
-      if (currentWeatherMode === 'auto') {
-        initWeatherAPI();
-      } else {
-        activeWeatherEffect = currentWeatherMode;
-        const badge = document.getElementById('weather-status-badge');
-        if (badge) badge.textContent = 'Weather Override Active: ' + currentWeatherMode.toUpperCase();
-      }
-    }
-
-    initWeatherAPI();
-
-    // 👻 FLOATING GHOST COMPANION INTERACTION
-    window.interactWithGhost = function() {
-      spawnBurst(window.innerWidth / 2, window.innerHeight / 2, 6);
-      alert('👻 Boo! Friendly Ghost says: "October 31st Halloween Relaunch is going to be epic!" (+10 Candy Corn)');
+    // FALL THEME PRESETS OVERRIDE
+    window.changeFallThemePreset = function(preset) {
+      document.body.classList.remove('theme-pumpkin-spice', 'theme-haunted-mansion');
+      if (preset === 'pumpkin') document.body.classList.add('theme-pumpkin-spice');
+      else if (preset === 'mansion') document.body.classList.add('theme-haunted-mansion');
     };
 
-    // 💬 COMMUNITY FORUM ENGINE
-    const defaultThreads = [
-      {
-        id: 1,
-        author: 'Jordan (Admin)',
-        title: '🎃 Official October 31st Relaunch Wishlist & Game Requests',
-        content: 'Drop your game requests and feature ideas for our Halloween relaunch below! We are adding 100+ unblocked titles.',
-        upvotes: 42,
-        replies: 18,
-        date: '2 hours ago'
-      },
-      {
-        id: 2,
-        author: 'Alex_Gamer',
-        title: '🎮 Will GBA and SNES emulators support multiplayer saves?',
-        content: 'Super excited for retro emulators! Will we be able to save state and play 1v1 multiplayer?',
-        upvotes: 27,
-        replies: 9,
-        date: '5 hours ago'
-      },
-      {
-        id: 3,
-        author: 'SpookyCat99',
-        title: '👻 Love the Halloween theme & OG Lo-Fi Beats radio!',
-        content: 'The shutdown screen theme is super relaxing. Can we keep the lo-fi beats player after relaunch?',
-        upvotes: 35,
-        replies: 12,
-        date: '1 day ago'
-      }
+    // SPOOKY AI ORACLE LOGIC
+    const oracleAnswers = [
+      "🔮 The spirits say: The October 31st relaunch will unleash unbelievable fortune!",
+      "👻 A ghostly whisper echoes: Victory awaits those who master Spooky Snake!",
+      "🎃 The Great Pumpkin foretells: Great wealth and zero-lag servers are in your future!",
+      "⚡ Thunder strikes! The ancient spell guarantees 100% data preservation!",
+      "🌙 The midnight moon glows brightly: Patience will bring retro emulators and 1v1 arenas!",
+      "🧙 The Witch's cauldron bubbles: Ask again under the light of the full moon!",
+      "🦇 Shadows dance across the realm: Your luck is at an all-time high today!"
     ];
 
-    function loadForumThreads() {
-      let threads = JSON.parse(localStorage.getItem('nitro_forum_threads') || 'null');
-      if (!threads) {
-        threads = defaultThreads;
-        localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
-      }
-      renderForumThreads(threads);
+    window.consultAIOracle = function() {
+      const box = document.getElementById('oracle-response-box');
+      if (!box) return;
+      box.style.display = 'block';
+      box.textContent = '🔮 Gazing into the mystical crystal ball...';
+
+      setTimeout(() => {
+        const rand = oracleAnswers[Math.floor(Math.random() * oracleAnswers.length)];
+        box.textContent = rand;
+      }, 600);
+    };
+
+    window.handleOracleFormSubmit = function(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('oracle-question-input');
+      const question = input ? input.value.trim() : '';
+      if (!question) return;
+
+      const box = document.getElementById('oracle-response-box');
+      if (!box) return;
+      box.style.display = 'block';
+      box.textContent = '🔮 The Spooky AI Oracle is consulting the spirits...';
+
+      setTimeout(() => {
+        const rand = oracleAnswers[Math.floor(Math.random() * oracleAnswers.length)];
+        box.innerHTML = '<strong>Q: "' + question + '"</strong><br><br>' + rand;
+        input.value = '';
+      }, 700);
+    };
+
+    // INTERACTIVE PUMPKIN CARVER TOY LOGIC
+    let carverTool = 'glow';
+    let carverCanvas = null;
+    let carverCtx = null;
+    let isCarving = false;
+
+    function initPumpkinCarverOnce() {
+      if (carverCanvas) return;
+      carverCanvas = document.getElementById('pumpkin-carve-canvas');
+      if (!carverCanvas) return;
+      carverCtx = carverCanvas.getContext('2d');
+
+      resetPumpkinCarveCanvas();
+
+      carverCanvas.addEventListener('mousedown', startCarve);
+      carverCanvas.addEventListener('mousemove', drawCarve);
+      carverCanvas.addEventListener('mouseup', stopCarve);
+      carverCanvas.addEventListener('mouseleave', stopCarve);
+
+      carverCanvas.addEventListener('touchstart', (e) => { startCarve(e.touches[0]); e.preventDefault(); });
+      carverCanvas.addEventListener('touchmove', (e) => { drawCarve(e.touches[0]); e.preventDefault(); });
+      carverCanvas.addEventListener('touchend', stopCarve);
     }
 
-    function renderForumThreads(threads) {
-      const container = document.getElementById('forum-threads-list');
-      if (!container) return;
+    window.setCarveTool = function(tool, btn) {
+      carverTool = tool;
+      document.querySelectorAll('.carve-tool-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    };
 
-      container.innerHTML = threads.map(t => `
-        <div class="forum-thread-card">
-          <div class="forum-thread-header">
-            <span class="forum-thread-title">${escapeHTML(t.title)}</span>
-            <span class="forum-badge">By ${escapeHTML(t.author)}</span>
-          </div>
-          <p style="font-size: 0.82rem; color: #cbd5e1; margin: 4px 0 8px 0; line-height: 1.45;">${escapeHTML(t.content)}</p>
-          <div class="forum-thread-meta">
-            <button type="button" class="forum-upvote-btn" onclick="upvoteThread(${t.id})">👍 ${t.upvotes}</button>
-            <span>💬 ${t.replies} Replies</span>
-            <span>• ${t.date}</span>
+    window.resetPumpkinCarveCanvas = function() {
+      if (!carverCtx || !carverCanvas) return;
+      carverCtx.clearRect(0, 0, carverCanvas.width, carverCanvas.height);
+      
+      carverCtx.fillStyle = 'rgba(255, 230, 150, 0.95)';
+      carverCtx.shadowColor = '#f97316';
+      carverCtx.shadowBlur = 12;
+
+      // Draw faint guide outline for pumpkin eyes & mouth
+      carverCtx.font = '72px serif';
+      carverCtx.textAlign = 'center';
+      carverCtx.globalAlpha = 0.25;
+      carverCtx.fillText('▲  ▲', carverCanvas.width / 2, 110);
+      carverCtx.font = '54px serif';
+      carverCtx.fillText('▲▲▲▲', carverCanvas.width / 2, 190);
+      carverCtx.globalAlpha = 1.0;
+    };
+
+    function startCarve(e) {
+      isCarving = true;
+      drawCarve(e);
+    }
+
+    function drawCarve(e) {
+      if (!isCarving || !carverCtx || !carverCanvas) return;
+      const rect = carverCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      carverCtx.beginPath();
+      if (carverTool === 'eraser') {
+        carverCtx.globalCompositeOperation = 'destination-out';
+        carverCtx.arc(x, y, 14, 0, Math.PI * 2);
+        carverCtx.fill();
+        carverCtx.globalCompositeOperation = 'source-over';
+      } else {
+        const colors = {
+          glow: '#ffea75',
+          yellow: '#facc15',
+          purple: '#c084fc'
+        };
+        const shadows = {
+          glow: '#f97316',
+          yellow: '#eab308',
+          purple: '#a855f7'
+        };
+        carverCtx.fillStyle = colors[carverTool] || '#ffea75';
+        carverCtx.shadowColor = shadows[carverTool] || '#f97316';
+        carverCtx.shadowBlur = 16;
+        carverCtx.arc(x, y, 9, 0, Math.PI * 2);
+        carverCtx.fill();
+      }
+    }
+
+    function stopCarve() {
+      isCarving = false;
+    }
+
+    window.stampCarveShape = function(shape) {
+      if (!carverCtx || !carverCanvas) return;
+      carverCtx.fillStyle = '#ffea75';
+      carverCtx.shadowColor = '#f97316';
+      carverCtx.shadowBlur = 20;
+      carverCtx.textAlign = 'center';
+
+      if (shape === 'eyes') {
+        carverCtx.font = '64px serif';
+        carverCtx.fillText('▲  ▲', carverCanvas.width / 2, 115);
+      } else if (shape === 'mouth') {
+        carverCtx.font = '54px serif';
+        carverCtx.fillText('▲▲▲▲', carverCanvas.width / 2, 195);
+      }
+    };
+
+    window.downloadCarvedPumpkin = function() {
+      if (!carverCanvas) return;
+      const link = document.createElement('a');
+      link.download = 'my-jack-o-lantern-artwork.png';
+      link.href = carverCanvas.toDataURL('image/png');
+      link.click();
+    };
+
+    // SPOOKY LIVE COMMUNITY CHATROOM LOGIC
+    let isChatInited = false;
+
+    const initialChatMessages = [
+      { badge: '👻', handle: 'GhostRider', time: '12:30 PM', text: 'Who else is super hyped for the October 31st relaunch?! 🎃' },
+      { badge: '🎃', handle: 'PumpkinKing', time: '12:31 PM', text: 'The new pumpkin carver tool is insane fire 🔥' },
+      { badge: '🔮', handle: 'OracleSeer', time: '12:33 PM', text: 'The Oracle told me retro GBA emulators are coming!' },
+      { badge: '🧙', handle: 'WitchyVibes', time: '12:34 PM', text: 'Love the rainy lofi radio stream while doing homework ☕' },
+      { badge: '🦇', handle: 'ShadowSpectre', time: '12:35 PM', text: 'Just hit score 120 in Spooky Snake! Beat that 🐍' }
+    ];
+
+    const botSimulatedChatters = [
+      { badge: '💀', handle: 'SkellyGamer', text: 'Anyone wanna challenge me in Tic-Tac-Toe?' },
+      { badge: '🍬', handle: 'CandyCornHero', text: 'Counting down to Halloween relaunch! 🎃' },
+      { badge: '🕷️', handle: 'WebCrawler', text: 'The weather FX changes the whole site mood so nicely.' },
+      { badge: '👻', handle: 'PhantomPlayer', text: 'Zero cost servers means no annoying ads forever!' },
+      { badge: '🔮', handle: 'MysticCoder', text: 'Checked the roadmap, 1v1 arenas are gonna be crazy!' }
+    ];
+
+    function initSpookyChatOnce() {
+      if (isChatInited) return;
+      isChatInited = true;
+
+      const saved = JSON.parse(localStorage.getItem('nitro_spooky_chat_history') || 'null');
+      const msgs = saved && saved.length > 0 ? saved : initialChatMessages;
+
+      renderChatMessages(msgs);
+
+      // Simulate live community chatter popping in periodically
+      setInterval(() => {
+        const box = document.getElementById('chat-messages-box');
+        const tabChat = document.getElementById('tab-chat');
+        if (!tabChat || !tabChat.classList.contains('active')) return;
+
+        const currentMsgs = JSON.parse(localStorage.getItem('nitro_spooky_chat_history') || 'null') || initialChatMessages;
+        const bot = botSimulatedChatters[Math.floor(Math.random() * botSimulatedChatters.length)];
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const newMsg = {
+          badge: bot.badge,
+          handle: bot.handle,
+          time: timeStr,
+          text: bot.text
+        };
+
+        currentMsgs.push(newMsg);
+        if (currentMsgs.length > 40) currentMsgs.shift();
+
+        localStorage.setItem('nitro_spooky_chat_history', JSON.stringify(currentMsgs));
+        renderChatMessages(currentMsgs);
+      }, 12000);
+    }
+
+    function renderChatMessages(msgs) {
+      const box = document.getElementById('chat-messages-box');
+      if (!box) return;
+
+      box.innerHTML = msgs.map(m => `
+        <div class="chat-msg">
+          <div class="chat-avatar">${m.badge}</div>
+          <div class="chat-content-box">
+            <div class="chat-header-line">
+              <span class="chat-username">${m.handle}</span>
+              <span class="chat-timestamp">${m.time}</span>
+            </div>
+            <div class="chat-text">${escapeHtml(m.text)}</div>
           </div>
         </div>
       `).join('');
+
+      box.scrollTop = box.scrollHeight;
     }
 
-    function escapeHTML(str) {
-      return String(str).replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-      );
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    window.toggleNewThreadForm = function() {
-      const form = document.getElementById('new-thread-form');
-      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    };
-
-    window.handleNewThreadSubmit = function(e) {
+    window.handleSendSpookyChatMessage = function(e) {
       if (e) e.preventDefault();
-      const author = document.getElementById('forum-author-input')?.value.trim();
-      const title = document.getElementById('forum-title-input')?.value.trim();
-      const content = document.getElementById('forum-content-input')?.value.trim();
+      const input = document.getElementById('chat-message-input');
+      const handleInput = document.getElementById('chat-handle-input');
+      const badgeSelect = document.getElementById('chat-badge-select');
 
-      if (author && title && content) {
-        let threads = JSON.parse(localStorage.getItem('nitro_forum_threads') || '[]');
-        threads.unshift({
-          id: Date.now(),
-          author: author,
-          title: title,
-          content: content,
-          upvotes: 1,
-          replies: 0,
-          date: 'Just now'
-        });
-        localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
-        renderForumThreads(threads);
-        toggleNewThreadForm();
-      }
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+
+      const handle = (handleInput && handleInput.value.trim()) || 'SpookyGamer';
+      const badge = badgeSelect ? badgeSelect.value : '🎃';
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      let msgs = JSON.parse(localStorage.getItem('nitro_spooky_chat_history') || 'null');
+      if (!msgs || msgs.length === 0) msgs = [...initialChatMessages];
+
+      msgs.push({ badge, handle, time: timeStr, text });
+      if (msgs.length > 40) msgs.shift();
+
+      localStorage.setItem('nitro_spooky_chat_history', JSON.stringify(msgs));
+      renderChatMessages(msgs);
+
+      input.value = '';
     };
 
-    window.upvoteThread = function(id) {
-      let threads = JSON.parse(localStorage.getItem('nitro_forum_threads') || '[]');
-      const target = threads.find(t => t.id === id);
-      if (target) {
-        target.upvotes++;
-        localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
-        renderForumThreads(threads);
-      }
-    };
-
-    // 🃏 SPOOKY MEMORY MATCH MINI-GAME
-    const memorySymbols = ['🎃', '👻', '🧙‍♀️', '🦇', '🍬', '🕸️'];
-    let memoryCards = [];
-    let flippedCards = [];
-    let memoryMoves = 0;
-
-    window.startMemoryMatchGame = function() {
-      const grid = document.getElementById('memory-grid');
-      if (!grid) return;
-
-      memoryMoves = 0;
-      flippedCards = [];
-      const deck = [...memorySymbols, ...memorySymbols].sort(() => Math.random() - 0.5);
-      memoryCards = deck;
-
-      const movesText = document.getElementById('memory-moves-text');
-      if (movesText) movesText.textContent = 'Moves: 0';
-
-      grid.innerHTML = deck.map((symbol, idx) => `
-        <div class="memory-card" id="mem-card-${idx}" onclick="flipMemoryCard(${idx})">❓</div>
-      `).join('');
-    };
-
-    window.flipMemoryCard = function(idx) {
-      if (flippedCards.length >= 2) return;
-      const cardEl = document.getElementById('mem-card-' + idx);
-      if (!cardEl || cardEl.classList.contains('flipped')) return;
-
-      cardEl.classList.add('flipped');
-      cardEl.textContent = memoryCards[idx];
-      flippedCards.push({ idx, symbol: memoryCards[idx] });
-
-      if (flippedCards.length === 2) {
-        memoryMoves++;
-        const movesText = document.getElementById('memory-moves-text');
-        if (movesText) movesText.textContent = 'Moves: ' + memoryMoves;
-
-        const [c1, c2] = flippedCards;
-        if (c1.symbol === c2.symbol) {
-          flippedCards = [];
-        } else {
-          setTimeout(() => {
-            const el1 = document.getElementById('mem-card-' + c1.idx);
-            const el2 = document.getElementById('mem-card-' + c2.idx);
-            if (el1) { el1.classList.remove('flipped'); el1.textContent = '❓'; }
-            if (el2) { el2.classList.remove('flipped'); el2.textContent = '❓'; }
-            flippedCards = [];
-          }, 700);
-        }
-      }
-    };
-
-    window.changeFallThemePreset = function(theme) {
-      document.body.classList.remove('theme-pumpkin-spice', 'theme-haunted-mansion');
-      if (theme === 'pumpkin') {
-        document.body.classList.add('theme-pumpkin-spice');
-      } else if (theme === 'mansion') {
-        document.body.classList.add('theme-haunted-mansion');
-      }
-    };
-
-    let pumpkinScore = 0;
-    window.harvestPumpkin = function(el) {
-      pumpkinScore++;
-      const scoreEl = document.getElementById('pumpkin-harvest-score');
-      if (scoreEl) scoreEl.textContent = 'Pumpkins Harvested: ' + pumpkinScore + ' 🎃';
-      
-      el.style.transform = 'scale(1.3) rotate(15deg)';
-      setTimeout(() => el.style.transform = 'none', 180);
-      spawnBurst(window.innerWidth / 2, window.innerHeight / 2, 4);
-    };
-
-    const treats = [
-      '🍬 You found a Candy Corn! (+50 Candy Points)',
-      '🥧 You baked a Fresh Pumpkin Pie!',
-      '👻 Boo! A friendly ghost gave you a Golden Pumpkin!',
-      '🍭 Super Sweet! Double Candy Multiplier Unlocked!'
-    ];
-
-    window.triggerTrickOrTreat = function() {
-      const banner = document.getElementById('trick-or-treat-banner');
-      const randomTreat = treats[Math.floor(Math.random() * treats.length)];
-      if (banner) {
-        banner.style.display = 'block';
-        banner.textContent = randomTreat;
-      }
-    };
-
-    // 🚀 STRICT SEQUENTIAL NUMBER INCREMENT ENGINE WITH ADMIN CONFIG
-    let statTargets = [
-      { id: 'stat-num-1', target: 10609, suffix: '+' },
-      { id: 'stat-num-2', target: 500, suffix: '+' },
-      { id: 'stat-num-3', target: 28, suffix: '+' },
-      { id: 'stat-num-4', target: 100, suffix: '%' }
-    ];
-
-    window.triggerRollNumbersUp = function(statIndex) {
-      const items = statIndex !== undefined ? [statTargets[statIndex]] : statTargets;
-
-      items.forEach((item, idx) => {
-        const el = document.getElementById(item.id);
-        if (!el) return;
-
-        if (el._rollTimer) clearInterval(el._rollTimer);
-
-        let current = 0;
-        const target = item.target;
-        const stepInc = target > 5000 ? 7 : (target > 500 ? 1 : 1);
-        const stepDelay = target > 5000 ? 1 : (target > 500 ? 2 : 15);
-
-        el._rollTimer = setInterval(() => {
-          current = Math.min(current + stepInc, target);
-          el.textContent = current.toLocaleString() + item.suffix;
-
-          if (current >= target) {
-            clearInterval(el._rollTimer);
-            el.textContent = target.toLocaleString() + item.suffix;
-          }
-        }, stepDelay);
-      });
-    };
-
-    setTimeout(() => window.triggerRollNumbersUp(), 500);
-
-    // Tab Switcher Controller
-    window.switchShutdownTab = function(tabId) {
-      const btns = document.querySelectorAll('.nav-tab-btn');
-      btns.forEach(b => b.classList.remove('active'));
-      const panels = document.querySelectorAll('.tab-panel-content');
-      panels.forEach(p => p.classList.remove('active'));
-
-      const targetBtn = Array.from(btns).find(b => b.getAttribute('onclick').includes(tabId));
-      if (targetBtn) targetBtn.classList.add('active');
-      const targetPanel = document.getElementById(tabId);
-      if (targetPanel) targetPanel.classList.add('active');
-
-      if (tabId === 'tab-notice') {
-        window.triggerRollNumbersUp();
-      } else if (tabId === 'tab-forum') {
-        loadForumThreads();
-      } else if (tabId === 'tab-carver') {
-        setTimeout(initPumpkinCarver, 100);
-      } else if (tabId === 'tab-minigames') {
-        setTimeout(() => {
-          startSnakeGame();
-          startMemoryMatchGame();
-        }, 100);
-      }
-    };
-
-    window.triggerStatPulse = function(el) {
-      el.style.transform = 'scale(1.1)';
-      setTimeout(() => el.style.transform = 'none', 200);
-    };
-
-    // FAQ Accordion Controller
-    window.toggleFAQ = function(el) {
-      const answer = el.nextElementSibling;
-      if (!answer) return;
-      const isOpen = answer.style.display === 'block';
-      answer.style.display = isOpen ? 'none' : 'block';
-    };
-
-    // Relaunch Notification Form Handler
+    // NOTIFY FORM HANDLER
     window.handleNotifySubmit = function(e) {
       if (e) e.preventDefault();
-      const input = document.getElementById('notify-input');
-      const feedback = document.getElementById('notify-feedback');
-      const val = input ? input.value.trim() : '';
-
-      if (val) {
-        let subs = JSON.parse(localStorage.getItem('nitro_relaunch_subscribers') || '[]');
-        subs.push({ contact: val, date: new Date().toISOString() });
-        localStorage.setItem('nitro_relaunch_subscribers', JSON.stringify(subs));
-
-        if (feedback) {
-          feedback.style.display = 'block';
-          feedback.textContent = '🎃 Subscribed successfully! You will be alerted on October 31st.';
-        }
-        if (input) input.value = '';
-      }
+      const msg = document.getElementById('notify-success-msg');
+      if (msg) msg.style.display = 'block';
     };
 
-    // 🐍 RETRO ARCADE SNAKE GAME ENGINE
-    (function() {
-      let snakeCanvas, snakeCtx;
-      let grid = 12;
-      let snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
-      let apple = { x: 192, y: 120 };
-      let score = 0;
-      let highScore = parseInt(localStorage.getItem('nitro_snake_highscore') || '0', 10);
-      let snakeInterval = null;
+    // FLOATING GHOST INTERACTION
+    window.interactWithGhost = function() {
+      const ghost = document.getElementById('ghost-companion');
+      if (!ghost) return;
 
-      window.startSnakeGame = function() {
-        snakeCanvas = document.getElementById('snake-canvas');
-        if (!snakeCanvas) return;
-        snakeCtx = snakeCanvas.getContext('2d');
+      const treats = ['🍬 Sweet Candy!', '🍭 Lollipop!', '🍫 Chocolate!', '🎃 Pumpkin Spice Cookie!', '✨ Ghost Power!'];
+      const treat = treats[Math.floor(Math.random() * treats.length)];
 
-        snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
-        apple = { x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 15) * grid };
-        score = 0;
-        updateSnakeScoreUI();
+      ghost.style.transform = 'scale(1.5) rotate(360deg)';
+      setTimeout(() => { ghost.style.transform = 'none'; }, 400);
 
-        if (snakeInterval) clearInterval(snakeInterval);
-        snakeInterval = setInterval(gameLoop, 90);
-      };
+      alert('👻 Ghost Companion gave you: ' + treat);
+    };
 
-      window.setSnakeDir = function(dir) {
-        if (dir === 'UP' && snake.dy === 0) { snake.dx = 0; snake.dy = -grid; }
-        else if (dir === 'DOWN' && snake.dy === 0) { snake.dx = 0; snake.dy = grid; }
-        else if (dir === 'LEFT' && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; }
-        else if (dir === 'RIGHT' && snake.dx === 0) { snake.dx = grid; snake.dy = 0; }
-      };
+    // HALLOWEEN MINI-GAMES SUITE LOGIC
+    let currentMinigame = 'snake';
 
-      function updateSnakeScoreUI() {
-        const sEl = document.getElementById('snake-score-text');
-        const hEl = document.getElementById('snake-high-text');
-        if (sEl) sEl.textContent = 'Score: ' + score;
-        if (hEl) hEl.textContent = 'High Score: ' + highScore;
+    window.switchMinigame = function(game) {
+      currentMinigame = game;
+      document.getElementById('btn-mg-snake').classList.toggle('active', game === 'snake');
+      document.getElementById('btn-mg-ttt').classList.toggle('active', game === 'ttt');
+      document.getElementById('btn-mg-memory').classList.toggle('active', game === 'memory');
+
+      document.getElementById('mg-panel-snake').style.display = game === 'snake' ? 'block' : 'none';
+      document.getElementById('mg-panel-ttt').style.display = game === 'ttt' ? 'block' : 'none';
+      document.getElementById('mg-panel-memory').style.display = game === 'memory' ? 'block' : 'none';
+
+      if (game === 'snake') initSnakeGame();
+      if (game === 'memory') resetMemoryGame();
+    };
+
+    // SPOOKY SNAKE GAME LOGIC
+    let snakeCanvas, snakeCtx;
+    let snakeInterval = null;
+    let grid = 15;
+    let count = 0;
+    let score = 0;
+    let highScore = parseInt(localStorage.getItem('nitro_snake_highscore') || '0', 10);
+
+    let snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
+    let apple = { x: 192, y: 192 };
+
+    function initSnakeGame() {
+      snakeCanvas = document.getElementById('snake-canvas');
+      if (!snakeCanvas) return;
+      snakeCtx = snakeCanvas.getContext('2d');
+
+      document.getElementById('snake-highscore').textContent = highScore;
+
+      if (snakeInterval) cancelAnimationFrame(snakeInterval);
+      requestAnimationFrame(loopSnake);
+    }
+
+    function updateSnakeScoreUI() {
+      const s = document.getElementById('snake-score');
+      const hs = document.getElementById('snake-highscore');
+      if (s) s.textContent = score;
+      if (hs) hs.textContent = highScore;
+    }
+
+    window.setSnakeDir = function(dir) {
+      if (dir === 'UP' && snake.dy === 0) { snake.dx = 0; snake.dy = -grid; }
+      else if (dir === 'DOWN' && snake.dy === 0) { snake.dx = 0; snake.dy = grid; }
+      else if (dir === 'LEFT' && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; }
+      else if (dir === 'RIGHT' && snake.dx === 0) { snake.dx = grid; snake.dy = 0; }
+    };
+
+    function loopSnake() {
+      snakeInterval = requestAnimationFrame(loopSnake);
+
+      if (++count < 6) return;
+      count = 0;
+
+      snakeCtx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+
+      snake.x += snake.dx;
+      snake.y += snake.dy;
+
+      if (snake.x < 0) snake.x = snakeCanvas.width - grid;
+      else if (snake.x >= snakeCanvas.width) snake.x = 0;
+
+      if (snake.y < 0) snake.y = snakeCanvas.height - grid;
+      else if (snake.y >= snakeCanvas.height) snake.y = 0;
+
+      snake.cells.unshift({ x: snake.x, y: snake.y });
+
+      if (snake.cells.length > snake.maxCells) {
+        snake.cells.pop();
       }
 
-      function gameLoop() {
-        if (!snakeCtx) return;
+      // Draw Pumpkin Apple
+      snakeCtx.fillStyle = '#f97316';
+      snakeCtx.beginPath();
+      snakeCtx.arc(apple.x + grid / 2, apple.y + grid / 2, grid / 2 - 1, 0, Math.PI * 2);
+      snakeCtx.fill();
 
-        snakeCtx.fillStyle = '#090d16';
-        snakeCtx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+      // Draw Snake Body
+      snake.cells.forEach(function(cell, index) {
+        snakeCtx.fillStyle = index === 0 ? '#38bdf8' : '#0284c7';
+        snakeCtx.beginPath();
+        snakeCtx.roundRect(cell.x, cell.y, grid - 1, grid - 1, 3);
+        snakeCtx.fill();
 
-        snake.x += snake.dx;
-        snake.y += snake.dy;
-
-        if (snake.x < 0) snake.x = snakeCanvas.width - grid;
-        else if (snake.x >= snakeCanvas.width) snake.x = 0;
-        if (snake.y < 0) snake.y = snakeCanvas.height - grid;
-        else if (snake.y >= snakeCanvas.height) snake.y = 0;
-
-        snake.cells.unshift({ x: snake.x, y: snake.y });
-
-        if (snake.cells.length > snake.maxCells) {
-          snake.cells.pop();
+        if (cell.x === apple.x && cell.y === apple.y) {
+          snake.maxCells++;
+          score += 10;
+          if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('nitro_snake_highscore', highScore.toString());
+          }
+          updateSnakeScoreUI();
+          apple.x = Math.floor(Math.random() * (snakeCanvas.width / grid)) * grid;
+          apple.y = Math.floor(Math.random() * (snakeCanvas.height / grid)) * grid;
         }
 
-        // Draw Pumpkin Apple
-        snakeCtx.font = '12px sans-serif';
-        snakeCtx.textAlign = 'center';
-        snakeCtx.textBaseline = 'middle';
-        snakeCtx.fillText('🎃', apple.x + grid / 2, apple.y + grid / 2);
-
-        // Draw Snake
-        snake.cells.forEach(function(cell, index) {
-          snakeCtx.fillStyle = index === 0 ? '#f97316' : '#fdba74';
-          snakeCtx.beginPath();
-          snakeCtx.roundRect(cell.x, cell.y, grid - 1, grid - 1, 3);
-          snakeCtx.fill();
-
-          if (cell.x === apple.x && cell.y === apple.y) {
-            snake.maxCells++;
-            score += 10;
-            if (score > highScore) {
-              highScore = score;
-              localStorage.setItem('nitro_snake_highscore', highScore.toString());
-            }
+        for (let i = index + 1; i < snake.cells.length; i++) {
+          if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+            snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
+            score = 0;
             updateSnakeScoreUI();
-            apple.x = Math.floor(Math.random() * (snakeCanvas.width / grid)) * grid;
-            apple.y = Math.floor(Math.random() * (snakeCanvas.height / grid)) * grid;
           }
-
-          for (let i = index + 1; i < snake.cells.length; i++) {
-            if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-              snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
-              score = 0;
-              updateSnakeScoreUI();
-            }
-          }
-        });
-      }
-
-      window.addEventListener('keydown', function(e) {
-        const tabMinigames = document.getElementById('tab-minigames');
-        if (!tabMinigames || !tabMinigames.classList.contains('active')) return;
-
-        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { setSnakeDir('UP'); e.preventDefault(); }
-        else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { setSnakeDir('DOWN'); e.preventDefault(); }
-        else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { setSnakeDir('LEFT'); e.preventDefault(); }
-        else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { setSnakeDir('RIGHT'); e.preventDefault(); }
+        }
       });
-    })();
+    }
+
+    window.addEventListener('keydown', function(e) {
+      const tabMinigames = document.getElementById('tab-minigames');
+      if (!tabMinigames || !tabMinigames.classList.contains('active')) return;
+
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { setSnakeDir('UP'); e.preventDefault(); }
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { setSnakeDir('DOWN'); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { setSnakeDir('LEFT'); e.preventDefault(); }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { setSnakeDir('RIGHT'); e.preventDefault(); }
+    });
 
     // Tic Tac Toe Game vs Groq AI Bot Logic
     (function() {
@@ -7300,6 +7368,59 @@
         gameOver = false;
         updateTTTUI();
         document.getElementById('ttt-status').textContent = 'Your turn! Click any box (Player: X vs Groq AI: O)';
+      };
+    })();
+
+    // SPOOKY MEMORY MATCHING GAME
+    (function() {
+      const emojis = ['🎃', '👻', '🦇', '🔮', '🧙', '💀'];
+      let cards = [];
+      let flippedCards = [];
+      let matchedCount = 0;
+
+      window.resetMemoryGame = function() {
+        matchedCount = 0;
+        document.getElementById('memory-matches').textContent = '0';
+        cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+        flippedCards = [];
+
+        const container = document.getElementById('memory-grid-container');
+        if (!container) return;
+
+        container.innerHTML = cards.map((emoji, idx) => `
+          <div class="memory-card" data-idx="${idx}" onclick="flipMemoryCard(${idx})">❓</div>
+        `).join('');
+      };
+
+      window.flipMemoryCard = function(idx) {
+        if (flippedCards.length >= 2) return;
+        const cardEls = document.querySelectorAll('.memory-card');
+        const cardEl = cardEls[idx];
+
+        if (cardEl.classList.contains('flipped')) return;
+
+        cardEl.classList.add('flipped');
+        cardEl.textContent = cards[idx];
+        flippedCards.push({ idx, emoji: cards[idx], el: cardEl });
+
+        if (flippedCards.length === 2) {
+          if (flippedCards[0].emoji === flippedCards[1].emoji) {
+            matchedCount++;
+            document.getElementById('memory-matches').textContent = matchedCount;
+            flippedCards = [];
+            if (matchedCount === 6) {
+              setTimeout(() => alert('🎉 You cleared the Spooky Memory Deck!'), 300);
+            }
+          } else {
+            setTimeout(() => {
+              flippedCards.forEach(c => {
+                c.el.classList.remove('flipped');
+                c.el.textContent = '❓';
+              });
+              flippedCards = [];
+            }, 800);
+          }
+        }
       };
     })();
 
@@ -7412,11 +7533,17 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // 🌌 ULTRA-SERENE AMBIENT PARTICLES & DYNAMIC WEATHER OVERLAY
+    // 🌌 HIGH-ENERGY, HIGH-DENSITY, HYPER-ACTIVE PARTICLES ENGINE
+    let particleDensityMode = 'insane';
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
     let spawnBurstFunc = null;
+
+    window.changeParticleDensity = function(mode) {
+      particleDensityMode = mode;
+      if (resetCanvasParticlesFunc) resetCanvasParticlesFunc();
+    };
 
     window.changeCanvasTheme = function(themeName) {
       currentCanvasTheme = themeName;
@@ -7438,12 +7565,12 @@
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [], shockwaves = [], leaves = [], raindrops = [];
+      let width, height, particles = [], shockwaves = [], leaves = [], raindrops = [], fogWisps = [];
 
       const mouse = {
         x: null,
         y: null,
-        radius: 90,
+        radius: 140,
         isPressed: false
       };
 
@@ -7454,43 +7581,71 @@
         initParticles();
         initLeaves();
         initRaindrops();
+        initFogWisps();
       }
       window.addEventListener('resize', resizeCanvas);
 
+      function getDensityMultiplier() {
+        if (particleDensityMode === 'hyper') return 3.2;
+        if (particleDensityMode === 'dense') return 1.8;
+        return 2.4; // insane default
+      }
+
       function initParticles() {
         particles = [];
-        const baseCount = Math.min(Math.floor((width * height) / 32000), 36);
-        for (let i = 0; i < Math.max(baseCount, 26); i++) {
+        const mult = getDensityMultiplier();
+        const baseCount = Math.floor(160 * mult);
+        for (let i = 0; i < baseCount; i++) {
           particles.push(createBaseParticle());
         }
       }
 
       function initLeaves() {
         leaves = [];
-        for (let i = 0; i < 8; i++) {
+        const mult = getDensityMultiplier();
+        const leafCount = Math.floor(65 * mult);
+        const emojis = ['🍂', '🍁', '🌾', '🦇', '✨', '🎃', '🌟', '👻', '⚡'];
+        for (let i = 0; i < leafCount; i++) {
           leaves.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            size: Math.random() * 8 + 10,
-            vy: Math.random() * 0.3 + 0.2,
-            vx: Math.random() * 0.2 - 0.1,
+            size: Math.random() * 10 + 14,
+            vy: Math.random() * 1.8 + 0.8,
+            vx: Math.random() * 1.4 - 0.7,
             rotation: Math.random() * Math.PI * 2,
-            vRot: (Math.random() - 0.5) * 0.015,
-            emoji: Math.random() > 0.5 ? '🍂' : '🍁'
+            vRot: (Math.random() - 0.5) * 0.06,
+            emoji: emojis[Math.floor(Math.random() * emojis.length)]
           });
         }
       }
 
       function initRaindrops() {
         raindrops = [];
-        for (let i = 0; i < 35; i++) {
+        const mult = getDensityMultiplier();
+        const dropCount = Math.floor(220 * mult);
+        for (let i = 0; i < dropCount; i++) {
           raindrops.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            length: Math.random() * 14 + 10,
-            vy: Math.random() * 6 + 7,
-            vx: -1.2,
-            alpha: Math.random() * 0.3 + 0.15
+            length: Math.random() * 22 + 14,
+            vy: Math.random() * 12 + 12,
+            vx: -2.8,
+            alpha: Math.random() * 0.55 + 0.3
+          });
+        }
+      }
+
+      function initFogWisps() {
+        fogWisps = [];
+        const mult = getDensityMultiplier();
+        const fogCount = Math.floor(50 * mult);
+        for (let i = 0; i < fogCount; i++) {
+          fogWisps.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 60 + 40,
+            vx: Math.random() * 0.8 + 0.3,
+            alpha: Math.random() * 0.16 + 0.05
           });
         }
       }
@@ -7499,10 +7654,10 @@
         return {
           x: Math.random() * (width || window.innerWidth),
           y: Math.random() * (height || window.innerHeight),
-          vx: (Math.random() - 0.5) * 0.2,
-          vy: (Math.random() - 0.5) * 0.2 - 0.04,
-          radius: Math.random() * 2 + 1,
-          alpha: Math.random() * 0.4 + 0.15,
+          vx: (Math.random() - 0.5) * 2.4,
+          vy: (Math.random() - 0.5) * 2.4 - 0.2,
+          radius: Math.random() * 3.5 + 1.2,
+          alpha: Math.random() * 0.65 + 0.25,
           decay: 0,
           isSpawned: false
         };
@@ -7512,6 +7667,7 @@
         initParticles();
         initLeaves();
         initRaindrops();
+        initFogWisps();
         shockwaves = [];
       };
 
@@ -7520,23 +7676,23 @@
           x: width / 2,
           y: height / 2,
           radius: 10,
-          maxRadius: Math.max(width, height) * 0.35,
-          alpha: 0.6
+          maxRadius: Math.max(width, height) * 0.55,
+          alpha: 0.95
         });
       };
 
       spawnBurstFunc = function(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 1.5 + 0.5;
+          const speed = Math.random() * 5.5 + 2.0;
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            radius: Math.random() * 2 + 1,
-            alpha: 0.7,
-            decay: Math.random() * 0.015 + 0.008,
+            radius: Math.random() * 4 + 1.8,
+            alpha: 0.95,
+            decay: Math.random() * 0.02 + 0.008,
             isSpawned: true
           });
         }
@@ -7575,7 +7731,7 @@
 
         if (!isOverUI && e.target === canvas) {
           mouse.isPressed = true;
-          spawnBurst(e.clientX, e.clientY, 2);
+          spawnBurst(e.clientX, e.clientY, 28);
         } else {
           mouse.isPressed = false;
         }
@@ -7593,13 +7749,28 @@
 
       resizeCanvas();
 
+      // Periodic Lightning Flash Trigger for Thunderstorm weather
+      setInterval(() => {
+        if (activeWeatherEffect === 'thunder') {
+          const flash = document.getElementById('lightning-flash');
+          if (flash && Math.random() > 0.35) {
+            flash.style.opacity = '0.85';
+            setTimeout(() => { flash.style.opacity = '0'; }, 90);
+            setTimeout(() => {
+              flash.style.opacity = '0.5';
+              setTimeout(() => { flash.style.opacity = '0'; }, 60);
+            }, 160);
+          }
+        }
+      }, 4000);
+
       function animateParticles() {
         ctx.clearRect(0, 0, width, height);
 
-        // Render Dynamic Weather Overlay (Rain / Snow / Thunder)
+        // Render High Velocity Weather FX Across ALL Conditions
         if (activeWeatherEffect === 'rain' || activeWeatherEffect === 'thunder') {
-          ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-          ctx.lineWidth = 1.1;
+          ctx.strokeStyle = activeWeatherEffect === 'thunder' ? 'rgba(168, 85, 247, 0.65)' : 'rgba(56, 189, 248, 0.65)';
+          ctx.lineWidth = 1.6;
           raindrops.forEach(drop => {
             drop.y += drop.vy;
             drop.x += drop.vx;
@@ -7610,22 +7781,31 @@
             ctx.stroke();
           });
         } else if (activeWeatherEffect === 'snow') {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
           raindrops.forEach(flake => {
-            flake.y += flake.vy * 0.2;
-            flake.x += Math.sin(flake.y * 0.02) * 0.4;
+            flake.y += flake.vy * 0.35;
+            flake.x += Math.sin(flake.y * 0.03) * 1.2;
             if (flake.y > height) { flake.y = -10; flake.x = Math.random() * width; }
             ctx.beginPath();
-            ctx.arc(flake.x, flake.y, Math.random() * 1.8 + 1, 0, Math.PI * 2);
+            ctx.arc(flake.x, flake.y, Math.random() * 2.8 + 1.4, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        } else if (activeWeatherEffect === 'fog') {
+          ctx.fillStyle = 'rgba(203, 213, 225, 0.08)';
+          fogWisps.forEach(wisp => {
+            wisp.x += wisp.vx;
+            if (wisp.x > width + 60) wisp.x = -60;
+            ctx.beginPath();
+            ctx.arc(wisp.x, wisp.y, wisp.radius, 0, Math.PI * 2);
             ctx.fill();
           });
         }
 
-        // Draw Subtle Shockwaves
+        // Draw High Speed Shockwaves
         for (let i = shockwaves.length - 1; i >= 0; i--) {
           const sw = shockwaves[i];
-          sw.radius += 4;
-          sw.alpha -= 0.01;
+          sw.radius += 8;
+          sw.alpha -= 0.016;
 
           if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
             shockwaves.splice(i, 1);
@@ -7635,20 +7815,20 @@
           ctx.beginPath();
           ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
           ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + sw.alpha + ')' : 'rgba(249, 115, 22, ' + sw.alpha + ')';
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth = 2.0;
           ctx.stroke();
         }
 
-        // Draw Gentle Falling Autumn Leaves
-        if (currentCanvasTheme === 'spooky') {
-          ctx.font = '14px serif';
+        // Draw Swirling High-Velocity Falling Autumn Leaves & Spooky Entities
+        if (currentCanvasTheme === 'spooky' || activeWeatherEffect === 'wind') {
+          ctx.font = '18px serif';
           leaves.forEach(leaf => {
             leaf.y += leaf.vy;
-            leaf.x += Math.sin(leaf.y * 0.015) * 0.4 + leaf.vx;
+            leaf.x += Math.sin(leaf.y * 0.02) * 1.2 + leaf.vx;
             leaf.rotation += leaf.vRot;
 
-            if (leaf.y > height + 20) {
-              leaf.y = -20;
+            if (leaf.y > height + 25) {
+              leaf.y = -25;
               leaf.x = Math.random() * width;
             }
 
@@ -7660,7 +7840,7 @@
           });
         }
 
-        // Draw Soft Ambient Particles
+        // Draw Energetic & Pulsing Ambient Particles
         for (let i = particles.length - 1; i >= 0; i--) {
           const p = particles[i];
 
@@ -7672,8 +7852,9 @@
             }
           }
 
-          p.x += p.vx;
-          p.y += p.vy;
+          // Energetic turbulent oscillation
+          p.x += p.vx + Math.sin(p.y * 0.02) * 0.4;
+          p.y += p.vy + Math.cos(p.x * 0.02) * 0.4;
 
           if (p.x < 0 || p.x > width) p.vx *= -1;
           if (p.y < 0 || p.y > height) p.vy *= -1;
@@ -7689,19 +7870,19 @@
               const maxDistance = mouse.radius;
               const force = (maxDistance - dist) / maxDistance;
               
-              const pushMultiplier = mouse.isPressed ? -1.0 : 0.6;
+              const pushMultiplier = mouse.isPressed ? -2.2 : 1.4;
               const directionX = forceDirectionX * force * pushMultiplier;
               const directionY = forceDirectionY * force * pushMultiplier;
 
               p.x -= directionX;
               p.y -= directionY;
 
-              if (dist < 70) {
+              if (dist < 110) {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 70) * 0.2) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 70) * 0.2) + ')';
-                ctx.lineWidth = 0.7;
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 110) * 0.4) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 110) * 0.4) + ')';
+                ctx.lineWidth = 1.1;
                 ctx.stroke();
               }
             }
@@ -7718,12 +7899,12 @@
             const dy = p.y - p2.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 75) {
+            if (dist < 90) {
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 75) * 0.12) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 75) * 0.12) + ')';
-              ctx.lineWidth = 0.6;
+              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 90) * 0.22) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 90) * 0.22) + ')';
+              ctx.lineWidth = 0.8;
               ctx.stroke();
             }
           }
