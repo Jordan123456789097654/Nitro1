@@ -205,15 +205,30 @@
     :root {
       --bg-color: #08040a;
       --card-bg: rgba(18, 12, 26, 0.94);
-      --card-border: rgba(249, 115, 22, 0.4);
+      --card-border: rgba(249, 115, 22, 0.45);
       --accent-color: #f97316;
       --text-main: #fcf5f0;
       --text-muted: #cbd5e1;
     }
 
-    /* Fall / Halloween Global Custom Overrides */
+    /* Fall Theme Presets Override Classes */
+    body.theme-pumpkin-spice {
+      --bg-color: #120904 !important;
+      --card-bg: rgba(28, 16, 8, 0.95) !important;
+      --card-border: rgba(245, 158, 11, 0.5) !important;
+      --accent-color: #f59e0b !important;
+    }
+
+    body.theme-haunted-mansion {
+      --bg-color: #040810 !important;
+      --card-bg: rgba(8, 18, 30, 0.95) !important;
+      --card-border: rgba(56, 189, 248, 0.5) !important;
+      --accent-color: #38bdf8 !important;
+    }
+
     body {
-      background-color: #08040a !important;
+      background-color: var(--bg-color) !important;
+      transition: background-color 0.4s ease;
     }
 
     #shutdown-overlay {
@@ -232,6 +247,7 @@
       overflow-y: auto;
       padding: 24px;
       box-sizing: border-box;
+      transition: background-color 0.4s ease;
     }
 
     #bg-canvas {
@@ -315,6 +331,7 @@
       text-align: center;
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(249, 115, 22, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.15);
       animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.4s ease;
     }
 
     @keyframes fadeInCard {
@@ -328,7 +345,7 @@
       gap: 8px;
       background: rgba(249, 115, 22, 0.15);
       border: 1px solid rgba(249, 115, 22, 0.45);
-      color: #f97316;
+      color: var(--accent-color);
       font-size: 0.82rem;
       font-weight: 800;
       letter-spacing: 0.08em;
@@ -350,9 +367,9 @@
     .pulse-dot {
       width: 8px;
       height: 8px;
-      background-color: #f97316;
+      background-color: var(--accent-color);
       border-radius: 50%;
-      box-shadow: 0 0 10px #f97316;
+      box-shadow: 0 0 10px var(--accent-color);
       animation: pulseDot 1.8s infinite;
     }
 
@@ -410,7 +427,7 @@
 
     .nav-tab-btn.active {
       background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(168, 85, 247, 0.25));
-      border-color: #f97316;
+      border-color: var(--accent-color);
       color: #fdba74;
       box-shadow: 0 0 20px rgba(249, 115, 22, 0.35);
     }
@@ -503,7 +520,7 @@
       font-family: 'Outfit', sans-serif;
       font-size: 1.6rem;
       font-weight: 800;
-      color: #f97316;
+      color: var(--accent-color);
       margin-top: -12px;
     }
 
@@ -560,7 +577,7 @@
       font-family: 'Outfit', sans-serif;
       font-size: 1.55rem;
       font-weight: 800;
-      color: #f97316;
+      color: var(--accent-color);
       line-height: 1.1;
       text-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
       transition: transform 0.1s ease;
@@ -582,6 +599,39 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+    }
+
+    /* PUMPKIN PATCH CLICKER MINI-GAME STYLES */
+    .pumpkin-patch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .pumpkin-patch-item {
+      aspect-ratio: 1;
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      border-radius: 16px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .pumpkin-patch-item:hover {
+      background: rgba(249, 115, 22, 0.25);
+      border-color: #f97316;
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 0 16px rgba(249, 115, 22, 0.5);
+    }
+
+    .pumpkin-patch-item:active {
+      transform: scale(0.9);
     }
 
     /* FAQ Accordion Styling */
@@ -772,22 +822,32 @@
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .countdown-unit { min-width: 42px; }
       .countdown-number { font-size: 1.35rem; }
+      .pumpkin-patch-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
-  <!-- FLOATING INTERACTIVE FALL/HALLOWEEN WIDGET -->
+  <!-- FLOATING INTERACTIVE FALL/HALLOWEEN CONTROLS -->
   <div id="floating-control-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
     
-    <!-- Canvas Theme Selector & Reset Particles Row -->
+    <!-- Fall Theme Preset Selector & Reset Particles Row -->
     <div style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
-      <span style="font-size: 0.85rem;">🎃</span>
-      <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #fdba74; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
-        <option value="spooky" selected>🎃 Halloween Ember Glow</option>
+      <span style="font-size: 0.85rem;">🎨</span>
+      <!-- Category #4: Fall Theme Preset Switcher -->
+      <select id="fall-theme-preset-select" onchange="changeFallThemePreset(this.value)" style="background: transparent; border: none; color: #fdba74; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
+        <option value="midnight" selected>🎃 Spooky Midnight</option>
+        <option value="pumpkin">🍁 Pumpkin Spice Autumn</option>
+        <option value="mansion">👻 Haunted Mansion</option>
+      </select>
+      
+      <!-- Canvas Particle Style Dropdown -->
+      <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.75rem; outline: none; cursor: pointer;">
+        <option value="spooky" selected>🍂 Falling Autumn Leaves</option>
         <option value="cosmic">🌌 Cosmic Constellation</option>
         <option value="matrix">🟢 Matrix Code Rain</option>
         <option value="sunset">🌅 Synthwave Sunset</option>
       </select>
+
       <button type="button" onclick="triggerCanvasShockwave()" title="Trigger Spooky Shockwave Blast" style="background: rgba(249, 115, 22, 0.25); border: 1px solid rgba(249, 115, 22, 0.5); color: #f97316; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
         💥 Pumpkin Blast
       </button>
@@ -858,10 +918,10 @@
       <!-- Interactive Section Navigation Tabs -->
       <div class="interactive-nav-tabs">
         <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade (Snake & AI)</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade Games & Clicker</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap & Timeline</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Relaunch Alert</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-faq')">❓ FAQ</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-faq')">❓ FAQ & Trivia</button>
       </div>
 
       <!-- TAB 1: NOTICE & COUNTDOWN -->
@@ -945,18 +1005,42 @@
         </div>
       </div>
 
-      <!-- TAB 2: PLAYABLE MINI-GAMES (RETRO SNAKE & AI TIC-TAC-TOE) -->
+      <!-- TAB 2: PLAYABLE MINI-GAMES (PUMPKIN PATCH CLICKER, SNAKE & AI TIC-TAC-TOE) -->
       <div id="tab-minigames" class="tab-panel-content">
+        <!-- CATEGORY #1: PUMPKIN PATCH CLICKER MINI-GAME -->
+        <div class="reason-box">
+          <div class="reason-box-header">
+            <span style="font-size: 1.3rem;">🎃</span>
+            <strong>1. Interactive Pumpkin Patch Clicker Mini-Game</strong>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
+            Click on growing jack-o'-lanterns below to harvest pumpkins and earn Candy Corn points!
+          </p>
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; font-weight: 800; color: #fdba74; margin-bottom: 6px;">
+            <span id="pumpkin-harvest-score">Pumpkins Harvested: 0 🎃</span>
+            <button type="button" onclick="triggerTrickOrTreat()" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; padding: 4px 14px; border-radius: 99px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">🍬 Trick or Treat!</button>
+          </div>
+          <div id="trick-or-treat-banner" style="display: none; background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.4); padding: 8px 12px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; color: #fdba74; margin-bottom: 8px; text-align: center;"></div>
+          <div class="pumpkin-patch-grid">
+            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
+            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
+            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
+            <div class="pumpkin-patch-item" onclick="harvestPumpkin(this)">🎃</div>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+
+        <!-- SNAKE GAME -->
         <div class="reason-box">
           <div class="reason-box-header">
             <span style="font-size: 1.2rem;">🐍</span>
-            <strong>1. Playable Retro Arcade Snake Game</strong>
+            <strong>2. Playable Retro Arcade Snake Game</strong>
           </div>
           <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
             Use Arrow Keys, WASD, or the D-Pad below to steer the snake and eat glowing neon pumpkins!
           </p>
 
-          <!-- Snake Canvas & Controls -->
           <div style="text-align: center;">
             <canvas id="snake-canvas" width="300" height="220"></canvas>
             <div style="display: flex; align-items: center; justify-content: space-between; max-width: 300px; margin: 0 auto 8px auto; font-size: 0.82rem; font-weight: 800; color: #fdba74;">
@@ -967,7 +1051,6 @@
               <button type="button" onclick="startSnakeGame()" style="background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 6px 18px; border-radius: 99px; font-weight: 800; font-size: 0.8rem; cursor: pointer;">▶ Start / Restart Snake</button>
             </div>
             
-            <!-- Touch / Click On-Screen D-Pad -->
             <div class="snake-dpad">
               <div></div>
               <div class="dpad-btn" onclick="setSnakeDir('UP')">▲</div>
@@ -977,41 +1060,34 @@
               <div class="dpad-btn" onclick="setSnakeDir('RIGHT')">▶</div>
             </div>
           </div>
+        </div>
 
-          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
 
-          <!-- Tic-Tac-Toe Game -->
-          <div>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-              <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8;">2. Tic-Tac-Toe vs Groq AI Bot</div>
-              <select id="ttt-difficulty" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-weight: 800; font-size: 0.75rem; border-radius: 6px; padding: 2px 6px; outline: none;">
-                <option value="medium">Medium Bot</option>
-                <option value="hard">Impossible Bot</option>
-                <option value="easy">Easy Bot</option>
-              </select>
-            </div>
-            
-            <div class="ttt-grid">
-              <div class="ttt-cell" onclick="playTTT(0)"></div>
-              <div class="ttt-cell" onclick="playTTT(1)"></div>
-              <div class="ttt-cell" onclick="playTTT(2)"></div>
-              <div class="ttt-cell" onclick="playTTT(3)"></div>
-              <div class="ttt-cell" onclick="playTTT(4)"></div>
-              <div class="ttt-cell" onclick="playTTT(5)"></div>
-              <div class="ttt-cell" onclick="playTTT(6)"></div>
-              <div class="ttt-cell" onclick="playTTT(7)"></div>
-              <div class="ttt-cell" onclick="playTTT(8)"></div>
-            </div>
-            <div id="ttt-status" style="font-size: 0.82rem; font-weight: 700; color: #fdba74;">Your turn! Click any box (Player: X vs Groq AI: O)</div>
-            <button type="button" onclick="resetTTT()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Reset Tic-Tac-Toe</button>
+        <!-- TIC TAC TOE GAME -->
+        <div class="reason-box">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8;">3. Tic-Tac-Toe vs Groq AI Bot</div>
+            <select id="ttt-difficulty" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-weight: 800; font-size: 0.75rem; border-radius: 6px; padding: 2px 6px; outline: none;">
+              <option value="medium">Medium Bot</option>
+              <option value="hard">Impossible Bot</option>
+              <option value="easy">Easy Bot</option>
+            </select>
           </div>
-
-          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
-
-          <div style="text-align: center;">
-            <div style="font-size: 0.88rem; font-weight: 800; color: #f97316; margin-bottom: 6px;">3. Spooky Laser Particle Shooter</div>
-            <p style="font-size: 0.82rem; color: #94a3b8;">Click anywhere on the background screen to burst spooky embers and pumpkins! Click rapidly to trigger supernovas.</p>
+          
+          <div class="ttt-grid">
+            <div class="ttt-cell" onclick="playTTT(0)"></div>
+            <div class="ttt-cell" onclick="playTTT(1)"></div>
+            <div class="ttt-cell" onclick="playTTT(2)"></div>
+            <div class="ttt-cell" onclick="playTTT(3)"></div>
+            <div class="ttt-cell" onclick="playTTT(4)"></div>
+            <div class="ttt-cell" onclick="playTTT(5)"></div>
+            <div class="ttt-cell" onclick="playTTT(6)"></div>
+            <div class="ttt-cell" onclick="playTTT(7)"></div>
+            <div class="ttt-cell" onclick="playTTT(8)"></div>
           </div>
+          <div id="ttt-status" style="font-size: 0.82rem; font-weight: 700; color: #fdba74;">Your turn! Click any box (Player: X vs Groq AI: O)</div>
+          <button type="button" onclick="resetTTT()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Reset Tic-Tac-Toe</button>
         </div>
       </div>
 
@@ -1057,7 +1133,7 @@
         </div>
       </div>
 
-      <!-- TAB 5: FAQ ACCORDION -->
+      <!-- TAB 5: FAQ & HALLOWEEN TRIVIA ACCORDION -->
       <div id="tab-faq" class="tab-panel-content">
         <div style="margin-bottom: 16px;">
           <div class="faq-item">
@@ -1080,6 +1156,13 @@
               <span>▼</span>
             </div>
             <div class="faq-answer">Click the <strong>🔑 Admin Sign In</strong> button below and enter your authorized developer password to bypass the shutdown notice.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <span>🎃 Halloween Trivia: Why is October 31st our launch date?</span>
+              <span>▼</span>
+            </div>
+            <div class="faq-answer">October 31st marks both Halloween and our planned infrastructure completion target, giving us the perfect timing for our grand reopening celebration!</div>
           </div>
         </div>
       </div>
@@ -6184,6 +6267,47 @@
       } catch (e) {}
     };
 
+    // Category #4: Global Fall Theme Preset Switcher Handler
+    window.changeFallThemePreset = function(theme) {
+      document.body.classList.remove('theme-pumpkin-spice', 'theme-haunted-mansion');
+      if (theme === 'pumpkin') {
+        document.body.classList.add('theme-pumpkin-spice');
+      } else if (theme === 'mansion') {
+        document.body.classList.add('theme-haunted-mansion');
+      }
+      playTone(523.25, 'sine', 0.1, 0.1);
+    };
+
+    // Category #1: Pumpkin Patch Clicker & Trick-or-Treat Mystery Box
+    let pumpkinScore = 0;
+    window.harvestPumpkin = function(el) {
+      pumpkinScore++;
+      playTone(600 + Math.random() * 300, 'sine', 0.08, 0.1);
+      const scoreEl = document.getElementById('pumpkin-harvest-score');
+      if (scoreEl) scoreEl.textContent = 'Pumpkins Harvested: ' + pumpkinScore + ' 🎃';
+      
+      el.style.transform = 'scale(1.3) rotate(15deg)';
+      setTimeout(() => el.style.transform = 'none', 180);
+      spawnBurst(window.innerWidth / 2, window.innerHeight / 2, 8);
+    };
+
+    const treats = [
+      '🍬 You found a Candy Corn! (+50 Candy Points)',
+      '🥧 You baked a Fresh Pumpkin Pie!',
+      '👻 Boo! A friendly ghost gave you a Golden Pumpkin!',
+      '🍭 Super Sweet! Double Candy Multiplier Unlocked!'
+    ];
+
+    window.triggerTrickOrTreat = function() {
+      playTone(783.99, 'triangle', 0.2, 0.12);
+      const banner = document.getElementById('trick-or-treat-banner');
+      const randomTreat = treats[Math.floor(Math.random() * treats.length)];
+      if (banner) {
+        banner.style.display = 'block';
+        banner.textContent = randomTreat;
+      }
+    };
+
     window.changeLofiTrack = function(style) {
       currentLofiStyle = style;
       playTone(587.33, 'sine', 0.1, 0.1);
@@ -6217,10 +6341,10 @@
       const trackPresets = {
         spooky: {
           chords: [
-            [146.83, 174.61, 220.00, 261.63], // Dm (Dark minor)
-            [138.59, 164.81, 207.65, 246.94], // C#dim (Suspense)
-            [164.81, 196.00, 246.94, 293.66], // Em (Spooky low)
-            [130.81, 155.56, 196.00, 233.08]  // Cm (Eerie resonance)
+            [146.83, 174.61, 220.00, 261.63],
+            [138.59, 164.81, 207.65, 246.94],
+            [164.81, 196.00, 246.94, 293.66],
+            [130.81, 155.56, 196.00, 233.08]
           ],
           tempo: 4000,
           filter: 550,
@@ -6228,10 +6352,10 @@
         },
         jazz: {
           chords: [
-            [261.63, 329.63, 392.00, 493.88], // Cmaj7
-            [220.00, 261.63, 329.63, 392.00], // Am7
-            [293.66, 349.23, 440.00, 523.25], // Dm7
-            [196.00, 246.94, 293.66, 349.23]  // G7
+            [261.63, 329.63, 392.00, 493.88],
+            [220.00, 261.63, 329.63, 392.00],
+            [293.66, 349.23, 440.00, 523.25],
+            [196.00, 246.94, 293.66, 349.23]
           ],
           tempo: 3800,
           filter: 750,
@@ -6337,7 +6461,6 @@
       });
     };
 
-    // Trigger number roll up on startup
     setTimeout(() => window.triggerRollNumbersUp(), 500);
 
     // Tab Switcher Controller
@@ -6469,7 +6592,6 @@
           snake.cells.pop();
         }
 
-        // Draw Pumpkin pellet (Orange)
         snakeCtx.fillStyle = '#f97316';
         snakeCtx.shadowColor = '#f97316';
         snakeCtx.shadowBlur = 8;
@@ -6522,7 +6644,7 @@
       });
     })();
 
-    // Tic Tac Toe Game vs Groq AI Bot Logic (Easy, Medium, Impossible)
+    // Tic Tac Toe Game vs Groq AI Bot Logic
     (function() {
       let board = ['', '', '', '', '', '', '', '', ''];
       let gameOver = false;
@@ -6713,10 +6835,11 @@
       updateCountdown();
     })();
 
-    // 🌌 ADVANCED COSMIC & HALLOWEEN CANVAS ENGINE WITH SPOOKY EMBERS, PUMPKINS & SHOCKWAVES
+    // 🌌 ADVANCED FALL/HALLOWEEN CANVAS ENGINE WITH FALLING LEAVES, SPOOKY EMBERS, BAT CURSOR & SHOCKWAVES
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
+    let spawnBurstFunc = null;
 
     window.changeCanvasTheme = function(themeName) {
       currentCanvasTheme = themeName;
@@ -6733,11 +6856,15 @@
       playTone(300, 'sawtooth', 0.3, 0.2);
     };
 
+    function spawnBurst(cx, cy, count) {
+      if (spawnBurstFunc) spawnBurstFunc(cx, cy, count);
+    }
+
     (function() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [], meteors = [], shockwaves = [];
+      let width, height, particles = [], meteors = [], shockwaves = [], leaves = [];
 
       const mouse = {
         x: null,
@@ -6751,6 +6878,7 @@
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
         initParticles();
+        initLeaves();
       }
       window.addEventListener('resize', resizeCanvas);
 
@@ -6762,12 +6890,29 @@
         }
       }
 
+      // CATEGORY #2: FALLING AUTUMN LEAVES ENGINE
+      function initLeaves() {
+        leaves = [];
+        for (let i = 0; i < 24; i++) {
+          leaves.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: Math.random() * 12 + 10,
+            vy: Math.random() * 1.2 + 0.8,
+            vx: Math.random() * 0.8 - 0.4,
+            rotation: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.04,
+            emoji: Math.random() > 0.5 ? '🍂' : '🍁'
+          });
+        }
+      }
+
       function createBaseParticle() {
         return {
           x: Math.random() * (width || window.innerWidth),
           y: Math.random() * (height || window.innerHeight),
           vx: (Math.random() - 0.5) * 0.75,
-          vy: (Math.random() - 0.5) * 0.75 - 0.25, // Slight upward float for Halloween embers
+          vy: (Math.random() - 0.5) * 0.75 - 0.2,
           radius: Math.random() * 3 + 1,
           alpha: Math.random() * 0.6 + 0.35,
           decay: 0,
@@ -6777,6 +6922,7 @@
 
       resetCanvasParticlesFunc = function() {
         initParticles();
+        initLeaves();
         meteors = [];
         shockwaves = [];
         spawnBurst(width / 2, height / 2, 30);
@@ -6789,56 +6935,7 @@
         spawnBurst(cx, cy, 35);
       };
 
-      resizeCanvas();
-
-      window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-      });
-
-      window.addEventListener('mouseleave', () => {
-        mouse.x = null;
-        mouse.y = null;
-        mouse.isPressed = false;
-      });
-
-      window.addEventListener('mousedown', (e) => {
-        mouse.isPressed = true;
-        spawnBurst(e.clientX, e.clientY, 18);
-
-        const pitchFreq = 300 + (e.clientX / width) * 700;
-        playTone(pitchFreq, 'sine', 0.08, 0.08);
-      });
-
-      window.addEventListener('mouseup', () => {
-        mouse.isPressed = false;
-      });
-
-      window.addEventListener('dblclick', (e) => {
-        triggerCanvasShockwaveFunc();
-      });
-
-      window.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) {
-          mouse.x = e.touches[0].clientX;
-          mouse.y = e.touches[0].clientY;
-          spawnBurst(mouse.x, mouse.y, 14);
-        }
-      });
-
-      window.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-          mouse.x = e.touches[0].clientX;
-          mouse.y = e.touches[0].clientY;
-        }
-      });
-
-      window.addEventListener('touchend', () => {
-        mouse.x = null;
-        mouse.y = null;
-      });
-
-      function spawnBurst(cx, cy, count) {
+      spawnBurstFunc = function(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = Math.random() * 6 + 2;
@@ -6856,7 +6953,56 @@
         if (particles.length > 180) {
           particles.splice(0, particles.length - 180);
         }
-      }
+      };
+
+      resizeCanvas();
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+        mouse.isPressed = false;
+      });
+
+      window.addEventListener('mousedown', (e) => {
+        mouse.isPressed = true;
+        spawnBurstFunc(e.clientX, e.clientY, 18);
+
+        const pitchFreq = 300 + (e.clientX / width) * 700;
+        playTone(pitchFreq, 'sine', 0.08, 0.08);
+      });
+
+      window.addEventListener('mouseup', () => {
+        mouse.isPressed = false;
+      });
+
+      window.addEventListener('dblclick', (e) => {
+        triggerCanvasShockwaveFunc();
+      });
+
+      window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+          mouse.x = e.touches[0].clientX;
+          mouse.y = e.touches[0].clientY;
+          spawnBurstFunc(mouse.x, mouse.y, 14);
+        }
+      });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          mouse.x = e.touches[0].clientX;
+          mouse.y = e.touches[0].clientY;
+        }
+      });
+
+      window.addEventListener('touchend', () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
 
       function spawnMeteor() {
         if (Math.random() < 0.025) {
@@ -6878,6 +7024,27 @@
         }
 
         ctx.clearRect(0, 0, width, height);
+
+        // RENDER FALLING LEAVES (CATEGORY #2)
+        if (currentCanvasTheme === 'spooky' || currentCanvasTheme === 'cosmic') {
+          ctx.font = '16px serif';
+          leaves.forEach(leaf => {
+            leaf.y += leaf.vy;
+            leaf.x += Math.sin(leaf.y / 25) * 0.8 + leaf.vx;
+            leaf.rotation += leaf.vRot;
+
+            if (leaf.y > height + 20) {
+              leaf.y = -20;
+              leaf.x = Math.random() * width;
+            }
+
+            ctx.save();
+            ctx.translate(leaf.x, leaf.y);
+            ctx.rotate(leaf.rotation);
+            ctx.fillText(leaf.emoji, 0, 0);
+            ctx.restore();
+          });
+        }
 
         // Render Shockwaves
         for (let i = shockwaves.length - 1; i >= 0; i--) {
