@@ -6698,63 +6698,141 @@
       }
     };
 
-    // REAL STREAMING AUDIO PLAYER WITH WATCHDOG FALLBACK
+    // DISTINCT MULTI-STATION LO-FI STREAMING AUDIO PLAYER & PROCEDURAL SYNTH ENGINE
     const lofiAudioPlayer = document.getElementById('lofi-audio-player');
     let isLofiPlaying = false;
     let lofiFallbackTimer = null;
+    let audioCtx = null;
+    let proceduralSynthInterval = null;
 
     const lofiStreams = {
       og_lofi: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
-      chillhop: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
-      spooky: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
-      synthwave: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
-      rain: 'https://stream.zeno.fm/f3wvbbqmdg8uv'
+      chillhop: 'https://stream.zeno.fm/0r0xa792kwzuv',
+      spooky: 'https://ice2.somafm.com/doomed-128-mp3',
+      synthwave: 'https://ice1.somafm.com/groovesalad-128-mp3',
+      rain: 'https://stream.zeno.fm/7c4f6971118uv'
     };
 
-    const lofiBackupMp3 = '/audio/iloveradio17.mp3';
+    const lofiTitles = {
+      og_lofi: '📻 OG Lo-Fi Beats',
+      chillhop: '☕ Autumn Chillhop Radio',
+      spooky: '👻 Haunted Spooky Beats',
+      synthwave: '🌌 Retro Synthwave Night',
+      rain: '🌧️ Cozy Rainy Day Lofi'
+    };
+
+    function stopProceduralSynth() {
+      if (proceduralSynthInterval) {
+        clearInterval(proceduralSynthInterval);
+        proceduralSynthInterval = null;
+      }
+    }
+
+    function startProceduralSynth(trackKey) {
+      stopProceduralSynth();
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const mainGain = audioCtx.createGain();
+        mainGain.gain.setValueAtTime(0.2, now);
+        mainGain.connect(audioCtx.destination);
+
+        let step = 0;
+        let scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C major pentatonic
+        
+        if (trackKey === 'spooky') {
+          scale = [220.00, 233.08, 261.63, 277.18, 329.63, 349.23]; // Minor / Diminished spook scale
+        } else if (trackKey === 'synthwave') {
+          scale = [110.00, 130.81, 146.83, 164.81, 196.00, 220.00]; // Retro synth bass scale
+        } else if (trackKey === 'chillhop') {
+          scale = [174.61, 196.00, 220.00, 261.63, 293.66, 329.63]; // F maj7 / Chillhop scale
+        } else if (trackKey === 'rain') {
+          scale = [196.00, 220.00, 246.94, 293.66, 329.63, 392.00]; // Soft rain guitar scale
+        }
+
+        proceduralSynthInterval = setInterval(() => {
+          if (!isLofiPlaying) return;
+          const t = audioCtx.currentTime;
+          
+          const osc = audioCtx.createOscillator();
+          const noteGain = audioCtx.createGain();
+
+          if (trackKey === 'synthwave') {
+            osc.type = 'sawtooth';
+          } else if (trackKey === 'spooky') {
+            osc.type = 'sine';
+          } else {
+            osc.type = 'triangle';
+          }
+
+          const freq = scale[step % scale.length] * (trackKey === 'spooky' ? 0.75 : (trackKey === 'synthwave' ? 1.0 : 1.25));
+          osc.frequency.setValueAtTime(freq, t);
+
+          noteGain.gain.setValueAtTime(0.01, t);
+          noteGain.gain.exponentialRampToValueAtTime(0.15, t + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.001, t + (trackKey === 'spooky' ? 1.8 : 0.6));
+
+          osc.connect(noteGain);
+          noteGain.connect(mainGain);
+
+          osc.start(t);
+          osc.stop(t + (trackKey === 'spooky' ? 2.0 : 0.8));
+
+          step++;
+        }, trackKey === 'spooky' ? 1200 : (trackKey === 'synthwave' ? 300 : 600));
+
+      } catch (e) {
+        console.warn('Procedural synth fallback error:', e);
+      }
+    }
 
     window.toggleLofiAudio = function() {
       const btn = document.getElementById('lofi-toggle-btn');
       const statusText = document.getElementById('lofi-status-text');
+      const select = document.getElementById('lofi-track-select');
+      const trackKey = select ? select.value : 'og_lofi';
+      const title = lofiTitles[trackKey] || 'Lo-Fi Radio';
 
       if (!lofiAudioPlayer) return;
 
       if (isLofiPlaying) {
         lofiAudioPlayer.pause();
+        stopProceduralSynth();
         isLofiPlaying = false;
         if (btn) btn.textContent = '▶';
-        if (statusText) statusText.textContent = 'Paused. Click Play for OG Lo-Fi 🎧';
+        if (statusText) statusText.textContent = 'Paused. Click Play for ' + title + ' 🎧';
         if (lofiFallbackTimer) clearTimeout(lofiFallbackTimer);
       } else {
-        const select = document.getElementById('lofi-track-select');
-        const trackKey = select ? select.value : 'og_lofi';
+        stopProceduralSynth();
         const streamUrl = lofiStreams[trackKey] || lofiStreams.og_lofi;
 
         lofiAudioPlayer.src = streamUrl;
-        if (statusText) statusText.textContent = 'Connecting live stream... ⏳';
+        if (statusText) statusText.textContent = 'Connecting ' + title + '... ⏳';
 
         lofiAudioPlayer.play().then(() => {
           isLofiPlaying = true;
           if (btn) btn.textContent = '⏸';
-          if (statusText) statusText.textContent = '🔴 LIVE: OG Lo-Fi Radio Stream 🎧';
+          if (statusText) statusText.textContent = '🔴 LIVE: ' + title + ' 🎧';
         }).catch(err => {
-          console.warn('Primary stream connection error, switching to reliable backup MP3...', err);
-          lofiAudioPlayer.src = lofiBackupMp3;
-          lofiAudioPlayer.play().then(() => {
-            isLofiPlaying = true;
-            if (btn) btn.textContent = '⏸';
-            if (statusText) statusText.textContent = '🔴 LIVE: OG Lo-Fi Radio (Backup) 🎧';
-          }).catch(e => {
-            if (statusText) statusText.textContent = 'Tap screen to enable audio playback 🔊';
-          });
+          console.warn('Live stream connection offline/blocked, starting procedural synth radio...', err);
+          isLofiPlaying = true;
+          startProceduralSynth(trackKey);
+          if (btn) btn.textContent = '⏸';
+          if (statusText) statusText.textContent = '🎶 PROCEDURAL LIVE: ' + title + ' 🎧';
         });
 
         if (lofiFallbackTimer) clearTimeout(lofiFallbackTimer);
         lofiFallbackTimer = setTimeout(() => {
           if (isLofiPlaying && lofiAudioPlayer.paused) {
-            console.warn('Stream watchdog triggered: switching to backup audio stream');
-            lofiAudioPlayer.src = lofiBackupMp3;
-            lofiAudioPlayer.play().catch(() => {});
+            console.warn('Stream watchdog triggered: switching to procedural audio generator');
+            startProceduralSynth(trackKey);
+            if (statusText) statusText.textContent = '🎶 PROCEDURAL LIVE: ' + title + ' 🎧';
           }
         }, 3500);
       }
@@ -6763,7 +6841,13 @@
     window.changeLofiTrack = function(trackKey) {
       if (isLofiPlaying) {
         isLofiPlaying = false;
+        if (lofiAudioPlayer) lofiAudioPlayer.pause();
+        stopProceduralSynth();
         toggleLofiAudio();
+      } else {
+        const statusText = document.getElementById('lofi-status-text');
+        const title = lofiTitles[trackKey] || 'Lo-Fi Radio';
+        if (statusText) statusText.textContent = 'Ready: Click Play for ' + title + ' 🎧';
       }
     };
 
