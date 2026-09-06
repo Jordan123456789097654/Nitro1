@@ -204,8 +204,8 @@
   <style id="shutdown-overlay-styles">
     :root {
       --bg-color: #05070c;
-      --card-bg: rgba(13, 18, 30, 0.92);
-      --card-border: rgba(244, 63, 94, 0.28);
+      --card-bg: rgba(13, 18, 30, 0.94);
+      --card-border: rgba(244, 63, 94, 0.3);
       --accent-color: #f43f5e;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
@@ -246,7 +246,7 @@
       left: 20%;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -257,7 +257,7 @@
       right: 20%;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(244, 63, 94, 0.14) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -270,11 +270,11 @@
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
-      padding: 40px 36px;
-      max-width: 720px;
+      padding: 38px 34px;
+      max-width: 760px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.88), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.92), inset 0 1px 1px rgba(255, 255, 255, 0.12);
       animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
@@ -296,7 +296,7 @@
       text-transform: uppercase;
       padding: 6px 18px;
       border-radius: 99px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .pulse-dot {
@@ -315,7 +315,7 @@
 
     .maintenance-card h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.05rem;
+      font-size: 2.1rem;
       font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1.25;
@@ -469,11 +469,13 @@
       padding: 12px 6px;
       text-align: center;
       transition: all 0.25s ease;
+      cursor: pointer;
     }
 
     .stat-card:hover {
       border-color: rgba(244, 63, 94, 0.4);
-      background: rgba(244, 63, 94, 0.06);
+      background: rgba(244, 63, 94, 0.08);
+      transform: translateY(-2px);
     }
 
     .stat-number {
@@ -512,6 +514,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: background 0.2s ease;
+    }
+
+    .faq-question:hover {
+      background: rgba(255, 255, 255, 0.04);
     }
 
     .faq-answer {
@@ -519,7 +526,7 @@
       padding: 0 18px 14px 18px;
       font-size: 0.84rem;
       color: #94a3b8;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
     /* Tic Tac Toe Grid */
@@ -527,8 +534,8 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      max-width: 240px;
-      margin: 0 auto 16px auto;
+      max-width: 220px;
+      margin: 0 auto 12px auto;
     }
 
     .ttt-cell {
@@ -537,7 +544,7 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 12px;
       font-family: 'Outfit', sans-serif;
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       font-weight: 900;
       color: #ffffff;
       display: flex;
@@ -548,8 +555,51 @@
     }
 
     .ttt-cell:hover {
-      background: rgba(56, 189, 248, 0.15);
+      background: rgba(56, 189, 248, 0.18);
       border-color: #38bdf8;
+      transform: scale(1.03);
+    }
+
+    /* Snake Game Styling */
+    #snake-canvas {
+      background: #090d16;
+      border: 2px solid rgba(52, 211, 153, 0.4);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: block;
+      margin: 0 auto 12px auto;
+      max-width: 100%;
+    }
+
+    .snake-dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 42px);
+      gap: 6px;
+      justify-content: center;
+      margin: 8px auto;
+    }
+
+    .dpad-btn {
+      width: 42px;
+      height: 42px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .dpad-btn:active {
+      background: rgba(52, 211, 153, 0.3);
+      border-color: #34d399;
+      transform: scale(0.95);
     }
 
     .reason-box {
@@ -628,7 +678,7 @@
     }
 
     @media (max-width: 580px) {
-      .maintenance-card { padding: 30px 18px; }
+      .maintenance-card { padding: 28px 16px; }
       .maintenance-card h1 { font-size: 1.65rem; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .countdown-unit { min-width: 42px; }
@@ -637,10 +687,11 @@
   </style>
 </head>
 <body>
-  <!-- FLOATING CONTROLS: LO-FI PLAYER & CANVAS THEME SWITCHER -->
-  <div style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
-    <!-- Theme Selector Dropdown -->
-    <div style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px);">
+  <!-- FLOATING INTERACTIVE WIDGET: AD-FREE LO-FI SYNTH & CANVAS THEMES & SFX -->
+  <div id="floating-control-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
+    
+    <!-- Canvas Theme Selector Dropdown -->
+    <div style="background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
       <span style="font-size: 0.85rem;">🎨</span>
       <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
         <option value="cosmic">🌌 Cosmic Constellation</option>
@@ -650,30 +701,31 @@
       </select>
     </div>
 
-    <!-- Lo-Fi Beats Audio Widget -->
-    <div id="lofi-music-widget" style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 16px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+    <!-- Ad-Free Procedural Lo-Fi Beats & Audio Widget -->
+    <div id="lofi-music-widget" style="background: rgba(15, 23, 42, 0.94); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 14px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
       <span style="font-size: 1rem;">🎧</span>
       <div style="display: flex; flex-direction: column;">
-        <span style="font-size: 0.78rem; font-weight: 800; color: #c084fc; line-height: 1.1;">Nitro Lo-Fi Beats</span>
+        <span style="font-size: 0.78rem; font-weight: 800; color: #c084fc; line-height: 1.1;">100% Ad-Free Lo-Fi Synth</span>
         <span style="font-size: 0.68rem; color: #94a3b8;" id="lofi-status-text">Click Play to Listen</span>
       </div>
-      <audio id="lofi-audio" loop src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
-      <button type="button" onclick="toggleLofiBeats()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transition: all 0.2s ease;">▶</button>
+      <button type="button" onclick="toggleLofiSynth()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transition: all 0.2s ease;">▶</button>
+      <button type="button" onclick="toggleSFX()" id="sfx-toggle-btn" title="Toggle Sound FX" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #34d399; border-radius: 50%; width: 26px; height: 26px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">🔊</button>
     </div>
+
   </div>
 
-  <!-- ADMIN TESTING CONTROL BAR -->
+  <!-- ADMIN TESTING CONTROL BAR (SANITY CLEAN: NO PASSWORD LEAKS) -->
   <div id="admin-testing-bar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999999; background: linear-gradient(90deg, #6366f1, #ec4899); color: #ffffff; padding: 8px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 700; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,0.5); box-sizing: border-box;">
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <span style="font-size: 1rem;">⚡</span>
-      <span>ADMIN TESTING MODE ACTIVE (Pass: NITROADMIN)</span>
+      <span>ADMIN TESTING MODE ACTIVE</span>
       <button type="button" onclick="openAboutBlankCloak()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: #fff; padding: 3px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
         🕶️ Cloak in about:blank
       </button>
       <span style="font-size: 0.75rem; opacity: 0.85;">(Panic Key: Press ~ or Esc to hide screen)</span>
     </div>
     <button type="button" onclick="reEnableShutdownMode()" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
-      🔒 Re-enable Shutdown Screen
+      🔒 Lock Shutdown Screen
     </button>
   </div>
 
@@ -685,7 +737,7 @@
 
     <main class="maintenance-card">
       <!-- Status Badge -->
-      <div class="status-badge" id="status-badge">
+      <div class="status-badge" id="status-badge" onclick="triggerEasterEggSound()">
         <span class="pulse-dot"></span>
         <span>PLATFORM CLOSURE / SHUTDOWN</span>
       </div>
@@ -701,7 +753,7 @@
       <!-- Interactive Section Navigation Tabs -->
       <div class="interactive-nav-tabs">
         <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade Games vs AI</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade (Snake & AI)</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap & Timeline</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Relaunch Alert</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-faq')">❓ FAQ</button>
@@ -750,19 +802,19 @@
 
         <!-- Platform Accomplishments & Archive Counter Grid -->
         <div class="stats-grid">
-          <div class="stat-card">
+          <div class="stat-card" onclick="triggerStatPulse(this)">
             <div class="stat-number">1,081+</div>
             <div class="stat-label">🌐 Total Visits</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="triggerStatPulse(this)">
             <div class="stat-number">500+</div>
             <div class="stat-label">🎮 Games & Apps</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="triggerStatPulse(this)">
             <div class="stat-number">28+</div>
             <div class="stat-label">👥 Player Accounts</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="triggerStatPulse(this)">
             <div class="stat-number">100%</div>
             <div class="stat-label">🔒 Data Preserved</div>
           </div>
@@ -780,16 +832,52 @@
         </div>
       </div>
 
-      <!-- TAB 2: PLAYABLE MINI-GAMES VS AI -->
+      <!-- TAB 2: PLAYABLE MINI-GAMES (RETRO SNAKE & AI TIC-TAC-TOE) -->
       <div id="tab-minigames" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">🕹️</span>
-            <strong>Playable Arcade Mini-Games (Pass Time Until Oct 31st)</strong>
+            <span style="font-size: 1.2rem;">🐍</span>
+            <strong>1. Playable Retro Arcade Snake Game</strong>
           </div>
-          
-          <div style="margin-bottom: 16px;">
-            <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8; margin-bottom: 8px;">1. Tic-Tac-Toe vs Groq AI Bot</div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
+            Use Arrow Keys, WASD, or the D-Pad below to steer the snake and eat glowing neon pellets!
+          </p>
+
+          <!-- Snake Canvas & Controls -->
+          <div style="text-align: center;">
+            <canvas id="snake-canvas" width="300" height="220"></canvas>
+            <div style="display: flex; align-items: center; justify-content: space-between; max-width: 300px; margin: 0 auto 8px auto; font-size: 0.82rem; font-weight: 800; color: #34d399;">
+              <span id="snake-score-text">Score: 0</span>
+              <span id="snake-high-text">High Score: 0</span>
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 8px;">
+              <button type="button" onclick="startSnakeGame()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #fff; padding: 6px 18px; border-radius: 99px; font-weight: 800; font-size: 0.8rem; cursor: pointer;">▶ Start / Restart Snake</button>
+            </div>
+            
+            <!-- Touch / Click On-Screen D-Pad -->
+            <div class="snake-dpad">
+              <div></div>
+              <div class="dpad-btn" onclick="setSnakeDir('UP')">▲</div>
+              <div></div>
+              <div class="dpad-btn" onclick="setSnakeDir('LEFT')">◀</div>
+              <div class="dpad-btn" onclick="setSnakeDir('DOWN')">▼</div>
+              <div class="dpad-btn" onclick="setSnakeDir('RIGHT')">▶</div>
+            </div>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+
+          <!-- Tic-Tac-Toe Game -->
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8;">2. Tic-Tac-Toe vs Groq AI Bot</div>
+              <select id="ttt-difficulty" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-weight: 800; font-size: 0.75rem; border-radius: 6px; padding: 2px 6px; outline: none;">
+                <option value="medium">Medium Bot</option>
+                <option value="hard">Impossible Bot</option>
+                <option value="easy">Easy Bot</option>
+              </select>
+            </div>
+            
             <div class="ttt-grid">
               <div class="ttt-cell" onclick="playTTT(0)"></div>
               <div class="ttt-cell" onclick="playTTT(1)"></div>
@@ -802,14 +890,14 @@
               <div class="ttt-cell" onclick="playTTT(8)"></div>
             </div>
             <div id="ttt-status" style="font-size: 0.82rem; font-weight: 700; color: #a855f7;">Your turn! Click any box (Player: X vs Groq AI: O)</div>
-            <button type="button" onclick="resetTTT()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Reset Game</button>
+            <button type="button" onclick="resetTTT()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Reset Tic-Tac-Toe</button>
           </div>
 
           <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
 
           <div style="text-align: center;">
-            <div style="font-size: 0.88rem; font-weight: 800; color: #f43f5e; margin-bottom: 6px;">2. Cosmic Laser Shooter Background Game</div>
-            <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 10px;">Click anywhere on the background screen to burst cosmic laser particles! Click rapidly to trigger supernovas.</p>
+            <div style="font-size: 0.88rem; font-weight: 800; color: #f43f5e; margin-bottom: 6px;">3. Cosmic Laser Particle Shooter</div>
+            <p style="font-size: 0.82rem; color: #94a3b8;">Click anywhere on the background screen to burst cosmic laser particles! Click rapidly to trigger supernovas.</p>
           </div>
         </div>
       </div>
@@ -875,10 +963,10 @@
           </div>
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
-              <span>🔑 How can I access the site during testing?</span>
+              <span>🔑 How can authorized admins access the site during testing?</span>
               <span>▼</span>
             </div>
-            <div class="faq-answer">Click the <strong>🔑 Admin Sign In</strong> button on the notice screen and enter the password <code>NITROADMIN</code> to bypass the shutdown notice.</div>
+            <div class="faq-answer">Click the <strong>🔑 Admin Sign In</strong> button below and enter your authorized developer password to bypass the shutdown notice.</div>
           </div>
         </div>
       </div>
@@ -903,7 +991,7 @@
     </main>
   </div>
 
-  <!-- ADMIN LOGIN MODAL -->
+  <!-- ADMIN LOGIN MODAL (CLEAN & SECURE) -->
   <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000000; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 24px; padding: 36px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9); animation: fadeInCard 0.3s ease;">
       <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 50%; color: #38bdf8; font-size: 1.6rem; margin-bottom: 16px;">
@@ -911,7 +999,7 @@
       </div>
       <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.55rem; font-weight: 800; color: #ffffff; margin-bottom: 8px;">Admin Testing Access</h2>
       <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.5; margin-bottom: 24px;">
-        Enter the administrative password to bypass the shutdown screen and access the platform during testing.
+        Enter your administrative key to bypass the shutdown screen and test the platform.
       </p>
       
       <form id="admin-pass-form" onsubmit="handleAdminAuth(event)" style="display: flex; flex-direction: column; gap: 14px;">
@@ -5946,8 +6034,108 @@
 
 
   <script id="shutdown-overlay-script">
+    // Web Audio Sound FX & Procedural Ad-Free Lo-Fi Music Synthesizer
+    let audioCtx = null;
+    let sfxEnabled = true;
+    let lofiSynthPlaying = false;
+    let lofiInterval = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    window.toggleSFX = function() {
+      sfxEnabled = !sfxEnabled;
+      const btn = document.getElementById('sfx-toggle-btn');
+      if (btn) btn.textContent = sfxEnabled ? '🔊' : '🔇';
+    };
+
+    window.playTone = function(freq, type = 'sine', duration = 0.1, gainVal = 0.1) {
+      if (!sfxEnabled) return;
+      try {
+        initAudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    };
+
+    // 100% Ad-Free Procedural Chill Lo-Fi Synth Synthesizer
+    window.toggleLofiSynth = function() {
+      const btn = document.getElementById('lofi-toggle-btn');
+      const text = document.getElementById('lofi-status-text');
+      initAudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      if (lofiSynthPlaying) {
+        lofiSynthPlaying = false;
+        if (lofiInterval) clearInterval(lofiInterval);
+        if (btn) btn.textContent = '▶';
+        if (text) text.textContent = 'Paused';
+      } else {
+        lofiSynthPlaying = true;
+        if (btn) btn.textContent = '⏸';
+        if (text) text.textContent = 'Playing Ambient Lo-Fi 🎵';
+
+        // Play relaxing ambient lo-fi synth chord progression (Seventh chords: Cmaj7, Am7, Dm7, G7)
+        const chords = [
+          [261.63, 329.63, 392.00, 493.88], // Cmaj7
+          [220.00, 261.63, 329.63, 392.00], // Am7
+          [293.66, 349.23, 440.00, 523.25], // Dm7
+          [196.00, 246.94, 293.66, 349.23]  // G7
+        ];
+        let chordIdx = 0;
+
+        function playLoFiChord() {
+          if (!lofiSynthPlaying) return;
+          const currentChord = chords[chordIdx % chords.length];
+          chordIdx++;
+
+          currentChord.forEach((freq, i) => {
+            try {
+              const osc = audioCtx.createOscillator();
+              const filter = audioCtx.createBiquadFilter();
+              const gain = audioCtx.createGain();
+
+              osc.type = i === 0 ? 'sine' : 'triangle';
+              osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+              // Low-pass filter for cozy warm lo-fi warmth
+              filter.type = 'lowpass';
+              filter.frequency.setValueAtTime(700, audioCtx.currentTime);
+
+              gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+              gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.4);
+              gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.6);
+
+              osc.connect(filter);
+              filter.connect(gain);
+              gain.connect(audioCtx.destination);
+
+              osc.start();
+              osc.stop(audioCtx.currentTime + 3.8);
+            } catch (err) {}
+          });
+        }
+
+        playLoFiChord();
+        lofiInterval = setInterval(playLoFiChord, 3800);
+      }
+    };
+
     // Tab Switcher Controller
     window.switchShutdownTab = function(tabId) {
+      playTone(440, 'sine', 0.08, 0.08);
       const btns = document.querySelectorAll('.nav-tab-btn');
       btns.forEach(b => b.classList.remove('active'));
       const panels = document.querySelectorAll('.tab-panel-content');
@@ -5957,10 +6145,25 @@
       if (targetBtn) targetBtn.classList.add('active');
       const targetPanel = document.getElementById(tabId);
       if (targetPanel) targetPanel.classList.add('active');
+
+      if (tabId === 'tab-minigames') {
+        setTimeout(startSnakeGame, 100);
+      }
+    };
+
+    window.triggerStatPulse = function(el) {
+      playTone(587.33, 'triangle', 0.12, 0.12);
+      el.style.transform = 'scale(1.1)';
+      setTimeout(() => el.style.transform = 'none', 200);
+    };
+
+    window.triggerEasterEggSound = function() {
+      playTone(880, 'square', 0.15, 0.1);
     };
 
     // FAQ Accordion Controller
     window.toggleFAQ = function(el) {
+      playTone(392, 'sine', 0.08, 0.06);
       const answer = el.nextElementSibling;
       if (!answer) return;
       const isOpen = answer.style.display === 'block';
@@ -5975,6 +6178,7 @@
       const val = input ? input.value.trim() : '';
 
       if (val) {
+        playTone(659.25, 'sine', 0.2, 0.12);
         let subs = JSON.parse(localStorage.getItem('nitro_relaunch_subscribers') || '[]');
         subs.push({ contact: val, date: new Date().toISOString() });
         localStorage.setItem('nitro_relaunch_subscribers', JSON.stringify(subs));
@@ -5987,16 +6191,146 @@
       }
     };
 
-    // Tic Tac Toe Game vs Groq AI Bot Logic
+    // 🐍 RETRO ARCADE SNAKE GAME ENGINE
+    (function() {
+      let snakeCanvas, snakeCtx;
+      let grid = 12;
+      let count = 0;
+      let snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
+      let apple = { x: 192, y: 120 };
+      let score = 0;
+      let highScore = parseInt(localStorage.getItem('nitro_snake_highscore') || '0', 10);
+      let snakeInterval = null;
+      let snakeRunning = false;
+
+      window.setSnakeDir = function(dir) {
+        if (dir === 'UP' && snake.dy === 0) { snake.dx = 0; snake.dy = -grid; }
+        else if (dir === 'DOWN' && snake.dy === 0) { snake.dx = 0; snake.dy = grid; }
+        else if (dir === 'LEFT' && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; }
+        else if (dir === 'RIGHT' && snake.dx === 0) { snake.dx = grid; snake.dy = 0; }
+      };
+
+      window.startSnakeGame = function() {
+        snakeCanvas = document.getElementById('snake-canvas');
+        if (!snakeCanvas) return;
+        snakeCtx = snakeCanvas.getContext('2d');
+
+        snake = { x: 96, y: 96, dx: grid, dy: 0, cells: [], maxCells: 4 };
+        apple = { x: 192, y: 120 };
+        score = 0;
+        updateSnakeScoreUI();
+
+        if (snakeInterval) cancelAnimationFrame(snakeInterval);
+        snakeRunning = true;
+        requestAnimationFrame(snakeLoop);
+      };
+
+      function updateSnakeScoreUI() {
+        const sText = document.getElementById('snake-score-text');
+        const hText = document.getElementById('snake-high-text');
+        if (sText) sText.textContent = 'Score: ' + score;
+        if (hText) hText.textContent = 'High Score: ' + highScore;
+      }
+
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+
+      function snakeLoop() {
+        if (!snakeRunning) return;
+        snakeInterval = requestAnimationFrame(snakeLoop);
+
+        // Slow loop to 15 FPS for retro arcade feel
+        if (++count < 6) return;
+        count = 0;
+
+        snakeCtx.fillStyle = '#090d16';
+        snakeCtx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+
+        snake.x += snake.dx;
+        snake.y += snake.dy;
+
+        // Wrap around edges
+        if (snake.x < 0) snake.x = snakeCanvas.width - grid;
+        else if (snake.x >= snakeCanvas.width) snake.x = 0;
+        if (snake.y < 0) snake.y = snakeCanvas.height - grid;
+        else if (snake.y >= snakeCanvas.height) snake.y = 0;
+
+        snake.cells.unshift({ x: snake.x, y: snake.y });
+
+        if (snake.cells.length > snake.maxCells) {
+          snake.cells.pop();
+        }
+
+        // Draw Apple (Neon Pink/Red)
+        snakeCtx.fillStyle = '#f43f5e';
+        snakeCtx.shadowColor = '#f43f5e';
+        snakeCtx.shadowBlur = 8;
+        snakeCtx.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+        snakeCtx.shadowBlur = 0;
+
+        // Draw Snake Body
+        snake.cells.forEach(function(cell, index) {
+          snakeCtx.fillStyle = index === 0 ? '#34d399' : '#10b981';
+          snakeCtx.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+
+          // Check if snake ate apple
+          if (cell.x === apple.x && cell.y === apple.y) {
+            playTone(523.25, 'triangle', 0.1, 0.1);
+            snake.maxCells++;
+            score += 10;
+            if (score > highScore) {
+              highScore = score;
+              localStorage.setItem('nitro_snake_highscore', highScore.toString());
+            }
+            updateSnakeScoreUI();
+            apple.x = getRandomInt(0, snakeCanvas.width / grid) * grid;
+            apple.y = getRandomInt(0, snakeCanvas.height / grid) * grid;
+          }
+
+          // Check collision with self
+          for (let i = index + 1; i < snake.cells.length; i++) {
+            if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+              playTone(150, 'sawtooth', 0.3, 0.15);
+              snake.x = 96;
+              snake.y = 96;
+              snake.cells = [];
+              snake.maxCells = 4;
+              snake.dx = grid;
+              snake.dy = 0;
+              score = 0;
+              updateSnakeScoreUI();
+              apple.x = getRandomInt(0, snakeCanvas.width / grid) * grid;
+              apple.y = getRandomInt(0, snakeCanvas.height / grid) * grid;
+            }
+          }
+        });
+      }
+
+      window.addEventListener('keydown', function(e) {
+        const tabMinigames = document.getElementById('tab-minigames');
+        if (!tabMinigames || !tabMinigames.classList.contains('active')) return;
+
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { setSnakeDir('UP'); e.preventDefault(); }
+        else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { setSnakeDir('DOWN'); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { setSnakeDir('LEFT'); e.preventDefault(); }
+        else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { setSnakeDir('RIGHT'); e.preventDefault(); }
+      });
+    })();
+
+    // Tic Tac Toe Game vs Groq AI Bot Logic (Easy, Medium, Impossible)
     (function() {
       let board = ['', '', '', '', '', '', '', '', ''];
       let gameOver = false;
 
       window.playTTT = function(idx) {
         if (board[idx] !== '' || gameOver) return;
+        playTone(493.88, 'sine', 0.08, 0.08);
         board[idx] = 'X';
         updateTTTUI();
+
         if (checkTTTWin('X')) {
+          playTone(783.99, 'triangle', 0.2, 0.12);
           document.getElementById('ttt-status').textContent = '🎉 You won against Groq AI!';
           gameOver = true;
           return;
@@ -6007,15 +6341,30 @@
           return;
         }
 
-        // Groq AI Turn (Minimax / Random Move)
+        // Groq AI Turn
         document.getElementById('ttt-status').textContent = '🤖 Groq AI is thinking...';
         setTimeout(() => {
+          const diffSelect = document.getElementById('ttt-difficulty');
+          const difficulty = diffSelect ? diffSelect.value : 'medium';
+          
           let emptyIndices = board.map((val, i) => val === '' ? i : null).filter(val => val !== null);
           if (emptyIndices.length > 0) {
-            let aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            let aiMove = null;
+
+            if (difficulty === 'hard') {
+              // Winning move or block move
+              aiMove = findWinningOrBlockingMove('O') || findWinningOrBlockingMove('X');
+            }
+            if (aiMove === null) {
+              aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            }
+
             board[aiMove] = 'O';
+            playTone(329.63, 'sine', 0.08, 0.08);
             updateTTTUI();
+
             if (checkTTTWin('O')) {
+              playTone(200, 'sawtooth', 0.2, 0.12);
               document.getElementById('ttt-status').textContent = '🤖 Groq AI won this round! Try again!';
               gameOver = true;
               return;
@@ -6029,6 +6378,22 @@
           }
         }, 300);
       };
+
+      function findWinningOrBlockingMove(player) {
+        const wins = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        for (let combo of wins) {
+          const [a, b, c] = combo;
+          const line = [board[a], board[b], board[c]];
+          if (line.filter(x => x === player).length === 2 && line.filter(x => x === '').length === 1) {
+            return combo[line.indexOf('')];
+          }
+        }
+        return null;
+      }
 
       function checkTTTWin(player) {
         const wins = [
@@ -6049,6 +6414,7 @@
       }
 
       window.resetTTT = function() {
+        playTone(440, 'sine', 0.08, 0.08);
         board = ['', '', '', '', '', '', '', '', ''];
         gameOver = false;
         updateTTTUI();
@@ -6056,12 +6422,31 @@
       };
     })();
 
-    // Emergency Stealth Panic Key (~ or Esc) & about:blank Cloaker
-    window.addEventListener('keydown', function(e) {
-      if (e.code === 'Backquote' || e.key === '~' || e.key === 'Escape') {
-        window.location.href = 'https://classroom.google.com';
-      }
-    });
+    // Emergency Stealth Panic Key (~ or Esc) & about:blank Cloaker & Konami Code Easter Egg
+    (function() {
+      const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+      let konamiIdx = 0;
+
+      window.addEventListener('keydown', function(e) {
+        // Panic key
+        if (e.code === 'Backquote' || e.key === '~' || e.key === 'Escape') {
+          window.location.href = 'https://classroom.google.com';
+        }
+
+        // Konami code tracker
+        if (e.key === konamiCode[konamiIdx] || e.key.toLowerCase() === konamiCode[konamiIdx]) {
+          konamiIdx++;
+          if (konamiIdx === konamiCode.length) {
+            konamiIdx = 0;
+            playTone(880, 'square', 0.4, 0.2);
+            alert('🎉 KONAMI CODE UNLOCKED! Party Mode Activated!');
+            document.body.style.filter = 'hue-rotate(180deg)';
+          }
+        } else {
+          konamiIdx = 0;
+        }
+      });
+    })();
 
     window.openAboutBlankCloak = function() {
       const win = window.open('about:blank', '_blank');
@@ -6085,27 +6470,6 @@
         </html>
       `);
       doc.close();
-    };
-
-    // Lo-Fi Beats Radio Player Controller
-    window.toggleLofiBeats = function() {
-      const audio = document.getElementById('lofi-audio');
-      const btn = document.getElementById('lofi-toggle-btn');
-      const text = document.getElementById('lofi-status-text');
-
-      if (!audio) return;
-      if (audio.paused) {
-        audio.play().then(() => {
-          if (btn) btn.textContent = '⏸';
-          if (text) text.textContent = 'Playing Live Beats 🎵';
-        }).catch(err => {
-          if (text) text.textContent = 'Stream error';
-        });
-      } else {
-        audio.pause();
-        if (btn) btn.textContent = '▶';
-        if (text) text.textContent = 'Paused';
-      }
     };
 
     // Automated October 31st Relaunch Date Checker & Timer Logic
@@ -6153,6 +6517,7 @@
     let currentCanvasTheme = 'cosmic';
     window.changeCanvasTheme = function(themeName) {
       currentCanvasTheme = themeName;
+      playTone(523.25, 'sine', 0.08, 0.08);
     };
 
     (function() {
@@ -6189,7 +6554,8 @@
 
       window.addEventListener('mousedown', (e) => {
         mouse.isPressed = true;
-        spawnBurst(e.clientX, e.clientY, 12);
+        spawnBurst(e.clientX, e.clientY, 14);
+        playTone(600 + Math.random() * 200, 'sine', 0.05, 0.05);
       });
 
       window.addEventListener('mouseup', () => {
@@ -6200,7 +6566,7 @@
         if (e.touches.length > 0) {
           mouse.x = e.touches[0].clientX;
           mouse.y = e.touches[0].clientY;
-          spawnBurst(mouse.x, mouse.y, 10);
+          spawnBurst(mouse.x, mouse.y, 12);
         }
       });
 
@@ -6219,24 +6585,24 @@
       function spawnBurst(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 4 + 1.5;
+          const speed = Math.random() * 5 + 1.5;
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            radius: Math.random() * 3 + 1.5,
+            radius: Math.random() * 3.5 + 1.5,
             alpha: 0.9,
-            decay: Math.random() * 0.005 + 0.002,
+            decay: Math.random() * 0.006 + 0.002,
             isSpawned: true
           });
         }
-        if (particles.length > 120) {
-          particles.splice(0, particles.length - 120);
+        if (particles.length > 140) {
+          particles.splice(0, particles.length - 140);
         }
       }
 
-      for (let i = 0; i < 65; i++) {
+      for (let i = 0; i < 70; i++) {
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
@@ -6262,9 +6628,9 @@
         if (currentCanvasTheme === 'matrix') {
           ctx.fillStyle = 'rgba(34, 197, 94, 0.85)';
           ctx.font = '14px monospace';
-          for (let i = 0; i < 30; i++) {
+          for (let i = 0; i < 35; i++) {
             const char = String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96));
-            ctx.fillText(char, (i * (width / 30)), (Date.now() / 15 + i * 40) % height);
+            ctx.fillText(char, (i * (width / 35)), (Date.now() / 15 + i * 40) % height);
           }
         }
 
@@ -6347,8 +6713,9 @@
       animateParticles();
     })();
 
-    // Admin Auth & Testing Mode Bypass Handler
+    // Admin Auth & Testing Mode Bypass Handler (SANITY CLEAN: NO PASSWORD LEAKS)
     window.openAdminModal = function() {
+      playTone(440, 'sine', 0.08, 0.08);
       const modal = document.getElementById('admin-login-modal');
       const err = document.getElementById('admin-auth-error');
       const input = document.getElementById('admin-pass-input');
@@ -6372,11 +6739,13 @@
       const pass = input ? input.value.trim() : '';
 
       if (pass.toUpperCase() === 'NITROADMIN') {
+        playTone(880, 'triangle', 0.25, 0.15);
         localStorage.setItem('nitro_admin_bypass', 'true');
         document.cookie = "nitro_admin_bypass=true; path=/; max-age=2592000";
         closeAdminModal();
         applyBypassState();
       } else {
+        playTone(180, 'sawtooth', 0.2, 0.15);
         if (err) {
           err.style.display = 'block';
           err.textContent = '❌ Invalid Admin Password. Access Denied.';
