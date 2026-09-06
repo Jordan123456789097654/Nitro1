@@ -319,7 +319,6 @@
       transition: opacity 0.08s ease-out;
     }
 
-    /* Ambient Glowing Spheres */
     .bg-glow-1 {
       position: absolute;
       top: -15%;
@@ -909,7 +908,7 @@
       border: 1px solid rgba(249, 115, 22, 0.45);
       border-radius: 18px;
       padding: 16px;
-      width: 330px;
+      width: 340px;
       max-width: 90vw;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(249, 115, 22, 0.2);
       backdrop-filter: blur(20px);
@@ -959,6 +958,13 @@
       color: #fff;
     }
 
+    /* Insanity Range Slider */
+    .insanity-slider {
+      width: 100%;
+      accent-color: #ef4444;
+      cursor: pointer;
+    }
+
     @media (max-width: 580px) {
       .maintenance-card { padding: 26px 16px; }
       .maintenance-card h1 { font-size: 1.6rem; }
@@ -984,14 +990,14 @@
     <img id="chat-lightbox-img" src="" style="max-width: 90vw; max-height: 80vh; border-radius: 14px; border: 2px solid #f97316; box-shadow: 0 20px 60px rgba(0,0,0,0.9); object-fit: contain;">
   </div>
 
-  <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET -->
+  <!-- SLEEK FLOATING AUDIO, WEATHER & PARTICLE INSANITY WIDGET -->
   <div id="floating-control-widget">
     
     <!-- Expandable Control Panel Box -->
     <div id="float-panel-box" class="float-panel-box" style="display: none;">
       
       <div class="float-panel-header">
-        <span>🎧 Audio, Weather & Energetic Particles</span>
+        <span>🎧 Audio, Weather & Particle Insanity</span>
         <button type="button" onclick="toggleFloatPanel()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; font-weight: 800;">✕</button>
       </div>
 
@@ -1034,24 +1040,25 @@
         <div id="weather-status-badge" style="font-size: 0.7rem; color: #38bdf8; margin-top: 4px; font-weight: 700;">Weather API: Detecting location...</div>
       </div>
 
-      <!-- 3. Themes & High-Energy Particle System Controls -->
-      <div>
-        <div class="float-group-title">🔥 Particle Speed & Density (High Energy)</div>
-        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-          <select class="float-select" onchange="changeFallThemePreset(this.value)">
-            <option value="midnight" selected>🎃 Spooky Midnight</option>
-            <option value="pumpkin">🍁 Pumpkin Spice</option>
-            <option value="mansion">👻 Haunted Mansion</option>
-          </select>
-          <select id="particle-density-select" class="float-select" onchange="changeParticleDensity(this.value)">
-            <option value="insane" selected>🔥 High-Energy Blast (350+ Particles)</option>
-            <option value="dense">🎆 Ultra Dense (250 Particles)</option>
-            <option value="hyper">⚡ Hyper Storm (500+ Particles)</option>
-          </select>
+      <!-- 3. EXTREME PARTICLE INSANITY CONTROLLER & WEBSITE CRASH MODE -->
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 10px; margin-top: 4px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+          <span class="float-group-title" style="color: #f87171;">💥 PARTICLE INSANITY SLIDER</span>
+          <span id="insanity-level-label" style="font-size: 0.75rem; font-weight: 900; color: #ef4444;">10x (800 Particles)</span>
         </div>
-        <div style="display: flex; gap: 6px;">
-          <button type="button" onclick="triggerCanvasShockwave()" style="flex: 1; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #f97316; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">💥 Fireworks Blast</button>
-          <button type="button" onclick="resetCanvasParticles()" style="flex: 1; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">🔄 Re-Energize FX</button>
+
+        <input type="range" id="particle-insanity-slider" min="1" max="100" value="10" class="insanity-slider" oninput="setParticleInsanityLevel(this.value)">
+
+        <div style="display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;">
+          <button type="button" onclick="setParticleInsanityPreset('calm')" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 4px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer;">🧘 Calm</button>
+          <button type="button" onclick="setParticleInsanityPreset('party')" style="flex: 1; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #fdba74; padding: 4px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; cursor: pointer;">🔥 Party</button>
+          <button type="button" onclick="setParticleInsanityPreset('supernova')" style="flex: 1; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 4px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; cursor: pointer;">🎆 Supernova</button>
+          <button type="button" onclick="triggerWebsiteCrashMode()" style="flex: 1.2; background: linear-gradient(135deg, #ef4444, #991b1b); border: 1px solid #ef4444; color: #fff; padding: 4px; border-radius: 6px; font-size: 0.68rem; font-weight: 900; cursor: pointer; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);">💥 TAB CRASH MODE</button>
+        </div>
+
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+          <button type="button" onclick="triggerCanvasShockwave()" style="flex: 1; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #f97316; padding: 5px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">💥 Explosive Burst</button>
+          <button type="button" onclick="emergencySafetyReset()" style="flex: 1; background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 5px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🛡️ Safety Reset</button>
         </div>
       </div>
 
@@ -1483,7 +1490,7 @@
 
       <!-- Footer Info -->
       <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.76rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
-        <div>Nitro Hub • Fall Infrastructure & Halloween Relaunch Suite v17</div>
+        <div>Nitro Hub • Fall Infrastructure & Halloween Relaunch Suite v18</div>
         <div style="display: flex; gap: 12px;">
           <a href="#" onclick="openAdminModal(); return false;" style="color: #94a3b8; text-decoration: none; font-weight: 700;">⚙️ Admin</a>
           <a href="#" onclick="openAboutBlankCloak(); return false;" style="color: #94a3b8; text-decoration: none; font-weight: 700;">🕶️ Cloak</a>
@@ -7610,14 +7617,18 @@
       };
     })();
 
-    // Stealth Panic Key (~ or Esc) & Cloaker & Konami Code
+    // Stealth Panic Key (~ or Esc) & Cloaker & Emergency Safety Reset
     (function() {
       const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
       let konamiIdx = 0;
 
       window.addEventListener('keydown', function(e) {
         if (e.code === 'Backquote' || e.key === '~' || e.key === 'Escape') {
-          window.location.href = 'https://classroom.google.com';
+          if (particleInsanityVal > 20) {
+            emergencySafetyReset();
+          } else {
+            window.location.href = 'https://classroom.google.com';
+          }
         }
 
         if (e.key === konamiCode[konamiIdx] || e.key.toLowerCase() === konamiCode[konamiIdx]) {
@@ -7719,16 +7730,61 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // 🌌 HIGH-ENERGY, HIGH-DENSITY, HYPER-ACTIVE PARTICLES ENGINE
-    let particleDensityMode = 'insane';
+    // 🌌 EXTREME PARTICLE INSANITY CONTROLLER & WEBSITE CRASH MODE
+    let particleInsanityVal = 10; // Default 10x
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
     let spawnBurstFunc = null;
 
-    window.changeParticleDensity = function(mode) {
-      particleDensityMode = mode;
+    window.setParticleInsanityLevel = function(val) {
+      particleInsanityVal = parseInt(val, 10);
+      const label = document.getElementById('insanity-level-label');
+
+      if (particleInsanityVal >= 90) {
+        if (label) label.textContent = '💥 TAB CRASH MODE (' + (particleInsanityVal * 300) + ' Particles)';
+      } else if (particleInsanityVal >= 40) {
+        if (label) label.textContent = '🎆 Supernova (' + (particleInsanityVal * 120) + ' Particles)';
+      } else if (particleInsanityVal >= 10) {
+        if (label) label.textContent = '🔥 Party Mode (' + (particleInsanityVal * 80) + ' Particles)';
+      } else {
+        if (label) label.textContent = '🧘 Calm (' + (particleInsanityVal * 40) + ' Particles)';
+      }
+
       if (resetCanvasParticlesFunc) resetCanvasParticlesFunc();
+    };
+
+    window.setParticleInsanityPreset = function(preset) {
+      const slider = document.getElementById('particle-insanity-slider');
+      if (preset === 'calm') {
+        if (slider) slider.value = 2;
+        setParticleInsanityLevel(2);
+      } else if (preset === 'party') {
+        if (slider) slider.value = 15;
+        setParticleInsanityLevel(15);
+      } else if (preset === 'supernova') {
+        if (slider) slider.value = 50;
+        setParticleInsanityLevel(50);
+      }
+    };
+
+    window.triggerWebsiteCrashMode = function() {
+      const confirmCrash = confirm('⚠️ WARNING: Triggering WEBSITE CRASH MODE will spawn 25,000+ moving glowing particles & intense physics loops simultaneously! This WILL freeze or crash your browser tab on your end!
+
+Do you want to unleash full tab meltdown?');
+      if (confirmCrash) {
+        const slider = document.getElementById('particle-insanity-slider');
+        if (slider) slider.value = 100;
+        setParticleInsanityLevel(100);
+      }
+    };
+
+    window.emergencySafetyReset = function() {
+      particleInsanityVal = 4;
+      const slider = document.getElementById('particle-insanity-slider');
+      if (slider) slider.value = 4;
+      setParticleInsanityLevel(4);
+      alert('🛡️ Emergency Reset Triggered! Particle Insanity restored to calm 4x level.');
     };
 
     window.changeCanvasTheme = function(themeName) {
@@ -7756,7 +7812,7 @@
       const mouse = {
         x: null,
         y: null,
-        radius: 140,
+        radius: 160,
         isPressed: false
       };
 
@@ -7771,16 +7827,10 @@
       }
       window.addEventListener('resize', resizeCanvas);
 
-      function getDensityMultiplier() {
-        if (particleDensityMode === 'hyper') return 3.2;
-        if (particleDensityMode === 'dense') return 1.8;
-        return 2.4; // insane default
-      }
-
       function initParticles() {
         particles = [];
-        const mult = getDensityMultiplier();
-        const baseCount = Math.floor(160 * mult);
+        // Insanity multiplier scales particle count from 80 up to 25,000+
+        const baseCount = Math.floor(60 * particleInsanityVal);
         for (let i = 0; i < baseCount; i++) {
           particles.push(createBaseParticle());
         }
@@ -7788,18 +7838,17 @@
 
       function initLeaves() {
         leaves = [];
-        const mult = getDensityMultiplier();
-        const leafCount = Math.floor(65 * mult);
-        const emojis = ['🍂', '🍁', '🌾', '🦇', '✨', '🎃', '🌟', '👻', '⚡'];
+        const leafCount = Math.floor(15 * particleInsanityVal);
+        const emojis = ['🍂', '🍁', '🌾', '🦇', '✨', '🎃', '🌟', '👻', '⚡', '💥', '🔥'];
         for (let i = 0; i < leafCount; i++) {
           leaves.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            size: Math.random() * 10 + 14,
-            vy: Math.random() * 1.8 + 0.8,
-            vx: Math.random() * 1.4 - 0.7,
+            size: Math.random() * 12 + 14,
+            vy: (Math.random() * 2 + 0.8) * (particleInsanityVal * 0.25),
+            vx: (Math.random() * 2 - 1) * (particleInsanityVal * 0.25),
             rotation: Math.random() * Math.PI * 2,
-            vRot: (Math.random() - 0.5) * 0.06,
+            vRot: (Math.random() - 0.5) * 0.08,
             emoji: emojis[Math.floor(Math.random() * emojis.length)]
           });
         }
@@ -7807,43 +7856,42 @@
 
       function initRaindrops() {
         raindrops = [];
-        const mult = getDensityMultiplier();
-        const dropCount = Math.floor(220 * mult);
+        const dropCount = Math.floor(30 * particleInsanityVal);
         for (let i = 0; i < dropCount; i++) {
           raindrops.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            length: Math.random() * 22 + 14,
-            vy: Math.random() * 12 + 12,
-            vx: -2.8,
-            alpha: Math.random() * 0.55 + 0.3
+            length: Math.random() * 24 + 14,
+            vy: (Math.random() * 14 + 10) * (particleInsanityVal * 0.3),
+            vx: -3.2,
+            alpha: Math.random() * 0.6 + 0.3
           });
         }
       }
 
       function initFogWisps() {
         fogWisps = [];
-        const mult = getDensityMultiplier();
-        const fogCount = Math.floor(50 * mult);
+        const fogCount = Math.floor(10 * particleInsanityVal);
         for (let i = 0; i < fogCount; i++) {
           fogWisps.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            radius: Math.random() * 60 + 40,
-            vx: Math.random() * 0.8 + 0.3,
-            alpha: Math.random() * 0.16 + 0.05
+            radius: Math.random() * 70 + 40,
+            vx: (Math.random() * 1.2 + 0.4) * (particleInsanityVal * 0.3),
+            alpha: Math.random() * 0.18 + 0.05
           });
         }
       }
 
       function createBaseParticle() {
+        const speedMult = Math.min(particleInsanityVal * 0.35, 12);
         return {
           x: Math.random() * (width || window.innerWidth),
           y: Math.random() * (height || window.innerHeight),
-          vx: (Math.random() - 0.5) * 2.4,
-          vy: (Math.random() - 0.5) * 2.4 - 0.2,
-          radius: Math.random() * 3.5 + 1.2,
-          alpha: Math.random() * 0.65 + 0.25,
+          vx: (Math.random() - 0.5) * (2.8 * speedMult),
+          vy: (Math.random() - 0.5) * (2.8 * speedMult) - 0.2,
+          radius: Math.random() * 4 + 1.2,
+          alpha: Math.random() * 0.75 + 0.25,
           decay: 0,
           isSpawned: false
         };
@@ -7858,27 +7906,31 @@
       };
 
       triggerCanvasShockwaveFunc = function() {
-        shockwaves.push({
-          x: width / 2,
-          y: height / 2,
-          radius: 10,
-          maxRadius: Math.max(width, height) * 0.55,
-          alpha: 0.95
-        });
+        const shockCount = Math.min(particleInsanityVal, 10);
+        for (let s = 0; s < shockCount; s++) {
+          shockwaves.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: 10,
+            maxRadius: Math.max(width, height) * 0.65,
+            alpha: 0.95
+          });
+        }
       };
 
       spawnBurstFunc = function(cx, cy, count) {
-        for (let i = 0; i < count; i++) {
+        const totalCount = count * Math.min(particleInsanityVal, 20);
+        for (let i = 0; i < totalCount; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 5.5 + 2.0;
+          const speed = (Math.random() * 6.5 + 2.0) * Math.min(particleInsanityVal * 0.4, 8);
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            radius: Math.random() * 4 + 1.8,
-            alpha: 0.95,
-            decay: Math.random() * 0.02 + 0.008,
+            radius: Math.random() * 5 + 2,
+            alpha: 0.98,
+            decay: Math.random() * 0.02 + 0.006,
             isSpawned: true
           });
         }
@@ -7917,7 +7969,7 @@
 
         if (!isOverUI && e.target === canvas) {
           mouse.isPressed = true;
-          spawnBurst(e.clientX, e.clientY, 28);
+          spawnBurst(e.clientX, e.clientY, 35);
         } else {
           mouse.isPressed = false;
         }
@@ -7939,24 +7991,24 @@
       setInterval(() => {
         if (activeWeatherEffect === 'thunder') {
           const flash = document.getElementById('lightning-flash');
-          if (flash && Math.random() > 0.35) {
-            flash.style.opacity = '0.85';
+          if (flash && Math.random() > 0.3) {
+            flash.style.opacity = '0.9';
             setTimeout(() => { flash.style.opacity = '0'; }, 90);
             setTimeout(() => {
-              flash.style.opacity = '0.5';
+              flash.style.opacity = '0.6';
               setTimeout(() => { flash.style.opacity = '0'; }, 60);
             }, 160);
           }
         }
-      }, 4000);
+      }, 3500);
 
       function animateParticles() {
         ctx.clearRect(0, 0, width, height);
 
-        // Render High Velocity Weather FX Across ALL Conditions
+        // Render Weather FX
         if (activeWeatherEffect === 'rain' || activeWeatherEffect === 'thunder') {
-          ctx.strokeStyle = activeWeatherEffect === 'thunder' ? 'rgba(168, 85, 247, 0.65)' : 'rgba(56, 189, 248, 0.65)';
-          ctx.lineWidth = 1.6;
+          ctx.strokeStyle = activeWeatherEffect === 'thunder' ? 'rgba(168, 85, 247, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+          ctx.lineWidth = 1.8;
           raindrops.forEach(drop => {
             drop.y += drop.vy;
             drop.x += drop.vx;
@@ -7967,31 +8019,31 @@
             ctx.stroke();
           });
         } else if (activeWeatherEffect === 'snow') {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
           raindrops.forEach(flake => {
-            flake.y += flake.vy * 0.35;
-            flake.x += Math.sin(flake.y * 0.03) * 1.2;
+            flake.y += flake.vy * 0.4;
+            flake.x += Math.sin(flake.y * 0.03) * 1.5;
             if (flake.y > height) { flake.y = -10; flake.x = Math.random() * width; }
             ctx.beginPath();
-            ctx.arc(flake.x, flake.y, Math.random() * 2.8 + 1.4, 0, Math.PI * 2);
+            ctx.arc(flake.x, flake.y, Math.random() * 3 + 1.5, 0, Math.PI * 2);
             ctx.fill();
           });
         } else if (activeWeatherEffect === 'fog') {
-          ctx.fillStyle = 'rgba(203, 213, 225, 0.08)';
+          ctx.fillStyle = 'rgba(203, 213, 225, 0.1)';
           fogWisps.forEach(wisp => {
             wisp.x += wisp.vx;
-            if (wisp.x > width + 60) wisp.x = -60;
+            if (wisp.x > width + 70) wisp.x = -70;
             ctx.beginPath();
             ctx.arc(wisp.x, wisp.y, wisp.radius, 0, Math.PI * 2);
             ctx.fill();
           });
         }
 
-        // Draw High Speed Shockwaves
+        // Draw Shockwaves
         for (let i = shockwaves.length - 1; i >= 0; i--) {
           const sw = shockwaves[i];
-          sw.radius += 8;
-          sw.alpha -= 0.016;
+          sw.radius += 10;
+          sw.alpha -= 0.018;
 
           if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
             shockwaves.splice(i, 1);
@@ -8001,20 +8053,20 @@
           ctx.beginPath();
           ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
           ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + sw.alpha + ')' : 'rgba(249, 115, 22, ' + sw.alpha + ')';
-          ctx.lineWidth = 2.0;
+          ctx.lineWidth = 2.2;
           ctx.stroke();
         }
 
-        // Draw Swirling High-Velocity Falling Autumn Leaves & Spooky Entities
+        // Draw Swirling Autumn Leaves & Spooky Entities
         if (currentCanvasTheme === 'spooky' || activeWeatherEffect === 'wind') {
-          ctx.font = '18px serif';
+          ctx.font = '20px serif';
           leaves.forEach(leaf => {
             leaf.y += leaf.vy;
-            leaf.x += Math.sin(leaf.y * 0.02) * 1.2 + leaf.vx;
+            leaf.x += Math.sin(leaf.y * 0.02) * 1.5 + leaf.vx;
             leaf.rotation += leaf.vRot;
 
-            if (leaf.y > height + 25) {
-              leaf.y = -25;
+            if (leaf.y > height + 30) {
+              leaf.y = -30;
               leaf.x = Math.random() * width;
             }
 
@@ -8026,7 +8078,9 @@
           });
         }
 
-        // Draw Energetic & Pulsing Ambient Particles
+        // Render Heavy Particle Loop (Scales up to 25,000+ for Website Crash Demo)
+        const connectDistance = particleInsanityVal > 20 ? 45 : 90;
+
         for (let i = particles.length - 1; i >= 0; i--) {
           const p = particles[i];
 
@@ -8038,9 +8092,8 @@
             }
           }
 
-          // Energetic turbulent oscillation
-          p.x += p.vx + Math.sin(p.y * 0.02) * 0.4;
-          p.y += p.vy + Math.cos(p.x * 0.02) * 0.4;
+          p.x += p.vx + Math.sin(p.y * 0.03) * 0.5;
+          p.y += p.vy + Math.cos(p.x * 0.03) * 0.5;
 
           if (p.x < 0 || p.x > width) p.vx *= -1;
           if (p.y < 0 || p.y > height) p.vy *= -1;
@@ -8056,19 +8109,19 @@
               const maxDistance = mouse.radius;
               const force = (maxDistance - dist) / maxDistance;
               
-              const pushMultiplier = mouse.isPressed ? -2.2 : 1.4;
+              const pushMultiplier = mouse.isPressed ? -2.5 : 1.8;
               const directionX = forceDirectionX * force * pushMultiplier;
               const directionY = forceDirectionY * force * pushMultiplier;
 
               p.x -= directionX;
               p.y -= directionY;
 
-              if (dist < 110) {
+              if (dist < 120 && particleInsanityVal < 30) {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 110) * 0.4) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 110) * 0.4) + ')';
-                ctx.lineWidth = 1.1;
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 120) * 0.45) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 120) * 0.45) + ')';
+                ctx.lineWidth = 1.2;
                 ctx.stroke();
               }
             }
@@ -8079,19 +8132,22 @@
           ctx.fillStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + p.alpha + ')' : (currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, ' + p.alpha + ')' : 'rgba(168, 85, 247, ' + p.alpha + ')');
           ctx.fill();
 
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const dx = p.x - p2.x;
-            const dy = p.y - p2.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+          // Only render inter-particle line connections when count is reasonable to avoid O(N^2) lockup
+          if (particleInsanityVal <= 15) {
+            for (let j = i + 1; j < Math.min(particles.length, i + 30); j++) {
+              const p2 = particles[j];
+              const dx = p.x - p2.x;
+              const dy = p.y - p2.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 90) {
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 90) * 0.22) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 90) * 0.22) + ')';
-              ctx.lineWidth = 0.8;
-              ctx.stroke();
+              if (dist < connectDistance) {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / connectDistance) * 0.2) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / connectDistance) * 0.2) + ')';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+              }
             }
           }
         }
