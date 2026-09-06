@@ -328,7 +328,7 @@
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
       padding: 36px 32px;
-      max-width: 780px;
+      max-width: 820px;
       width: 100%;
       text-align: center;
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(249, 115, 22, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.15);
@@ -573,6 +573,92 @@
       margin-top: 4px;
     }
 
+    /* COMMUNITY FORUM STYLING */
+    .forum-container {
+      text-align: left;
+    }
+
+    .forum-thread-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .forum-thread-card:hover {
+      border-color: rgba(249, 115, 22, 0.4);
+      background: rgba(249, 115, 22, 0.05);
+    }
+
+    .forum-thread-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .forum-thread-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fdba74;
+    }
+
+    .forum-badge {
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .forum-thread-meta {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .forum-upvote-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .forum-upvote-btn:hover {
+      background: rgba(249, 115, 22, 0.3);
+      border-color: #f97316;
+    }
+
+    /* GHOST COMPANION FLOATING WIDGET */
+    #ghost-companion {
+      position: fixed;
+      top: 100px;
+      left: 20px;
+      z-index: 9999999;
+      font-size: 2.2rem;
+      cursor: pointer;
+      user-select: none;
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+      transition: transform 0.1s linear, top 2s ease-out, left 2s ease-out;
+      animation: floatGhost 3s infinite ease-in-out alternate;
+    }
+
+    @keyframes floatGhost {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-10px) scale(1.05); }
+    }
+
     /* Minigame Pumpkin Patch Grid */
     .pumpkin-patch-grid {
       display: grid;
@@ -596,6 +682,34 @@
       background: rgba(249, 115, 22, 0.28);
       transform: scale(1.08);
       box-shadow: 0 0 16px rgba(249, 115, 22, 0.4);
+    }
+
+    /* Memory Match Grid */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      max-width: 320px;
+      margin: 12px auto;
+    }
+
+    .memory-card {
+      height: 60px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      font-size: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .memory-card.flipped {
+      background: rgba(249, 115, 22, 0.25);
+      border-color: #f97316;
     }
 
     /* Tic Tac Toe Grid */
@@ -823,6 +937,9 @@
   <!-- HIDDEN REAL LO-FI STREAM AUDIO PLAYER -->
   <audio id="lofi-audio-player" preload="none" crossorigin="anonymous"></audio>
 
+  <!-- FLOATING GHOST PET COMPANION -->
+  <div id="ghost-companion" onclick="interactWithGhost()" title="Click me for Candy!">👻</div>
+
   <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET (BOTTOM RIGHT) -->
   <div id="floating-control-widget">
     
@@ -830,7 +947,7 @@
     <div id="float-panel-box" class="float-panel-box" style="display: none;">
       
       <div class="float-panel-header">
-        <span>🎧 Audio & Spooky FX Panel</span>
+        <span>🎧 Audio, Weather & FX Panel</span>
         <button type="button" onclick="toggleFloatPanel()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; font-weight: 800;">✕</button>
       </div>
 
@@ -856,7 +973,23 @@
         </div>
       </div>
 
-      <!-- 2. Halloween Soundboard -->
+      <!-- 2. Dynamic Weather API & Override Selector -->
+      <div>
+        <div class="float-group-title">🌦️ Dynamic Weather Engine</div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <select id="weather-select" class="float-select" onchange="changeWeatherMode(this.value)">
+            <option value="auto" selected>🌍 Auto-Detect (IP Weather API)</option>
+            <option value="rain">🌧️ Rainy Autumn Day</option>
+            <option value="thunder">⛈️ Spooky Thunderstorm</option>
+            <option value="snow">❄️ Frosty Snowfall</option>
+            <option value="fog">☁️ Eerie Foggy Mist</option>
+            <option value="clear">☀️ Golden Autumn Sun</option>
+          </select>
+        </div>
+        <div id="weather-status-badge" style="font-size: 0.7rem; color: #38bdf8; margin-top: 4px; font-weight: 700;">Weather API: Detecting location...</div>
+      </div>
+
+      <!-- 3. Halloween Soundboard -->
       <div>
         <div class="float-group-title">🧙‍♀️ Halloween Soundboard</div>
         <div class="soundboard-grid">
@@ -867,7 +1000,7 @@
         </div>
       </div>
 
-      <!-- 3. Themes & Canvas Particle Selector -->
+      <!-- 4. Themes & Canvas Particle Selector -->
       <div>
         <div class="float-group-title">🎨 Theme & Particles</div>
         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
@@ -893,7 +1026,7 @@
     <!-- Main Toggle Dock Button -->
     <button type="button" class="float-toggle-btn" onclick="toggleFloatPanel()">
       <span style="font-size: 1.1rem;">🎧</span>
-      <span>Spooky Audio & Themes</span>
+      <span>Spooky Audio & Weather</span>
     </button>
 
   </div>
@@ -903,6 +1036,9 @@
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <span style="font-size: 1rem;">🎃</span>
       <span>HALLOWEEN ADMIN TESTING MODE ACTIVE</span>
+      <button type="button" onclick="openAdminModal()" style="background: rgba(255,255,255,0.25); border: 1px solid #fff; color: #fff; padding: 3px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+        ⚙️ Config Panel
+      </button>
       <button type="button" onclick="openAboutBlankCloak()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: #fff; padding: 3px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
         🕶️ Cloak in about:blank
       </button>
@@ -926,7 +1062,7 @@
       <!-- Status Badge -->
       <div class="status-badge" id="status-badge" onclick="triggerEasterEggSound()">
         <span class="pulse-dot"></span>
-        <span>🎃 FALL / HALLOWEEN SHUTDOWN NOTICE • OCT 31ST RELAUNCH</span>
+        <span id="badge-status-text">🎃 FALL / HALLOWEEN SHUTDOWN NOTICE • OCT 31ST RELAUNCH</span>
       </div>
 
       <!-- Main Title -->
@@ -940,6 +1076,7 @@
       <!-- Interactive Section Navigation Tabs -->
       <div class="interactive-nav-tabs">
         <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-forum')">💬 Community Forum</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade Games & Clicker</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap & Timeline</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Relaunch Alert</button>
@@ -951,15 +1088,15 @@
         <div class="status-update-banner">
           <div class="status-update-header">
             <span>🎃</span>
-            <span>Status Update • Launch Schedule Adjustment</span>
+            <span id="status-banner-title">Status Update • Launch Schedule Adjustment</span>
           </div>
-          <div class="status-update-body">
+          <div class="status-update-body" id="status-banner-body">
             We have updated our planned comeback date to <strong>October 31st, 2026 (Halloween Relaunch)</strong>! This additional time allows our team to complete a full zero-cost database migration, execute comprehensive server RAM optimizations, and roll out a massive new feature suite including retro emulators, 1v1 multiplayer games, and AI homework tools!
           </div>
         </div>
 
         <div class="relaunch-countdown-card">
-          <div class="relaunch-countdown-title">
+          <div class="relaunch-countdown-title" id="countdown-banner-title">
             ⏳ Official Halloween Relaunch Countdown • October 31st, 2026 🎃
           </div>
           <div class="countdown-timer-grid">
@@ -985,7 +1122,7 @@
           </div>
         </div>
 
-        <!-- STRICT SEQUENTIAL 1-BY-1 COUNTING STATS GRID (VISITS TARGET: 10609) -->
+        <!-- STRICT SEQUENTIAL 1-BY-1 COUNTING STATS GRID -->
         <div class="stats-grid" id="stats-grid-container">
           <div class="stat-card" onclick="triggerRollNumbersUp(0)">
             <div class="stat-number-wrapper">
@@ -1024,7 +1161,34 @@
         </div>
       </div>
 
-      <!-- TAB 2: PLAYABLE MINI-GAMES -->
+      <!-- TAB 2: COMMUNITY FORUM & GUESTBOOK -->
+      <div id="tab-forum" class="tab-panel-content">
+        <div class="reason-box forum-container">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-size: 1rem; font-weight: 800; color: #fdba74;">💬 Community Forum & Wishlist Board</div>
+            <button type="button" onclick="toggleNewThreadForm()" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; padding: 5px 14px; border-radius: 99px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">+ Create Thread</button>
+          </div>
+
+          <!-- New Thread Creation Form -->
+          <div id="new-thread-form" style="display: none; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+            <h4 style="color: #fff; margin: 0 0 10px 0; font-size: 0.9rem;">Post a New Community Thread / Wish</h4>
+            <form onsubmit="handleNewThreadSubmit(event)">
+              <input type="text" id="forum-author-input" placeholder="Your Name / Tag..." required style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; margin-bottom: 8px; box-sizing: border-box;">
+              <input type="text" id="forum-title-input" placeholder="Thread Title (e.g. Please add Mario Kart GBA!)..." required style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; margin-bottom: 8px; box-sizing: border-box;">
+              <textarea id="forum-content-input" placeholder="Write your post details or feedback..." required rows="3" style="width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; margin-bottom: 10px; box-sizing: border-box; resize: vertical;"></textarea>
+              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button type="button" onclick="toggleNewThreadForm()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; cursor: pointer;">Cancel</button>
+                <button type="submit" style="background: #f97316; border: none; color: #fff; padding: 6px 16px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">Post Thread 🎃</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Forum Thread List Container -->
+          <div id="forum-threads-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: PLAYABLE MINI-GAMES -->
       <div id="tab-minigames" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
@@ -1082,10 +1246,28 @@
 
         <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
 
+        <!-- SPOOKY MEMORY MATCH GAME -->
+        <div class="reason-box">
+          <div class="reason-box-header">
+            <span style="font-size: 1.2rem;">🃏</span>
+            <strong>3. Spooky Halloween Memory Pair Match</strong>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
+            Match all 6 pairs of spooky Halloween cards in the fewest moves possible!
+          </p>
+          <div style="display: flex; align-items: center; justify-content: space-between; max-width: 320px; margin: 0 auto 6px auto; font-size: 0.82rem; font-weight: 800; color: #fdba74;">
+            <span id="memory-moves-text">Moves: 0</span>
+            <button type="button" onclick="startMemoryMatchGame()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 2px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">Restart Game</button>
+          </div>
+          <div id="memory-grid" class="memory-grid"></div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+
         <!-- TIC TAC TOE GAME -->
         <div class="reason-box">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8;">3. Tic-Tac-Toe vs Groq AI Bot</div>
+            <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8;">4. Tic-Tac-Toe vs Groq AI Bot</div>
             <select id="ttt-difficulty" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-weight: 800; font-size: 0.75rem; border-radius: 6px; padding: 2px 6px; outline: none;">
               <option value="medium">Medium Bot</option>
               <option value="hard">Impossible Bot</option>
@@ -1109,7 +1291,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: ROADMAP & TIMELINE -->
+      <!-- TAB 4: ROADMAP & TIMELINE -->
       <div id="tab-roadmap" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
@@ -1141,7 +1323,7 @@
         </div>
       </div>
 
-      <!-- TAB 4: RELAUNCH NOTIFICATION -->
+      <!-- TAB 5: RELAUNCH NOTIFICATION -->
       <div id="tab-notify" class="tab-panel-content">
         <div class="reason-box" style="text-align: center;">
           <span style="font-size: 2rem;">🔔</span>
@@ -1158,7 +1340,7 @@
         </div>
       </div>
 
-      <!-- TAB 5: FAQ & TRIVIA -->
+      <!-- TAB 6: FAQ & TRIVIA -->
       <div id="tab-faq" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
@@ -1206,7 +1388,7 @@
           <span>📦 View Relaunch Release Notes</span>
         </a>
         <button class="btn-admin-signin" onclick="openAdminModal()">
-          🔑 Admin Sign In
+          🔑 Admin Sign In & Config Panel
         </button>
       </div>
 
@@ -1217,21 +1399,71 @@
 
   </div>
 
-  <!-- ADMIN AUTH MODAL -->
-  <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); align-items: center; justify-content: center;">
-    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 20px; padding: 28px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
-      <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
-      <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.15rem;">Admin Authentication</h3>
-      <p style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 16px;">Enter master password to access site during shutdown maintenance.</p>
+  <!-- ADMIN AUTH & CONFIGURATION DASHBOARD MODAL -->
+  <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999; background: rgba(0,0,0,0.88); backdrop-filter: blur(16px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; box-sizing: border-box;">
+    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.6); border-radius: 24px; padding: 28px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
       
-      <form onsubmit="handleAdminAuth(event)">
-        <input type="password" id="admin-pass-input" placeholder="Enter Admin Password..." style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 12px; box-sizing: border-box;">
-        <div id="admin-auth-error" style="display: none; color: #ef4444; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px;"></div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancel</button>
-          <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer;">Authenticate</button>
+      <!-- State 1: Password Auth Form -->
+      <div id="admin-auth-step-1">
+        <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
+        <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.2rem;">Admin Master Authentication</h3>
+        <p style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 16px;">Enter master password to access live site configuration and test bypass mode.</p>
+        
+        <form onsubmit="handleAdminAuth(event)">
+          <input type="password" id="admin-pass-input" placeholder="Enter Admin Password..." style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 12px; box-sizing: border-box;">
+          <div id="admin-auth-error" style="display: none; color: #ef4444; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px;"></div>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancel</button>
+            <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer;">Authenticate</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- State 2: Admin Live Configuration Dashboard -->
+      <div id="admin-auth-step-2" style="display: none; text-align: left;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 14px;">
+          <div style="font-weight: 900; font-size: 1.05rem; color: #fdba74; display: flex; align-items: center; gap: 8px;">
+            <span>⚙️</span>
+            <span>Admin Site Configuration Panel</span>
+          </div>
+          <button type="button" onclick="closeAdminModal()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer;">✕</button>
         </div>
-      </form>
+
+        <form onsubmit="handleSaveAdminConfig(event)" style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">📅 Relaunch Target Date:</label>
+            <input type="datetime-local" id="config-relaunch-date" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; outline: none; box-sizing: border-box;">
+          </div>
+
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">🌐 Total Visits Counter Target:</label>
+            <input type="number" id="config-visits-target" placeholder="10609" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; outline: none; box-sizing: border-box;">
+          </div>
+
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">🌤️ Weather System Mode:</label>
+            <select id="config-weather-mode" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fdba74; font-weight: 700; font-size: 0.85rem; outline: none; box-sizing: border-box;">
+              <option value="auto">🌍 Auto-Detect (IP Weather API)</option>
+              <option value="rain">🌧️ Rainy Autumn Day</option>
+              <option value="thunder">⛈️ Spooky Thunderstorm</option>
+              <option value="snow">❄️ Frosty Snowfall</option>
+              <option value="fog">☁️ Eerie Foggy Mist</option>
+              <option value="clear">☀️ Golden Autumn Sun</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 4px;">📢 Live Status Banner Message:</label>
+            <textarea id="config-status-msg" rows="2" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box; resize: vertical;"></textarea>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer;">Close</button>
+            <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer;">Save Config Changes ⚡</button>
+          </div>
+        </form>
+      </div>
+
     </div>
   </div>
 
@@ -6247,7 +6479,7 @@
 
 
   <script id="shutdown-overlay-script">
-    // 🎧 BULLETPROOF REAL STREAMING LO-FI AUDIO ENGINE WITH CONNECTION WATCHDOG & BACKUPS
+    // 🎧 REAL STREAMING LO-FI AUDIO PLAYER ENGINE WITH WATCHDOG & BACKUP
     const lofiStreams = {
       og_lofi: 'https://stream.zeno.fm/0r0xa792kwzuv',
       chillhop: 'https://streams.ilovemusic.de/iloveradio17.mp3',
@@ -6299,7 +6531,6 @@
       });
 
       audio.addEventListener('error', function() {
-        console.warn('Audio stream error occurred, switching to reliable backup stream...');
         triggerStreamBackupFallback();
       });
     }
@@ -6318,7 +6549,6 @@
         audio.src = backupUrl;
         audio.load();
         audio.play().catch(err => {
-          console.error('Backup audio stream play blocked:', err);
           if (text) text.textContent = 'Click ▶ to Allow Radio 🎧';
         });
       } else {
@@ -6347,16 +6577,11 @@
         if (text) text.textContent = 'Connecting to Radio... 🎧';
 
         if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
-        // Connection Watchdog: If stream stalls for >3.5s, auto switch to backup stream!
         audioWatchdogTimer = setTimeout(() => {
-          if (!isLofiPlaying) {
-            console.warn('Primary stream connection timed out, triggering backup stream...');
-            triggerStreamBackupFallback();
-          }
+          if (!isLofiPlaying) triggerStreamBackupFallback();
         }, 3500);
 
         audio.play().catch(err => {
-          console.log('Primary play error, switching backup:', err);
           triggerStreamBackupFallback();
         });
       }
@@ -6374,16 +6599,12 @@
 
       if (isLofiPlaying || audio.src) {
         if (text) text.textContent = 'Switching Radio Stream... 🎧';
-        
         if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
         audioWatchdogTimer = setTimeout(() => {
-          if (audio.paused) {
-            triggerStreamBackupFallback();
-          }
+          if (audio.paused) triggerStreamBackupFallback();
         }, 3500);
 
         audio.play().catch(err => {
-          console.log('Stream switch fallback:', err);
           triggerStreamBackupFallback();
         });
       }
@@ -6392,6 +6613,232 @@
     window.setLofiVolume = function(val) {
       const audio = document.getElementById('lofi-audio-player');
       if (audio) audio.volume = parseFloat(val);
+    };
+
+    // 🌦️ DYNAMIC WEATHER API ENGINE & CANVAS OVERLAY
+    let currentWeatherMode = 'auto'; // 'auto', 'rain', 'thunder', 'snow', 'fog', 'clear'
+    let activeWeatherEffect = 'clear';
+
+    window.changeWeatherMode = function(mode) {
+      currentWeatherMode = mode;
+      playTone(523.25, 'sine', 0.08, 0.08);
+      updateWeatherVisuals();
+    };
+
+    function initWeatherAPI() {
+      const badge = document.getElementById('weather-status-badge');
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.latitude && data.longitude) {
+            return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + data.latitude + '&longitude=' + data.longitude + '&current_weather=true');
+          }
+          throw new Error('IP geolocation unavailable');
+        })
+        .then(res => res.json())
+        .then(weatherData => {
+          if (weatherData && weatherData.current_weather) {
+            const code = weatherData.current_weather.weathercode;
+            let detected = 'clear';
+            let desc = '☀️ Clear Autumn Sky';
+
+            if (code >= 51 && code <= 67) { detected = 'rain'; desc = '🌧️ Rainy Autumn Day'; }
+            else if (code >= 80 && code <= 82) { detected = 'rain'; desc = '🌧️ Heavy Autumn Rain'; }
+            else if (code >= 95) { detected = 'thunder'; desc = '⛈️ Spooky Thunderstorm'; }
+            else if (code >= 71 && code <= 77) { detected = 'snow'; desc = '❄️ Frosty Snowfall'; }
+            else if (code === 45 || code === 48) { detected = 'fog'; desc = '☁️ Eerie Foggy Mist'; }
+
+            if (badge) badge.textContent = 'Weather API (' + (weatherData.current_weather.temperature || 60) + '°F): ' + desc;
+            
+            if (currentWeatherMode === 'auto') {
+              activeWeatherEffect = detected;
+            }
+          }
+        })
+        .catch(err => {
+          if (badge) badge.textContent = 'Weather API: 🌧️ Cozy Autumn Rain (Default)';
+          if (currentWeatherMode === 'auto') activeWeatherEffect = 'rain';
+        });
+    }
+
+    function updateWeatherVisuals() {
+      if (currentWeatherMode === 'auto') {
+        initWeatherAPI();
+      } else {
+        activeWeatherEffect = currentWeatherMode;
+        const badge = document.getElementById('weather-status-badge');
+        if (badge) badge.textContent = 'Weather Override Active: ' + currentWeatherMode.toUpperCase();
+      }
+    }
+
+    initWeatherAPI();
+
+    // 👻 FLOATING GHOST COMPANION INTERACTION
+    window.interactWithGhost = function() {
+      playTone(659.25, 'sine', 0.15, 0.12);
+      spawnBurst(window.innerWidth / 2, window.innerHeight / 2, 6);
+      alert('👻 Boo! Friendly Ghost says: "October 31st Halloween Relaunch is going to be epic!" (+10 Candy Corn)');
+    };
+
+    // 💬 COMMUNITY FORUM ENGINE
+    const defaultThreads = [
+      {
+        id: 1,
+        author: 'Jordan (Admin)',
+        title: '🎃 Official October 31st Relaunch Wishlist & Game Requests',
+        content: 'Drop your game requests and feature ideas for our Halloween relaunch below! We are adding 100+ unblocked titles.',
+        upvotes: 42,
+        replies: 18,
+        date: '2 hours ago'
+      },
+      {
+        id: 2,
+        author: 'Alex_Gamer',
+        title: '🎮 Will GBA and SNES emulators support multiplayer saves?',
+        content: 'Super excited for retro emulators! Will we be able to save state and play 1v1 multiplayer?',
+        upvotes: 27,
+        replies: 9,
+        date: '5 hours ago'
+      },
+      {
+        id: 3,
+        author: 'SpookyCat99',
+        title: '👻 Love the Halloween theme & OG Lo-Fi Beats radio!',
+        content: 'The shutdown screen theme is super relaxing. Can we keep the lo-fi beats player after relaunch?',
+        upvotes: 35,
+        replies: 12,
+        date: '1 day ago'
+      }
+    ];
+
+    function loadForumThreads() {
+      let threads = JSON.parse(localStorage.getItem('nitro_forum_threads') || 'null');
+      if (!threads) {
+        threads = defaultThreads;
+        localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
+      }
+      renderForumThreads(threads);
+    }
+
+    function renderForumThreads(threads) {
+      const container = document.getElementById('forum-threads-list');
+      if (!container) return;
+
+      container.innerHTML = threads.map(t => `
+        <div class="forum-thread-card">
+          <div class="forum-thread-header">
+            <span class="forum-thread-title">${escapeHTML(t.title)}</span>
+            <span class="forum-badge">By ${escapeHTML(t.author)}</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #cbd5e1; margin: 4px 0 8px 0; line-height: 1.45;">${escapeHTML(t.content)}</p>
+          <div class="forum-thread-meta">
+            <button type="button" class="forum-upvote-btn" onclick="upvoteThread(${t.id})">👍 ${t.upvotes}</button>
+            <span>💬 ${t.replies} Replies</span>
+            <span>• ${t.date}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    window.toggleNewThreadForm = function() {
+      const form = document.getElementById('new-thread-form');
+      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      playTone(440, 'sine', 0.08, 0.08);
+    };
+
+    window.handleNewThreadSubmit = function(e) {
+      if (e) e.preventDefault();
+      const author = document.getElementById('forum-author-input')?.value.trim();
+      const title = document.getElementById('forum-title-input')?.value.trim();
+      const content = document.getElementById('forum-content-input')?.value.trim();
+
+      if (author && title && content) {
+        let threads = JSON.parse(localStorage.getItem('nitro_forum_threads') || '[]');
+        threads.unshift({
+          id: Date.now(),
+          author: author,
+          title: title,
+          content: content,
+          upvotes: 1,
+          replies: 0,
+          date: 'Just now'
+        });
+        localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
+        renderForumThreads(threads);
+        toggleNewThreadForm();
+        playTone(783.99, 'triangle', 0.15, 0.12);
+      }
+    };
+
+    window.upvoteThread = function(id) {
+      let threads = JSON.parse(localStorage.getItem('nitro_forum_threads') || '[]');
+      const target = threads.find(t => t.id === id);
+      if (target) {
+        target.upvotes++;
+        localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
+        renderForumThreads(threads);
+        playTone(600, 'sine', 0.08, 0.08);
+      }
+    };
+
+    // 🃏 SPOOKY MEMORY MATCH MINI-GAME
+    const memorySymbols = ['🎃', '👻', '🧙‍♀️', '🦇', '🍬', '🕸️'];
+    let memoryCards = [];
+    let flippedCards = [];
+    let memoryMoves = 0;
+
+    window.startMemoryMatchGame = function() {
+      const grid = document.getElementById('memory-grid');
+      if (!grid) return;
+
+      memoryMoves = 0;
+      flippedCards = [];
+      const deck = [...memorySymbols, ...memorySymbols].sort(() => Math.random() - 0.5);
+      memoryCards = deck;
+
+      const movesText = document.getElementById('memory-moves-text');
+      if (movesText) movesText.textContent = 'Moves: 0';
+
+      grid.innerHTML = deck.map((symbol, idx) => `
+        <div class="memory-card" id="mem-card-${idx}" onclick="flipMemoryCard(${idx})">❓</div>
+      `).join('');
+    };
+
+    window.flipMemoryCard = function(idx) {
+      if (flippedCards.length >= 2) return;
+      const cardEl = document.getElementById('mem-card-' + idx);
+      if (!cardEl || cardEl.classList.contains('flipped')) return;
+
+      playTone(500 + idx * 20, 'sine', 0.08, 0.08);
+      cardEl.classList.add('flipped');
+      cardEl.textContent = memoryCards[idx];
+      flippedCards.push({ idx, symbol: memoryCards[idx] });
+
+      if (flippedCards.length === 2) {
+        memoryMoves++;
+        const movesText = document.getElementById('memory-moves-text');
+        if (movesText) movesText.textContent = 'Moves: ' + memoryMoves;
+
+        const [c1, c2] = flippedCards;
+        if (c1.symbol === c2.symbol) {
+          playTone(783.99, 'triangle', 0.15, 0.12);
+          flippedCards = [];
+        } else {
+          setTimeout(() => {
+            const el1 = document.getElementById('mem-card-' + c1.idx);
+            const el2 = document.getElementById('mem-card-' + c2.idx);
+            if (el1) { el1.classList.remove('flipped'); el1.textContent = '❓'; }
+            if (el2) { el2.classList.remove('flipped'); el2.textContent = '❓'; }
+            flippedCards = [];
+          }, 700);
+        }
+      }
     };
 
     // 🔊 Halloween Web Audio SFX Engine for Soundboard & Tones
@@ -6527,8 +6974,8 @@
       }
     };
 
-    // 🚀 STRICT 1-BY-1 SEQUENTIAL NUMBER INCREMENT ENGINE (TOTAL VISITS = 10,609)
-    const statTargets = [
+    // 🚀 STRICT SEQUENTIAL NUMBER INCREMENT ENGINE WITH ADMIN CONFIG
+    let statTargets = [
       { id: 'stat-num-1', target: 10609, suffix: '+' },
       { id: 'stat-num-2', target: 500, suffix: '+' },
       { id: 'stat-num-3', target: 28, suffix: '+' },
@@ -6547,7 +6994,6 @@
 
         let current = 0;
         const target = item.target;
-        // Fast step multiplier for large numbers so it counts 1, 2, 3... 10609 smoothly in ~1.8 seconds!
         const stepInc = target > 5000 ? 7 : (target > 500 ? 1 : 1);
         const stepDelay = target > 5000 ? 1 : (target > 500 ? 2 : 15);
 
@@ -6581,8 +7027,13 @@
 
       if (tabId === 'tab-notice') {
         window.triggerRollNumbersUp();
+      } else if (tabId === 'tab-forum') {
+        loadForumThreads();
       } else if (tabId === 'tab-minigames') {
-        setTimeout(startSnakeGame, 100);
+        setTimeout(() => {
+          startSnakeGame();
+          startMemoryMatchGame();
+        }, 100);
       }
     };
 
@@ -6883,48 +7334,69 @@
       doc.close();
     };
 
-    // Automated October 31st Relaunch Date Checker & Timer Logic
-    (function() {
-      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
+    // Automated Countdown Date & Admin Config Dynamic Checker
+    let relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
 
-      function updateCountdown() {
-        const now = Date.now();
-        const diff = relaunchTargetDate - now;
-
-        if (diff <= 0) {
-          const overlay = document.getElementById('shutdown-overlay');
-          if (overlay) overlay.style.display = 'none';
-          document.body.style.overflow = 'auto';
-          
-          if (!localStorage.getItem('nitro_relaunch_welcomed')) {
-            const welcomeModal = document.getElementById('relaunch-welcome-modal');
-            if (welcomeModal) welcomeModal.style.display = 'flex';
-            localStorage.setItem('nitro_relaunch_welcomed', 'true');
-          }
-          return;
+    function loadSavedAdminConfig() {
+      const savedConfig = JSON.parse(localStorage.getItem('nitro_admin_config') || 'null');
+      if (savedConfig) {
+        if (savedConfig.relaunchDate) {
+          relaunchTargetDate = new Date(savedConfig.relaunchDate).getTime();
         }
+        if (savedConfig.visitsTarget) {
+          statTargets[0].target = parseInt(savedConfig.visitsTarget, 10);
+        }
+        if (savedConfig.weatherMode) {
+          currentWeatherMode = savedConfig.weatherMode;
+          const select = document.getElementById('weather-select');
+          if (select) select.value = currentWeatherMode;
+          updateWeatherVisuals();
+        }
+        if (savedConfig.statusMsg) {
+          const body = document.getElementById('status-banner-body');
+          if (body) body.innerHTML = savedConfig.statusMsg;
+        }
+      }
+    }
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+    function updateCountdown() {
+      const now = Date.now();
+      const diff = relaunchTargetDate - now;
 
-        const elDays = document.getElementById('timer-days');
-        const elHours = document.getElementById('timer-hours');
-        const elMins = document.getElementById('timer-mins');
-        const elSecs = document.getElementById('timer-secs');
-
-        if (elDays) elDays.textContent = String(days).padStart(2, '0');
-        if (elHours) elHours.textContent = String(hours).padStart(2, '0');
-        if (elMins) elMins.textContent = String(mins).padStart(2, '0');
-        if (elSecs) elSecs.textContent = String(secs).padStart(2, '0');
+      if (diff <= 0) {
+        const overlay = document.getElementById('shutdown-overlay');
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        if (!localStorage.getItem('nitro_relaunch_welcomed')) {
+          const welcomeModal = document.getElementById('relaunch-welcome-modal');
+          if (welcomeModal) welcomeModal.style.display = 'flex';
+          localStorage.setItem('nitro_relaunch_welcomed', 'true');
+        }
+        return;
       }
 
-      setInterval(updateCountdown, 1000);
-      updateCountdown();
-    })();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-    // 🌌 ULTRA-SERENE & CALM AMBIENT PARTICLES
+      const elDays = document.getElementById('timer-days');
+      const elHours = document.getElementById('timer-hours');
+      const elMins = document.getElementById('timer-mins');
+      const elSecs = document.getElementById('timer-secs');
+
+      if (elDays) elDays.textContent = String(days).padStart(2, '0');
+      if (elHours) elHours.textContent = String(hours).padStart(2, '0');
+      if (elMins) elMins.textContent = String(mins).padStart(2, '0');
+      if (elSecs) elSecs.textContent = String(secs).padStart(2, '0');
+    }
+
+    loadSavedAdminConfig();
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // 🌌 ULTRA-SERENE AMBIENT PARTICLES & DYNAMIC WEATHER OVERLAY
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
@@ -6953,7 +7425,7 @@
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [], shockwaves = [], leaves = [];
+      let width, height, particles = [], shockwaves = [], leaves = [], raindrops = [];
 
       const mouse = {
         x: null,
@@ -6968,6 +7440,7 @@
         height = canvas.height = window.innerHeight;
         initParticles();
         initLeaves();
+        initRaindrops();
       }
       window.addEventListener('resize', resizeCanvas);
 
@@ -6995,6 +7468,20 @@
         }
       }
 
+      function initRaindrops() {
+        raindrops = [];
+        for (let i = 0; i < 35; i++) {
+          raindrops.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            length: Math.random() * 14 + 10,
+            vy: Math.random() * 6 + 7,
+            vx: -1.2,
+            alpha: Math.random() * 0.3 + 0.15
+          });
+        }
+      }
+
       function createBaseParticle() {
         return {
           x: Math.random() * (width || window.innerWidth),
@@ -7011,6 +7498,7 @@
       resetCanvasParticlesFunc = function() {
         initParticles();
         initLeaves();
+        initRaindrops();
         shockwaves = [];
       };
 
@@ -7051,6 +7539,7 @@
                          e.target.tagName === 'BUTTON' ||
                          e.target.tagName === 'SELECT' ||
                          e.target.tagName === 'INPUT' ||
+                         e.target.tagName === 'TEXTAREA' ||
                          e.target.tagName === 'A';
 
         if (isOverUI) {
@@ -7092,6 +7581,31 @@
 
       function animateParticles() {
         ctx.clearRect(0, 0, width, height);
+
+        // Render Dynamic Weather Overlay (Rain / Snow / Thunder)
+        if (activeWeatherEffect === 'rain' || activeWeatherEffect === 'thunder') {
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+          ctx.lineWidth = 1.1;
+          raindrops.forEach(drop => {
+            drop.y += drop.vy;
+            drop.x += drop.vx;
+            if (drop.y > height) { drop.y = -drop.length; drop.x = Math.random() * width; }
+            ctx.beginPath();
+            ctx.moveTo(drop.x, drop.y);
+            ctx.lineTo(drop.x + drop.vx * 2, drop.y + drop.length);
+            ctx.stroke();
+          });
+        } else if (activeWeatherEffect === 'snow') {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+          raindrops.forEach(flake => {
+            flake.y += flake.vy * 0.2;
+            flake.x += Math.sin(flake.y * 0.02) * 0.4;
+            if (flake.y > height) { flake.y = -10; flake.x = Math.random() * width; }
+            ctx.beginPath();
+            ctx.arc(flake.x, flake.y, Math.random() * 1.8 + 1, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
 
         // Draw Subtle Shockwaves
         for (let i = shockwaves.length - 1; i >= 0; i--) {
@@ -7205,7 +7719,7 @@
       animateParticles();
     })();
 
-    // Admin Auth Handler
+    // Admin Auth Handler & Live Configuration Dashboard
     window.openAdminModal = function() {
       playTone(440, 'sine', 0.08, 0.08);
       const modal = document.getElementById('admin-login-modal');
@@ -7213,11 +7727,38 @@
       const input = document.getElementById('admin-pass-input');
       if (err) err.style.display = 'none';
       if (input) input.value = '';
+
+      const isBypassed = localStorage.getItem('nitro_admin_bypass') === 'true' || document.cookie.includes('nitro_admin_bypass=true');
+      const step1 = document.getElementById('admin-auth-step-1');
+      const step2 = document.getElementById('admin-auth-step-2');
+
+      if (isBypassed) {
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
+        loadAdminConfigToForm();
+      } else {
+        if (step1) step1.style.display = 'block';
+        if (step2) step2.style.display = 'none';
+      }
+
       if (modal) {
         modal.style.display = 'flex';
         setTimeout(() => input && input.focus(), 100);
       }
     };
+
+    function loadAdminConfigToForm() {
+      const config = JSON.parse(localStorage.getItem('nitro_admin_config') || '{}');
+      const elVisits = document.getElementById('config-visits-target');
+      const elWeather = document.getElementById('config-weather-mode');
+      const elStatus = document.getElementById('config-status-msg');
+      const elDate = document.getElementById('config-relaunch-date');
+
+      if (elVisits) elVisits.value = config.visitsTarget || statTargets[0].target;
+      if (elWeather) elWeather.value = config.weatherMode || currentWeatherMode;
+      if (elStatus) elStatus.value = config.statusMsg || 'We have updated our planned comeback date to October 31st, 2026 (Halloween Relaunch)!';
+      if (elDate && config.relaunchDate) elDate.value = config.relaunchDate.substring(0, 16);
+    }
 
     window.closeAdminModal = function() {
       const modal = document.getElementById('admin-login-modal');
@@ -7234,7 +7775,12 @@
         playTone(880, 'triangle', 0.25, 0.15);
         localStorage.setItem('nitro_admin_bypass', 'true');
         document.cookie = "nitro_admin_bypass=true; path=/; max-age=2592000";
-        closeAdminModal();
+        
+        const step1 = document.getElementById('admin-auth-step-1');
+        const step2 = document.getElementById('admin-auth-step-2');
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
+        loadAdminConfigToForm();
         applyBypassState();
       } else {
         playTone(180, 'sawtooth', 0.2, 0.15);
@@ -7245,6 +7791,27 @@
       }
     };
 
+    window.handleSaveAdminConfig = function(e) {
+      if (e) e.preventDefault();
+      const elVisits = document.getElementById('config-visits-target')?.value;
+      const elWeather = document.getElementById('config-weather-mode')?.value;
+      const elStatus = document.getElementById('config-status-msg')?.value;
+      const elDate = document.getElementById('config-relaunch-date')?.value;
+
+      const newConfig = {
+        visitsTarget: elVisits ? parseInt(elVisits, 10) : 10609,
+        weatherMode: elWeather || 'auto',
+        statusMsg: elStatus || '',
+        relaunchDate: elDate ? new Date(elDate).toISOString() : '2026-10-31T00:00:00.000Z'
+      };
+
+      localStorage.setItem('nitro_admin_config', JSON.stringify(newConfig));
+      loadSavedAdminConfig();
+      playTone(783.99, 'triangle', 0.2, 0.15);
+      alert('⚡ Admin Site Configuration Saved Successfully! Live UI Updated.');
+      closeAdminModal();
+    };
+
     window.reEnableShutdownMode = function() {
       localStorage.removeItem('nitro_admin_bypass');
       document.cookie = "nitro_admin_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
@@ -7253,7 +7820,6 @@
 
     window.applyBypassState = function() {
       const now = Date.now();
-      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
       const isRelaunchPassed = now >= relaunchTargetDate;
 
       const isBypassed = isRelaunchPassed || localStorage.getItem('nitro_admin_bypass') === 'true' || document.cookie.includes('nitro_admin_bypass=true');
