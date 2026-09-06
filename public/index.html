@@ -229,6 +229,8 @@
     body {
       background-color: var(--bg-color) !important;
       transition: background-color 0.4s ease;
+      margin: 0;
+      padding: 0;
     }
 
     #shutdown-overlay {
@@ -319,19 +321,20 @@
 
     .maintenance-card {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
-      padding: 38px 34px;
-      max-width: 760px;
+      padding: 36px 32px;
+      max-width: 780px;
       width: 100%;
       text-align: center;
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(249, 115, 22, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.15);
       animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       transition: all 0.4s ease;
+      margin: auto;
     }
 
     @keyframes fadeInCard {
@@ -380,7 +383,7 @@
 
     .maintenance-card h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.15rem;
+      font-size: 2.1rem;
       font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1.25;
@@ -479,174 +482,120 @@
     }
 
     .relaunch-countdown-title {
-      font-size: 0.78rem;
+      font-size: 0.88rem;
       font-weight: 800;
       color: #fdba74;
-      letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
     }
 
     .countdown-timer-grid {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
     }
 
     .countdown-unit {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      border-radius: 12px;
+      padding: 8px 14px;
+      min-width: 58px;
       text-align: center;
-      min-width: 55px;
     }
 
     .countdown-number {
       font-family: 'Outfit', sans-serif;
-      font-size: 1.7rem;
+      font-size: 1.6rem;
       font-weight: 900;
       color: #ffffff;
       line-height: 1;
-      margin-bottom: 4px;
-      text-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
     }
 
     .countdown-label {
       font-size: 0.65rem;
       font-weight: 800;
       color: #94a3b8;
+      margin-top: 4px;
       letter-spacing: 0.05em;
     }
 
     .countdown-divider {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 800;
+      font-size: 1.5rem;
+      font-weight: 900;
       color: var(--accent-color);
-      margin-top: -12px;
+      opacity: 0.8;
     }
 
-    /* STATS GRID & STRICT SEQUENTIAL 1-BY-1 COUNTING NUMBERS */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 20px;
     }
 
     .stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(249, 115, 22, 0.2);
-      border-radius: 14px;
-      padding: 14px 8px;
-      text-align: center;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px 10px;
+      transition: all 0.25s ease;
       cursor: pointer;
-      opacity: 0;
-      transform: translateY(35px);
-      animation: slideUpStat 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .stat-card:nth-child(1) { animation-delay: 0.1s; }
-    .stat-card:nth-child(2) { animation-delay: 0.2s; }
-    .stat-card:nth-child(3) { animation-delay: 0.3s; }
-    .stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-    @keyframes slideUpStat {
-      from { opacity: 0; transform: translateY(35px) scale(0.92); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .stat-card:hover {
-      border-color: rgba(249, 115, 22, 0.7);
-      background: rgba(249, 115, 22, 0.14);
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 10px 24px rgba(249, 115, 22, 0.3);
+      border-color: rgba(249, 115, 22, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.15);
     }
 
     .stat-number-wrapper {
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 2.1rem;
-      margin-bottom: 4px;
-      overflow: hidden;
     }
 
     .stat-number {
       font-family: 'Outfit', sans-serif;
-      font-size: 1.55rem;
-      font-weight: 800;
-      color: var(--accent-color);
-      line-height: 1.1;
-      text-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #ffffff;
     }
 
-    /* PUMPKIN PATCH CLICKER MINI-GAME STYLES */
+    .stat-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    /* Minigame Pumpkin Patch Grid */
     .pumpkin-patch-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin: 14px 0;
+      gap: 10px;
+      margin-top: 10px;
     }
 
     .pumpkin-patch-item {
-      aspect-ratio: 1;
-      background: rgba(249, 115, 22, 0.1);
+      background: rgba(249, 115, 22, 0.12);
       border: 1px solid rgba(249, 115, 22, 0.3);
-      border-radius: 16px;
+      border-radius: 12px;
+      padding: 14px;
       font-size: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       cursor: pointer;
+      transition: all 0.2s ease;
       user-select: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .pumpkin-patch-item:hover {
-      background: rgba(249, 115, 22, 0.25);
-      border-color: #f97316;
-      transform: scale(1.1) rotate(5deg);
-      box-shadow: 0 0 16px rgba(249, 115, 22, 0.5);
-    }
-
-    .pumpkin-patch-item:active {
-      transform: scale(0.9);
-    }
-
-    /* FAQ Accordion Styling */
-    .faq-item {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      margin-bottom: 10px;
-      overflow: hidden;
-      text-align: left;
-    }
-
-    .faq-question {
-      padding: 14px 18px;
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: #ffffff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.2s ease;
-    }
-
-    .faq-question:hover {
-      background: rgba(249, 115, 22, 0.08);
-    }
-
-    .faq-answer {
-      display: none;
-      padding: 0 18px 14px 18px;
-      font-size: 0.84rem;
-      color: #94a3b8;
-      line-height: 1.55;
+      background: rgba(249, 115, 22, 0.28);
+      transform: scale(1.08);
+      box-shadow: 0 0 16px rgba(249, 115, 22, 0.4);
     }
 
     /* Tic Tac Toe Grid */
@@ -654,30 +603,29 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      max-width: 220px;
-      margin: 0 auto 12px auto;
+      max-width: 210px;
+      margin: 12px auto;
     }
 
     .ttt-cell {
-      aspect-ratio: 1;
-      background: rgba(255, 255, 255, 0.05);
+      width: 64px;
+      height: 64px;
+      background: rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 12px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.7rem;
+      font-size: 1.8rem;
       font-weight: 900;
-      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      user-select: none;
       transition: all 0.2s ease;
     }
 
     .ttt-cell:hover {
       background: rgba(249, 115, 22, 0.2);
-      border-color: #f97316;
-      transform: scale(1.03);
+      border-color: rgba(249, 115, 22, 0.5);
     }
 
     /* Snake Game Styling */
@@ -749,121 +697,208 @@
       line-height: 1.55;
     }
 
-    .btn-release {
-      display: inline-flex;
-      align-items: center;
+    /* SLEEK COMPACT FLOATING CONTROLS WIDGET AT BOTTOM RIGHT (NO OVERLAPPING!) */
+    #floating-control-widget {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 99999999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
       gap: 8px;
-      padding: 10px 20px;
-      border-radius: 99px;
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: #f8fafc;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      text-decoration: none;
-      transition: all 0.25s ease;
     }
 
-    .btn-release:hover {
-      background: rgba(249, 115, 22, 0.22);
-      border-color: rgba(249, 115, 22, 0.6);
+    .float-toggle-btn {
+      background: linear-gradient(135deg, #f97316, #a855f7);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       color: #ffffff;
-      transform: translateY(-2px);
-    }
-
-    .btn-admin-signin {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 99px;
-      font-size: 0.85rem;
       font-weight: 800;
-      color: #fdba74;
-      background: rgba(249, 115, 22, 0.12);
-      border: 1px solid rgba(249, 115, 22, 0.4);
+      font-size: 0.82rem;
+      padding: 8px 16px;
+      border-radius: 99px;
       cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(249, 115, 22, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
       transition: all 0.25s ease;
     }
 
-    .btn-admin-signin:hover {
-      background: rgba(249, 115, 22, 0.28);
-      color: #ffffff;
-      transform: translateY(-2px);
+    .float-toggle-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.6);
     }
 
-    .footer-note {
-      font-size: 0.78rem;
-      color: #64748b;
+    .float-panel-box {
+      background: rgba(18, 12, 26, 0.96);
+      border: 1px solid rgba(249, 115, 22, 0.45);
+      border-radius: 18px;
+      padding: 16px;
+      width: 320px;
+      max-width: 90vw;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(249, 115, 22, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeInCard 0.3s ease;
+    }
+
+    .float-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #fdba74;
+    }
+
+    .float-group-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .float-select {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      color: #fdba74;
+      font-weight: 700;
+      font-size: 0.76rem;
+      border-radius: 8px;
+      padding: 6px 8px;
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .float-select option {
+      background: #120c1a;
+      color: #fff;
+    }
+
+    .soundboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .soundboard-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .soundboard-btn:hover {
+      background: rgba(249, 115, 22, 0.25);
+      border-color: rgba(249, 115, 22, 0.5);
     }
 
     @media (max-width: 580px) {
-      .maintenance-card { padding: 28px 16px; }
-      .maintenance-card h1 { font-size: 1.65rem; }
+      .maintenance-card { padding: 26px 16px; }
+      .maintenance-card h1 { font-size: 1.6rem; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .countdown-unit { min-width: 42px; }
       .countdown-number { font-size: 1.35rem; }
       .pumpkin-patch-grid { grid-template-columns: repeat(2, 1fr); }
+      #floating-control-widget { bottom: 12px; right: 12px; }
     }
   </style>
 </head>
 <body>
-  <!-- FLOATING INTERACTIVE FALL/HALLOWEEN CONTROLS -->
-  <div id="floating-control-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
+  <!-- HIDDEN REAL LO-FI STREAM AUDIO PLAYER -->
+  <audio id="lofi-audio-player" preload="none" crossorigin="anonymous"></audio>
+
+  <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET (BOTTOM RIGHT) -->
+  <div id="floating-control-widget">
     
-    <!-- 🧙‍♀️ HALLOWEEN SOUNDBOARD BUTTONS BAR -->
-    <div style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
-      <span style="font-size: 0.78rem; font-weight: 800; color: #fdba74;">Soundboard:</span>
-      <button type="button" onclick="playSpookySound('thunder')" title="Thunder Rumble" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⚡ Thunder</button>
-      <button type="button" onclick="playSpookySound('witch')" title="Witch Laugh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🧙‍♀️ Witch</button>
-      <button type="button" onclick="playSpookySound('boo')" title="Ghost Boo" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">👻 Ghost</button>
-      <button type="button" onclick="playSpookySound('crunch')" title="Pumpkin Crunch" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🎃 Crunch</button>
-    </div>
-
-    <!-- Fall Theme Preset Selector & Reset Particles Row -->
-    <div style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
-      <span style="font-size: 0.85rem;">🎨</span>
-      <select id="fall-theme-preset-select" onchange="changeFallThemePreset(this.value)" style="background: transparent; border: none; color: #fdba74; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
-        <option value="midnight" selected>🎃 Spooky Midnight</option>
-        <option value="pumpkin">🍁 Pumpkin Spice Autumn</option>
-        <option value="mansion">👻 Haunted Mansion</option>
-      </select>
+    <!-- Expandable Control Panel Box -->
+    <div id="float-panel-box" class="float-panel-box" style="display: none;">
       
-      <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.75rem; outline: none; cursor: pointer;">
-        <option value="spooky" selected>🍂 Falling Autumn Leaves</option>
-        <option value="cosmic">🌌 Cosmic Constellation</option>
-        <option value="matrix">🟢 Matrix Code Rain</option>
-        <option value="sunset">🌅 Synthwave Sunset</option>
-      </select>
-
-      <button type="button" onclick="triggerCanvasShockwave()" title="Trigger Spooky Shockwave Blast" style="background: rgba(249, 115, 22, 0.25); border: 1px solid rgba(249, 115, 22, 0.5); color: #f97316; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
-        💥 Pumpkin Blast
-      </button>
-      <button type="button" onclick="resetCanvasParticles()" title="Reset Particles" style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 3px 10px; border-radius: 99px; font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
-        🔄 Reset
-      </button>
-    </div>
-
-    <!-- Fall / Spooky Procedural Multi-Track Lo-Fi Beats & Audio Widget -->
-    <div id="lofi-music-widget" style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 6px 14px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.7); flex-wrap: wrap;">
-      <span style="font-size: 1rem;">🎧</span>
-      <div style="display: flex; flex-direction: column;">
-        <select id="lofi-track-select" onchange="changeLofiTrack(this.value)" style="background: transparent; border: none; color: #fdba74; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
-          <option value="spooky" selected>🎃 Spooky Fall Lo-Fi (Minor Suspense)</option>
-          <option value="chiptune">👾 8-Bit Monster Mash (Retro Synth)</option>
-          <option value="jazz">🎷 Midnight Chill (Jazz 7ths)</option>
-          <option value="synthwave">🌌 Synthwave Night (80s Arp)</option>
-          <option value="cafe">☕ Autumn Cafe (Warm Acoustic)</option>
-        </select>
-        <span style="font-size: 0.65rem; color: #94a3b8;" id="lofi-status-text">100% Ad-Free Fall Beats • Click Play</span>
+      <div class="float-panel-header">
+        <span>🎧 Audio & Spooky FX Panel</span>
+        <button type="button" onclick="toggleFloatPanel()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; font-weight: 800;">✕</button>
       </div>
-      <button type="button" onclick="toggleLofiSynth()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.5); transition: all 0.2s ease;">▶</button>
-      <button type="button" onclick="toggleSFX()" id="sfx-toggle-btn" title="Toggle Sound FX" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #34d399; border-radius: 50%; width: 26px; height: 26px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">🔊</button>
+
+      <!-- 1. Real Streaming Lo-Fi Radio Player -->
+      <div>
+        <div class="float-group-title">🎧 Real Streaming Lo-Fi Radio</div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <select id="lofi-track-select" class="float-select" onchange="changeLofiTrack(this.value)">
+            <option value="lofigirl" selected>🎃 Halloween Lofi Radio (Live)</option>
+            <option value="chillhop">☕ Autumn Chillhop Radio (Live)</option>
+            <option value="spooky">👻 Haunted Spooky Beats (Live)</option>
+            <option value="synthwave">🌌 Retro Synthwave Night (Live)</option>
+            <option value="rain">🌧️ Cozy Rainy Day Lofi (Live)</option>
+          </select>
+          <button type="button" onclick="toggleLofiAudio()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; border-radius: 50%; width: 32px; height: 32px; font-size: 0.9rem; font-weight: 900; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.5);">▶</button>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: #94a3b8;">
+          <span id="lofi-status-text">Click Play for Live Music 🎧</span>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span>🔊</span>
+            <input type="range" id="lofi-volume" min="0" max="1" step="0.05" value="0.75" oninput="setLofiVolume(this.value)" style="width: 60px; accent-color: #f97316; cursor: pointer;">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Halloween Soundboard -->
+      <div>
+        <div class="float-group-title">🧙‍♀️ Halloween Soundboard</div>
+        <div class="soundboard-grid">
+          <button type="button" class="soundboard-btn" onclick="playSpookySound('thunder')">⚡ Thunder</button>
+          <button type="button" class="soundboard-btn" onclick="playSpookySound('witch')">🧙‍♀️ Witch</button>
+          <button type="button" class="soundboard-btn" onclick="playSpookySound('boo')">👻 Ghost</button>
+          <button type="button" class="soundboard-btn" onclick="playSpookySound('crunch')">🎃 Crunch</button>
+        </div>
+      </div>
+
+      <!-- 3. Themes & Canvas Particle Selector -->
+      <div>
+        <div class="float-group-title">🎨 Theme & Particles</div>
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <select class="float-select" onchange="changeFallThemePreset(this.value)">
+            <option value="midnight" selected>🎃 Spooky Midnight</option>
+            <option value="pumpkin">🍁 Pumpkin Spice</option>
+            <option value="mansion">👻 Haunted Mansion</option>
+          </select>
+          <select class="float-select" onchange="changeCanvasTheme(this.value)">
+            <option value="spooky" selected>🍂 Autumn Leaves</option>
+            <option value="cosmic">🌌 Cosmic Stars</option>
+            <option value="matrix">🟢 Matrix Rain</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" onclick="triggerCanvasShockwave()" class="soundboard-btn" style="flex: 1; color: #f97316; border-color: rgba(249, 115, 22, 0.4);">💥 Pumpkin Blast</button>
+          <button type="button" onclick="resetCanvasParticles()" class="soundboard-btn" style="flex: 1; color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">🔄 Reset</button>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Main Toggle Dock Button -->
+    <button type="button" class="float-toggle-btn" onclick="toggleFloatPanel()">
+      <span style="font-size: 1.1rem;">🎧</span>
+      <span>Spooky Audio & Themes</span>
+    </button>
 
   </div>
 
-  <!-- ADMIN TESTING CONTROL BAR (SANITY CLEAN: NO PASSWORD LEAKS) -->
+  <!-- ADMIN TESTING CONTROL BAR -->
   <div id="admin-testing-bar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999999; background: linear-gradient(90deg, #f97316, #a855f7); color: #ffffff; padding: 8px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 700; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,0.5); box-sizing: border-box;">
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <span style="font-size: 1rem;">🎃</span>
@@ -1078,22 +1113,29 @@
       <div id="tab-roadmap" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">📜</span>
-            <strong>Platform Development Roadmap (Path to Oct 31st)</strong>
+            <span style="font-size: 1.2rem;">🎃</span>
+            <strong>October 31st Halloween Comeback Plan</strong>
           </div>
+          <p class="reason-box-desc">
+            We are working around the clock to rebuild our stack from the ground up! Here is our official roadmap leading up to the October 31st Halloween relaunch:
+          </p>
 
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 10px 14px; border-radius: 8px;">
-              <div style="font-size: 0.84rem; font-weight: 800; color: #34d399;">✅ Phase 1: Database Preservation & Data Lock (Completed)</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">100% of user accounts, progression, catalog items, and games backed up safely.</div>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px; text-align: left;">
+            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #34d399; padding: 10px 14px; border-radius: 0 10px 10px 0;">
+              <strong style="color: #34d399; font-size: 0.85rem;">✅ Phase 1: Database Migration & Cloud Hosting Overhaul</strong>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Migrated from expensive 00/mo provider to high-performance zero-cost infrastructure with automated hourly backups.</p>
             </div>
-            <div style="background: rgba(249, 115, 22, 0.12); border-left: 3px solid #f97316; padding: 10px 14px; border-radius: 8px;">
-              <div style="font-size: 0.84rem; font-weight: 800; color: #fdba74;">⚡ Phase 2: Zero-Cost DB Engine & Memory Optimization (Active)</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Implementing SQLite fallback engine to eliminate 00/mo costs and Render RAM caching.</div>
+            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #f97316; padding: 10px 14px; border-radius: 0 10px 10px 0;">
+              <strong style="color: #f97316; font-size: 0.85rem;">🚧 Phase 2: Retro Arcade Emulators & 1v1 Games (In Progress)</strong>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Integrating GBA/SNES HTML5 WebAssembly emulators and instant 1v1 multiplayer matchmaking.</p>
             </div>
-            <div style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding: 10px 14px; border-radius: 8px;">
-              <div style="font-size: 0.84rem; font-weight: 800; color: #c084fc;">🚀 Phase 3: Halloween Relaunch, Emulators & AI Tutor (Oct 31st)</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Deploying GBA/N64 emulators, AI homework suite, 1v1 mini-games, and reopening access.</div>
+            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #a855f7; padding: 10px 14px; border-radius: 0 10px 10px 0;">
+              <strong style="color: #a855f7; font-size: 0.85rem;">🔒 Phase 3: AI Homework Assistant & Cloaker Upgrade (Oct 20)</strong>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Deploying Groq AI homework solver tool and enhanced stealth Tab Cloaker for seamless browser integration.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 10px 10px 0;">
+              <strong style="color: #f59e0b; font-size: 0.85rem;">🎃 Phase 4: GRAND HALLOWEEN RELAUNCH (Oct 31, 2026)</strong>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0 0;">Public launch of the all-new Nitro Games Platform with 100+ unblocked games!</p>
             </div>
           </div>
         </div>
@@ -1101,114 +1143,108 @@
 
       <!-- TAB 4: RELAUNCH NOTIFICATION -->
       <div id="tab-notify" class="tab-panel-content">
+        <div class="reason-box" style="text-align: center;">
+          <span style="font-size: 2rem;">🔔</span>
+          <h3 style="color: #fff; font-size: 1.1rem; margin: 8px 0;">Get Alerted When We Go Live!</h3>
+          <p style="font-size: 0.85rem; color: #94a3b8; max-width: 480px; margin: 0 auto 16px auto;">
+            Leave your Discord username or email below to receive an instant alert on October 31st when Nitro Games officially re-opens!
+          </p>
+
+          <form onsubmit="handleNotifySubmit(event)" style="display: flex; gap: 8px; max-width: 420px; margin: 0 auto;">
+            <input type="text" id="notify-input" placeholder="Discord Tag (e.g. user#1234) or Email..." required style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(249,115,22,0.4); border-radius: 99px; padding: 10px 16px; color: #fff; outline: none; font-size: 0.85rem;">
+            <button type="submit" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 10px 20px; border-radius: 99px; cursor: pointer; transition: all 0.2s ease;">Notify Me 🎃</button>
+          </form>
+          <div id="notify-feedback" style="display: none; margin-top: 12px; font-size: 0.82rem; color: #34d399; font-weight: 700;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 5: FAQ & TRIVIA -->
+      <div id="tab-faq" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
-            <span style="font-size: 1.2rem;">🔔</span>
-            <strong>Get Notified on Halloween Relaunch Day</strong>
+            <span style="font-size: 1.2rem;">❓</span>
+            <strong>Frequently Asked Questions</strong>
           </div>
-          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 14px;">Enter your email or Discord tag below to get an automated alert the moment Nitro Platform reopens on October 31st!</p>
-          
-          <form onsubmit="handleNotifySubmit(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input type="text" id="notify-input" required placeholder="Enter your Email or Discord @username" style="flex: 1; min-width: 220px; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 99px; color: #fff; outline: none; font-size: 0.85rem;">
-            <button type="submit" style="padding: 10px 22px; background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; border-radius: 99px; font-weight: 800; font-size: 0.85rem; cursor: pointer;">Subscribe Alert 🎃</button>
-          </form>
-          <div id="notify-feedback" style="display: none; margin-top: 10px; font-size: 0.82rem; font-weight: 700; color: #fdba74;"></div>
-        </div>
-      </div>
 
-      <!-- TAB 5: FAQ & HALLOWEEN TRIVIA ACCORDION -->
-      <div id="tab-faq" class="tab-panel-content">
-        <div style="margin-bottom: 16px;">
-          <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-              <span>💰 Will my account coins, XP, and rank be saved?</span>
-              <span>▼</span>
+          <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-top: 10px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
+              <div onclick="toggleFAQ(this)" style="font-weight: 800; font-size: 0.86rem; color: #fdba74; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <span>Q: What happened to my game saves and account high scores?</span>
+                <span>▼</span>
+              </div>
+              <div style="display: none; font-size: 0.82rem; color: #cbd5e1; margin-top: 8px; line-height: 1.5;">
+                All local browser game saves, player accounts, and leaderboard entries have been backed up in our offline archive. They will be restored automatically when you log in on October 31st!
+              </div>
             </div>
-            <div class="faq-answer">YES! 100% of player account profiles, coins, XP, and custom unlocked flairs have been safely preserved in our database.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-              <span>🕹️ Will all 500+ games still be available?</span>
-              <span>▼</span>
+
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
+              <div onclick="toggleFAQ(this)" style="font-weight: 800; font-size: 0.86rem; color: #fdba74; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <span>Q: Can administrators still sign in for maintenance testing?</span>
+                <span>▼</span>
+              </div>
+              <div style="display: none; font-size: 0.82rem; color: #cbd5e1; margin-top: 8px; line-height: 1.5;">
+                Yes! Click the button at the bottom of the notice card to open the Admin Sign In panel.
+              </div>
             </div>
-            <div class="faq-answer">Yes, all 500+ games and unblocked proxy engines will be available on October 31st, plus brand new Retro GBA/N64 Emulators and 1v1 Mini-games!</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-              <span>🔑 How can authorized admins access the site during testing?</span>
-              <span>▼</span>
+
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
+              <div onclick="toggleFAQ(this)" style="font-weight: 800; font-size: 0.86rem; color: #fdba74; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <span>Q: How do I activate Panic Cloak Mode?</span>
+                <span>▼</span>
+              </div>
+              <div style="display: none; font-size: 0.82rem; color: #cbd5e1; margin-top: 8px; line-height: 1.5;">
+                Press the <strong>~</strong> (tilde) key or <strong>Escape</strong> at any time to immediately redirect your tab to Google Classroom!
+              </div>
             </div>
-            <div class="faq-answer">Click the <strong>🔑 Admin Sign In</strong> button below and enter your authorized developer password to bypass the shutdown notice.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-              <span>🎃 Halloween Trivia: Why is October 31st our launch date?</span>
-              <span>▼</span>
-            </div>
-            <div class="faq-answer">October 31st marks both Halloween and our planned infrastructure completion target, giving us the perfect timing for our grand reopening celebration!</div>
           </div>
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-        <a href="https://drive.google.com/file/d/1rT2nfTYM4Th3D5ba1soWuLnmBvidY9u8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-release">
-          📄 View Full Release Statement
+      <!-- Action Buttons Row -->
+      <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <a href="https://github.com/jordan-nitro-games/nitro-games/releases" target="_blank" class="btn-release">
+          <span>📦 View Relaunch Release Notes</span>
         </a>
-        <button type="button" onclick="openAdminModal()" class="btn-admin-signin">
+        <button class="btn-admin-signin" onclick="openAdminModal()">
           🔑 Admin Sign In
         </button>
-        <button type="button" onclick="openAboutBlankCloak()" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 99px; font-size: 0.85rem; font-weight: 800; color: #fdba74; background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.4); cursor: pointer; transition: all 0.25s ease;">
-          🕶️ Cloaked Mode
-        </button>
       </div>
 
-      <p class="footer-note">
-        Nitro Platform • System Status Operations Center 🎃
-      </p>
+      <div class="footer-note" style="margin-top: 16px;">
+        Nitro Games Infrastructure Team • Relaunch Scheduled October 31st, 2026 🎃
+      </div>
     </main>
+
   </div>
 
-  <!-- ADMIN LOGIN MODAL -->
-  <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000000; background: rgba(5, 7, 12, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 24px; padding: 36px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 25px 70px rgba(0,0,0,0.9); animation: fadeInCard 0.3s ease;">
-      <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 50%; color: #f97316; font-size: 1.6rem; margin-bottom: 16px;">
-        🔑
-      </div>
-      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.55rem; font-weight: 800; color: #ffffff; margin-bottom: 8px;">Admin Testing Access</h2>
-      <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 24px;">
-        Enter your administrative key to bypass the shutdown screen and test the platform.
-      </p>
+  <!-- ADMIN AUTH MODAL -->
+  <div id="admin-login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); align-items: center; justify-content: center;">
+    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 20px; padding: 28px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9);">
+      <div style="font-size: 2rem; margin-bottom: 8px;">🔑</div>
+      <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.15rem;">Admin Authentication</h3>
+      <p style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 16px;">Enter master password to access site during shutdown maintenance.</p>
       
-      <form id="admin-pass-form" onsubmit="handleAdminAuth(event)" style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="position: relative;">
-          <input type="password" id="admin-pass-input" placeholder="Enter Admin Password" required style="width: 100%; padding: 14px 16px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; color: #ffffff; font-size: 0.95rem; outline: none; box-sizing: border-box; transition: all 0.2s ease;">
-        </div>
-        <div id="admin-auth-error" style="display: none; color: #ef4444; font-size: 0.84rem; font-weight: 700; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); padding: 10px 14px; border-radius: 10px;">
-          ❌ Invalid Admin Password. Access Denied.
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 6px;">
-          <button type="button" onclick="closeAdminModal()" style="flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; border-radius: 99px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;">
-            Cancel
-          </button>
-          <button type="submit" style="flex: 1.4; padding: 12px; background: linear-gradient(135deg, #f97316, #ea580c); border: none; color: #ffffff; border-radius: 99px; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4); transition: all 0.2s ease;">
-            Verify & Unlock 🎃
-          </button>
+      <form onsubmit="handleAdminAuth(event)">
+        <input type="password" id="admin-pass-input" placeholder="Enter Admin Password..." style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 10px; padding: 10px 14px; color: #fff; font-size: 0.9rem; outline: none; margin-bottom: 12px; box-sizing: border-box;">
+        <div id="admin-auth-error" style="display: none; color: #ef4444; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px;"></div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" onclick="closeAdminModal()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancel</button>
+          <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer;">Authenticate</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- HALLOWEEN RELAUNCH WELCOME BACK MODAL -->
-  <div id="relaunch-welcome-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999998; background: rgba(5, 7, 12, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: linear-gradient(135deg, rgba(18, 12, 26, 0.98), rgba(40, 18, 55, 0.98)); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 24px; padding: 40px 32px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 30px 90px rgba(249, 115, 22, 0.35); animation: fadeInCard 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
-      <div style="font-size: 2.8rem; margin-bottom: 12px;">🎃👻🚀</div>
-      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #ffffff; margin-bottom: 8px;">Happy Halloween! Welcome Back!</h2>
-      <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;">
-        Nitro Platform is officially <strong>REOPENED & LIVE FOR HALLOWEEN</strong>! All 100% of your account data, coins, and saved games are intact!
+  <!-- RELAUNCH WELCOME MODAL -->
+  <div id="relaunch-welcome-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999999; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); align-items: center; justify-content: center;">
+    <div style="background: rgba(18, 12, 26, 0.96); border: 1px solid rgba(249, 115, 22, 0.6); border-radius: 24px; padding: 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(249, 115, 22, 0.4);">
+      <div style="font-size: 2.8rem; margin-bottom: 10px;">🎃 🎉</div>
+      <h2 style="color: #fff; margin-bottom: 8px; font-size: 1.5rem;">WE ARE BACK ONLINE!</h2>
+      <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.55; margin-bottom: 20px;">
+        Happy Halloween! The Nitro Games Platform has officially completed maintenance and is now live with 100+ unblocked games, retro emulators, and fast servers!
       </p>
-      <button type="button" onclick="document.getElementById('relaunch-welcome-modal').style.display='none'" style="padding: 12px 32px; background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #ffffff; border-radius: 99px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4); transition: all 0.2s ease;">
-        🎮 Jump Into Games 🎃
+      <button type="button" onclick="document.getElementById('relaunch-welcome-modal').style.display='none'" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 900; font-size: 0.95rem; padding: 12px 32px; border-radius: 99px; cursor: pointer; box-shadow: 0 4px 20px rgba(249, 115, 22, 0.6);">
+        🎮 Start Playing Now!
       </button>
     </div>
   </div>
@@ -6211,16 +6247,86 @@
 
 
   <script id="shutdown-overlay-script">
-    // Web Audio Sound FX & Procedural Multi-Track Lo-Fi Beats Synthesizer
+    // 🎧 REAL STREAMING LO-FI AUDIO PLAYER ENGINE (RESTORED REAL LO-FI STATIONS WITH ADS/STREAM SUPPORT)
+    const lofiStreams = {
+      lofigirl: 'https://stream.zeno.fm/0r0xa792kwzuv',
+      chillhop: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      spooky: 'https://stream.zeno.fm/a843p94ed0hvv',
+      synthwave: 'https://stream.zeno.fm/4621p549618uv',
+      rain: 'https://stream.zeno.fm/3r28u679618uv'
+    };
+
+    let isLofiPlaying = false;
+
+    window.toggleFloatPanel = function() {
+      const box = document.getElementById('float-panel-box');
+      if (box) {
+        box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+      }
+      playTone(440, 'sine', 0.08, 0.08);
+    };
+
+    window.toggleLofiAudio = function() {
+      const audio = document.getElementById('lofi-audio-player');
+      const btn = document.getElementById('lofi-toggle-btn');
+      const text = document.getElementById('lofi-status-text');
+      const trackSelect = document.getElementById('lofi-track-select');
+      const selectedKey = trackSelect ? trackSelect.value : 'lofigirl';
+
+      if (!audio) return;
+
+      if (isLofiPlaying) {
+        audio.pause();
+        isLofiPlaying = false;
+        if (btn) btn.textContent = '▶';
+        if (text) text.textContent = 'Paused Live Stream 🎧';
+      } else {
+        if (!audio.src || !audio.src.includes('zeno.fm')) {
+          audio.src = lofiStreams[selectedKey] || lofiStreams.lofigirl;
+        }
+        audio.volume = parseFloat(document.getElementById('lofi-volume')?.value || 0.75);
+        audio.play().then(() => {
+          isLofiPlaying = true;
+          if (btn) btn.textContent = '⏸';
+          if (text) text.textContent = 'Playing Live Lo-Fi Radio 🎧';
+        }).catch(err => {
+          console.log('Audio play blocked or stream loading:', err);
+          if (text) text.textContent = 'Connecting to Stream...';
+        });
+      }
+    };
+
+    window.changeLofiTrack = function(trackKey) {
+      const audio = document.getElementById('lofi-audio-player');
+      const btn = document.getElementById('lofi-toggle-btn');
+      const text = document.getElementById('lofi-status-text');
+      if (!audio) return;
+
+      audio.src = lofiStreams[trackKey] || lofiStreams.lofigirl;
+      audio.volume = parseFloat(document.getElementById('lofi-volume')?.value || 0.75);
+
+      if (isLofiPlaying) {
+        if (text) text.textContent = 'Switching Radio Stream...';
+        audio.play().then(() => {
+          if (btn) btn.textContent = '⏸';
+          if (text) text.textContent = 'Playing Live Lo-Fi Radio 🎧';
+        }).catch(err => console.log('Audio switch play:', err));
+      }
+    };
+
+    window.setLofiVolume = function(val) {
+      const audio = document.getElementById('lofi-audio-player');
+      if (audio) audio.volume = parseFloat(val);
+    };
+
+    // 🔊 Halloween Web Audio SFX Engine for Soundboard & Tones
     let audioCtx = null;
     let sfxEnabled = true;
-    let lofiSynthPlaying = false;
-    let lofiInterval = null;
-    let currentLofiStyle = 'spooky';
 
     function initAudioContext() {
       if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
       }
     }
 
@@ -6230,44 +6336,55 @@
       if (btn) btn.textContent = sfxEnabled ? '🔊' : '🔇';
     };
 
-    window.playTone = function(freq, type = 'sine', duration = 0.1, gainVal = 0.1) {
+    function playTone(freq, type = 'sine', duration = 0.15, vol = 0.1) {
       if (!sfxEnabled) return;
       try {
         initAudioContext();
+        if (!audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
+
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+
         osc.type = type;
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    };
+      } catch(e) {}
+    }
 
-    // 🧙‍♀️ HALLOWEEN SOUNDBOARD SYNTHESIZER ENGINE
     window.playSpookySound = function(soundType) {
-      initAudioContext();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
+      if (!sfxEnabled) return;
       try {
+        initAudioContext();
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
         if (soundType === 'thunder') {
           const bufferSize = audioCtx.sampleRate * 1.5;
           const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
           const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.4));
+          }
           const noise = audioCtx.createBufferSource();
           noise.buffer = buffer;
           const filter = audioCtx.createBiquadFilter();
           filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(150, audioCtx.currentTime);
-          filter.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1.4);
+          filter.frequency.setValueAtTime(250, audioCtx.currentTime);
+          filter.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 1.4);
+
           const gain = audioCtx.createGain();
-          gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.4);
+          gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+
           noise.connect(filter);
           filter.connect(gain);
           gain.connect(audioCtx.destination);
@@ -6335,132 +6452,7 @@
       }
     };
 
-    window.changeLofiTrack = function(style) {
-      currentLofiStyle = style;
-      playTone(587.33, 'sine', 0.1, 0.1);
-      if (lofiSynthPlaying) {
-        if (lofiInterval) clearInterval(lofiInterval);
-        startLofiLoop();
-      }
-    };
-
-    window.toggleLofiSynth = function() {
-      const btn = document.getElementById('lofi-toggle-btn');
-      const text = document.getElementById('lofi-status-text');
-      initAudioContext();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      if (lofiSynthPlaying) {
-        lofiSynthPlaying = false;
-        if (lofiInterval) clearInterval(lofiInterval);
-        if (btn) btn.textContent = '▶';
-        if (text) text.textContent = 'Paused';
-      } else {
-        lofiSynthPlaying = true;
-        if (btn) btn.textContent = '⏸';
-        if (text) text.textContent = 'Playing Fall Beats 🎃';
-        startLofiLoop();
-      }
-    };
-
-    function startLofiLoop() {
-      const trackPresets = {
-        spooky: {
-          chords: [
-            [146.83, 174.61, 220.00, 261.63],
-            [138.59, 164.81, 207.65, 246.94],
-            [164.81, 196.00, 246.94, 293.66],
-            [130.81, 155.56, 196.00, 233.08]
-          ],
-          tempo: 4000,
-          filter: 550,
-          type: 'sine'
-        },
-        chiptune: {
-          chords: [
-            [220.00, 277.18, 329.63, 440.00],
-            [174.61, 220.00, 261.63, 349.23],
-            [196.00, 246.94, 293.66, 392.00],
-            [146.83, 174.61, 220.00, 293.66]
-          ],
-          tempo: 2000,
-          filter: 2400,
-          type: 'square'
-        },
-        jazz: {
-          chords: [
-            [261.63, 329.63, 392.00, 493.88],
-            [220.00, 261.63, 329.63, 392.00],
-            [293.66, 349.23, 440.00, 523.25],
-            [196.00, 246.94, 293.66, 349.23]
-          ],
-          tempo: 3800,
-          filter: 750,
-          type: 'triangle'
-        },
-        synthwave: {
-          chords: [
-            [130.81, 196.00, 261.63, 329.63],
-            [174.61, 261.63, 349.23, 440.00],
-            [146.83, 220.00, 293.66, 349.23],
-            [196.00, 293.66, 392.00, 493.88]
-          ],
-          tempo: 2400,
-          filter: 1200,
-          type: 'sawtooth'
-        },
-        cafe: {
-          chords: [
-            [261.63, 329.63, 392.00],
-            [220.00, 261.63, 329.63],
-            [174.61, 220.00, 261.63],
-            [196.00, 246.94, 293.66]
-          ],
-          tempo: 3400,
-          filter: 650,
-          type: 'triangle'
-        }
-      };
-
-      let chordIdx = 0;
-      const preset = trackPresets[currentLofiStyle] || trackPresets.spooky;
-
-      function playLoFiBeatStep() {
-        if (!lofiSynthPlaying) return;
-        const currentChord = preset.chords[chordIdx % preset.chords.length];
-        chordIdx++;
-
-        currentChord.forEach((freq, i) => {
-          try {
-            const osc = audioCtx.createOscillator();
-            const filter = audioCtx.createBiquadFilter();
-            const gain = audioCtx.createGain();
-
-            osc.type = i === 0 ? 'sine' : preset.type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-            filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(preset.filter, audioCtx.currentTime);
-
-            gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.035, audioCtx.currentTime + 0.3);
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (preset.tempo / 1000) - 0.2);
-
-            osc.connect(filter);
-            filter.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + (preset.tempo / 1000));
-          } catch (err) {}
-        });
-      }
-
-      playLoFiBeatStep();
-      lofiInterval = setInterval(playLoFiBeatStep, preset.tempo);
-    }
-
-    // 🚀 STRICT 1-BY-1 SEQUENTIAL NUMBER INCREMENT ENGINE ("Go up thru ALL numbers without jumping")
+    // 🚀 STRICT 1-BY-1 SEQUENTIAL NUMBER INCREMENT ENGINE
     const statTargets = [
       { id: 'stat-num-1', target: 1081, suffix: '+' },
       { id: 'stat-num-2', target: 500, suffix: '+' },
@@ -6476,14 +6468,10 @@
         if (!el) return;
 
         playTone(450 + idx * 90, 'triangle', 0.1, 0.08);
-
         if (el._rollTimer) clearInterval(el._rollTimer);
 
         let current = 0;
         const target = item.target;
-        // High-speed 1-by-1 increment delay:
-        // 1.5ms for 1081 so it counts 1,2,3,4...1081 sequentially in ~1.6s
-        // 15ms for 28/100 so it ticks every single number smoothly!
         const stepDelay = target > 300 ? 1.5 : (target > 50 ? 12 : 25);
 
         el._rollTimer = setInterval(() => {
@@ -6571,7 +6559,21 @@
       let score = 0;
       let highScore = parseInt(localStorage.getItem('nitro_snake_highscore') || '0', 10);
       let snakeInterval = null;
-      let snakeRunning = false;
+
+      window.startSnakeGame = function() {
+        snakeCanvas = document.getElementById('snake-canvas');
+        if (!snakeCanvas) return;
+        snakeCtx = snakeCanvas.getContext('2d');
+
+        snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
+        apple = { x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 15) * grid };
+        score = 0;
+        updateSnakeScoreUI();
+
+        if (snakeInterval) clearInterval(snakeInterval);
+        snakeInterval = setInterval(gameLoop, 90);
+        playTone(523.25, 'sine', 0.1, 0.1);
+      };
 
       window.setSnakeDir = function(dir) {
         if (dir === 'UP' && snake.dy === 0) { snake.dx = 0; snake.dy = -grid; }
@@ -6580,38 +6582,15 @@
         else if (dir === 'RIGHT' && snake.dx === 0) { snake.dx = grid; snake.dy = 0; }
       };
 
-      window.startSnakeGame = function() {
-        snakeCanvas = document.getElementById('snake-canvas');
-        if (!snakeCanvas) return;
-        snakeCtx = snakeCanvas.getContext('2d');
-
-        snake = { x: 96, y: 96, dx: grid, dy: 0, cells: [], maxCells: 4 };
-        apple = { x: 192, y: 120 };
-        score = 0;
-        updateSnakeScoreUI();
-
-        if (snakeInterval) cancelAnimationFrame(snakeInterval);
-        snakeRunning = true;
-        requestAnimationFrame(snakeLoop);
-      };
-
       function updateSnakeScoreUI() {
-        const sText = document.getElementById('snake-score-text');
-        const hText = document.getElementById('snake-high-text');
-        if (sText) sText.textContent = 'Score: ' + score;
-        if (hText) hText.textContent = 'High Score: ' + highScore;
+        const sEl = document.getElementById('snake-score-text');
+        const hEl = document.getElementById('snake-high-text');
+        if (sEl) sEl.textContent = 'Score: ' + score;
+        if (hEl) hEl.textContent = 'High Score: ' + highScore;
       }
 
-      function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
-      }
-
-      function snakeLoop() {
-        if (!snakeRunning) return;
-        snakeInterval = requestAnimationFrame(snakeLoop);
-
-        if (++count < 6) return;
-        count = 0;
+      function gameLoop() {
+        if (!snakeCtx) return;
 
         snakeCtx.fillStyle = '#090d16';
         snakeCtx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
@@ -6630,18 +6609,20 @@
           snake.cells.pop();
         }
 
-        snakeCtx.fillStyle = '#f97316';
-        snakeCtx.shadowColor = '#f97316';
-        snakeCtx.shadowBlur = 8;
-        snakeCtx.fillRect(apple.x, apple.y, grid - 1, grid - 1);
-        snakeCtx.shadowBlur = 0;
+        // Draw Pumpkin Apple
+        snakeCtx.font = '12px sans-serif';
+        snakeCtx.textAlign = 'center';
+        snakeCtx.textBaseline = 'middle';
+        snakeCtx.fillText('🎃', apple.x + grid / 2, apple.y + grid / 2);
 
+        // Draw Snake
         snake.cells.forEach(function(cell, index) {
-          snakeCtx.fillStyle = index === 0 ? '#fdba74' : '#f97316';
-          snakeCtx.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+          snakeCtx.fillStyle = index === 0 ? '#f97316' : '#fdba74';
+          snakeCtx.beginPath();
+          snakeCtx.roundRect(cell.x, cell.y, grid - 1, grid - 1, 3);
+          snakeCtx.fill();
 
           if (cell.x === apple.x && cell.y === apple.y) {
-            playTone(523.25, 'triangle', 0.1, 0.1);
             snake.maxCells++;
             score += 10;
             if (score > highScore) {
@@ -6649,23 +6630,17 @@
               localStorage.setItem('nitro_snake_highscore', highScore.toString());
             }
             updateSnakeScoreUI();
-            apple.x = getRandomInt(0, snakeCanvas.width / grid) * grid;
-            apple.y = getRandomInt(0, snakeCanvas.height / grid) * grid;
+            playTone(783.99, 'triangle', 0.1, 0.12);
+            apple.x = Math.floor(Math.random() * (snakeCanvas.width / grid)) * grid;
+            apple.y = Math.floor(Math.random() * (snakeCanvas.height / grid)) * grid;
           }
 
           for (let i = index + 1; i < snake.cells.length; i++) {
             if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-              playTone(150, 'sawtooth', 0.3, 0.15);
-              snake.x = 96;
-              snake.y = 96;
-              snake.cells = [];
-              snake.maxCells = 4;
-              snake.dx = grid;
-              snake.dy = 0;
+              playTone(180, 'sawtooth', 0.3, 0.15);
+              snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
               score = 0;
               updateSnakeScoreUI();
-              apple.x = getRandomInt(0, snakeCanvas.width / grid) * grid;
-              apple.y = getRandomInt(0, snakeCanvas.height / grid) * grid;
             }
           }
         });
@@ -6873,7 +6848,7 @@
       updateCountdown();
     })();
 
-    // 🌌 ADVANCED FALL/HALLOWEEN CANVAS ENGINE WITH FLYING BATS & FALLING LEAVES
+    // 🌌 ADVANCED FALL/HALLOWEEN CANVAS ENGINE (SCOPED MOUSE INTERACTION TO CANVAS ONLY)
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
@@ -6902,7 +6877,7 @@
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [], meteors = [], shockwaves = [], leaves = [], bats = [];
+      let width, height, particles = [], shockwaves = [], leaves = [];
 
       const mouse = {
         x: null,
@@ -6944,18 +6919,6 @@
         }
       }
 
-      function spawnBat(x, y) {
-        bats.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3 - 2,
-          alpha: 1,
-          size: Math.random() * 8 + 14
-        });
-        if (bats.length > 25) bats.shift();
-      }
-
       function createBaseParticle() {
         return {
           x: Math.random() * (width || window.innerWidth),
@@ -6972,114 +6935,112 @@
       resetCanvasParticlesFunc = function() {
         initParticles();
         initLeaves();
-        meteors = [];
         shockwaves = [];
-        bats = [];
-        spawnBurst(width / 2, height / 2, 30);
       };
 
       triggerCanvasShockwaveFunc = function() {
-        const cx = mouse.x || width / 2;
-        const cy = mouse.y || height / 2;
-        shockwaves.push({ x: cx, y: cy, radius: 10, maxRadius: 350, alpha: 0.9 });
-        spawnBurst(cx, cy, 35);
+        shockwaves.push({
+          x: width / 2,
+          y: height / 2,
+          radius: 10,
+          maxRadius: Math.max(width, height) * 0.6,
+          alpha: 1
+        });
       };
 
       spawnBurstFunc = function(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 6 + 2;
+          const speed = Math.random() * 4 + 1.5;
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            radius: Math.random() * 4 + 1.5,
-            alpha: 0.95,
-            decay: Math.random() * 0.007 + 0.003,
+            radius: Math.random() * 3 + 1.5,
+            alpha: 1,
+            decay: Math.random() * 0.02 + 0.01,
             isSpawned: true
           });
         }
-        if (particles.length > 180) {
-          particles.splice(0, particles.length - 180);
-        }
       };
 
-      resizeCanvas();
+      // 🛡️ CRITICAL FIX: ONLY TRACK MOUSE WHEN HOVERING DIRECTLY OVER CANVAS (NOT OVER UI CARDS/BUTTONS)
+      window.addEventListener('mousemove', function(e) {
+        const overlayCard = document.querySelector('.maintenance-card');
+        const floatWidget = document.getElementById('floating-control-widget');
+        
+        const isOverUI = (overlayCard && overlayCard.contains(e.target)) ||
+                         (floatWidget && floatWidget.contains(e.target)) ||
+                         e.target.tagName === 'BUTTON' ||
+                         e.target.tagName === 'SELECT' ||
+                         e.target.tagName === 'INPUT' ||
+                         e.target.tagName === 'A';
 
-      window.addEventListener('mousemove', (e) => {
+        if (isOverUI) {
+          mouse.x = null;
+          mouse.y = null;
+          mouse.isPressed = false;
+          return;
+        }
+
         mouse.x = e.clientX;
         mouse.y = e.clientY;
-        if (Math.random() < 0.25) spawnBat(e.clientX, e.clientY);
       });
 
-      window.addEventListener('mouseleave', () => {
+      window.addEventListener('mousedown', function(e) {
+        const overlayCard = document.querySelector('.maintenance-card');
+        const floatWidget = document.getElementById('floating-control-widget');
+        const isOverUI = (overlayCard && overlayCard.contains(e.target)) ||
+                         (floatWidget && floatWidget.contains(e.target));
+
+        if (!isOverUI) {
+          mouse.isPressed = true;
+          spawnBurst(e.clientX, e.clientY, 5);
+        } else {
+          mouse.isPressed = false;
+        }
+      });
+
+      window.addEventListener('mouseup', function() {
+        mouse.isPressed = false;
+      });
+
+      window.addEventListener('mouseleave', function() {
         mouse.x = null;
         mouse.y = null;
         mouse.isPressed = false;
       });
 
-      window.addEventListener('mousedown', (e) => {
-        mouse.isPressed = true;
-        spawnBurstFunc(e.clientX, e.clientY, 18);
-        spawnBat(e.clientX, e.clientY);
-        spawnBat(e.clientX, e.clientY);
-
-        const pitchFreq = 300 + (e.clientX / width) * 700;
-        playTone(pitchFreq, 'sine', 0.08, 0.08);
-      });
-
-      window.addEventListener('mouseup', () => {
-        mouse.isPressed = false;
-      });
-
-      window.addEventListener('dblclick', (e) => {
-        triggerCanvasShockwaveFunc();
-      });
-
-      function spawnMeteor() {
-        if (Math.random() < 0.025) {
-          meteors.push({
-            x: Math.random() * width,
-            y: 0,
-            length: Math.random() * 90 + 45,
-            speed: Math.random() * 9 + 6,
-            alpha: 1
-          });
-        }
-      }
+      resizeCanvas();
 
       function animateParticles() {
-        const overlay = document.getElementById('shutdown-overlay');
-        if (overlay && overlay.style.display === 'none') {
-          requestAnimationFrame(animateParticles);
-          return;
-        }
-
         ctx.clearRect(0, 0, width, height);
 
-        for (let i = bats.length - 1; i >= 0; i--) {
-          const bat = bats[i];
-          bat.x += bat.vx;
-          bat.y += bat.vy;
-          bat.alpha -= 0.025;
+        // Draw Shockwaves
+        for (let i = shockwaves.length - 1; i >= 0; i--) {
+          const sw = shockwaves[i];
+          sw.radius += 10;
+          sw.alpha -= 0.015;
 
-          if (bat.alpha <= 0) {
-            bats.splice(i, 1);
+          if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+            shockwaves.splice(i, 1);
             continue;
           }
 
-          ctx.font = bat.size + 'px serif';
-          ctx.globalAlpha = bat.alpha;
-          ctx.fillText('🦇', bat.x, bat.y);
-          ctx.globalAlpha = 1;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + sw.alpha + ')' : 'rgba(249, 115, 22, ' + sw.alpha + ')';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
         }
 
-        if (currentCanvasTheme === 'spooky' || currentCanvasTheme === 'cosmic') {
+        // Draw Falling Autumn Leaves
+        if (currentCanvasTheme === 'spooky') {
           ctx.font = '16px serif';
           leaves.forEach(leaf => {
             leaf.y += leaf.vy;
-            leaf.x += Math.sin(leaf.y / 25) * 0.8 + leaf.vx;
+            leaf.x += Math.sin(leaf.y * 0.02) * 0.8 + leaf.vx;
             leaf.rotation += leaf.vRot;
 
             if (leaf.y > height + 20) {
@@ -7095,80 +7056,7 @@
           });
         }
 
-        for (let i = shockwaves.length - 1; i >= 0; i--) {
-          const sw = shockwaves[i];
-          sw.radius += 10;
-          sw.alpha -= 0.025;
-
-          if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
-            shockwaves.splice(i, 1);
-            continue;
-          }
-
-          ctx.beginPath();
-          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(249, 115, 22, ' + sw.alpha + ')';
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          particles.forEach(p => {
-            const dx = p.x - sw.x;
-            const dy = p.y - sw.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (Math.abs(dist - sw.radius) < 25 && dist > 0) {
-              p.vx += (dx / dist) * 3;
-              p.vy += (dy / dist) * 3;
-            }
-          });
-        }
-
-        if (currentCanvasTheme === 'cosmic' || currentCanvasTheme === 'spooky') {
-          spawnMeteor();
-          for (let i = meteors.length - 1; i >= 0; i--) {
-            const m = meteors[i];
-            m.x += m.speed * 0.7;
-            m.y += m.speed;
-            m.alpha -= 0.015;
-
-            if (m.alpha <= 0 || m.y > height || m.x > width) {
-              meteors.splice(i, 1);
-              continue;
-            }
-
-            const grad = ctx.createLinearGradient(m.x, m.y, m.x - m.length * 0.7, m.y - m.length);
-            grad.addColorStop(0, currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.9)' : 'rgba(192, 132, 252, 0.9)');
-            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-            ctx.beginPath();
-            ctx.moveTo(m.x, m.y);
-            ctx.lineTo(m.x - m.length * 0.7, m.y - m.length);
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 2.4;
-            ctx.stroke();
-          }
-        }
-
-        if (currentCanvasTheme === 'matrix') {
-          ctx.fillStyle = 'rgba(34, 197, 94, 0.85)';
-          ctx.font = '14px monospace';
-          for (let i = 0; i < 38; i++) {
-            const char = String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96));
-            ctx.fillText(char, (i * (width / 38)), (Date.now() / 15 + i * 40) % height);
-          }
-        }
-
-        const baseParticles = particles.filter(p => !p.isSpawned);
-        if (baseParticles.length < 55) {
-          particles.push(createBaseParticle());
-        }
-
-        if (mouse.x !== null && mouse.y !== null) {
-          ctx.beginPath();
-          ctx.arc(mouse.x, mouse.y, mouse.isPressed ? 18 : 10, 0, Math.PI * 2);
-          ctx.fillStyle = currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.85)' : (mouse.isPressed ? 'rgba(249, 115, 22, 0.9)' : 'rgba(255, 255, 255, 0.5)');
-          ctx.fill();
-        }
-
+        // Draw Particles
         for (let i = particles.length - 1; i >= 0; i--) {
           const p = particles[i];
 
@@ -7241,7 +7129,7 @@
       animateParticles();
     })();
 
-    // Admin Auth Handler (SANITY CLEAN: NO PASSWORD LEAKS)
+    // Admin Auth Handler
     window.openAdminModal = function() {
       playTone(440, 'sine', 0.08, 0.08);
       const modal = document.getElementById('admin-login-modal');
