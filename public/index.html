@@ -1253,93 +1253,268 @@
 
       <!-- TAB 4: UPGRADED MAIN-WEBSITE CHAT SUITE CONNECTED TO NITRODB DATABASE -->
       <div id="tab-chat" class="tab-panel-content">
-        <div class="chat-container">
-          
-          <!-- Database Live Sync Connection Banner -->
-          <div class="nitro-db-banner">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="display: inline-block; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e;"></span>
-              <span>NitroDB v2.4 Live Database Engine Connected</span>
+        <div style="width: 100%; max-width: 950px; margin: 0 auto;">
+          <section class="page-view" id="view-chat">
+      <div class="header-title-section">
+        <h1>COMMUNITY MESSAGING</h1>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-mode-tabs">
+          <button class="chat-mode-tab active" data-mode="global">🌍 Global Chat</button>
+          <button class="chat-mode-tab" data-mode="friends" style="color: #38bdf8; font-weight: 800;">👥 Friends</button>
+          <button class="chat-mode-tab" data-mode="voice" style="color: #10b981; font-weight: 800;">🎤 Voice Rooms</button>
+          <button class="chat-mode-tab" data-mode="dm">💬 Direct Messages</button>
+          <button class="chat-mode-tab" data-mode="room">🔒 Private Rooms</button>
+          <button class="chat-mode-tab" data-mode="whiteboard">🎨 Live Whiteboard</button>
+        </div>
+
+        <!-- FRIENDS LIST CONTAINER -->
+        <div id="chat-friends-container" style="display: none; padding: 20px; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); padding: 14px 18px; border-radius: var(--radius-md);">
+            <div>
+              <strong style="color: #38bdf8; font-size: 1.1rem;">👥 Friends & Connections</strong>
+              <span style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Connect with classmates, see who is online, and invite friends to voice rooms or DMs.</span>
             </div>
-            <div id="nitro-db-stats" style="font-size: 0.7rem; opacity: 0.9;">Total Messages: 48 • Persistent SQL Table</div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="friend-request-username-input" placeholder="Enter student @username..." style="padding: 6px 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem; width: 200px;">
+              <button class="btn-pill primary" id="send-friend-request-btn">＋ Add Friend</button>
+            </div>
           </div>
 
-          <!-- Top Controls & Multi-Channel Selector -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-            <!-- Channels Bar -->
-            <div class="chat-channels-bar">
-              <button type="button" class="chat-channel-btn active" id="chan-global" onclick="switchChatChannel('global')">🌐 #general</button>
-              <button type="button" class="chat-channel-btn" id="chan-halloween" onclick="switchChatChannel('halloween')">🎃 #halloween-relaunch</button>
-              <button type="button" class="chat-channel-btn" id="chan-gaming" onclick="switchChatChannel('gaming')">🎮 #arcade-highscores</button>
-              <button type="button" class="chat-channel-btn" id="chan-private" onclick="switchChatChannel('private')">🔑 #private-room</button>
-            </div>
+          <div id="friends-pending-section" style="display: block;">
+            <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
+              <span>📬 Pending Friend Requests</span>
+              <span id="friends-pending-count-badge" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; font-size: 0.75rem; padding: 2px 10px; border-radius: 99px; font-weight: 800;">0 Pending</span>
+            </h4>
+            <div id="friends-pending-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
 
-            <!-- Profile & Role Selector -->
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <select id="chat-role-select" onchange="updateUserChatRole(this.value)" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); color: #fdba74; border-radius: 8px; padding: 4px 6px; font-size: 0.74rem; font-weight: 800; outline: none;">
-                <option value="MEMBER">👤 MEMBER</option>
-                <option value="VIP">⭐ VIP</option>
-                <option value="MOD">🛡️ MOD</option>
-                <option value="OWNER" selected>👑 OWNER</option>
+          <div>
+            <h4 style="color: #38bdf8; margin: 0 0 10px; font-size: 0.95rem;">My Friends List</h4>
+            <div id="friends-accepted-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+        </div>
+
+        <!-- VOICE ROOMS CONTAINER -->
+        <div id="chat-voice-container" style="display: none; padding: 20px; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); padding: 14px 18px; border-radius: var(--radius-md);">
+            <div>
+              <strong style="color: #10b981; font-size: 1.1rem;">🎤 Ephemeral WebRTC Voice Lounge</strong>
+              <span style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Join or create voice channels for study groups and game comms.</span>
+            </div>
+            <button class="btn-pill primary" id="create-voice-channel-btn" style="background: #10b981; border-color: #10b981; color: #000; font-weight: 800;">＋ Create Voice Room</button>
+          </div>
+
+          <div id="voice-connected-bar" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: rgba(56, 189, 248, 0.12); border: 1px solid #38bdf8; padding: 12px 18px; border-radius: var(--radius-md);">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <strong id="voice-connected-label" style="color: #38bdf8; font-size: 0.95rem;">Connected to Voice</strong>
+              <span id="voice-ptt-active-badge" style="display: none; padding: 3px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 900; background: #ef4444; color: #fff;">🔴 PTT: SPACE HELD</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <!-- Voice Mode (Open Mic vs PTT) -->
+              <select id="voice-activation-mode-select" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; outline: none; cursor: pointer;" title="Toggle between Open Mic and Push-to-Talk">
+                <option value="voice_activity">🎙️ Voice Activity (Open Mic)</option>
+                <option value="ptt">⌨️ Push-to-Talk (Hold Space)</option>
               </select>
 
-              <select id="chat-badge-select" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); color: #fff; border-radius: 8px; padding: 4px 6px; font-size: 0.78rem; outline: none;">
-                <option value="🎃">🎃 Pumpkin</option>
-                <option value="👻">👻 Ghost</option>
-                <option value="🦇">🦇 Bat</option>
-                <option value="🔮">🔮 Oracle</option>
-                <option value="🧙">🧙 Witch</option>
-                <option value="💀">💀 Skeleton</option>
-                <option value="🍬">🍬 Candy</option>
-                <option value="⚡">⚡ Cyber</option>
-              </select>
+              <!-- Spatial Audio Toggle -->
+              <button class="btn-small" id="voice-spatial-toggle-btn" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 700;" title="Toggle 3D Binaural Stereo Spatial Audio">🎧 Spatial: ON</button>
 
-              <input type="text" id="chat-handle-input" placeholder="Handle..." value="NitroPlayer" style="width: 100px; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 4px 8px; color: #fff; font-size: 0.78rem; font-weight: 700; outline: none;">
+              <!-- Screen Sharing Button -->
+              <button class="btn-small" id="voice-share-screen-btn" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; font-weight: 700;" title="Share your screen with room participants">🖥️ Share Screen</button>
+
+              <!-- Voice FX -->
+              <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);">
+                <span style="font-size: 0.78rem; color: #a7f3d0; font-weight: 700;">🎭 FX:</span>
+                <select id="voice-changer-select" style="font-size: 0.78rem; padding: 2px 6px; border-radius: 6px; background: rgba(16,185,129,0.2); border: 1px solid #10b981; color: #fff; font-weight: 700; outline: none; cursor: pointer;">
+                  <option value="normal">🎙️ Normal</option>
+                  <option value="robot">🤖 Robot</option>
+                  <option value="alien">👾 Alien</option>
+                  <option value="deep">👹 Deep</option>
+                  <option value="helium">🎈 Helium</option>
+                  <option value="radio">📻 Radio</option>
+                  <option value="echo">🔊 Echo</option>
+                </select>
+              </div>
+
+              <button class="btn-small" id="voice-mute-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎙️ Mute</button>
+              <button class="btn-small" id="voice-deafen-btn" style="background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🎧 Deafen</button>
             </div>
           </div>
 
-          <!-- Chat Stream Messages Box -->
-          <div id="chat-messages-box" class="chat-messages-box"></div>
-
-          <!-- GIF & Sticker Selection Drawer -->
-          <div id="chat-gif-drawer" class="chat-gif-drawer">
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-weight: 800; color: #fdba74;">
-              <span>🎞️ Animated GIFs & Stickers</span>
-              <button type="button" onclick="toggleGifDrawer()" style="background: none; border: none; color: #94a3b8; font-size: 0.9rem; cursor: pointer;">✕</button>
+          <!-- Screen Sharing Live Preview Tile -->
+          <div id="voice-screen-video-container" style="display: none; margin-top: 12px; background: #000; border: 1px solid rgba(168, 85, 247, 0.5); border-radius: 12px; overflow: hidden; position: relative;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(0,0,0,0.85); border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <span id="voice-screen-sharer-label" style="font-size: 0.85rem; font-weight: 700; color: #c084fc;">🖥️ Live Screen Share</span>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-small" id="voice-screen-fullscreen-btn" style="padding: 3px 8px; font-size: 0.75rem; background: rgba(255,255,255,0.1); color: #fff;">⤢ Fullscreen</button>
+                <button class="btn-small danger" id="voice-screen-close-btn" style="padding: 3px 8px; font-size: 0.75rem;">Close</button>
+              </div>
             </div>
-            <div class="chat-gif-grid" id="chat-gif-grid-container">
-              <img src="https://media.giphy.com/media/3o7TKsjRrfIPjeiVyM/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
-              <img src="https://media.giphy.com/media/l2JHRhAtnJSDNJ2py/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
-              <img src="https://media.giphy.com/media/d2ZeMUDQSSsCP9FC/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
-              <img src="https://media.giphy.com/media/eH2uOQJKD3MhW/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
+            <video id="voice-screen-video" autoplay playsinline style="width: 100%; max-height: 420px; object-fit: contain; background: #000; display: block;"></video>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <h4 style="color: #38bdf8; margin: 0 0 10px; font-size: 0.95rem;">Active Participants in Channel</h4>
+            <div id="voice-participants-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
+          </div>
+
+          <!-- Board Games Active Area inside Voice Room -->
+          <div id="voice-games-container" style="display: none; margin-top: 14px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+              <strong style="color: #fbbf24; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">🎲 Study Lounge Board Games</strong>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-small secondary" id="voice-game-select-chess" style="padding: 3px 10px; background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">♟️ Chess</button>
+                <button class="btn-small secondary" id="voice-game-select-checkers" style="padding: 3px 10px; background: rgba(255,255,255,0.1); color: #fff; font-weight: 700;">🔴 Checkers</button>
+                <button class="btn-small danger" id="voice-game-quit" style="padding: 3px 10px; font-weight: 700; background: #ef4444; border: none; color: #fff; border-radius: 4px; display: none;">Quit Game</button>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: start; flex-wrap: wrap;">
+              <!-- Game Board Grid -->
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
+                <div id="board-game-canvas-container" style="width: 256px; height: 256px; background: #1e293b; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2); position: relative; overflow: hidden; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); user-select: none;">
+                  <!-- Tiles will be dynamically rendered here -->
+                </div>
+                <div id="board-game-status" style="margin-top: 8px; font-size: 0.8rem; color: #a855f7; font-weight: 700;">Select a game to start!</div>
+              </div>
+              
+              <!-- Game Lobby / Control panel -->
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.8rem;">
+                <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">Player Seats:</strong>
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                      <span>⚪ <span id="white-seat-label">White</span>: <strong id="board-player-white" style="color: #fbbf24;">Empty</strong></span>
+                      <button class="btn-small" id="btn-claim-white" style="padding: 2px 8px; font-size: 0.72rem; background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius: 4px; font-weight: 700; cursor: pointer;">Seat</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                      <span>⚫ <span id="black-seat-label">Black</span>: <strong id="board-player-black" style="color: #fbbf24;">Empty</strong></span>
+                      <button class="btn-small" id="btn-claim-black" style="padding: 2px 8px; font-size: 0.72rem; background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid #38bdf8; border-radius: 4px; font-weight: 700; cursor: pointer;">Seat</button>
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn-small primary" id="btn-game-restart" style="flex: 1; justify-content: center; padding: 6px 12px; font-weight: 700; background: #38bdf8; color: #000; border: none; border-radius: 4px; cursor: pointer; display: none;">Reset Board</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Rich Media Attachments Toolbar -->
-          <div class="chat-rich-toolbar">
-            <input type="file" id="chat-file-input" accept="image/*" style="display: none;" onchange="handleImageFileSelected(event)">
-            <button type="button" class="rich-tool-btn" onclick="triggerFileInput()">🖼️ Image</button>
-            <button type="button" class="rich-tool-btn" onclick="toggleGifDrawer()">🎞️ GIF</button>
-            <button type="button" class="rich-tool-btn" onclick="recordVoiceMemo()">🎙️ Mic (15s)</button>
-            <button type="button" class="rich-tool-btn" onclick="exportChatDatabase()">💾 Export DB</button>
-            <span style="font-size: 0.7rem; color: #64748b; margin-left: auto; align-self: center;">Markdown Supported: **bold** *italic* `code`</span>
+          <h4 style="color: #fbbf24; margin: 0 0 10px; font-size: 0.95rem;">Available Voice & Study Channels</h4>
+          <div id="voice-channels-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+
+        <div class="chat-header">
+          <div class="chat-header-title" id="chat-global-subhead">
+            <span class="online-dot"></span>
+            <span id="chat-online-count">Online</span>
           </div>
 
-          <!-- Image Attachment Preview Bar -->
-          <div id="chat-image-preview-bar" style="display: none; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 10px; padding: 6px 12px; margin-bottom: 8px; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <img id="chat-image-preview-thumb" src="" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px;">
-              <span id="chat-image-preview-name" style="font-size: 0.78rem; color: #fff; font-weight: 700;">Image attached</span>
+          <button id="owner-purge-chat-btn" style="display: none; padding: 6px 14px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-left: auto;" title="Permanently delete all Global Chat history">🔥 Purge Chat</button>
+
+          <div id="chat-dm-bar" style="display: none; flex-direction: column; gap: 8px; width: 100%; padding: 4px 0;">
+            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+              <input type="text" id="chat-dm-target-user" placeholder="Enter student username to DM..." style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.88rem;">
+              <button class="btn-pill primary" id="chat-start-dm-btn">Open DM</button>
             </div>
-            <button type="button" onclick="removeAttachedImage()" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">✕</button>
+            
+            <div id="chat-open-dms-section" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">💬 Open DMs:</span>
+              <div id="chat-open-dms-pills" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;"></div>
+            </div>
+
+            <span id="chat-dm-active-label" style="font-size: 0.82rem; color: #38bdf8; font-weight: 700;"></span>
           </div>
 
-          <!-- Main Input Form -->
-          <form onsubmit="handleSendMainChatMessage(event)" class="chat-input-bar">
-            <input type="text" id="chat-message-input" placeholder="Type a message or paste image URL..." required autocomplete="off" class="chat-input">
-            <button type="submit" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 8px 20px; border-radius: 99px; cursor: pointer; flex-shrink: 0;">Send 🎃</button>
-          </form>
+          <div id="chat-room-bar" style="display: none; flex-direction: column; gap: 8px; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+              <input type="text" id="chat-room-code-input" placeholder="Enter Room Code (e.g. squad42)..." style="flex: 1; padding: 6px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 0.85rem;">
+              <button class="btn-small primary" id="chat-join-room-btn">Join / Create Room</button>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <span id="chat-room-active-label" style="font-size: 0.82rem; color: #fbbf24; font-weight: 700;"></span>
+            </div>
+            
+            <!-- Private Room Settings Controls -->
+            <div id="chat-room-controls" style="display: none; flex-direction: column; gap: 8px; width: 100%; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 4px;">
+              <div style="display: flex; align-items: center; gap: 10px; justify-content: space-between;">
+                <span style="font-size: 0.76rem; color: var(--text-muted);">👑 Host: <strong id="chat-room-owner-name" style="color: #fbbf24;">None</strong></span>
+                <span id="chat-room-lock-status" style="font-size: 0.72rem; color: #10b981; font-weight: 700;">🔓 Public</span>
+              </div>
+              <div id="chat-room-actions-row" style="display: none; gap: 6px; flex-wrap: wrap;">
+                <button class="btn-small" id="chat-room-set-pw-btn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.72rem; padding: 4px 8px; border-radius: 4px; font-weight: 700;">🔑 Set/Remove Password</button>
+                <button class="btn-small danger" id="chat-room-kick-btn" style="font-size: 0.72rem; padding: 4px 8px; border-radius: 4px; font-weight: 700;">👢 Kick Student</button>
+                <button class="btn-small" id="chat-room-transfer-btn" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.72rem; padding: 4px 8px; border-radius: 4px; font-weight: 700;">🤝 Transfer Host</button>
+              </div>
+              <div id="chat-room-members-list" style="font-size: 0.74rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; margin-top: 2px;">
+                <div style="font-weight: 700; display: flex; align-items: center; gap: 4px; color: #38bdf8;">👥 Room Members:</div>
+                <div id="chat-room-members-pills" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px;"></div>
+              </div>
+            </div>
+          </div>
 
+          <span id="chat-slowmode-indicator" style="display: none; font-size: 0.78rem; color: #f59e0b; font-weight: 700;"></span>
+        </div>
+
+        <!-- COLLABORATIVE WHITEBOARD VIEW -->
+        <div id="chat-whiteboard-container" class="chat-whiteboard-container" style="display: none;">
+          <div class="whiteboard-toolbar">
+            <span style="font-weight: 700; color: #38bdf8; font-size: 0.9rem;">🎨 Shared Canvas</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button class="wb-color-btn active" data-color="#38bdf8" style="background: #38bdf8;"></button>
+              <button class="wb-color-btn" data-color="#10b981" style="background: #10b981;"></button>
+              <button class="wb-color-btn" data-color="#f43f5e" style="background: #f43f5e;"></button>
+              <button class="wb-color-btn" data-color="#fbbf24" style="background: #fbbf24;"></button>
+              <button class="wb-color-btn" data-color="#ffffff" style="background: #ffffff;"></button>
+              <button class="btn-small" id="wb-eraser-btn" style="background: rgba(255,255,255,0.1); color: #fff;">🧹 Eraser</button>
+              <button class="btn-small danger" id="wb-clear-btn">Clear</button>
+            </div>
+          </div>
+          <canvas id="whiteboard-canvas" class="whiteboard-canvas"></canvas>
+        </div>
+
+        <div class="chat-messages-area" id="chat-messages"></div>
+
+        <!-- GIF & Sticker Keyboard Drawer -->
+        <div id="chat-gif-drawer" class="chat-gif-drawer" style="display: none;">
+          <div style="padding: 10px 12px 6px;">
+            <input type="text" id="chat-gif-search" placeholder="Search 50+ animated GIFs & stickers..." style="width: 100%; padding: 6px 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 0.8rem;">
+          </div>
+          <div id="chat-gif-categories" style="display: flex; gap: 4px; padding: 0 12px 8px; overflow-x: auto; scrollbar-width: none;">
+            <button class="gif-cat-btn active" data-cat="all" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; white-space: nowrap;">🔥 All</button>
+            <button class="gif-cat-btn" data-cat="memes" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">😂 Memes</button>
+            <button class="gif-cat-btn" data-cat="gaming" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">🎮 Gaming</button>
+            <button class="gif-cat-btn" data-cat="anime" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">🐱 Anime</button>
+            <button class="gif-cat-btn" data-cat="reactions" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">💬 Reactions</button>
+            <button class="gif-cat-btn" data-cat="stickers" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; white-space: nowrap;">✨ Stickers</button>
+          </div>
+          <div class="chat-gif-grid" id="chat-gif-grid"></div>
+        </div>
+
+        <!-- Image Upload Attachment Preview Bar -->
+        <div id="chat-image-preview-bar" style="display: none; padding: 8px 14px; background: rgba(0,0,0,0.5); border-top: 1px solid var(--card-border); align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img id="chat-image-preview-thumb" src="" style="width: 42px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid #38bdf8;">
+            <div>
+              <span id="chat-image-preview-name" style="font-size: 0.82rem; color: #fff; font-weight: 700; display: block;">image.png</span>
+              <span style="font-size: 0.72rem; color: #10b981;">🤖 Groq AI Vision Scanning Ready</span>
+            </div>
+          </div>
+          <button type="button" id="chat-image-remove-btn" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
+        <form class="chat-input-box-wrapper" id="chat-form">
+          <input type="file" id="chat-image-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" style="display: none;">
+          <button type="button" class="btn-small" id="chat-image-btn" style="background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 800;" title="Attach Image (Scanned by Groq AI)">🖼️ Image</button>
+          <button type="button" class="btn-small" id="chat-gif-btn" style="background: rgba(255,255,255,0.08); color: #fbbf24; border: 1px solid rgba(255,255,255,0.1); font-weight: 800;" title="Insert Animated GIF / Sticker">GIF</button>
+          <button type="button" class="btn-small" id="chat-voice-record-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800;" title="Record 15s Voice Memo">🎙️ Mic</button>
+          <input type="text" id="chat-input" placeholder="Type a message... (**bold**, *italic*, `code`, ~~strike~~)" autocomplete="off">
+          <button type="submit" class="btn-pill primary">Send</button>
+        </form>
+      </div>
+    </section>
         </div>
       </div>
 
@@ -8364,5 +8539,17 @@
       applyBypassState();
     }
   </script>
+
+  <script type="module">
+    import { initChat } from '/js/chat.js';
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        try { initChat(); } catch(e) { console.warn('Chat init error:', e); }
+      });
+    } else {
+      try { initChat(); } catch(e) { console.warn('Chat init error:', e); }
+    }
+  </script>
+
 </body>
 </html>
