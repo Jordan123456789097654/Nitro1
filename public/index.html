@@ -524,7 +524,7 @@
       margin-top: -12px;
     }
 
-    /* STATS GRID & FALL/HALLOWEEN CARDS */
+    /* STATS GRID & SILKY SMOOTH 60FPS SLOT NUMBERS */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -580,25 +580,7 @@
       color: var(--accent-color);
       line-height: 1.1;
       text-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
-      transition: transform 0.1s ease;
-    }
-
-    .stat-number.rolling {
-      animation: rollNumberUp 0.12s infinite linear;
-    }
-
-    @keyframes rollNumberUp {
-      0% { transform: translateY(12px); opacity: 0.6; }
-      50% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-12px); opacity: 0.6; }
-    }
-
-    .stat-label {
-      font-size: 0.7rem;
-      color: #94a3b8;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      will-change: transform;
     }
 
     /* PUMPKIN PATCH CLICKER MINI-GAME STYLES */
@@ -830,17 +812,24 @@
   <!-- FLOATING INTERACTIVE FALL/HALLOWEEN CONTROLS -->
   <div id="floating-control-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
     
+    <!-- 🧙‍♀️ HALLOWEEN SOUNDBOARD BUTTONS BAR -->
+    <div style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
+      <span style="font-size: 0.78rem; font-weight: 800; color: #fdba74;">Soundboard:</span>
+      <button type="button" onclick="playSpookySound('thunder')" title="Thunder Rumble" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">⚡ Thunder</button>
+      <button type="button" onclick="playSpookySound('witch')" title="Witch Laugh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🧙‍♀️ Witch</button>
+      <button type="button" onclick="playSpookySound('boo')" title="Ghost Boo" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">👻 Ghost</button>
+      <button type="button" onclick="playSpookySound('crunch')" title="Pumpkin Crunch" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">🎃 Crunch</button>
+    </div>
+
     <!-- Fall Theme Preset Selector & Reset Particles Row -->
     <div style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
       <span style="font-size: 0.85rem;">🎨</span>
-      <!-- Category #4: Fall Theme Preset Switcher -->
       <select id="fall-theme-preset-select" onchange="changeFallThemePreset(this.value)" style="background: transparent; border: none; color: #fdba74; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
         <option value="midnight" selected>🎃 Spooky Midnight</option>
         <option value="pumpkin">🍁 Pumpkin Spice Autumn</option>
         <option value="mansion">👻 Haunted Mansion</option>
       </select>
       
-      <!-- Canvas Particle Style Dropdown -->
       <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.75rem; outline: none; cursor: pointer;">
         <option value="spooky" selected>🍂 Falling Autumn Leaves</option>
         <option value="cosmic">🌌 Cosmic Constellation</option>
@@ -860,9 +849,9 @@
     <div id="lofi-music-widget" style="background: rgba(18, 12, 26, 0.94); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 99px; padding: 6px 14px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.7); flex-wrap: wrap;">
       <span style="font-size: 1rem;">🎧</span>
       <div style="display: flex; flex-direction: column;">
-        <!-- Lo-Fi Track Style Dropdown -->
         <select id="lofi-track-select" onchange="changeLofiTrack(this.value)" style="background: transparent; border: none; color: #fdba74; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
           <option value="spooky" selected>🎃 Spooky Fall Lo-Fi (Minor Suspense)</option>
+          <option value="chiptune">👾 8-Bit Monster Mash (Retro Synth)</option>
           <option value="jazz">🎷 Midnight Chill (Jazz 7ths)</option>
           <option value="synthwave">🌌 Synthwave Night (80s Arp)</option>
           <option value="cafe">☕ Autumn Cafe (Warm Acoustic)</option>
@@ -897,7 +886,6 @@
     <div class="bg-glow-2"></div>
 
     <main class="maintenance-card">
-      <!-- Decorative Floating Pumpkins -->
       <div class="pumpkin-corner-left">🎃</div>
       <div class="pumpkin-corner-right">🎃</div>
 
@@ -926,7 +914,6 @@
 
       <!-- TAB 1: NOTICE & COUNTDOWN -->
       <div id="tab-notice" class="tab-panel-content active">
-        <!-- Prominent Status Update Box -->
         <div class="status-update-banner">
           <div class="status-update-header">
             <span>🎃</span>
@@ -937,7 +924,6 @@
           </div>
         </div>
 
-        <!-- October 31st Automated Relaunch Countdown Card -->
         <div class="relaunch-countdown-card">
           <div class="relaunch-countdown-title">
             ⏳ Official Halloween Relaunch Countdown • October 31st, 2026 🎃
@@ -965,7 +951,7 @@
           </div>
         </div>
 
-        <!-- Platform Accomplishments & Upward Rolling Numbers Counter Grid -->
+        <!-- SILKY SMOOTH 60FPS SLOT ROLLING NUMBERS COUNTER GRID -->
         <div class="stats-grid" id="stats-grid-container">
           <div class="stat-card" onclick="triggerRollNumbersUp(0)">
             <div class="stat-number-wrapper">
@@ -993,7 +979,6 @@
           </div>
         </div>
 
-        <!-- Official Statement Card -->
         <div class="reason-box">
           <div class="reason-box-header">
             <span style="display: inline-block; width: 10px; height: 10px; background: #f97316; border-radius: 50%; box-shadow: 0 0 8px #f97316;"></span>
@@ -1005,9 +990,8 @@
         </div>
       </div>
 
-      <!-- TAB 2: PLAYABLE MINI-GAMES (PUMPKIN PATCH CLICKER, SNAKE & AI TIC-TAC-TOE) -->
+      <!-- TAB 2: PLAYABLE MINI-GAMES -->
       <div id="tab-minigames" class="tab-panel-content">
-        <!-- CATEGORY #1: PUMPKIN PATCH CLICKER MINI-GAME -->
         <div class="reason-box">
           <div class="reason-box-header">
             <span style="font-size: 1.3rem;">🎃</span>
@@ -1167,7 +1151,6 @@
         </div>
       </div>
 
-      <!-- View Full Release & Admin Sign In Row -->
       <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
         <a href="https://drive.google.com/file/d/1rT2nfTYM4Th3D5ba1soWuLnmBvidY9u8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-release">
           📄 View Full Release Statement
@@ -1180,7 +1163,6 @@
         </button>
       </div>
 
-      <!-- Footer Note -->
       <p class="footer-note">
         Nitro Platform • System Status Operations Center 🎃
       </p>
@@ -6230,7 +6212,7 @@
 
 
   <script id="shutdown-overlay-script">
-    // Web Audio Sound FX & Procedural Multi-Track Lo-Fi Music Synthesizer
+    // Web Audio Sound FX & Procedural Multi-Track Lo-Fi Beats Synthesizer
     let audioCtx = null;
     let sfxEnabled = true;
     let lofiSynthPlaying = false;
@@ -6267,7 +6249,57 @@
       } catch (e) {}
     };
 
-    // Category #4: Global Fall Theme Preset Switcher Handler
+    // 🧙‍♀️ HALLOWEEN SOUNDBOARD SYNTHESIZER ENGINE
+    window.playSpookySound = function(soundType) {
+      initAudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      try {
+        if (soundType === 'thunder') {
+          // Low-pass rumble noise generator
+          const bufferSize = audioCtx.sampleRate * 1.5;
+          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+          const noise = audioCtx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(150, audioCtx.currentTime);
+          filter.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1.4);
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.4);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          noise.start();
+        } else if (soundType === 'witch') {
+          // Pitch slide witch laugh arpeggio
+          [400, 650, 480, 720, 350].forEach((freq, i) => {
+            setTimeout(() => playTone(freq, 'sawtooth', 0.15, 0.12), i * 90);
+          });
+        } else if (soundType === 'boo') {
+          // Ghost eerie pitch slide
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(650, audioCtx.currentTime + 0.4);
+          osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 1.2);
+          gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 1.2);
+        } else if (soundType === 'crunch') {
+          playTone(220, 'square', 0.05, 0.2);
+          setTimeout(() => playTone(140, 'triangle', 0.08, 0.2), 40);
+        }
+      } catch(e) {}
+    };
+
     window.changeFallThemePreset = function(theme) {
       document.body.classList.remove('theme-pumpkin-spice', 'theme-haunted-mansion');
       if (theme === 'pumpkin') {
@@ -6278,7 +6310,6 @@
       playTone(523.25, 'sine', 0.1, 0.1);
     };
 
-    // Category #1: Pumpkin Patch Clicker & Trick-or-Treat Mystery Box
     let pumpkinScore = 0;
     window.harvestPumpkin = function(el) {
       pumpkinScore++;
@@ -6317,7 +6348,6 @@
       }
     };
 
-    // 100% Ad-Free Procedural Multi-Style Chill Lo-Fi Synthesizer
     window.toggleLofiSynth = function() {
       const btn = document.getElementById('lofi-toggle-btn');
       const text = document.getElementById('lofi-status-text');
@@ -6332,7 +6362,7 @@
       } else {
         lofiSynthPlaying = true;
         if (btn) btn.textContent = '⏸';
-        if (text) text.textContent = 'Playing Spooky Beats 🎃';
+        if (text) text.textContent = 'Playing Fall Beats 🎃';
         startLofiLoop();
       }
     };
@@ -6349,6 +6379,17 @@
           tempo: 4000,
           filter: 550,
           type: 'sine'
+        },
+        chiptune: {
+          chords: [
+            [220.00, 277.18, 329.63, 440.00], // 8-Bit Monster Mash
+            [174.61, 220.00, 261.63, 349.23],
+            [196.00, 246.94, 293.66, 392.00],
+            [146.83, 174.61, 220.00, 293.66]
+          ],
+          tempo: 2000,
+          filter: 2400,
+          type: 'square'
         },
         jazz: {
           chords: [
@@ -6423,7 +6464,7 @@
       lofiInterval = setInterval(playLoFiBeatStep, preset.tempo);
     }
 
-    // 🚀 HIGH-ENERGY UPWARD ROLLING SLOT NUMBERS ENGINE ("numbers go up")
+    // 🚀 SILKY SMOOTH 60FPS SLOT NUMBERS TICKER ENGINE (REPLACED COARSE INTERVAL)
     const statTargets = [
       { id: 'stat-num-1', target: 1081, suffix: '+' },
       { id: 'stat-num-2', target: 500, suffix: '+' },
@@ -6433,31 +6474,38 @@
 
     window.triggerRollNumbersUp = function(statIndex) {
       const items = statIndex !== undefined ? [statTargets[statIndex]] : statTargets;
-      
+
       items.forEach((item, idx) => {
         const el = document.getElementById(item.id);
         if (!el) return;
 
-        playTone(500 + idx * 100, 'square', 0.1, 0.08);
-        el.classList.add('rolling');
+        playTone(450 + idx * 90, 'triangle', 0.1, 0.08);
 
-        let current = 0;
         const target = item.target;
-        const steps = 30;
-        const increment = Math.ceil(target / steps);
-        
-        const rollTimer = setInterval(() => {
-          current += increment + Math.floor(Math.random() * 5);
-          if (current >= target) {
-            current = target;
-            clearInterval(rollTimer);
-            el.classList.remove('rolling');
-            el.textContent = target.toLocaleString() + item.suffix;
-            playTone(880 + idx * 80, 'sine', 0.15, 0.1);
+        const duration = 1200;
+        const startTime = performance.now();
+
+        function easeOutCubic(x) {
+          return 1 - Math.pow(1 - x, 3);
+        }
+
+        function animateRoll(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easedProgress = easeOutCubic(progress);
+
+          const currentVal = Math.floor(easedProgress * target);
+          el.textContent = currentVal.toLocaleString() + item.suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(animateRoll);
           } else {
-            el.textContent = current.toLocaleString() + item.suffix;
+            el.textContent = target.toLocaleString() + item.suffix;
+            playTone(880 + idx * 80, 'sine', 0.12, 0.08);
           }
-        }, 35);
+        }
+
+        requestAnimationFrame(animateRoll);
       });
     };
 
@@ -6835,7 +6883,7 @@
       updateCountdown();
     })();
 
-    // 🌌 ADVANCED FALL/HALLOWEEN CANVAS ENGINE WITH FALLING LEAVES, SPOOKY EMBERS, BAT CURSOR & SHOCKWAVES
+    // 🌌 ADVANCED FALL/HALLOWEEN CANVAS ENGINE WITH FLYING BATS & FALLING LEAVES
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
@@ -6864,7 +6912,7 @@
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let width, height, particles = [], meteors = [], shockwaves = [], leaves = [];
+      let width, height, particles = [], meteors = [], shockwaves = [], leaves = [], bats = [];
 
       const mouse = {
         x: null,
@@ -6890,10 +6938,9 @@
         }
       }
 
-      // CATEGORY #2: FALLING AUTUMN LEAVES ENGINE
       function initLeaves() {
         leaves = [];
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i < 26; i++) {
           leaves.push({
             x: Math.random() * width,
             y: Math.random() * height,
@@ -6905,6 +6952,19 @@
             emoji: Math.random() > 0.5 ? '🍂' : '🍁'
           });
         }
+      }
+
+      // FLYING BAT CURSOR TRAIL ENGINE
+      function spawnBat(x, y) {
+        bats.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3 - 2,
+          alpha: 1,
+          size: Math.random() * 8 + 14
+        });
+        if (bats.length > 25) bats.shift();
       }
 
       function createBaseParticle() {
@@ -6925,6 +6985,7 @@
         initLeaves();
         meteors = [];
         shockwaves = [];
+        bats = [];
         spawnBurst(width / 2, height / 2, 30);
       };
 
@@ -6960,6 +7021,7 @@
       window.addEventListener('mousemove', (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
+        if (Math.random() < 0.25) spawnBat(e.clientX, e.clientY);
       });
 
       window.addEventListener('mouseleave', () => {
@@ -6971,6 +7033,8 @@
       window.addEventListener('mousedown', (e) => {
         mouse.isPressed = true;
         spawnBurstFunc(e.clientX, e.clientY, 18);
+        spawnBat(e.clientX, e.clientY);
+        spawnBat(e.clientX, e.clientY);
 
         const pitchFreq = 300 + (e.clientX / width) * 700;
         playTone(pitchFreq, 'sine', 0.08, 0.08);
@@ -6982,26 +7046,6 @@
 
       window.addEventListener('dblclick', (e) => {
         triggerCanvasShockwaveFunc();
-      });
-
-      window.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) {
-          mouse.x = e.touches[0].clientX;
-          mouse.y = e.touches[0].clientY;
-          spawnBurstFunc(mouse.x, mouse.y, 14);
-        }
-      });
-
-      window.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-          mouse.x = e.touches[0].clientX;
-          mouse.y = e.touches[0].clientY;
-        }
-      });
-
-      window.addEventListener('touchend', () => {
-        mouse.x = null;
-        mouse.y = null;
       });
 
       function spawnMeteor() {
@@ -7025,7 +7069,25 @@
 
         ctx.clearRect(0, 0, width, height);
 
-        // RENDER FALLING LEAVES (CATEGORY #2)
+        // RENDER FLYING BATS TRAIL
+        for (let i = bats.length - 1; i >= 0; i--) {
+          const bat = bats[i];
+          bat.x += bat.vx;
+          bat.y += bat.vy;
+          bat.alpha -= 0.025;
+
+          if (bat.alpha <= 0) {
+            bats.splice(i, 1);
+            continue;
+          }
+
+          ctx.font = bat.size + 'px serif';
+          ctx.globalAlpha = bat.alpha;
+          ctx.fillText('🦇', bat.x, bat.y);
+          ctx.globalAlpha = 1;
+        }
+
+        // RENDER FALLING LEAVES
         if (currentCanvasTheme === 'spooky' || currentCanvasTheme === 'cosmic') {
           ctx.font = '16px serif';
           leaves.forEach(leaf => {
