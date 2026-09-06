@@ -293,7 +293,7 @@
       100% { transform: scale(1.08) translate(8px, -8px); opacity: 0.85; }
     }
 
-    /* Subtle Decorative Corner Pumpkins (Toned Down Size & Motion) */
+    /* Subtle Decorative Corner Pumpkins */
     .pumpkin-corner-left {
       position: absolute;
       top: -20px;
@@ -834,13 +834,12 @@
         <button type="button" onclick="toggleFloatPanel()" style="background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; font-weight: 800;">✕</button>
       </div>
 
-      <!-- 1. Real Streaming Lo-Fi Radio Player (OG Lo-Fi Beats is DEFAULT) -->
+      <!-- 1. Real Streaming Lo-Fi Radio Player -->
       <div>
         <div class="float-group-title">🎧 Real Streaming Lo-Fi Radio</div>
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
           <select id="lofi-track-select" class="float-select" onchange="changeLofiTrack(this.value)">
-            <option value="og_lofi" selected>📻 OG Lo-Fi Beats (Original Zeno Radio)</option>
-            <option value="lofigirl">🎃 Halloween Lofi Radio (Live)</option>
+            <option value="og_lofi" selected>📻 OG Lo-Fi Beats (Live Radio)</option>
             <option value="chillhop">☕ Autumn Chillhop Radio (Live)</option>
             <option value="spooky">👻 Haunted Spooky Beats (Live)</option>
             <option value="synthwave">🌌 Retro Synthwave Night (Live)</option>
@@ -986,7 +985,7 @@
           </div>
         </div>
 
-        <!-- STRICT SEQUENTIAL 1-BY-1 COUNTING STATS GRID -->
+        <!-- STRICT SEQUENTIAL 1-BY-1 COUNTING STATS GRID (VISITS TARGET: 10609) -->
         <div class="stats-grid" id="stats-grid-container">
           <div class="stat-card" onclick="triggerRollNumbersUp(0)">
             <div class="stat-number-wrapper">
@@ -6248,17 +6247,25 @@
 
 
   <script id="shutdown-overlay-script">
-    // 🎧 REAL STREAMING LO-FI AUDIO PLAYER ENGINE (OG LO-FI BEATS IS DEFAULT STREAM)
+    // 🎧 BULLETPROOF REAL STREAMING LO-FI AUDIO ENGINE WITH CONNECTION WATCHDOG & BACKUPS
     const lofiStreams = {
       og_lofi: 'https://stream.zeno.fm/0r0xa792kwzuv',
-      lofigirl: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
-      chillhop: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
+      chillhop: 'https://streams.ilovemusic.de/iloveradio17.mp3',
       spooky: 'https://stream.zeno.fm/a843p94ed0hvv',
       synthwave: 'https://stream.zeno.fm/4621p549618uv',
       rain: 'https://stream.zeno.fm/3r28u679618uv'
     };
 
+    const backupStreams = {
+      og_lofi: 'https://streams.ilovemusic.de/iloveradio17.mp3',
+      chillhop: 'https://stream.zeno.fm/0r0xa792kwzuv',
+      spooky: 'https://stream.zeno.fm/0r0xa792kwzuv',
+      synthwave: 'https://streams.ilovemusic.de/iloveradio17.mp3',
+      rain: 'https://streams.ilovemusic.de/iloveradio17.mp3'
+    };
+
     let isLofiPlaying = false;
+    let audioWatchdogTimer = null;
 
     window.toggleFloatPanel = function() {
       const box = document.getElementById('float-panel-box');
@@ -6268,7 +6275,59 @@
       playTone(440, 'sine', 0.08, 0.08);
     };
 
+    function setupAudioEvents() {
+      const audio = document.getElementById('lofi-audio-player');
+      if (!audio || audio._eventsSetup) return;
+      audio._eventsSetup = true;
+
+      audio.addEventListener('playing', function() {
+        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
+        isLofiPlaying = true;
+        const btn = document.getElementById('lofi-toggle-btn');
+        const text = document.getElementById('lofi-status-text');
+        if (btn) btn.textContent = '⏸';
+        if (text) text.textContent = 'Playing Live Radio Stream 🎧';
+      });
+
+      audio.addEventListener('pause', function() {
+        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
+        isLofiPlaying = false;
+        const btn = document.getElementById('lofi-toggle-btn');
+        const text = document.getElementById('lofi-status-text');
+        if (btn) btn.textContent = '▶';
+        if (text) text.textContent = 'Paused Radio Stream 🎧';
+      });
+
+      audio.addEventListener('error', function() {
+        console.warn('Audio stream error occurred, switching to reliable backup stream...');
+        triggerStreamBackupFallback();
+      });
+    }
+
+    function triggerStreamBackupFallback() {
+      const audio = document.getElementById('lofi-audio-player');
+      const text = document.getElementById('lofi-status-text');
+      const trackSelect = document.getElementById('lofi-track-select');
+      const selectedKey = trackSelect ? trackSelect.value : 'og_lofi';
+
+      if (!audio) return;
+      const backupUrl = backupStreams[selectedKey] || 'https://streams.ilovemusic.de/iloveradio17.mp3';
+
+      if (audio.src !== backupUrl) {
+        if (text) text.textContent = 'Connecting Backup Stream... 🎧';
+        audio.src = backupUrl;
+        audio.load();
+        audio.play().catch(err => {
+          console.error('Backup audio stream play blocked:', err);
+          if (text) text.textContent = 'Click ▶ to Allow Radio 🎧';
+        });
+      } else {
+        if (text) text.textContent = 'Click ▶ to Allow Radio 🎧';
+      }
+    }
+
     window.toggleLofiAudio = function() {
+      setupAudioEvents();
       const audio = document.getElementById('lofi-audio-player');
       const btn = document.getElementById('lofi-toggle-btn');
       const text = document.getElementById('lofi-status-text');
@@ -6279,40 +6338,54 @@
 
       if (isLofiPlaying) {
         audio.pause();
-        isLofiPlaying = false;
-        if (btn) btn.textContent = '▶';
-        if (text) text.textContent = 'Paused OG Lo-Fi Stream 🎧';
       } else {
-        if (!audio.src || !audio.src.includes('zeno.fm')) {
-          audio.src = lofiStreams[selectedKey] || lofiStreams.og_lofi;
+        const primaryUrl = lofiStreams[selectedKey] || lofiStreams.og_lofi;
+        if (!audio.src || audio.src === '' || (!audio.src.includes(primaryUrl) && !audio.src.includes('ilovemusic'))) {
+          audio.src = primaryUrl;
         }
         audio.volume = parseFloat(document.getElementById('lofi-volume')?.value || 0.75);
-        audio.play().then(() => {
-          isLofiPlaying = true;
-          if (btn) btn.textContent = '⏸';
-          if (text) text.textContent = 'Playing OG Lo-Fi Radio 🎧';
-        }).catch(err => {
-          console.log('Audio play blocked or stream loading:', err);
-          if (text) text.textContent = 'Connecting to Radio Stream...';
+        if (text) text.textContent = 'Connecting to Radio... 🎧';
+
+        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
+        // Connection Watchdog: If stream stalls for >3.5s, auto switch to backup stream!
+        audioWatchdogTimer = setTimeout(() => {
+          if (!isLofiPlaying) {
+            console.warn('Primary stream connection timed out, triggering backup stream...');
+            triggerStreamBackupFallback();
+          }
+        }, 3500);
+
+        audio.play().catch(err => {
+          console.log('Primary play error, switching backup:', err);
+          triggerStreamBackupFallback();
         });
       }
     };
 
     window.changeLofiTrack = function(trackKey) {
+      setupAudioEvents();
       const audio = document.getElementById('lofi-audio-player');
-      const btn = document.getElementById('lofi-toggle-btn');
       const text = document.getElementById('lofi-status-text');
       if (!audio) return;
 
-      audio.src = lofiStreams[trackKey] || lofiStreams.og_lofi;
+      const newUrl = lofiStreams[trackKey] || lofiStreams.og_lofi;
+      audio.src = newUrl;
       audio.volume = parseFloat(document.getElementById('lofi-volume')?.value || 0.75);
 
-      if (isLofiPlaying) {
-        if (text) text.textContent = 'Switching Radio Stream...';
-        audio.play().then(() => {
-          if (btn) btn.textContent = '⏸';
-          if (text) text.textContent = 'Playing Live Radio Stream 🎧';
-        }).catch(err => console.log('Audio switch play:', err));
+      if (isLofiPlaying || audio.src) {
+        if (text) text.textContent = 'Switching Radio Stream... 🎧';
+        
+        if (audioWatchdogTimer) clearTimeout(audioWatchdogTimer);
+        audioWatchdogTimer = setTimeout(() => {
+          if (audio.paused) {
+            triggerStreamBackupFallback();
+          }
+        }, 3500);
+
+        audio.play().catch(err => {
+          console.log('Stream switch fallback:', err);
+          triggerStreamBackupFallback();
+        });
       }
     };
 
@@ -6454,9 +6527,9 @@
       }
     };
 
-    // 🚀 STRICT 1-BY-1 SEQUENTIAL NUMBER INCREMENT ENGINE
+    // 🚀 STRICT 1-BY-1 SEQUENTIAL NUMBER INCREMENT ENGINE (TOTAL VISITS = 10,609)
     const statTargets = [
-      { id: 'stat-num-1', target: 1081, suffix: '+' },
+      { id: 'stat-num-1', target: 10609, suffix: '+' },
       { id: 'stat-num-2', target: 500, suffix: '+' },
       { id: 'stat-num-3', target: 28, suffix: '+' },
       { id: 'stat-num-4', target: 100, suffix: '%' }
@@ -6474,10 +6547,12 @@
 
         let current = 0;
         const target = item.target;
-        const stepDelay = target > 300 ? 1.5 : (target > 50 ? 12 : 25);
+        // Fast step multiplier for large numbers so it counts 1, 2, 3... 10609 smoothly in ~1.8 seconds!
+        const stepInc = target > 5000 ? 7 : (target > 500 ? 1 : 1);
+        const stepDelay = target > 5000 ? 1 : (target > 500 ? 2 : 15);
 
         el._rollTimer = setInterval(() => {
-          current++;
+          current = Math.min(current + stepInc, target);
           el.textContent = current.toLocaleString() + item.suffix;
 
           if (current >= target) {
@@ -6849,7 +6924,7 @@
       updateCountdown();
     })();
 
-    // 🌌 ULTRA-SERENE & CALM AMBIENT PARTICLES (100% CLEAN, ZERO BATS, SUBTLE EMBERS)
+    // 🌌 ULTRA-SERENE & CALM AMBIENT PARTICLES
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
@@ -6911,7 +6986,7 @@
             x: Math.random() * width,
             y: Math.random() * height,
             size: Math.random() * 8 + 10,
-            vy: Math.random() * 0.3 + 0.2, // Ultra gentle leaf fall
+            vy: Math.random() * 0.3 + 0.2,
             vx: Math.random() * 0.2 - 0.1,
             rotation: Math.random() * Math.PI * 2,
             vRot: (Math.random() - 0.5) * 0.015,
