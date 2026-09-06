@@ -343,6 +343,7 @@ app.get('/api/status', async (req, res) => {
 
     res.json({
       maintenance_mode: isMaintenance,
+      relaunch_date: '2026-09-29T00:00:00Z',
       is_owner: isOwner,
       is_admin: isAdmin,
       announcement: announcement,
@@ -352,6 +353,7 @@ app.get('/api/status', async (req, res) => {
   } catch (err) {
     res.json({
       maintenance_mode: false,
+      relaunch_date: '2026-09-29T00:00:00Z',
       is_owner: false,
       is_admin: false,
       announcement: null,
