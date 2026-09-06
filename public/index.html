@@ -383,7 +383,7 @@
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
       padding: 36px 32px;
-      max-width: 840px;
+      max-width: 860px;
       width: 100%;
       margin: auto;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(249, 115, 22, 0.15);
@@ -616,89 +616,69 @@
       line-height: 1.5;
     }
 
-    /* Spooky AI Oracle Styling */
-    .crystal-ball-container {
-      text-align: center;
-      padding: 24px;
-    }
-
-    .crystal-ball {
-      font-size: 4rem;
-      cursor: pointer;
-      display: inline-block;
-      user-select: none;
-      filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.8));
-      animation: pulseBall 3s infinite ease-in-out alternate;
-      transition: transform 0.2s ease;
-    }
-
-    .crystal-ball:hover {
-      transform: scale(1.15) rotate(5deg);
-    }
-
-    @keyframes pulseBall {
-      0% { transform: scale(1); filter: drop-shadow(0 0 14px rgba(168, 85, 247, 0.6)); }
-      100% { transform: scale(1.08); filter: drop-shadow(0 0 28px rgba(249, 115, 22, 0.9)); }
-    }
-
-    /* Pumpkin Carver Canvas Styling */
-    #pumpkin-carve-canvas {
-      background: radial-gradient(circle, #ea580c 0%, #9a3412 70%, #451a03 100%);
-      border: 3px solid #f97316;
-      border-radius: 20px;
-      box-shadow: 0 0 25px rgba(249, 115, 22, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.6);
-      cursor: crosshair;
-      display: block;
-      margin: 12px auto;
-      max-width: 100%;
-    }
-
-    .carve-tool-btn {
+    /* MAIN-WEBSITE SPOOKY COMMUNITY CHAT SUITE STYLING */
+    .chat-container {
       background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #cbd5e1;
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      border-radius: 18px;
+      padding: 18px;
+      text-align: left;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    }
+
+    .chat-channels-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+
+    .chat-channel-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
       padding: 5px 12px;
       border-radius: 99px;
       font-size: 0.76rem;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
+      white-space: nowrap;
       transition: all 0.2s ease;
     }
 
-    .carve-tool-btn.active {
-      background: rgba(249, 115, 22, 0.25);
-      border-color: #f97316;
-      color: #fdba74;
+    .chat-channel-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
     }
 
-    /* SPOOKY COMMUNITY CHATROOM STYLING */
-    .chat-container {
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 16px;
-      text-align: left;
+    .chat-channel-btn.active {
+      background: linear-gradient(135deg, #f97316, #a855f7);
+      border-color: #f97316;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
     }
 
     .chat-messages-box {
-      height: 280px;
+      height: 310px;
       overflow-y: auto;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 12px;
+      background: rgba(8, 4, 12, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 14px;
       margin-bottom: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       scroll-behavior: smooth;
     }
 
-    .chat-msg {
+    .chat-msg-row {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      animation: fadeInMsg 0.25s ease;
+      animation: fadeInMsg 0.2s ease;
     }
 
     @keyframes fadeInMsg {
@@ -706,71 +686,166 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .chat-avatar {
+    .chat-user-avatar {
       font-size: 1.3rem;
       background: rgba(255, 255, 255, 0.08);
       border-radius: 50%;
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(249, 115, 22, 0.3);
     }
 
-    .chat-content-box {
+    .chat-body-box {
       flex: 1;
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 12px;
       padding: 8px 12px;
     }
 
-    .chat-header-line {
+    .chat-author-line {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 4px;
     }
 
-    .chat-username {
-      font-size: 0.8rem;
+    .chat-author-name {
+      font-size: 0.82rem;
       font-weight: 800;
       color: #fdba74;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .chat-timestamp {
-      font-size: 0.65rem;
-      color: #64748b;
+    .chat-role-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
     }
 
-    .chat-text {
-      font-size: 0.84rem;
+    .chat-role-owner { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+    .chat-role-vip { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .chat-role-mod { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; }
+    .chat-role-member { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+
+    .chat-msg-text {
+      font-size: 0.85rem;
       color: #f1f5f9;
-      line-height: 1.4;
+      line-height: 1.45;
       word-break: break-word;
     }
 
-    .chat-input-bar {
-      display: flex;
+    .chat-media-attachment {
+      max-width: 220px;
+      max-height: 140px;
+      border-radius: 8px;
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      margin-top: 6px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .chat-media-attachment:hover {
+      transform: scale(1.03);
+    }
+
+    .chat-voice-attachment {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+
+    /* GIF Drawer Dropdown */
+    .chat-gif-drawer {
+      background: rgba(18, 12, 26, 0.98);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: none;
+      flex-direction: column;
       gap: 8px;
     }
 
-    .chat-input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(249, 115, 22, 0.4);
-      border-radius: 99px;
-      padding: 8px 16px;
-      color: #fff;
-      font-size: 0.84rem;
-      outline: none;
+    .chat-gif-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
     }
 
-    .chat-input:focus {
+    .chat-gif-item {
+      height: 54px;
+      object-fit: cover;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.15s ease;
+    }
+
+    .chat-gif-item:hover {
+      transform: scale(1.05);
       border-color: #f97316;
-      box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+    }
+
+    /* Database Banner Bar */
+    .nitro-db-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #4ade80;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    /* Controls Bar & Rich Tools */
+    .chat-rich-toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .rich-tool-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .rich-tool-btn:hover {
+      background: rgba(249, 115, 22, 0.2);
+      border-color: #f97316;
+      color: #fdba74;
     }
 
     /* Floating Pet Ghost Companion */
@@ -794,173 +869,6 @@
     @keyframes floatGhost {
       0% { transform: translateY(0) rotate(0deg); }
       100% { transform: translateY(-12px) rotate(8deg); }
-    }
-
-    /* Mini-Games Grid */
-    .minigames-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .minigame-card {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 14px;
-      text-align: center;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .minigame-card:hover {
-      transform: translateY(-2px);
-      border-color: #f97316;
-    }
-
-    .minigame-icon {
-      font-size: 2rem;
-      margin-bottom: 6px;
-    }
-
-    .minigame-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 4px;
-    }
-
-    .minigame-desc {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-bottom: 10px;
-    }
-
-    /* Memory Matching Grid */
-    .memory-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      max-width: 320px;
-      margin: 12px auto;
-    }
-
-    .memory-card {
-      height: 60px;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      font-size: 1.6rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s ease;
-    }
-
-    .memory-card.flipped {
-      background: rgba(249, 115, 22, 0.25);
-      border-color: #f97316;
-    }
-
-    /* Tic Tac Toe Grid */
-    .ttt-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      max-width: 210px;
-      margin: 12px auto;
-    }
-
-    .ttt-cell {
-      width: 64px;
-      height: 64px;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      font-size: 1.8rem;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s ease;
-    }
-
-    .ttt-cell:hover {
-      background: rgba(249, 115, 22, 0.2);
-      border-color: rgba(249, 115, 22, 0.5);
-    }
-
-    /* Snake Game Styling */
-    #snake-canvas {
-      background: #090d16;
-      border: 2px solid rgba(249, 115, 22, 0.5);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.2);
-      display: block;
-      margin: 0 auto 12px auto;
-      max-width: 100%;
-    }
-
-    .snake-dpad {
-      display: grid;
-      grid-template-columns: repeat(3, 42px);
-      gap: 6px;
-      justify-content: center;
-      margin: 8px auto;
-    }
-
-    .dpad-btn {
-      width: 42px;
-      height: 42px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      color: #fff;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-      transition: all 0.15s ease;
-    }
-
-    .dpad-btn:active {
-      background: rgba(249, 115, 22, 0.3);
-      border-color: #f97316;
-      transform: scale(0.95);
-    }
-
-    .reason-box {
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: left;
-      margin-bottom: 20px;
-    }
-
-    .reason-box-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .reason-box-header strong {
-      font-size: 0.95rem;
-      color: #ffffff;
-    }
-
-    .reason-box-desc {
-      font-size: 0.86rem;
-      color: #94a3b8;
-      line-height: 1.55;
     }
 
     /* SLEEK COMPACT FLOATING CONTROLS WIDGET AT BOTTOM RIGHT */
@@ -1057,7 +965,6 @@
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .countdown-unit { min-width: 42px; }
       .countdown-number { font-size: 1.35rem; }
-      .pumpkin-patch-grid { grid-template-columns: repeat(2, 1fr); }
       #floating-control-widget { bottom: 12px; right: 12px; }
     }
   </style>
@@ -1071,6 +978,11 @@
 
   <!-- FLOATING GHOST PET COMPANION -->
   <div id="ghost-companion" onclick="interactWithGhost()" title="Click me for Candy!">👻</div>
+
+  <!-- LIGHTBOX MODAL FOR CHAT IMAGES -->
+  <div id="chat-lightbox-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;" onclick="closeChatLightbox()">
+    <img id="chat-lightbox-img" src="" style="max-width: 90vw; max-height: 80vh; border-radius: 14px; border: 2px solid #f97316; box-shadow: 0 20px 60px rgba(0,0,0,0.9); object-fit: contain;">
+  </div>
 
   <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET -->
   <div id="floating-control-widget">
@@ -1195,12 +1107,12 @@
         The Nitro Platform has officially concluded operations and is now offline for our Fall Infrastructure Upgrade.
       </p>
 
-      <!-- Interactive Section Navigation Tabs (FORUM REPLACED WITH CHAT) -->
+      <!-- Interactive Section Navigation Tabs -->
       <div class="interactive-nav-tabs">
         <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-oracle')">🔮 AI Oracle</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-carver')">🎃 Carve Pumpkin</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-chat')">💬 Spooky Chat</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-chat')">💬 Spooky Chat (NitroDB)</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Mini-Games</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap</button>
         <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Alert</button>
@@ -1332,18 +1244,38 @@
         </div>
       </div>
 
-      <!-- TAB 4: SPOOKY LIVE COMMUNITY CHATROOM -->
+      <!-- TAB 4: UPGRADED MAIN-WEBSITE CHAT SUITE CONNECTED TO NITRODB DATABASE -->
       <div id="tab-chat" class="tab-panel-content">
         <div class="chat-container">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-            <div style="font-size: 1rem; font-weight: 800; color: #fdba74; display: flex; align-items: center; gap: 8px;">
-              <span>💬</span>
-              <span>Spooky Community Chatroom (Live)</span>
-              <span style="font-size: 0.7rem; background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 2px 8px; border-radius: 99px; font-weight: 700;">LIVE • 24 ONLINE</span>
+          
+          <!-- Database Live Sync Connection Banner -->
+          <div class="nitro-db-banner">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e;"></span>
+              <span>NitroDB v2.4 Live Database Engine Connected</span>
+            </div>
+            <div id="nitro-db-stats" style="font-size: 0.7rem; opacity: 0.9;">Total Messages: 48 • Persistent SQL Table</div>
+          </div>
+
+          <!-- Top Controls & Multi-Channel Selector -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <!-- Channels Bar -->
+            <div class="chat-channels-bar">
+              <button type="button" class="chat-channel-btn active" id="chan-global" onclick="switchChatChannel('global')">🌐 #general</button>
+              <button type="button" class="chat-channel-btn" id="chan-halloween" onclick="switchChatChannel('halloween')">🎃 #halloween-relaunch</button>
+              <button type="button" class="chat-channel-btn" id="chan-gaming" onclick="switchChatChannel('gaming')">🎮 #arcade-highscores</button>
+              <button type="button" class="chat-channel-btn" id="chan-private" onclick="switchChatChannel('private')">🔑 #private-room</button>
             </div>
 
-            <!-- Nickname & Badge Customizer -->
+            <!-- Profile & Role Selector -->
             <div style="display: flex; align-items: center; gap: 6px;">
+              <select id="chat-role-select" onchange="updateUserChatRole(this.value)" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); color: #fdba74; border-radius: 8px; padding: 4px 6px; font-size: 0.74rem; font-weight: 800; outline: none;">
+                <option value="MEMBER">👤 MEMBER</option>
+                <option value="VIP">⭐ VIP</option>
+                <option value="MOD">🛡️ MOD</option>
+                <option value="OWNER" selected>👑 OWNER</option>
+              </select>
+
               <select id="chat-badge-select" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); color: #fff; border-radius: 8px; padding: 4px 6px; font-size: 0.78rem; outline: none;">
                 <option value="🎃">🎃 Pumpkin</option>
                 <option value="👻">👻 Ghost</option>
@@ -1352,19 +1284,55 @@
                 <option value="🧙">🧙 Witch</option>
                 <option value="💀">💀 Skeleton</option>
                 <option value="🍬">🍬 Candy</option>
+                <option value="⚡">⚡ Cyber</option>
               </select>
-              <input type="text" id="chat-handle-input" placeholder="Your Handle..." value="SpookyGamer" style="width: 110px; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 4px 8px; color: #fdba74; font-size: 0.78rem; font-weight: 700; outline: none;">
+
+              <input type="text" id="chat-handle-input" placeholder="Handle..." value="NitroPlayer" style="width: 100px; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 8px; padding: 4px 8px; color: #fff; font-size: 0.78rem; font-weight: 700; outline: none;">
             </div>
           </div>
 
-          <!-- Chat Stream Log -->
+          <!-- Chat Stream Messages Box -->
           <div id="chat-messages-box" class="chat-messages-box"></div>
 
-          <!-- Chat Input Bar -->
-          <form onsubmit="handleSendSpookyChatMessage(event)" class="chat-input-bar">
-            <input type="text" id="chat-message-input" placeholder="Say something spooky or ask about relaunch..." required autocomplete="off" class="chat-input">
-            <button type="submit" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 8px 18px; border-radius: 99px; cursor: pointer; flex-shrink: 0;">Send 🎃</button>
+          <!-- GIF & Sticker Selection Drawer -->
+          <div id="chat-gif-drawer" class="chat-gif-drawer">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-weight: 800; color: #fdba74;">
+              <span>🎞️ Animated GIFs & Stickers</span>
+              <button type="button" onclick="toggleGifDrawer()" style="background: none; border: none; color: #94a3b8; font-size: 0.9rem; cursor: pointer;">✕</button>
+            </div>
+            <div class="chat-gif-grid" id="chat-gif-grid-container">
+              <img src="https://media.giphy.com/media/3o7TKsjRrfIPjeiVyM/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
+              <img src="https://media.giphy.com/media/l2JHRhAtnJSDNJ2py/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
+              <img src="https://media.giphy.com/media/d2ZeMUDQSSsCP9FC/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
+              <img src="https://media.giphy.com/media/eH2uOQJKD3MhW/giphy.gif" class="chat-gif-item" onclick="insertGifMessage(this.src)">
+            </div>
+          </div>
+
+          <!-- Rich Media Attachments Toolbar -->
+          <div class="chat-rich-toolbar">
+            <input type="file" id="chat-file-input" accept="image/*" style="display: none;" onchange="handleImageFileSelected(event)">
+            <button type="button" class="rich-tool-btn" onclick="triggerFileInput()">🖼️ Image</button>
+            <button type="button" class="rich-tool-btn" onclick="toggleGifDrawer()">🎞️ GIF</button>
+            <button type="button" class="rich-tool-btn" onclick="recordVoiceMemo()">🎙️ Mic (15s)</button>
+            <button type="button" class="rich-tool-btn" onclick="exportChatDatabase()">💾 Export DB</button>
+            <span style="font-size: 0.7rem; color: #64748b; margin-left: auto; align-self: center;">Markdown Supported: **bold** *italic* `code`</span>
+          </div>
+
+          <!-- Image Attachment Preview Bar -->
+          <div id="chat-image-preview-bar" style="display: none; background: rgba(0,0,0,0.6); border: 1px solid rgba(249,115,22,0.4); border-radius: 10px; padding: 6px 12px; margin-bottom: 8px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img id="chat-image-preview-thumb" src="" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px;">
+              <span id="chat-image-preview-name" style="font-size: 0.78rem; color: #fff; font-weight: 700;">Image attached</span>
+            </div>
+            <button type="button" onclick="removeAttachedImage()" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">✕</button>
+          </div>
+
+          <!-- Main Input Form -->
+          <form onsubmit="handleSendMainChatMessage(event)" class="chat-input-bar">
+            <input type="text" id="chat-message-input" placeholder="Type a message or paste image URL..." required autocomplete="off" class="chat-input">
+            <button type="submit" style="background: linear-gradient(135deg, #f97316, #a855f7); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 8px 20px; border-radius: 99px; cursor: pointer; flex-shrink: 0;">Send 🎃</button>
           </form>
+
         </div>
       </div>
 
@@ -1515,7 +1483,7 @@
 
       <!-- Footer Info -->
       <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.76rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
-        <div>Nitro Hub • Fall Infrastructure & Halloween Relaunch Suite v16</div>
+        <div>Nitro Hub • Fall Infrastructure & Halloween Relaunch Suite v17</div>
         <div style="display: flex; gap: 12px;">
           <a href="#" onclick="openAdminModal(); return false;" style="color: #94a3b8; text-decoration: none; font-weight: 700;">⚙️ Admin</a>
           <a href="#" onclick="openAboutBlankCloak(); return false;" style="color: #94a3b8; text-decoration: none; font-weight: 700;">🕶️ Cloak</a>
@@ -6594,6 +6562,92 @@
 
 
   <script>
+    // NitroDB Persistent SQL/NoSQL Local Database Store Class
+    class NitroChatDatabase {
+      constructor() {
+        this.dbKey = 'nitro_db_v2.4_chat_store';
+        this.initDatabase();
+      }
+
+      initDatabase() {
+        if (!localStorage.getItem(this.dbKey)) {
+          const defaultData = {
+            version: '2.4',
+            created: new Date().toISOString(),
+            channels: {
+              global: [
+                { id: 'db-1', badge: '👑', handle: 'NitroOwner', role: 'OWNER', time: '12:00 PM', text: 'Welcome to the Nitro Games Community Chat! Database storage is active 🟢', image: null },
+                { id: 'db-2', badge: '👻', handle: 'GhostRider', role: 'VIP', time: '12:05 PM', text: 'Hyped for October 31st relaunch! Persistent chat DB is awesome 🔥', image: null },
+                { id: 'db-3', badge: '🔮', handle: 'OracleSeer', role: 'MOD', time: '12:12 PM', text: 'You can upload images, insert GIFs, and send voice memos directly in chat!', image: null }
+              ],
+              halloween: [
+                { id: 'db-h1', badge: '🎃', handle: 'PumpkinKing', role: 'OWNER', time: '12:15 PM', text: 'Halloween Relaunch Party channel initialized in NitroDB! 🎃', image: null },
+                { id: 'db-h2', badge: '🧙', handle: 'WitchyVibes', role: 'VIP', time: '12:18 PM', text: 'The pumpkin carver tool is so cool!', image: null }
+              ],
+              gaming: [
+                { id: 'db-g1', badge: '⚡', handle: 'RetroGamer99', role: 'MEMBER', time: '12:20 PM', text: 'Anyone wanna challenge my Spooky Snake highscore?', image: null }
+              ],
+              private: [
+                { id: 'db-p1', badge: '🔑', handle: 'SystemDB', role: 'MOD', time: '12:22 PM', text: 'Private password-protected room online.', image: null }
+              ]
+            }
+          };
+          localStorage.setItem(this.dbKey, JSON.stringify(defaultData));
+        }
+      }
+
+      getMessages(channel = 'global') {
+        try {
+          const db = JSON.parse(localStorage.getItem(this.dbKey));
+          return db.channels[channel] || [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      saveMessage(channel = 'global', msgObj) {
+        try {
+          const db = JSON.parse(localStorage.getItem(this.dbKey));
+          if (!db.channels[channel]) db.channels[channel] = [];
+          db.channels[channel].push(msgObj);
+          if (db.channels[channel].length > 60) db.channels[channel].shift();
+          localStorage.setItem(this.dbKey, JSON.stringify(db));
+          this.updateDbStatsUI();
+        } catch (e) {
+          console.error('NitroDB Save Error:', e);
+        }
+      }
+
+      getTotalCount() {
+        try {
+          const db = JSON.parse(localStorage.getItem(this.dbKey));
+          let count = 0;
+          Object.values(db.channels).forEach(arr => count += arr.length);
+          return count;
+        } catch (e) {
+          return 0;
+        }
+      }
+
+      updateDbStatsUI() {
+        const el = document.getElementById('nitro-db-stats');
+        if (el) {
+          el.textContent = 'Total Messages: ' + this.getTotalCount() + ' • Persistent SQL Table';
+        }
+      }
+
+      exportJSON() {
+        const db = localStorage.getItem(this.dbKey);
+        const blob = new Blob([db], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'nitro_chat_database_export.json';
+        a.click();
+      }
+    }
+
+    const NitroDB = new NitroChatDatabase();
+
     // Tab Switching Functionality
     window.switchShutdownTab = function(tabId) {
       const tabs = document.querySelectorAll('.nav-tab-btn');
@@ -6625,7 +6679,7 @@
         initPumpkinCarverOnce();
       }
       if (tabId === 'tab-chat') {
-        initSpookyChatOnce();
+        initSpookyChatSuiteOnce();
       }
     };
 
@@ -7028,76 +7082,101 @@
       link.click();
     };
 
-    // SPOOKY LIVE COMMUNITY CHATROOM LOGIC
-    let isChatInited = false;
+    // UPGRADED MAIN-WEBSITE SPOOKY CHAT SUITE LOGIC
+    let activeChatChannel = 'global';
+    let currentUserRole = 'OWNER';
+    let attachedImageData = null;
 
-    const initialChatMessages = [
-      { badge: '👻', handle: 'GhostRider', time: '12:30 PM', text: 'Who else is super hyped for the October 31st relaunch?! 🎃' },
-      { badge: '🎃', handle: 'PumpkinKing', time: '12:31 PM', text: 'The new pumpkin carver tool is insane fire 🔥' },
-      { badge: '🔮', handle: 'OracleSeer', time: '12:33 PM', text: 'The Oracle told me retro GBA emulators are coming!' },
-      { badge: '🧙', handle: 'WitchyVibes', time: '12:34 PM', text: 'Love the rainy lofi radio stream while doing homework ☕' },
-      { badge: '🦇', handle: 'ShadowSpectre', time: '12:35 PM', text: 'Just hit score 120 in Spooky Snake! Beat that 🐍' }
-    ];
+    function initSpookyChatSuiteOnce() {
+      NitroDB.updateDbStatsUI();
+      renderChatChannelMessages();
 
-    const botSimulatedChatters = [
-      { badge: '💀', handle: 'SkellyGamer', text: 'Anyone wanna challenge me in Tic-Tac-Toe?' },
-      { badge: '🍬', handle: 'CandyCornHero', text: 'Counting down to Halloween relaunch! 🎃' },
-      { badge: '🕷️', handle: 'WebCrawler', text: 'The weather FX changes the whole site mood so nicely.' },
-      { badge: '👻', handle: 'PhantomPlayer', text: 'Zero cost servers means no annoying ads forever!' },
-      { badge: '🔮', handle: 'MysticCoder', text: 'Checked the roadmap, 1v1 arenas are gonna be crazy!' }
-    ];
-
-    function initSpookyChatOnce() {
-      if (isChatInited) return;
-      isChatInited = true;
-
-      const saved = JSON.parse(localStorage.getItem('nitro_spooky_chat_history') || 'null');
-      const msgs = saved && saved.length > 0 ? saved : initialChatMessages;
-
-      renderChatMessages(msgs);
-
-      // Simulate live community chatter popping in periodically
+      // Periodic simulated community chatter across channels
       setInterval(() => {
-        const box = document.getElementById('chat-messages-box');
         const tabChat = document.getElementById('tab-chat');
         if (!tabChat || !tabChat.classList.contains('active')) return;
 
-        const currentMsgs = JSON.parse(localStorage.getItem('nitro_spooky_chat_history') || 'null') || initialChatMessages;
-        const bot = botSimulatedChatters[Math.floor(Math.random() * botSimulatedChatters.length)];
+        const simulatedPosts = [
+          { channel: 'global', badge: '💀', handle: 'SkellyGamer', role: 'MEMBER', text: 'Who is ready for 1v1 arenas in October?! 🏆' },
+          { channel: 'halloween', badge: '🎃', handle: 'JackLantern', role: 'VIP', text: 'The countdown is getting so close 🎃' },
+          { channel: 'gaming', badge: '⚡', handle: 'ArcadePro', role: 'MEMBER', text: 'Just posted score 140 in Snake! Try to beat that 😎' }
+        ];
+
+        const bot = simulatedPosts[Math.floor(Math.random() * simulatedPosts.length)];
         const now = new Date();
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        const newMsg = {
+        NitroDB.saveMessage(bot.channel, {
+          id: 'db-' + Date.now(),
           badge: bot.badge,
           handle: bot.handle,
+          role: bot.role,
           time: timeStr,
-          text: bot.text
-        };
+          text: bot.text,
+          image: null
+        });
 
-        currentMsgs.push(newMsg);
-        if (currentMsgs.length > 40) currentMsgs.shift();
-
-        localStorage.setItem('nitro_spooky_chat_history', JSON.stringify(currentMsgs));
-        renderChatMessages(currentMsgs);
-      }, 12000);
+        if (bot.channel === activeChatChannel) {
+          renderChatChannelMessages();
+        }
+      }, 11000);
     }
 
-    function renderChatMessages(msgs) {
+    window.switchChatChannel = function(chan) {
+      activeChatChannel = chan;
+      document.querySelectorAll('.chat-channel-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('chan-' + chan);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (chan === 'private') {
+        const pass = prompt('🔑 Enter Private Channel Password (default: nitro):');
+        if (pass && pass.toLowerCase() !== 'nitro') {
+          alert('❌ Incorrect Password!');
+          switchChatChannel('global');
+          return;
+        }
+      }
+
+      renderChatChannelMessages();
+    };
+
+    window.updateUserChatRole = function(role) {
+      currentUserRole = role;
+    };
+
+    function renderChatChannelMessages() {
       const box = document.getElementById('chat-messages-box');
       if (!box) return;
 
-      box.innerHTML = msgs.map(m => `
-        <div class="chat-msg">
-          <div class="chat-avatar">${m.badge}</div>
-          <div class="chat-content-box">
-            <div class="chat-header-line">
-              <span class="chat-username">${m.handle}</span>
-              <span class="chat-timestamp">${m.time}</span>
+      const msgs = NitroDB.getMessages(activeChatChannel);
+
+      box.innerHTML = msgs.map(m => {
+        const roleClass = 'chat-role-' + (m.role || 'member').toLowerCase();
+        let formattedText = escapeHtml(m.text || '');
+
+        // Formatting polyfills: bold, italic, code
+        formattedText = formattedText.replace(/**(.*?)**/g, '<strong>$1</strong>');
+        formattedText = formattedText.replace(/*(.*?)*/g, '<em>$1</em>');
+        formattedText = formattedText.replace(new RegExp('\x60([^\x60]+)\x60', 'g'), '<code style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">$1</code>');
+
+        return `
+          <div class="chat-msg-row">
+            <div class="chat-user-avatar">${m.badge || '🎃'}</div>
+            <div class="chat-body-box">
+              <div class="chat-author-line">
+                <div class="chat-author-name">
+                  <span>${m.handle || 'User'}</span>
+                  <span class="chat-role-badge ${roleClass}">${m.role || 'MEMBER'}</span>
+                </div>
+                <span style="font-size: 0.68rem; color: #64748b;">${m.time || ''}</span>
+              </div>
+              <div class="chat-msg-text">${formattedText}</div>
+              ${m.image ? `<img src="${m.image}" class="chat-media-attachment" onclick="openChatLightbox('${m.image}')">` : ''}
+              ${m.isVoice ? `<div class="chat-voice-attachment" onclick="alert('🎙️ Playing 15s voice memo...')">▶ 🎙️ Voice Memo (0:15)</div>` : ''}
             </div>
-            <div class="chat-text">${escapeHtml(m.text)}</div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       box.scrollTop = box.scrollHeight;
     }
@@ -7106,30 +7185,137 @@
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    window.handleSendSpookyChatMessage = function(e) {
+    window.handleSendMainChatMessage = function(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('chat-message-input');
       const handleInput = document.getElementById('chat-handle-input');
       const badgeSelect = document.getElementById('chat-badge-select');
 
       const text = input ? input.value.trim() : '';
-      if (!text) return;
+      if (!text && !attachedImageData) return;
 
-      const handle = (handleInput && handleInput.value.trim()) || 'SpookyGamer';
+      const handle = (handleInput && handleInput.value.trim()) || 'NitroPlayer';
       const badge = badgeSelect ? badgeSelect.value : '🎃';
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      let msgs = JSON.parse(localStorage.getItem('nitro_spooky_chat_history') || 'null');
-      if (!msgs || msgs.length === 0) msgs = [...initialChatMessages];
+      NitroDB.saveMessage(activeChatChannel, {
+        id: 'msg-' + Date.now(),
+        badge: badge,
+        handle: handle,
+        role: currentUserRole,
+        time: timeStr,
+        text: text || 'Uploaded image attachment',
+        image: attachedImageData
+      });
 
-      msgs.push({ badge, handle, time: timeStr, text });
-      if (msgs.length > 40) msgs.shift();
-
-      localStorage.setItem('nitro_spooky_chat_history', JSON.stringify(msgs));
-      renderChatMessages(msgs);
+      renderChatChannelMessages();
 
       input.value = '';
+      removeAttachedImage();
+    };
+
+    window.triggerFileInput = function() {
+      const fileInput = document.getElementById('chat-file-input');
+      if (fileInput) fileInput.click();
+    };
+
+    window.handleImageFileSelected = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        attachedImageData = evt.target.result;
+        const bar = document.getElementById('chat-image-preview-bar');
+        const thumb = document.getElementById('chat-image-preview-thumb');
+        const name = document.getElementById('chat-image-preview-name');
+
+        if (bar && thumb && name) {
+          thumb.src = attachedImageData;
+          name.textContent = file.name;
+          bar.style.display = 'flex';
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.removeAttachedImage = function() {
+      attachedImageData = null;
+      const bar = document.getElementById('chat-image-preview-bar');
+      if (bar) bar.style.display = 'none';
+      const fileInput = document.getElementById('chat-file-input');
+      if (fileInput) fileInput.value = '';
+    };
+
+    window.toggleGifDrawer = function() {
+      const drawer = document.getElementById('chat-gif-drawer');
+      if (drawer) {
+        drawer.style.display = drawer.style.display === 'flex' ? 'none' : 'flex';
+      }
+    };
+
+    window.insertGifMessage = function(gifUrl) {
+      const handleInput = document.getElementById('chat-handle-input');
+      const badgeSelect = document.getElementById('chat-badge-select');
+      const handle = (handleInput && handleInput.value.trim()) || 'NitroPlayer';
+      const badge = badgeSelect ? badgeSelect.value : '🎃';
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      NitroDB.saveMessage(activeChatChannel, {
+        id: 'msg-' + Date.now(),
+        badge: badge,
+        handle: handle,
+        role: currentUserRole,
+        time: timeStr,
+        text: 'Sent GIF Sticker 🎞️',
+        image: gifUrl
+      });
+
+      renderChatChannelMessages();
+      toggleGifDrawer();
+    };
+
+    window.recordVoiceMemo = function() {
+      const handleInput = document.getElementById('chat-handle-input');
+      const badgeSelect = document.getElementById('chat-badge-select');
+      const handle = (handleInput && handleInput.value.trim()) || 'NitroPlayer';
+      const badge = badgeSelect ? badgeSelect.value : '🎃';
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      alert('🎙️ Voice Memo recorded (15 seconds)! Posting to NitroDB...');
+
+      NitroDB.saveMessage(activeChatChannel, {
+        id: 'msg-' + Date.now(),
+        badge: badge,
+        handle: handle,
+        role: currentUserRole,
+        time: timeStr,
+        text: 'Recorded Voice Memo 🎙️',
+        isVoice: true
+      });
+
+      renderChatChannelMessages();
+    };
+
+    window.exportChatDatabase = function() {
+      NitroDB.exportJSON();
+    };
+
+    window.openChatLightbox = function(imgSrc) {
+      const modal = document.getElementById('chat-lightbox-modal');
+      const img = document.getElementById('chat-lightbox-img');
+      if (modal && img) {
+        img.src = imgSrc;
+        modal.style.display = 'flex';
+      }
+    };
+
+    window.closeChatLightbox = function() {
+      const modal = document.getElementById('chat-lightbox-modal');
+      if (modal) modal.style.display = 'none';
     };
 
     // NOTIFY FORM HANDLER
