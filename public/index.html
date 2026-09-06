@@ -330,6 +330,33 @@
       margin-bottom: 20px;
     }
 
+    .status-update-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 16px;
+      padding: 16px 20px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .status-update-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .status-update-body {
+      font-size: 0.86rem;
+      color: #cbd5e1;
+      line-height: 1.55;
+    }
+
     .relaunch-countdown-card {
       background: linear-gradient(135deg, rgba(124, 58, 237, 0.14), rgba(236, 72, 153, 0.1));
       border: 1px solid rgba(168, 85, 247, 0.35);
@@ -510,11 +537,26 @@
   </style>
 </head>
 <body>
+  <!-- FLOATING LO-FI MUSIC PLAYER WIDGET -->
+  <div id="lofi-music-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 16px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+    <span style="font-size: 1rem; animation: pulseDot 2s infinite;">🎧</span>
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-size: 0.78rem; font-weight: 800; color: #c084fc; line-height: 1.1;">Nitro Lo-Fi Beats</span>
+      <span style="font-size: 0.68rem; color: #94a3b8;" id="lofi-status-text">Click Play to Listen</span>
+    </div>
+    <audio id="lofi-audio" loop src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
+    <button type="button" onclick="toggleLofiBeats()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 50%; width: 30px; height: 30px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transition: all 0.2s ease;">▶</button>
+  </div>
+
   <!-- ADMIN TESTING CONTROL BAR -->
   <div id="admin-testing-bar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999999; background: linear-gradient(90deg, #6366f1, #ec4899); color: #ffffff; padding: 8px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 700; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,0.5); box-sizing: border-box;">
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <span style="font-size: 1rem;">⚡</span>
-      <span>ADMIN TESTING MODE ACTIVE — Shutdown Overlay Bypassed (Pass: NITROADMIN)</span>
+      <span>ADMIN TESTING MODE ACTIVE (Pass: NITROADMIN)</span>
+      <button type="button" onclick="openAboutBlankCloak()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: #fff; padding: 3px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
+        🕶️ Cloak in about:blank
+      </button>
+      <span style="font-size: 0.75rem; opacity: 0.85;">(Panic Key: Press ~ or Esc to hide screen)</span>
     </div>
     <button type="button" onclick="reEnableShutdownMode()" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease;">
       🔒 Re-enable Shutdown Screen
@@ -542,10 +584,21 @@
         The Nitro Platform has officially concluded operations and is now offline.
       </p>
 
-      <!-- September 29th Automated Relaunch Countdown Card -->
+      <!-- Prominent Status Update Box -->
+      <div class="status-update-banner">
+        <div class="status-update-header">
+          <span>📢</span>
+          <span>Status Update • Launch Schedule Adjustment</span>
+        </div>
+        <div class="status-update-body">
+          We have updated our planned comeback date to <strong>October 31st, 2026</strong>. This additional time allows our team to complete a full zero-cost database migration, execute comprehensive server RAM optimizations, and roll out a massive new feature suite including retro emulators, 1v1 multiplayer games, and AI homework tools!
+        </div>
+      </div>
+
+      <!-- October 31st Automated Relaunch Countdown Card -->
       <div class="relaunch-countdown-card">
         <div class="relaunch-countdown-title">
-          ⏳ Official Relaunch Countdown • September 29th, 2026
+          ⏳ Official Relaunch Countdown • October 31st, 2026
         </div>
         <div class="countdown-timer-grid">
           <div class="countdown-unit">
@@ -597,7 +650,7 @@
           <strong>Shutdown Notice & Information</strong>
         </div>
         <p class="reason-box-desc">
-          We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to 00 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by September 29th. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
+          We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to 00 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by October 31st. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
         </p>
       </div>
 
@@ -608,6 +661,9 @@
         </a>
         <button type="button" onclick="openAdminModal()" class="btn-admin-signin">
           🔑 Admin Sign In
+        </button>
+        <button type="button" onclick="openAboutBlankCloak()" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 99px; font-size: 0.88rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.35); cursor: pointer; transition: all 0.25s ease;">
+          🕶️ Cloaked Mode
         </button>
       </div>
 
@@ -649,10 +705,10 @@
     </div>
   </div>
 
-  <!-- SEPTEMBER RELAUNCH WELCOME BACK MODAL -->
+  <!-- OCTOBER RELAUNCH WELCOME BACK MODAL -->
   <div id="relaunch-welcome-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999998; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 27, 75, 0.98)); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 24px; padding: 40px 32px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 30px 90px rgba(124, 58, 237, 0.3); animation: fadeInCard 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
-      <div style="font-size: 2.8rem; margin-bottom: 12px;">🎉🚀</div>
+      <div style="font-size: 2.8rem; margin-bottom: 12px;">🎃🚀</div>
       <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #ffffff; margin-bottom: 8px;">Welcome Back to Nitro Platform!</h2>
       <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;">
         We are officially <strong>REOPENED & LIVE</strong>! Thank you for your patience while we upgraded our infrastructure. All 100% of your account data, games, and saved progression are fully intact!
@@ -5661,21 +5717,71 @@
 
 
   <script id="shutdown-overlay-script">
-    // Automated September 29th Relaunch Date Checker & Timer Logic
+    // Emergency Stealth Panic Key (`~` or Esc) & about:blank Cloaker
+    window.addEventListener('keydown', function(e) {
+      if (e.code === 'Backquote' || e.key === '~' || e.key === 'Escape') {
+        window.location.href = 'https://classroom.google.com';
+      }
+    });
+
+    window.openAboutBlankCloak = function() {
+      const win = window.open('about:blank', '_blank');
+      if (!win) {
+        alert('Please allow pop-ups for this site to open cloaked mode!');
+        return;
+      }
+      const doc = win.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Google Drive</title>
+          <link rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+          <style>body,html,iframe{margin:0;padding:0;width:100%;height:100%;overflow:hidden;border:none;background:#000;}</style>
+        </head>
+        <body>
+          <iframe src="${window.location.href}"></iframe>
+        </body>
+        </html>
+      `);
+      doc.close();
+    };
+
+    // Lo-Fi Beats Radio Player Controller
+    window.toggleLofiBeats = function() {
+      const audio = document.getElementById('lofi-audio');
+      const btn = document.getElementById('lofi-toggle-btn');
+      const text = document.getElementById('lofi-status-text');
+
+      if (!audio) return;
+      if (audio.paused) {
+        audio.play().then(() => {
+          if (btn) btn.textContent = '⏸';
+          if (text) text.textContent = 'Playing Live Beats 🎵';
+        }).catch(err => {
+          if (text) text.textContent = 'Stream error';
+        });
+      } else {
+        audio.pause();
+        if (btn) btn.textContent = '▶';
+        if (text) text.textContent = 'Paused';
+      }
+    };
+
+    // Automated October 31st Relaunch Date Checker & Timer Logic
     (function() {
-      const relaunchTargetDate = new Date('2026-09-29T00:00:00Z').getTime();
+      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
 
       function updateCountdown() {
         const now = Date.now();
         const diff = relaunchTargetDate - now;
 
-        // Auto-Lift Shutdown Screen on or after September 29th
         if (diff <= 0) {
           const overlay = document.getElementById('shutdown-overlay');
           if (overlay) overlay.style.display = 'none';
           document.body.style.overflow = 'auto';
           
-          // Show Welcome Back Modal once
           if (!localStorage.getItem('nitro_relaunch_welcomed')) {
             const welcomeModal = document.getElementById('relaunch-welcome-modal');
             if (welcomeModal) welcomeModal.style.display = 'flex';
@@ -5932,7 +6038,7 @@
 
     window.applyBypassState = function() {
       const now = Date.now();
-      const relaunchTargetDate = new Date('2026-09-29T00:00:00Z').getTime();
+      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
       const isRelaunchPassed = now >= relaunchTargetDate;
 
       const isBypassed = isRelaunchPassed || localStorage.getItem('nitro_admin_bypass') === 'true' || document.cookie.includes('nitro_admin_bypass=true');
