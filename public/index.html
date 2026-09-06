@@ -573,71 +573,60 @@
       margin-top: 4px;
     }
 
-    /* COMMUNITY FORUM STYLING */
-    .forum-container {
-      text-align: left;
+    /* SPOOKY AI ORACLE CRYSTAL BALL STYLING */
+    .crystal-ball-container {
+      text-align: center;
+      padding: 20px;
     }
 
-    .forum-thread-card {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 14px 18px;
-      margin-bottom: 10px;
-      transition: all 0.2s ease;
+    .crystal-ball {
+      font-size: 4rem;
+      display: inline-block;
       cursor: pointer;
+      user-select: none;
+      filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8));
+      transition: all 0.3s ease;
+      animation: pulseCrystalBall 2.5s infinite ease-in-out alternate;
     }
 
-    .forum-thread-card:hover {
-      border-color: rgba(249, 115, 22, 0.4);
-      background: rgba(249, 115, 22, 0.05);
+    .crystal-ball:hover {
+      transform: scale(1.15) rotate(5deg);
+      filter: drop-shadow(0 0 40px rgba(249, 115, 22, 0.95));
     }
 
-    .forum-thread-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
+    @keyframes pulseCrystalBall {
+      0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.7)); }
+      100% { transform: scale(1.08); filter: drop-shadow(0 0 35px rgba(249, 115, 22, 0.9)); }
     }
 
-    .forum-thread-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #fdba74;
+    /* PUMPKIN CARVING CANVAS STYLING */
+    #pumpkin-carve-canvas {
+      background: radial-gradient(circle, #e65100 0%, #bf360c 80%, #1a0800 100%);
+      border: 3px solid #ff9800;
+      border-radius: 50% 50% 45% 45% / 55% 55% 40% 40%;
+      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.4), inset 0 -10px 20px rgba(0,0,0,0.6);
+      cursor: crosshair;
+      display: block;
+      margin: 12px auto;
+      touch-action: none;
     }
 
-    .forum-badge {
-      background: rgba(168, 85, 247, 0.2);
-      border: 1px solid rgba(168, 85, 247, 0.4);
-      color: #c084fc;
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 99px;
-    }
-
-    .forum-thread-meta {
-      font-size: 0.76rem;
-      color: #94a3b8;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .forum-upvote-btn {
+    .carve-tool-btn {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #fff;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.72rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
       font-weight: 800;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .forum-upvote-btn:hover {
+    .carve-tool-btn.active, .carve-tool-btn:hover {
       background: rgba(249, 115, 22, 0.3);
       border-color: #f97316;
+      color: #fdba74;
     }
 
     /* GHOST COMPANION FLOATING WIDGET */
@@ -899,29 +888,6 @@
       color: #fff;
     }
 
-    .soundboard-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-    }
-
-    .soundboard-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: #fff;
-      padding: 5px 8px;
-      border-radius: 8px;
-      font-size: 0.74rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .soundboard-btn:hover {
-      background: rgba(249, 115, 22, 0.25);
-      border-color: rgba(249, 115, 22, 0.5);
-    }
-
     @media (max-width: 580px) {
       .maintenance-card { padding: 26px 16px; }
       .maintenance-card h1 { font-size: 1.6rem; }
@@ -940,7 +906,7 @@
   <!-- FLOATING GHOST PET COMPANION -->
   <div id="ghost-companion" onclick="interactWithGhost()" title="Click me for Candy!">👻</div>
 
-  <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET (BOTTOM RIGHT) -->
+  <!-- SLEEK FLOATING AUDIO & SPOOKY CONTROLS WIDGET (SOUNDBOARD REMOVED) -->
   <div id="floating-control-widget">
     
     <!-- Expandable Control Panel Box -->
@@ -989,18 +955,7 @@
         <div id="weather-status-badge" style="font-size: 0.7rem; color: #38bdf8; margin-top: 4px; font-weight: 700;">Weather API: Detecting location...</div>
       </div>
 
-      <!-- 3. Halloween Soundboard -->
-      <div>
-        <div class="float-group-title">🧙‍♀️ Halloween Soundboard</div>
-        <div class="soundboard-grid">
-          <button type="button" class="soundboard-btn" onclick="playSpookySound('thunder')">⚡ Thunder</button>
-          <button type="button" class="soundboard-btn" onclick="playSpookySound('witch')">🧙‍♀️ Witch</button>
-          <button type="button" class="soundboard-btn" onclick="playSpookySound('boo')">👻 Ghost</button>
-          <button type="button" class="soundboard-btn" onclick="playSpookySound('crunch')">🎃 Crunch</button>
-        </div>
-      </div>
-
-      <!-- 4. Themes & Canvas Particle Selector -->
+      <!-- 3. Themes & Canvas Particle Selector -->
       <div>
         <div class="float-group-title">🎨 Theme & Particles</div>
         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
@@ -1016,8 +971,8 @@
           </select>
         </div>
         <div style="display: flex; gap: 6px;">
-          <button type="button" onclick="triggerCanvasShockwave()" class="soundboard-btn" style="flex: 1; color: #f97316; border-color: rgba(249, 115, 22, 0.4);">💥 Pumpkin Blast</button>
-          <button type="button" onclick="resetCanvasParticles()" class="soundboard-btn" style="flex: 1; color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">🔄 Reset</button>
+          <button type="button" onclick="triggerCanvasShockwave()" style="flex: 1; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); color: #f97316; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">💥 Pumpkin Blast</button>
+          <button type="button" onclick="resetCanvasParticles()" style="flex: 1; background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 5px; border-radius: 8px; font-size: 0.74rem; font-weight: 800; cursor: pointer;">🔄 Reset</button>
         </div>
       </div>
 
@@ -1076,11 +1031,13 @@
       <!-- Interactive Section Navigation Tabs -->
       <div class="interactive-nav-tabs">
         <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-forum')">💬 Community Forum</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade Games & Clicker</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap & Timeline</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Relaunch Alert</button>
-        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-faq')">❓ FAQ & Trivia</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-oracle')">🔮 AI Oracle</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-carver')">🎃 Carve Pumpkin</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-forum')">💬 Forum</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Mini-Games</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Alert</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-faq')">❓ FAQ</button>
       </div>
 
       <!-- TAB 1: NOTICE & COUNTDOWN -->
@@ -1161,7 +1118,54 @@
         </div>
       </div>
 
-      <!-- TAB 2: COMMUNITY FORUM & GUESTBOOK -->
+      <!-- TAB 2: SPOOKY AI HALLOWEEN ORACLE -->
+      <div id="tab-oracle" class="tab-panel-content">
+        <div class="reason-box crystal-ball-container">
+          <div class="crystal-ball" id="crystal-ball-icon" onclick="consultAIOracle()">🔮</div>
+          <h3 style="color: #fff; font-size: 1.15rem; margin: 8px 0 4px 0;">Spooky AI Halloween Fortune Oracle</h3>
+          <p style="font-size: 0.84rem; color: #94a3b8; max-width: 480px; margin: 0 auto 14px auto;">
+            Ask the Spooky Oracle a question about gaming, luck, school, or the October 31st relaunch!
+          </p>
+
+          <form onsubmit="handleOracleFormSubmit(event)" style="display: flex; gap: 8px; max-width: 440px; margin: 0 auto 12px auto;">
+            <input type="text" id="oracle-question-input" placeholder="Type your question for the Spooky AI Oracle..." required style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(168,85,247,0.4); border-radius: 99px; padding: 10px 16px; color: #fff; outline: none; font-size: 0.85rem;">
+            <button type="submit" style="background: linear-gradient(135deg, #a855f7, #f97316); border: none; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 10px 18px; border-radius: 99px; cursor: pointer;">Consult 🔮</button>
+          </form>
+
+          <div id="oracle-response-box" style="display: none; background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.4); border-radius: 14px; padding: 14px 18px; font-size: 0.88rem; color: #fdba74; font-weight: 700; line-height: 1.5; max-width: 500px; margin: 0 auto; text-align: center;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: INTERACTIVE PUMPKIN CARVER TOY -->
+      <div id="tab-carver" class="tab-panel-content">
+        <div class="reason-box" style="text-align: center;">
+          <div class="reason-box-header" style="justify-content: center;">
+            <span style="font-size: 1.3rem;">🎃</span>
+            <strong>Interactive Jack-o'-Lantern Pumpkin Carving Toy</strong>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 10px;">
+            Carve glowing eyes, spooky mouths, or draw your own custom jack-o'-lantern artwork below!
+          </p>
+
+          <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px;">
+            <button type="button" class="carve-tool-btn active" onclick="setCarveTool('glow', this)">🔥 Glowing Fire</button>
+            <button type="button" class="carve-tool-btn" onclick="setCarveTool('yellow', this)">⚡ Neon Yellow</button>
+            <button type="button" class="carve-tool-btn" onclick="setCarveTool('purple', this)">🔮 Spooky Violet</button>
+            <button type="button" class="carve-tool-btn" onclick="setCarveTool('eraser', this)">🧽 Smooth Eraser</button>
+            <button type="button" class="carve-tool-btn" onclick="stampCarveShape('eyes')">👁️ Stamp Eyes</button>
+            <button type="button" class="carve-tool-btn" onclick="stampCarveShape('mouth')">👄 Stamp Mouth</button>
+          </div>
+
+          <canvas id="pumpkin-carve-canvas" width="340" height="260"></canvas>
+
+          <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+            <button type="button" onclick="resetPumpkinCarveCanvas()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Clear Pumpkin</button>
+            <button type="button" onclick="downloadCarvedPumpkin()" style="background: linear-gradient(135deg, #f97316, #c2410c); border: none; color: #fff; padding: 6px 18px; border-radius: 99px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">Download Pumpkin 🎃</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: COMMUNITY FORUM & GUESTBOOK -->
       <div id="tab-forum" class="tab-panel-content">
         <div class="reason-box forum-container">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -1188,7 +1192,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: PLAYABLE MINI-GAMES -->
+      <!-- TAB 5: PLAYABLE MINI-GAMES -->
       <div id="tab-minigames" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
@@ -1291,7 +1295,7 @@
         </div>
       </div>
 
-      <!-- TAB 4: ROADMAP & TIMELINE -->
+      <!-- TAB 6: ROADMAP & TIMELINE -->
       <div id="tab-roadmap" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
@@ -1323,7 +1327,7 @@
         </div>
       </div>
 
-      <!-- TAB 5: RELAUNCH NOTIFICATION -->
+      <!-- TAB 7: RELAUNCH NOTIFICATION -->
       <div id="tab-notify" class="tab-panel-content">
         <div class="reason-box" style="text-align: center;">
           <span style="font-size: 2rem;">🔔</span>
@@ -1340,7 +1344,7 @@
         </div>
       </div>
 
-      <!-- TAB 6: FAQ & TRIVIA -->
+      <!-- TAB 8: FAQ & TRIVIA -->
       <div id="tab-faq" class="tab-panel-content">
         <div class="reason-box">
           <div class="reason-box-header">
@@ -6504,7 +6508,6 @@
       if (box) {
         box.style.display = box.style.display === 'none' ? 'flex' : 'none';
       }
-      playTone(440, 'sine', 0.08, 0.08);
     };
 
     function setupAudioEvents() {
@@ -6615,13 +6618,149 @@
       if (audio) audio.volume = parseFloat(val);
     };
 
+    // 🔮 SPOOKY AI HALLOWEEN ORACLE & FORTUNE TELLER
+    const oracleFortunes = [
+      '🔮 The Oracle foresees great fortune! On October 31st, your favorite game will load instantly with 0 lag.',
+      '✨ The Halloween spirits reveal: A high score of epic proportions awaits you on relaunch day!',
+      '🎃 Beware of black cats... but rejoice! Nitro Games is building 100+ unblocked retro emulators for you!',
+      '👻 The Oracle senses immense gaming luck in your aura. Victory in Tic-Tac-Toe vs Groq AI is within reach!',
+      '🌌 Beyond the fog, the stars align: Your data and game saves have been 100% preserved in our vault!',
+      '📜 A secret Halloween prophecy: Your homework will be solved in seconds by our new Groq AI homework tool!'
+    ];
+
+    window.handleOracleFormSubmit = function(e) {
+      if (e) e.preventDefault();
+      consultAIOracle();
+    };
+
+    window.consultAIOracle = function() {
+      const icon = document.getElementById('crystal-ball-icon');
+      const responseBox = document.getElementById('oracle-response-box');
+      const qInput = document.getElementById('oracle-question-input');
+      const qText = qInput ? qInput.value.trim() : '';
+
+      if (icon) {
+        icon.style.transform = 'scale(1.25) rotate(15deg)';
+        setTimeout(() => icon.style.transform = 'none', 400);
+      }
+
+      if (responseBox) {
+        responseBox.style.display = 'block';
+        responseBox.textContent = '🔮 Spooky AI Oracle is gazing into the crystal ball...';
+
+        setTimeout(() => {
+          const randomFortune = oracleFortunes[Math.floor(Math.random() * oracleFortunes.length)];
+          const prefix = qText ? 'Regarding "' + escapeHTML(qText) + '":\n' : '';
+          responseBox.innerHTML = prefix + randomFortune;
+        }, 750);
+      }
+    };
+
+    // 🎃 INTERACTIVE JACK-O'-LANTERN PUMPKIN CARVING CANVAS TOY
+    let carveCanvas, carveCtx;
+    let currentCarveTool = 'glow'; // 'glow', 'yellow', 'purple', 'eraser'
+    let isCarving = false;
+
+    function initPumpkinCarver() {
+      carveCanvas = document.getElementById('pumpkin-carve-canvas');
+      if (!carveCanvas) return;
+      carveCtx = carveCanvas.getContext('2d');
+
+      carveCanvas.onmousedown = startCarving;
+      carveCanvas.onmousemove = drawCarving;
+      carveCanvas.onmouseup = stopCarving;
+      carveCanvas.onmouseleave = stopCarving;
+
+      carveCanvas.ontouchstart = (e) => { startCarving(e.touches[0]); };
+      carveCanvas.ontouchmove = (e) => { drawCarving(e.touches[0]); e.preventDefault(); };
+      carveCanvas.ontouchend = stopCarving;
+    }
+
+    window.setCarveTool = function(tool, btn) {
+      currentCarveTool = tool;
+      const btns = document.querySelectorAll('.carve-tool-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    };
+
+    function startCarving(e) {
+      isCarving = true;
+      drawCarving(e);
+    }
+
+    function drawCarving(e) {
+      if (!isCarving || !carveCtx) return;
+      const rect = carveCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      carveCtx.lineWidth = currentCarveTool === 'eraser' ? 22 : 12;
+      carveCtx.lineCap = 'round';
+      carveCtx.lineJoin = 'round';
+
+      if (currentCarveTool === 'glow') {
+        carveCtx.strokeStyle = '#ff9900';
+        carveCtx.shadowColor = '#ff5722';
+        carveCtx.shadowBlur = 12;
+      } else if (currentCarveTool === 'yellow') {
+        carveCtx.strokeStyle = '#ffeb3b';
+        carveCtx.shadowColor = '#ffc107';
+        carveCtx.shadowBlur = 14;
+      } else if (currentCarveTool === 'purple') {
+        carveCtx.strokeStyle = '#c084fc';
+        carveCtx.shadowColor = '#a855f7';
+        carveCtx.shadowBlur = 14;
+      } else if (currentCarveTool === 'eraser') {
+        carveCtx.strokeStyle = '#d84315';
+        carveCtx.shadowBlur = 0;
+      }
+
+      carveCtx.beginPath();
+      carveCtx.arc(x, y, carveCtx.lineWidth / 2, 0, Math.PI * 2);
+      carveCtx.fillStyle = carveCtx.strokeStyle;
+      carveCtx.fill();
+    }
+
+    function stopCarving() {
+      isCarving = false;
+    }
+
+    window.stampCarveShape = function(shape) {
+      if (!carveCtx) return;
+      carveCtx.fillStyle = '#ffeb3b';
+      carveCtx.shadowColor = '#ff9800';
+      carveCtx.shadowBlur = 16;
+      carveCtx.font = shape === 'eyes' ? '36px sans-serif' : '42px sans-serif';
+      carveCtx.textAlign = 'center';
+      carveCtx.textBaseline = 'middle';
+
+      if (shape === 'eyes') {
+        carveCtx.fillText('🔺', 110, 110);
+        carveCtx.fillText('🔺', 230, 110);
+      } else if (shape === 'mouth') {
+        carveCtx.fillText('👄', 170, 180);
+      }
+    };
+
+    window.resetPumpkinCarveCanvas = function() {
+      if (!carveCtx) return;
+      carveCtx.clearRect(0, 0, carveCanvas.width, carveCanvas.height);
+    };
+
+    window.downloadCarvedPumpkin = function() {
+      if (!carveCanvas) return;
+      const link = document.createElement('a');
+      link.download = 'my-jack-o-lantern-carving.png';
+      link.href = carveCanvas.toDataURL();
+      link.click();
+    };
+
     // 🌦️ DYNAMIC WEATHER API ENGINE & CANVAS OVERLAY
-    let currentWeatherMode = 'auto'; // 'auto', 'rain', 'thunder', 'snow', 'fog', 'clear'
+    let currentWeatherMode = 'auto';
     let activeWeatherEffect = 'clear';
 
     window.changeWeatherMode = function(mode) {
       currentWeatherMode = mode;
-      playTone(523.25, 'sine', 0.08, 0.08);
       updateWeatherVisuals();
     };
 
@@ -6649,10 +6788,7 @@
             else if (code === 45 || code === 48) { detected = 'fog'; desc = '☁️ Eerie Foggy Mist'; }
 
             if (badge) badge.textContent = 'Weather API (' + (weatherData.current_weather.temperature || 60) + '°F): ' + desc;
-            
-            if (currentWeatherMode === 'auto') {
-              activeWeatherEffect = detected;
-            }
+            if (currentWeatherMode === 'auto') activeWeatherEffect = detected;
           }
         })
         .catch(err => {
@@ -6675,7 +6811,6 @@
 
     // 👻 FLOATING GHOST COMPANION INTERACTION
     window.interactWithGhost = function() {
-      playTone(659.25, 'sine', 0.15, 0.12);
       spawnBurst(window.innerWidth / 2, window.innerHeight / 2, 6);
       alert('👻 Boo! Friendly Ghost says: "October 31st Halloween Relaunch is going to be epic!" (+10 Candy Corn)');
     };
@@ -6749,7 +6884,6 @@
     window.toggleNewThreadForm = function() {
       const form = document.getElementById('new-thread-form');
       if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-      playTone(440, 'sine', 0.08, 0.08);
     };
 
     window.handleNewThreadSubmit = function(e) {
@@ -6772,7 +6906,6 @@
         localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
         renderForumThreads(threads);
         toggleNewThreadForm();
-        playTone(783.99, 'triangle', 0.15, 0.12);
       }
     };
 
@@ -6783,7 +6916,6 @@
         target.upvotes++;
         localStorage.setItem('nitro_forum_threads', JSON.stringify(threads));
         renderForumThreads(threads);
-        playTone(600, 'sine', 0.08, 0.08);
       }
     };
 
@@ -6815,7 +6947,6 @@
       const cardEl = document.getElementById('mem-card-' + idx);
       if (!cardEl || cardEl.classList.contains('flipped')) return;
 
-      playTone(500 + idx * 20, 'sine', 0.08, 0.08);
       cardEl.classList.add('flipped');
       cardEl.textContent = memoryCards[idx];
       flippedCards.push({ idx, symbol: memoryCards[idx] });
@@ -6827,7 +6958,6 @@
 
         const [c1, c2] = flippedCards;
         if (c1.symbol === c2.symbol) {
-          playTone(783.99, 'triangle', 0.15, 0.12);
           flippedCards = [];
         } else {
           setTimeout(() => {
@@ -6841,100 +6971,6 @@
       }
     };
 
-    // 🔊 Halloween Web Audio SFX Engine for Soundboard & Tones
-    let audioCtx = null;
-    let sfxEnabled = true;
-
-    function initAudioContext() {
-      if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtx = new AudioContext();
-      }
-    }
-
-    window.toggleSFX = function() {
-      sfxEnabled = !sfxEnabled;
-      const btn = document.getElementById('sfx-toggle-btn');
-      if (btn) btn.textContent = sfxEnabled ? '🔊' : '🔇';
-    };
-
-    function playTone(freq, type = 'sine', duration = 0.15, vol = 0.1) {
-      if (!sfxEnabled) return;
-      try {
-        initAudioContext();
-        if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch(e) {}
-    }
-
-    window.playSpookySound = function(soundType) {
-      if (!sfxEnabled) return;
-      try {
-        initAudioContext();
-        if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        if (soundType === 'thunder') {
-          const bufferSize = audioCtx.sampleRate * 1.5;
-          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) {
-            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.4));
-          }
-          const noise = audioCtx.createBufferSource();
-          noise.buffer = buffer;
-          const filter = audioCtx.createBiquadFilter();
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(250, audioCtx.currentTime);
-          filter.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 1.4);
-
-          const gain = audioCtx.createGain();
-          gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
-
-          noise.connect(filter);
-          filter.connect(gain);
-          gain.connect(audioCtx.destination);
-          noise.start();
-        } else if (soundType === 'witch') {
-          [400, 650, 480, 720, 350].forEach((freq, i) => {
-            setTimeout(() => playTone(freq, 'sawtooth', 0.15, 0.12), i * 90);
-          });
-        } else if (soundType === 'boo') {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(650, audioCtx.currentTime + 0.4);
-          osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 1.2);
-          gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 1.2);
-        } else if (soundType === 'crunch') {
-          playTone(220, 'square', 0.05, 0.2);
-          setTimeout(() => playTone(140, 'triangle', 0.08, 0.2), 40);
-        }
-      } catch(e) {}
-    };
-
     window.changeFallThemePreset = function(theme) {
       document.body.classList.remove('theme-pumpkin-spice', 'theme-haunted-mansion');
       if (theme === 'pumpkin') {
@@ -6942,13 +6978,11 @@
       } else if (theme === 'mansion') {
         document.body.classList.add('theme-haunted-mansion');
       }
-      playTone(523.25, 'sine', 0.1, 0.1);
     };
 
     let pumpkinScore = 0;
     window.harvestPumpkin = function(el) {
       pumpkinScore++;
-      playTone(600 + Math.random() * 300, 'sine', 0.08, 0.1);
       const scoreEl = document.getElementById('pumpkin-harvest-score');
       if (scoreEl) scoreEl.textContent = 'Pumpkins Harvested: ' + pumpkinScore + ' 🎃';
       
@@ -6965,7 +6999,6 @@
     ];
 
     window.triggerTrickOrTreat = function() {
-      playTone(783.99, 'triangle', 0.2, 0.12);
       const banner = document.getElementById('trick-or-treat-banner');
       const randomTreat = treats[Math.floor(Math.random() * treats.length)];
       if (banner) {
@@ -6989,7 +7022,6 @@
         const el = document.getElementById(item.id);
         if (!el) return;
 
-        playTone(450 + idx * 90, 'triangle', 0.1, 0.08);
         if (el._rollTimer) clearInterval(el._rollTimer);
 
         let current = 0;
@@ -7004,7 +7036,6 @@
           if (current >= target) {
             clearInterval(el._rollTimer);
             el.textContent = target.toLocaleString() + item.suffix;
-            playTone(880 + idx * 80, 'sine', 0.12, 0.08);
           }
         }, stepDelay);
       });
@@ -7014,7 +7045,6 @@
 
     // Tab Switcher Controller
     window.switchShutdownTab = function(tabId) {
-      playTone(440, 'sine', 0.08, 0.08);
       const btns = document.querySelectorAll('.nav-tab-btn');
       btns.forEach(b => b.classList.remove('active'));
       const panels = document.querySelectorAll('.tab-panel-content');
@@ -7029,6 +7059,8 @@
         window.triggerRollNumbersUp();
       } else if (tabId === 'tab-forum') {
         loadForumThreads();
+      } else if (tabId === 'tab-carver') {
+        setTimeout(initPumpkinCarver, 100);
       } else if (tabId === 'tab-minigames') {
         setTimeout(() => {
           startSnakeGame();
@@ -7038,18 +7070,12 @@
     };
 
     window.triggerStatPulse = function(el) {
-      playTone(587.33, 'triangle', 0.12, 0.12);
       el.style.transform = 'scale(1.1)';
       setTimeout(() => el.style.transform = 'none', 200);
     };
 
-    window.triggerEasterEggSound = function() {
-      playTone(880, 'square', 0.15, 0.1);
-    };
-
     // FAQ Accordion Controller
     window.toggleFAQ = function(el) {
-      playTone(392, 'sine', 0.08, 0.06);
       const answer = el.nextElementSibling;
       if (!answer) return;
       const isOpen = answer.style.display === 'block';
@@ -7064,7 +7090,6 @@
       const val = input ? input.value.trim() : '';
 
       if (val) {
-        playTone(659.25, 'sine', 0.2, 0.12);
         let subs = JSON.parse(localStorage.getItem('nitro_relaunch_subscribers') || '[]');
         subs.push({ contact: val, date: new Date().toISOString() });
         localStorage.setItem('nitro_relaunch_subscribers', JSON.stringify(subs));
@@ -7099,7 +7124,6 @@
 
         if (snakeInterval) clearInterval(snakeInterval);
         snakeInterval = setInterval(gameLoop, 90);
-        playTone(523.25, 'sine', 0.1, 0.1);
       };
 
       window.setSnakeDir = function(dir) {
@@ -7157,14 +7181,12 @@
               localStorage.setItem('nitro_snake_highscore', highScore.toString());
             }
             updateSnakeScoreUI();
-            playTone(783.99, 'triangle', 0.1, 0.12);
             apple.x = Math.floor(Math.random() * (snakeCanvas.width / grid)) * grid;
             apple.y = Math.floor(Math.random() * (snakeCanvas.height / grid)) * grid;
           }
 
           for (let i = index + 1; i < snake.cells.length; i++) {
             if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-              playTone(180, 'sawtooth', 0.3, 0.15);
               snake = { x: 96, y: 96, dx: 12, dy: 0, cells: [], maxCells: 4 };
               score = 0;
               updateSnakeScoreUI();
@@ -7191,12 +7213,10 @@
 
       window.playTTT = function(idx) {
         if (board[idx] !== '' || gameOver) return;
-        playTone(493.88, 'sine', 0.08, 0.08);
         board[idx] = 'X';
         updateTTTUI();
 
         if (checkTTTWin('X')) {
-          playTone(783.99, 'triangle', 0.2, 0.12);
           document.getElementById('ttt-status').textContent = '🎉 You won against Groq AI!';
           gameOver = true;
           return;
@@ -7224,11 +7244,9 @@
             }
 
             board[aiMove] = 'O';
-            playTone(329.63, 'sine', 0.08, 0.08);
             updateTTTUI();
 
             if (checkTTTWin('O')) {
-              playTone(200, 'sawtooth', 0.2, 0.12);
               document.getElementById('ttt-status').textContent = '🤖 Groq AI won this round! Try again!';
               gameOver = true;
               return;
@@ -7278,7 +7296,6 @@
       }
 
       window.resetTTT = function() {
-        playTone(440, 'sine', 0.08, 0.08);
         board = ['', '', '', '', '', '', '', '', ''];
         gameOver = false;
         updateTTTUI();
@@ -7300,7 +7317,6 @@
           konamiIdx++;
           if (konamiIdx === konamiCode.length) {
             konamiIdx = 0;
-            playTone(880, 'square', 0.4, 0.2);
             alert('🎃 HALLOWEEN KONAMI UNLOCKED! Spooky Party Mode Activated!');
             document.body.style.filter = 'hue-rotate(180deg)';
           }
@@ -7404,17 +7420,14 @@
 
     window.changeCanvasTheme = function(themeName) {
       currentCanvasTheme = themeName;
-      playTone(523.25, 'sine', 0.08, 0.08);
     };
 
     window.resetCanvasParticles = function() {
       if (resetCanvasParticlesFunc) resetCanvasParticlesFunc();
-      playTone(783.99, 'triangle', 0.15, 0.12);
     };
 
     window.triggerCanvasShockwave = function() {
       if (triggerCanvasShockwaveFunc) triggerCanvasShockwaveFunc();
-      playTone(300, 'sawtooth', 0.3, 0.2);
     };
 
     function spawnBurst(cx, cy, count) {
@@ -7540,9 +7553,10 @@
                          e.target.tagName === 'SELECT' ||
                          e.target.tagName === 'INPUT' ||
                          e.target.tagName === 'TEXTAREA' ||
-                         e.target.tagName === 'A';
+                         e.target.tagName === 'A' ||
+                         e.target.tagName === 'CANVAS';
 
-        if (isOverUI) {
+        if (isOverUI && e.target !== canvas) {
           mouse.x = null;
           mouse.y = null;
           mouse.isPressed = false;
@@ -7559,7 +7573,7 @@
         const isOverUI = (overlayCard && overlayCard.contains(e.target)) ||
                          (floatWidget && floatWidget.contains(e.target));
 
-        if (!isOverUI) {
+        if (!isOverUI && e.target === canvas) {
           mouse.isPressed = true;
           spawnBurst(e.clientX, e.clientY, 2);
         } else {
@@ -7721,7 +7735,6 @@
 
     // Admin Auth Handler & Live Configuration Dashboard
     window.openAdminModal = function() {
-      playTone(440, 'sine', 0.08, 0.08);
       const modal = document.getElementById('admin-login-modal');
       const err = document.getElementById('admin-auth-error');
       const input = document.getElementById('admin-pass-input');
@@ -7772,7 +7785,6 @@
       const pass = input ? input.value.trim() : '';
 
       if (pass.toUpperCase() === 'NITROADMIN') {
-        playTone(880, 'triangle', 0.25, 0.15);
         localStorage.setItem('nitro_admin_bypass', 'true');
         document.cookie = "nitro_admin_bypass=true; path=/; max-age=2592000";
         
@@ -7783,7 +7795,6 @@
         loadAdminConfigToForm();
         applyBypassState();
       } else {
-        playTone(180, 'sawtooth', 0.2, 0.15);
         if (err) {
           err.style.display = 'block';
           err.textContent = '❌ Invalid Admin Password. Access Denied.';
@@ -7807,7 +7818,6 @@
 
       localStorage.setItem('nitro_admin_config', JSON.stringify(newConfig));
       loadSavedAdminConfig();
-      playTone(783.99, 'triangle', 0.2, 0.15);
       alert('⚡ Admin Site Configuration Saved Successfully! Live UI Updated.');
       closeAdminModal();
     };
