@@ -263,17 +263,17 @@
       cursor: crosshair;
     }
 
-    /* Ambient Spooky Glow Spheres */
+    /* Ambient Subtle Spooky Glow Spheres */
     .bg-glow-1 {
       position: absolute;
       top: -15%;
       left: 20%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(249, 115, 22, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.14) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
-      animation: pulseGlow 10s infinite alternate ease-in-out;
+      animation: pulseGlow 12s infinite alternate ease-in-out;
     }
 
     .bg-glow-2 {
@@ -282,41 +282,41 @@
       right: 20%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
       pointer-events: none;
       z-index: 0;
-      animation: pulseGlow 12s infinite alternate ease-in-out;
+      animation: pulseGlow 14s infinite alternate ease-in-out;
     }
 
     @keyframes pulseGlow {
-      0% { transform: scale(0.95) translate(0, 0); opacity: 0.6; }
-      100% { transform: scale(1.1) translate(10px, -10px); opacity: 0.95; }
+      0% { transform: scale(0.95) translate(0, 0); opacity: 0.5; }
+      100% { transform: scale(1.08) translate(8px, -8px); opacity: 0.85; }
     }
 
-    /* Halloween Spooky Decorative Corner Pumpkins */
+    /* Subtle Decorative Corner Pumpkins (Toned Down Size & Motion) */
     .pumpkin-corner-left {
       position: absolute;
-      top: -24px;
-      left: -20px;
-      font-size: 2.4rem;
+      top: -20px;
+      left: -16px;
+      font-size: 1.8rem;
       z-index: 2;
-      filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.8));
-      animation: floatPumpkin 4s infinite ease-in-out alternate;
+      filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
+      animation: floatPumpkin 5s infinite ease-in-out alternate;
     }
 
     .pumpkin-corner-right {
       position: absolute;
-      top: -24px;
-      right: -20px;
-      font-size: 2.4rem;
+      top: -20px;
+      right: -16px;
+      font-size: 1.8rem;
       z-index: 2;
-      filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.8));
-      animation: floatPumpkin 4s infinite ease-in-out alternate-reverse;
+      filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
+      animation: floatPumpkin 5s infinite ease-in-out alternate-reverse;
     }
 
     @keyframes floatPumpkin {
-      0% { transform: translateY(0) rotate(-5deg); }
-      100% { transform: translateY(-6px) rotate(5deg); }
+      0% { transform: translateY(0) rotate(-3deg); }
+      100% { transform: translateY(-4px) rotate(3deg); }
     }
 
     .maintenance-card {
@@ -6849,7 +6849,7 @@
       updateCountdown();
     })();
 
-    // 🌌 ULTRA-CALM & GENTLE AMBIENT CANVAS PARTICLES (NO CRAZY SPEED OR FLASHING LINES)
+    // 🌌 ULTRA-SERENE & CALM AMBIENT PARTICLES (100% CLEAN, ZERO BATS, SUBTLE EMBERS)
     let currentCanvasTheme = 'spooky';
     let resetCanvasParticlesFunc = null;
     let triggerCanvasShockwaveFunc = null;
@@ -6883,7 +6883,7 @@
       const mouse = {
         x: null,
         y: null,
-        radius: 100,
+        radius: 90,
         isPressed: false
       };
 
@@ -6898,24 +6898,23 @@
 
       function initParticles() {
         particles = [];
-        // Low count (38 particles) for smooth, ultra-calm aesthetic
-        const baseCount = Math.min(Math.floor((width * height) / 28000), 45);
-        for (let i = 0; i < Math.max(baseCount, 32); i++) {
+        const baseCount = Math.min(Math.floor((width * height) / 32000), 36);
+        for (let i = 0; i < Math.max(baseCount, 26); i++) {
           particles.push(createBaseParticle());
         }
       }
 
       function initLeaves() {
         leaves = [];
-        for (let i = 0; i < 14; i++) {
+        for (let i = 0; i < 8; i++) {
           leaves.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            size: Math.random() * 10 + 10,
-            vy: Math.random() * 0.4 + 0.3, // Gentle slow fall
-            vx: Math.random() * 0.3 - 0.15,
+            size: Math.random() * 8 + 10,
+            vy: Math.random() * 0.3 + 0.2, // Ultra gentle leaf fall
+            vx: Math.random() * 0.2 - 0.1,
             rotation: Math.random() * Math.PI * 2,
-            vRot: (Math.random() - 0.5) * 0.02,
+            vRot: (Math.random() - 0.5) * 0.015,
             emoji: Math.random() > 0.5 ? '🍂' : '🍁'
           });
         }
@@ -6925,10 +6924,10 @@
         return {
           x: Math.random() * (width || window.innerWidth),
           y: Math.random() * (height || window.innerHeight),
-          vx: (Math.random() - 0.5) * 0.25, // Slow calm float
-          vy: (Math.random() - 0.5) * 0.25 - 0.05,
-          radius: Math.random() * 2.5 + 1,
-          alpha: Math.random() * 0.45 + 0.2,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2 - 0.04,
+          radius: Math.random() * 2 + 1,
+          alpha: Math.random() * 0.4 + 0.15,
           decay: 0,
           isSpawned: false
         };
@@ -6945,22 +6944,22 @@
           x: width / 2,
           y: height / 2,
           radius: 10,
-          maxRadius: Math.max(width, height) * 0.4,
-          alpha: 0.7
+          maxRadius: Math.max(width, height) * 0.35,
+          alpha: 0.6
         });
       };
 
       spawnBurstFunc = function(cx, cy, count) {
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 1.8 + 0.8;
+          const speed = Math.random() * 1.5 + 0.5;
           particles.push({
             x: cx,
             y: cy,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             radius: Math.random() * 2 + 1,
-            alpha: 0.8,
+            alpha: 0.7,
             decay: Math.random() * 0.015 + 0.008,
             isSpawned: true
           });
@@ -6998,7 +6997,7 @@
 
         if (!isOverUI) {
           mouse.isPressed = true;
-          spawnBurst(e.clientX, e.clientY, 3);
+          spawnBurst(e.clientX, e.clientY, 2);
         } else {
           mouse.isPressed = false;
         }
@@ -7019,10 +7018,10 @@
       function animateParticles() {
         ctx.clearRect(0, 0, width, height);
 
-        // Draw Gentle Shockwaves
+        // Draw Subtle Shockwaves
         for (let i = shockwaves.length - 1; i >= 0; i--) {
           const sw = shockwaves[i];
-          sw.radius += 5;
+          sw.radius += 4;
           sw.alpha -= 0.01;
 
           if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
@@ -7033,16 +7032,16 @@
           ctx.beginPath();
           ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
           ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + sw.alpha + ')' : 'rgba(249, 115, 22, ' + sw.alpha + ')';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         }
 
         // Draw Gentle Falling Autumn Leaves
         if (currentCanvasTheme === 'spooky') {
-          ctx.font = '15px serif';
+          ctx.font = '14px serif';
           leaves.forEach(leaf => {
             leaf.y += leaf.vy;
-            leaf.x += Math.sin(leaf.y * 0.015) * 0.5 + leaf.vx;
+            leaf.x += Math.sin(leaf.y * 0.015) * 0.4 + leaf.vx;
             leaf.rotation += leaf.vRot;
 
             if (leaf.y > height + 20) {
@@ -7087,19 +7086,19 @@
               const maxDistance = mouse.radius;
               const force = (maxDistance - dist) / maxDistance;
               
-              const pushMultiplier = mouse.isPressed ? -1.5 : 0.8;
+              const pushMultiplier = mouse.isPressed ? -1.0 : 0.6;
               const directionX = forceDirectionX * force * pushMultiplier;
               const directionY = forceDirectionY * force * pushMultiplier;
 
               p.x -= directionX;
               p.y -= directionY;
 
-              if (dist < 80) {
+              if (dist < 70) {
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 80) * 0.25) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 80) * 0.25) + ')';
-                ctx.lineWidth = 0.8;
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 70) * 0.2) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 70) * 0.2) + ')';
+                ctx.lineWidth = 0.7;
                 ctx.stroke();
               }
             }
@@ -7116,12 +7115,12 @@
             const dy = p.y - p2.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 85) {
+            if (dist < 75) {
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 85) * 0.15) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 85) * 0.15) + ')';
-              ctx.lineWidth = 0.7;
+              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? 'rgba(34, 197, 94, ' + ((1 - dist / 75) * 0.12) + ')' : 'rgba(249, 115, 22, ' + ((1 - dist / 75) * 0.12) + ')';
+              ctx.lineWidth = 0.6;
               ctx.stroke();
             }
           }
