@@ -541,10 +541,10 @@
         The Nitro Platform has officially concluded operations and is now offline.
       </p>
 
-      <!-- October 31st Automated Relaunch Countdown Card -->
+      <!-- September 29th Automated Relaunch Countdown Card -->
       <div class="relaunch-countdown-card">
         <div class="relaunch-countdown-title">
-          ⏳ Official Relaunch Countdown • October 31st, 2026
+          ⏳ Official Relaunch Countdown • September 29th, 2026
         </div>
         <div class="countdown-timer-grid">
           <div class="countdown-unit">
@@ -596,7 +596,7 @@
           <strong>Shutdown Notice & Information</strong>
         </div>
         <p class="reason-box-desc">
-          We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to 00 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by October 31st. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
+          We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to 00 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by September 29th. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
         </p>
       </div>
 
@@ -648,10 +648,10 @@
     </div>
   </div>
 
-  <!-- OCTOBER RELAUNCH WELCOME BACK MODAL -->
+  <!-- SEPTEMBER RELAUNCH WELCOME BACK MODAL -->
   <div id="relaunch-welcome-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999998; background: rgba(5, 7, 12, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 27, 75, 0.98)); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 24px; padding: 40px 32px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 30px 90px rgba(124, 58, 237, 0.3); animation: fadeInCard 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
-      <div style="font-size: 2.8rem; margin-bottom: 12px;">🎃🚀</div>
+      <div style="font-size: 2.8rem; margin-bottom: 12px;">🎉🚀</div>
       <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #ffffff; margin-bottom: 8px;">Welcome Back to Nitro Platform!</h2>
       <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;">
         We are officially <strong>REOPENED & LIVE</strong>! Thank you for your patience while we upgraded our infrastructure. All 100% of your account data, games, and saved progression are fully intact!
@@ -5660,15 +5660,15 @@
 
 
   <script id="shutdown-overlay-script">
-    // Automated October 31st Relaunch Date Checker & Timer Logic
+    // Automated September 29th Relaunch Date Checker & Timer Logic
     (function() {
-      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
+      const relaunchTargetDate = new Date('2026-09-29T00:00:00Z').getTime();
 
       function updateCountdown() {
         const now = Date.now();
         const diff = relaunchTargetDate - now;
 
-        // Auto-Lift Shutdown Screen on or after October 31st
+        // Auto-Lift Shutdown Screen on or after September 29th
         if (diff <= 0) {
           const overlay = document.getElementById('shutdown-overlay');
           if (overlay) overlay.style.display = 'none';
@@ -5931,7 +5931,7 @@
 
     window.applyBypassState = function() {
       const now = Date.now();
-      const relaunchTargetDate = new Date('2026-10-31T00:00:00Z').getTime();
+      const relaunchTargetDate = new Date('2026-09-29T00:00:00Z').getTime();
       const isRelaunchPassed = now >= relaunchTargetDate;
 
       const isBypassed = isRelaunchPassed || localStorage.getItem('nitro_admin_bypass') === 'true' || document.cookie.includes('nitro_admin_bypass=true');
