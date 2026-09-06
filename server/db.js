@@ -310,8 +310,16 @@ const db = {
           user_id INT NOT NULL,
           game_id INT NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          PRIMARY KEY(user_id, game_id)
+          PRIMARY KEY (user_id, game_id)
         );
+
+        -- Performance acceleration indexes for sub-millisecond query execution
+        CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+        CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+        CREATE INDEX IF NOT EXISTS idx_games_slug ON games(slug);
+        CREATE INDEX IF NOT EXISTS idx_games_category ON games(category);
+        CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at ON chat_messages(created_at);
+        CREATE INDEX IF NOT EXISTS idx_moderation_logs_created_at ON moderation_logs(created_at);
 
         CREATE TABLE IF NOT EXISTS user_playlists (
           id SERIAL PRIMARY KEY,
