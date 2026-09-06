@@ -7853,9 +7853,7 @@
     };
 
     window.triggerWebsiteCrashMode = function() {
-      const confirmCrash = confirm('⚠️ WARNING: Triggering WEBSITE CRASH MODE will spawn 25,000+ moving glowing particles & intense physics loops simultaneously! This WILL freeze or crash your browser tab on your end!
-
-Do you want to unleash full tab meltdown?');
+      const confirmCrash = confirm("⚠️ WARNING: Triggering WEBSITE CRASH MODE will spawn 25,000+ moving glowing particles & intense physics loops simultaneously! This WILL freeze or crash your browser tab on your end!\n\nDo you want to unleash full tab meltdown?");
       if (confirmCrash) {
         const slider = document.getElementById('particle-insanity-slider');
         if (slider) slider.value = 100;
