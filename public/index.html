@@ -204,8 +204,8 @@
   <style id="shutdown-overlay-styles">
     :root {
       --bg-color: #05070c;
-      --card-bg: rgba(13, 18, 30, 0.88);
-      --card-border: rgba(244, 63, 94, 0.25);
+      --card-bg: rgba(13, 18, 30, 0.92);
+      --card-border: rgba(244, 63, 94, 0.28);
       --accent-color: #f43f5e;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
@@ -270,11 +270,11 @@
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border-radius: 24px;
-      padding: 44px 38px;
-      max-width: 680px;
+      padding: 40px 36px;
+      max-width: 720px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.88), inset 0 1px 1px rgba(255, 255, 255, 0.1);
       animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
@@ -315,7 +315,7 @@
 
     .maintenance-card h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.1rem;
+      font-size: 2.05rem;
       font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1.25;
@@ -325,9 +325,53 @@
 
     .notice-text {
       color: var(--text-muted);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    /* Interactive Section Navigation Tabs */
+    .interactive-nav-tabs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
       margin-bottom: 20px;
+    }
+
+    .nav-tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .nav-tab-btn.active {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(236, 72, 153, 0.2));
+      border-color: #a855f7;
+      color: #c084fc;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.3);
+    }
+
+    .tab-panel-content {
+      display: none;
+    }
+
+    .tab-panel-content.active {
+      display: block;
+      animation: fadeInCard 0.4s ease;
     }
 
     .status-update-banner {
@@ -362,7 +406,7 @@
       border: 1px solid rgba(168, 85, 247, 0.35);
       border-radius: 18px;
       padding: 16px 20px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .relaunch-countdown-title {
@@ -415,7 +459,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .stat-card {
@@ -449,13 +493,72 @@
       letter-spacing: 0.04em;
     }
 
+    /* FAQ Accordion Styling */
+    .faq-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .faq-question {
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .faq-answer {
+      display: none;
+      padding: 0 18px 14px 18px;
+      font-size: 0.84rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Tic Tac Toe Grid */
+    .ttt-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      max-width: 240px;
+      margin: 0 auto 16px auto;
+    }
+
+    .ttt-cell {
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ttt-cell:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+    }
+
     .reason-box {
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 20px;
       text-align: left;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .reason-box-header {
@@ -480,9 +583,9 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 99px;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 800;
       color: #f8fafc;
       background: rgba(255, 255, 255, 0.08);
@@ -496,16 +599,15 @@
       border-color: rgba(244, 63, 94, 0.5);
       color: #ffffff;
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(244, 63, 94, 0.3);
     }
 
     .btn-admin-signin {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 99px;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 800;
       color: #38bdf8;
       background: rgba(56, 189, 248, 0.1);
@@ -516,10 +618,8 @@
 
     .btn-admin-signin:hover {
       background: rgba(56, 189, 248, 0.25);
-      border-color: rgba(56, 189, 248, 0.6);
       color: #ffffff;
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.3);
     }
 
     .footer-note {
@@ -528,8 +628,8 @@
     }
 
     @media (max-width: 580px) {
-      .maintenance-card { padding: 32px 20px; }
-      .maintenance-card h1 { font-size: 1.7rem; }
+      .maintenance-card { padding: 30px 18px; }
+      .maintenance-card h1 { font-size: 1.65rem; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .countdown-unit { min-width: 42px; }
       .countdown-number { font-size: 1.35rem; }
@@ -537,15 +637,29 @@
   </style>
 </head>
 <body>
-  <!-- FLOATING LO-FI MUSIC PLAYER WIDGET -->
-  <div id="lofi-music-widget" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 16px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
-    <span style="font-size: 1rem; animation: pulseDot 2s infinite;">🎧</span>
-    <div style="display: flex; flex-direction: column;">
-      <span style="font-size: 0.78rem; font-weight: 800; color: #c084fc; line-height: 1.1;">Nitro Lo-Fi Beats</span>
-      <span style="font-size: 0.68rem; color: #94a3b8;" id="lofi-status-text">Click Play to Listen</span>
+  <!-- FLOATING CONTROLS: LO-FI PLAYER & CANVAS THEME SWITCHER -->
+  <div style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; display: flex; flex-direction: column; gap: 8px;">
+    <!-- Theme Selector Dropdown -->
+    <div style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 4px 12px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px);">
+      <span style="font-size: 0.85rem;">🎨</span>
+      <select id="canvas-theme-select" onchange="changeCanvasTheme(this.value)" style="background: transparent; border: none; color: #c084fc; font-weight: 800; font-size: 0.78rem; outline: none; cursor: pointer;">
+        <option value="cosmic">🌌 Cosmic Constellation</option>
+        <option value="matrix">🟢 Matrix Code Rain</option>
+        <option value="sunset">🌅 Synthwave Sunset</option>
+        <option value="spooky">🎃 Halloween Ember Glow</option>
+      </select>
     </div>
-    <audio id="lofi-audio" loop src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
-    <button type="button" onclick="toggleLofiBeats()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 50%; width: 30px; height: 30px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transition: all 0.2s ease;">▶</button>
+
+    <!-- Lo-Fi Beats Audio Widget -->
+    <div id="lofi-music-widget" style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 99px; padding: 6px 16px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+      <span style="font-size: 1rem;">🎧</span>
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-size: 0.78rem; font-weight: 800; color: #c084fc; line-height: 1.1;">Nitro Lo-Fi Beats</span>
+        <span style="font-size: 0.68rem; color: #94a3b8;" id="lofi-status-text">Click Play to Listen</span>
+      </div>
+      <audio id="lofi-audio" loop src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
+      <button type="button" onclick="toggleLofiBeats()" id="lofi-toggle-btn" style="background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); transition: all 0.2s ease;">▶</button>
+    </div>
   </div>
 
   <!-- ADMIN TESTING CONTROL BAR -->
@@ -584,85 +698,200 @@
         The Nitro Platform has officially concluded operations and is now offline.
       </p>
 
-      <!-- Prominent Status Update Box -->
-      <div class="status-update-banner">
-        <div class="status-update-header">
-          <span>📢</span>
-          <span>Status Update • Launch Schedule Adjustment</span>
+      <!-- Interactive Section Navigation Tabs -->
+      <div class="interactive-nav-tabs">
+        <button class="nav-tab-btn active" onclick="switchShutdownTab('tab-notice')">📢 Notice & Countdown</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-minigames')">🎮 Arcade Games vs AI</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-roadmap')">📜 Roadmap & Timeline</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-notify')">🔔 Relaunch Alert</button>
+        <button class="nav-tab-btn" onclick="switchShutdownTab('tab-faq')">❓ FAQ</button>
+      </div>
+
+      <!-- TAB 1: NOTICE & COUNTDOWN -->
+      <div id="tab-notice" class="tab-panel-content active">
+        <!-- Prominent Status Update Box -->
+        <div class="status-update-banner">
+          <div class="status-update-header">
+            <span>📢</span>
+            <span>Status Update • Launch Schedule Adjustment</span>
+          </div>
+          <div class="status-update-body">
+            We have updated our planned comeback date to <strong>October 31st, 2026</strong>. This additional time allows our team to complete a full zero-cost database migration, execute comprehensive server RAM optimizations, and roll out a massive new feature suite including retro emulators, 1v1 multiplayer games, and AI homework tools!
+          </div>
         </div>
-        <div class="status-update-body">
-          We have updated our planned comeback date to <strong>October 31st, 2026</strong>. This additional time allows our team to complete a full zero-cost database migration, execute comprehensive server RAM optimizations, and roll out a massive new feature suite including retro emulators, 1v1 multiplayer games, and AI homework tools!
+
+        <!-- October 31st Automated Relaunch Countdown Card -->
+        <div class="relaunch-countdown-card">
+          <div class="relaunch-countdown-title">
+            ⏳ Official Relaunch Countdown • October 31st, 2026
+          </div>
+          <div class="countdown-timer-grid">
+            <div class="countdown-unit">
+              <div class="countdown-number" id="timer-days">--</div>
+              <div class="countdown-label">DAYS</div>
+            </div>
+            <div class="countdown-divider">:</div>
+            <div class="countdown-unit">
+              <div class="countdown-number" id="timer-hours">--</div>
+              <div class="countdown-label">HOURS</div>
+            </div>
+            <div class="countdown-divider">:</div>
+            <div class="countdown-unit">
+              <div class="countdown-number" id="timer-mins">--</div>
+              <div class="countdown-label">MINS</div>
+            </div>
+            <div class="countdown-divider">:</div>
+            <div class="countdown-unit">
+              <div class="countdown-number" id="timer-secs" style="color: #f43f5e;">--</div>
+              <div class="countdown-label">SECS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Platform Accomplishments & Archive Counter Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">1,081+</div>
+            <div class="stat-label">🌐 Total Visits</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">🎮 Games & Apps</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">28+</div>
+            <div class="stat-label">👥 Player Accounts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">🔒 Data Preserved</div>
+          </div>
+        </div>
+
+        <!-- Official Statement Card -->
+        <div class="reason-box">
+          <div class="reason-box-header">
+            <span style="display: inline-block; width: 10px; height: 10px; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 8px #f43f5e;"></span>
+            <strong>Shutdown Notice & Information</strong>
+          </div>
+          <p class="reason-box-desc">
+            We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to 00 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by October 31st. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
+          </p>
         </div>
       </div>
 
-      <!-- October 31st Automated Relaunch Countdown Card -->
-      <div class="relaunch-countdown-card">
-        <div class="relaunch-countdown-title">
-          ⏳ Official Relaunch Countdown • October 31st, 2026
-        </div>
-        <div class="countdown-timer-grid">
-          <div class="countdown-unit">
-            <div class="countdown-number" id="timer-days">--</div>
-            <div class="countdown-label">DAYS</div>
+      <!-- TAB 2: PLAYABLE MINI-GAMES VS AI -->
+      <div id="tab-minigames" class="tab-panel-content">
+        <div class="reason-box">
+          <div class="reason-box-header">
+            <span style="font-size: 1.2rem;">🕹️</span>
+            <strong>Playable Arcade Mini-Games (Pass Time Until Oct 31st)</strong>
           </div>
-          <div class="countdown-divider">:</div>
-          <div class="countdown-unit">
-            <div class="countdown-number" id="timer-hours">--</div>
-            <div class="countdown-label">HOURS</div>
+          
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 0.88rem; font-weight: 800; color: #38bdf8; margin-bottom: 8px;">1. Tic-Tac-Toe vs Groq AI Bot</div>
+            <div class="ttt-grid">
+              <div class="ttt-cell" onclick="playTTT(0)"></div>
+              <div class="ttt-cell" onclick="playTTT(1)"></div>
+              <div class="ttt-cell" onclick="playTTT(2)"></div>
+              <div class="ttt-cell" onclick="playTTT(3)"></div>
+              <div class="ttt-cell" onclick="playTTT(4)"></div>
+              <div class="ttt-cell" onclick="playTTT(5)"></div>
+              <div class="ttt-cell" onclick="playTTT(6)"></div>
+              <div class="ttt-cell" onclick="playTTT(7)"></div>
+              <div class="ttt-cell" onclick="playTTT(8)"></div>
+            </div>
+            <div id="ttt-status" style="font-size: 0.82rem; font-weight: 700; color: #a855f7;">Your turn! Click any box (Player: X vs Groq AI: O)</div>
+            <button type="button" onclick="resetTTT()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 0.78rem; cursor: pointer;">Reset Game</button>
           </div>
-          <div class="countdown-divider">:</div>
-          <div class="countdown-unit">
-            <div class="countdown-number" id="timer-mins">--</div>
-            <div class="countdown-label">MINS</div>
-          </div>
-          <div class="countdown-divider">:</div>
-          <div class="countdown-unit">
-            <div class="countdown-number" id="timer-secs" style="color: #f43f5e;">--</div>
-            <div class="countdown-label">SECS</div>
+
+          <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+
+          <div style="text-align: center;">
+            <div style="font-size: 0.88rem; font-weight: 800; color: #f43f5e; margin-bottom: 6px;">2. Cosmic Laser Shooter Background Game</div>
+            <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 10px;">Click anywhere on the background screen to burst cosmic laser particles! Click rapidly to trigger supernovas.</p>
           </div>
         </div>
       </div>
 
-      <!-- Platform Accomplishments & Archive Counter Grid -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number">1,081+</div>
-          <div class="stat-label">🌐 Total Visits</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">500+</div>
-          <div class="stat-label">🎮 Games & Apps</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">28+</div>
-          <div class="stat-label">👥 Player Accounts</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">100%</div>
-          <div class="stat-label">🔒 Data Preserved</div>
+      <!-- TAB 3: ROADMAP & TIMELINE -->
+      <div id="tab-roadmap" class="tab-panel-content">
+        <div class="reason-box">
+          <div class="reason-box-header">
+            <span style="font-size: 1.2rem;">📜</span>
+            <strong>Platform Development Roadmap (Path to Oct 31st)</strong>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 10px 14px; border-radius: 8px;">
+              <div style="font-size: 0.84rem; font-weight: 800; color: #34d399;">✅ Phase 1: Database Preservation & Data Lock (Completed)</div>
+              <div style="font-size: 0.8rem; color: #94a3b8;">100% of user accounts, progression, catalog items, and games backed up safely.</div>
+            </div>
+            <div style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38bdf8; padding: 10px 14px; border-radius: 8px;">
+              <div style="font-size: 0.84rem; font-weight: 800; color: #38bdf8;">⚡ Phase 2: Zero-Cost DB Engine & Memory Optimization (Active)</div>
+              <div style="font-size: 0.8rem; color: #94a3b8;">Implementing SQLite fallback engine to eliminate 00/mo costs and Render RAM caching.</div>
+            </div>
+            <div style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding: 10px 14px; border-radius: 8px;">
+              <div style="font-size: 0.84rem; font-weight: 800; color: #c084fc;">🚀 Phase 3: Retro Emulators, AI Tutor & Relaunch (Oct 31st)</div>
+              <div style="font-size: 0.8rem; color: #94a3b8;">Deploying GBA/N64 emulators, AI homework suite, 1v1 mini-games, and reopening access.</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Official Statement Card -->
-      <div class="reason-box">
-        <div class="reason-box-header">
-          <span style="display: inline-block; width: 10px; height: 10px; background: #f43f5e; border-radius: 50%; box-shadow: 0 0 8px #f43f5e;"></span>
-          <strong>Shutdown Notice & Information</strong>
+      <!-- TAB 4: RELAUNCH NOTIFICATION -->
+      <div id="tab-notify" class="tab-panel-content">
+        <div class="reason-box">
+          <div class="reason-box-header">
+            <span style="font-size: 1.2rem;">🔔</span>
+            <strong>Get Notified on Relaunch Day</strong>
+          </div>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 14px;">Enter your email or Discord tag below to get an automated alert the moment Nitro Platform reopens on October 31st!</p>
+          
+          <form onsubmit="handleNotifySubmit(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="notify-input" required placeholder="Enter your Email or Discord @username" style="flex: 1; min-width: 220px; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 99px; color: #fff; outline: none; font-size: 0.85rem;">
+            <button type="submit" style="padding: 10px 22px; background: linear-gradient(135deg, #7c3aed, #db2777); border: none; color: #fff; border-radius: 99px; font-weight: 800; font-size: 0.85rem; cursor: pointer;">Subscribe Alert 🔔</button>
+          </form>
+          <div id="notify-feedback" style="display: none; margin-top: 10px; font-size: 0.82rem; font-weight: 700; color: #34d399;"></div>
         </div>
-        <p class="reason-box-desc">
-          We are deeply grateful to everyone who visited, played, and supported this community. All active platform data has been securely archived. We have made the difficult decision to temporarily shut down our platform. Behind the scenes, the economics of running the service became completely unsustainable: our primary database provider unexpectedly hiked their pricing to 00 a month, which far exceeded our operating budget, while our low-cost hosting provider proved consistently unstable and unreliable, resulting in frequent outages and data issues. Because our budget was entirely tapped out, we had no financial room to migrate to a better, more stable infrastructure. Facing mounting server instability alongside costs we could no longer cover, continuing to operate became impossible for now. However, we are actively working on a plan to restructure and resolve these hurdles, and we are aiming to make our comeback by October 31st. We sincerely apologize for this disruption, and we are profoundly grateful for the community we built together. We hope to see you again soon.
-        </p>
+      </div>
+
+      <!-- TAB 5: FAQ ACCORDION -->
+      <div id="tab-faq" class="tab-panel-content">
+        <div style="margin-bottom: 16px;">
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <span>💰 Will my account coins, XP, and rank be saved?</span>
+              <span>▼</span>
+            </div>
+            <div class="faq-answer">YES! 100% of player account profiles, coins, XP, and custom unlocked flairs have been safely preserved in our database.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <span>🕹️ Will all 500+ games still be available?</span>
+              <span>▼</span>
+            </div>
+            <div class="faq-answer">Yes, all 500+ games and unblocked proxy engines will be available on October 31st, plus brand new Retro GBA/N64 Emulators and 1v1 Mini-games!</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <span>🔑 How can I access the site during testing?</span>
+              <span>▼</span>
+            </div>
+            <div class="faq-answer">Click the <strong>🔑 Admin Sign In</strong> button on the notice screen and enter the password <code>NITROADMIN</code> to bypass the shutdown notice.</div>
+          </div>
+        </div>
       </div>
 
       <!-- View Full Release & Admin Sign In Row -->
-      <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
         <a href="https://drive.google.com/file/d/1rT2nfTYM4Th3D5ba1soWuLnmBvidY9u8/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-release">
           📄 View Full Release Statement
         </a>
         <button type="button" onclick="openAdminModal()" class="btn-admin-signin">
           🔑 Admin Sign In
         </button>
-        <button type="button" onclick="openAboutBlankCloak()" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 99px; font-size: 0.88rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.35); cursor: pointer; transition: all 0.25s ease;">
+        <button type="button" onclick="openAboutBlankCloak()" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 99px; font-size: 0.85rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.35); cursor: pointer; transition: all 0.25s ease;">
           🕶️ Cloaked Mode
         </button>
       </div>
@@ -5717,7 +5946,117 @@
 
 
   <script id="shutdown-overlay-script">
-    // Emergency Stealth Panic Key (`~` or Esc) & about:blank Cloaker
+    // Tab Switcher Controller
+    window.switchShutdownTab = function(tabId) {
+      const btns = document.querySelectorAll('.nav-tab-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      const panels = document.querySelectorAll('.tab-panel-content');
+      panels.forEach(p => p.classList.remove('active'));
+
+      const targetBtn = Array.from(btns).find(b => b.getAttribute('onclick').includes(tabId));
+      if (targetBtn) targetBtn.classList.add('active');
+      const targetPanel = document.getElementById(tabId);
+      if (targetPanel) targetPanel.classList.add('active');
+    };
+
+    // FAQ Accordion Controller
+    window.toggleFAQ = function(el) {
+      const answer = el.nextElementSibling;
+      if (!answer) return;
+      const isOpen = answer.style.display === 'block';
+      answer.style.display = isOpen ? 'none' : 'block';
+    };
+
+    // Relaunch Notification Form Handler
+    window.handleNotifySubmit = function(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('notify-input');
+      const feedback = document.getElementById('notify-feedback');
+      const val = input ? input.value.trim() : '';
+
+      if (val) {
+        let subs = JSON.parse(localStorage.getItem('nitro_relaunch_subscribers') || '[]');
+        subs.push({ contact: val, date: new Date().toISOString() });
+        localStorage.setItem('nitro_relaunch_subscribers', JSON.stringify(subs));
+
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.textContent = '🎉 Subscribed successfully! You will be alerted on October 31st.';
+        }
+        if (input) input.value = '';
+      }
+    };
+
+    // Tic Tac Toe Game vs Groq AI Bot Logic
+    (function() {
+      let board = ['', '', '', '', '', '', '', '', ''];
+      let gameOver = false;
+
+      window.playTTT = function(idx) {
+        if (board[idx] !== '' || gameOver) return;
+        board[idx] = 'X';
+        updateTTTUI();
+        if (checkTTTWin('X')) {
+          document.getElementById('ttt-status').textContent = '🎉 You won against Groq AI!';
+          gameOver = true;
+          return;
+        }
+        if (board.every(c => c !== '')) {
+          document.getElementById('ttt-status').textContent = '🤝 It is a draw!';
+          gameOver = true;
+          return;
+        }
+
+        // Groq AI Turn (Minimax / Random Move)
+        document.getElementById('ttt-status').textContent = '🤖 Groq AI is thinking...';
+        setTimeout(() => {
+          let emptyIndices = board.map((val, i) => val === '' ? i : null).filter(val => val !== null);
+          if (emptyIndices.length > 0) {
+            let aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            board[aiMove] = 'O';
+            updateTTTUI();
+            if (checkTTTWin('O')) {
+              document.getElementById('ttt-status').textContent = '🤖 Groq AI won this round! Try again!';
+              gameOver = true;
+              return;
+            }
+            if (board.every(c => c !== '')) {
+              document.getElementById('ttt-status').textContent = '🤝 It is a draw!';
+              gameOver = true;
+              return;
+            }
+            document.getElementById('ttt-status').textContent = 'Your turn! Click any box (X)';
+          }
+        }, 300);
+      };
+
+      function checkTTTWin(player) {
+        const wins = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        return wins.some(w => w.every(i => board[i] === player));
+      }
+
+      function updateTTTUI() {
+        const cells = document.querySelectorAll('.ttt-cell');
+        cells.forEach((cell, i) => {
+          cell.textContent = board[i];
+          if (board[i] === 'X') cell.style.color = '#38bdf8';
+          else if (board[i] === 'O') cell.style.color = '#f43f5e';
+        });
+      }
+
+      window.resetTTT = function() {
+        board = ['', '', '', '', '', '', '', '', ''];
+        gameOver = false;
+        updateTTTUI();
+        document.getElementById('ttt-status').textContent = 'Your turn! Click any box (Player: X vs Groq AI: O)';
+      };
+    })();
+
+    // Emergency Stealth Panic Key (~ or Esc) & about:blank Cloaker
     window.addEventListener('keydown', function(e) {
       if (e.code === 'Backquote' || e.key === '~' || e.key === 'Escape') {
         window.location.href = 'https://classroom.google.com';
@@ -5810,7 +6149,12 @@
       updateCountdown();
     })();
 
-    // Interactive Cosmic Particle Mesh Canvas
+    // Dynamic Background Canvas Engine (Cosmic, Matrix, Sunset, Spooky Glow)
+    let currentCanvasTheme = 'cosmic';
+    window.changeCanvasTheme = function(themeName) {
+      currentCanvasTheme = themeName;
+    };
+
     (function() {
       const canvas = document.getElementById('bg-canvas');
       if (!canvas) return;
@@ -5914,10 +6258,20 @@
 
         ctx.clearRect(0, 0, width, height);
 
+        // Render Matrix Code Rain mode if selected
+        if (currentCanvasTheme === 'matrix') {
+          ctx.fillStyle = 'rgba(34, 197, 94, 0.85)';
+          ctx.font = '14px monospace';
+          for (let i = 0; i < 30; i++) {
+            const char = String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96));
+            ctx.fillText(char, (i * (width / 30)), (Date.now() / 15 + i * 40) % height);
+          }
+        }
+
         if (mouse.x !== null && mouse.y !== null) {
           ctx.beginPath();
           ctx.arc(mouse.x, mouse.y, mouse.isPressed ? 14 : 8, 0, Math.PI * 2);
-          ctx.fillStyle = mouse.isPressed ? 'rgba(244, 63, 94, 0.8)' : 'rgba(255, 255, 255, 0.4)';
+          ctx.fillStyle = currentCanvasTheme === 'spooky' ? 'rgba(249, 115, 22, 0.8)' : (mouse.isPressed ? 'rgba(244, 63, 94, 0.8)' : 'rgba(255, 255, 255, 0.4)');
           ctx.fill();
         }
 
@@ -5960,7 +6314,7 @@
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = `rgba(244, 63, 94, ${(1 - dist / 150) * 0.45})`;
+                ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 150) * 0.45})` : `rgba(244, 63, 94, ${(1 - dist / 150) * 0.45})`;
                 ctx.lineWidth = 1.0;
                 ctx.stroke();
               }
@@ -5969,7 +6323,7 @@
 
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(244, 63, 94, ${p.alpha})`;
+          ctx.fillStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${p.alpha})` : (currentCanvasTheme === 'spooky' ? `rgba(249, 115, 22, ${p.alpha})` : `rgba(244, 63, 94, ${p.alpha})`);
           ctx.fill();
 
           for (let j = i + 1; j < particles.length; j++) {
@@ -5982,7 +6336,7 @@
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(244, 63, 94, ${(1 - dist / 140) * 0.22})`;
+              ctx.strokeStyle = currentCanvasTheme === 'matrix' ? `rgba(34, 197, 94, ${(1 - dist / 140) * 0.22})` : `rgba(244, 63, 94, ${(1 - dist / 140) * 0.22})`;
               ctx.lineWidth = 0.9;
               ctx.stroke();
             }
